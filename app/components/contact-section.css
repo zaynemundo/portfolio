@@ -1,0 +1,238 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Contact Section — entrance animations and micro-interaction styles
+
+   TIMING
+   ──────
+   Adjust the DESKTOP / MOBILE constant objects in ContactSection.tsx.
+   All delay values are in milliseconds.
+
+   To tune the entrance speed:
+     • headingStagger  — gap between each heading line
+     • rowStagger      — gap between each contact-detail row
+     • rowBase         — when the first row starts (keep ≥ details + 180ms
+                         so the column is ≥ 90% opaque when rows appear)
+
+   ENTRANCE MECHANISM
+   ──────────────────
+   JS (ContactSection.tsx useEffect) adds data-cr="up|left|right" to each
+   element before the IntersectionObserver fires, which marks them hidden.
+   When the section enters the viewport, JS adds data-cv="" to each element
+   after its staggered delay, triggering the CSS transition to the visible
+   state. No data-cr = always visible (SSR / no-JS safe).
+
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Section shell ─────────────────────────────────────────────────────────── */
+
+.contact-section {
+  /* New stacking context so animated children never overlap the fixed nav */
+  isolation: isolate;
+  /* Clip horizontal overflow from transform-based slides on narrow viewports */
+  overflow-x: clip;
+}
+
+/* ── Section eyebrow ────────────────────────────────────────────────────────── */
+
+.cs-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #71717a; /* zinc-500 */
+  margin: 0 0 1.75rem;
+}
+
+.cs-eyebrow-num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #52525b; /* zinc-600 */
+  letter-spacing: normal;
+}
+
+.cs-eyebrow-rule {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1px;
+  background: #52525b;
+  flex-shrink: 0;
+}
+
+/* ── Heading line spans ─────────────────────────────────────────────────────── */
+
+/* display:inline-block is required for translateY to work on inline elements. */
+.cs-heading-line {
+  display: inline-block;
+}
+
+/* ── Row group labels ───────────────────────────────────────────────────────── */
+
+.cs-row-group-label {
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a1a1aa; /* zinc-400 */
+  margin: 1.25rem 0 0.5rem;
+  padding: 0;
+}
+
+.cs-row-group-label:first-of-type {
+  margin-top: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ENTRANCE ANIMATION
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Selector scoped to .contact-section to avoid touching any other element
+   on the page that might coincidentally have a data-cr attribute.
+
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.contact-section [data-cr] {
+  opacity: 0;
+  transition:
+    opacity  0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+/* Direction variants */
+.contact-section [data-cr="up"]    { transform: translateY(10px); }
+.contact-section [data-cr="left"]  { transform: translateX(-16px); }
+.contact-section [data-cr="right"] { transform: translateX(16px); }
+
+/* Visible state — triggered by JS adding data-cv="" */
+.contact-section [data-cr][data-cv] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTACT ROW INTERACTIONS
+
+   External-link arrow moves diagonally up-right (max 3 px).
+   Download arrow moves straight down (max 3 px).
+   Both transitions use the same deceleration curve as the entrance.
+
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.cs-row-arrow--external {
+  color: #3f3f46; /* zinc-700 */
+  transition:
+    transform 250ms cubic-bezier(0.25, 1, 0.5, 1),
+    color     200ms ease;
+}
+
+.cs-row--external:hover       .cs-row-arrow--external,
+.cs-row--external:focus-visible .cs-row-arrow--external {
+  transform: translate(2px, -2px); /* diagonal, max 3 px */
+  color: #a1a1aa;                  /* zinc-400 */
+}
+
+.cs-row-arrow--download {
+  color: #3f3f46;
+  transition:
+    transform 250ms cubic-bezier(0.25, 1, 0.5, 1),
+    color     200ms ease;
+}
+
+.cs-row--download:hover        .cs-row-arrow--download,
+.cs-row--download:focus-visible .cs-row-arrow--download {
+  transform: translateY(2px); /* down, max 3 px */
+  color: #a1a1aa;
+}
+
+/* Explicit keyboard-focus ring on each anchor row.
+   border-radius matches the rounded-xl Tailwind class on the element. */
+.cs-row:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 0.75rem;
+}
+
+/* Minimum touch target — 44 px height enforced here so it applies
+   on all breakpoints without relying on a Tailwind utility. */
+.cs-row {
+  min-height: 44px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AVAILABILITY DOT — FINITE 2-CYCLE PULSE
+
+   The ring starts invisible (opacity: 0).
+   JS adds .cs-pulse-active after the section enters the viewport.
+   animation-iteration-count: 2 stops the animation after two cycles.
+   fill-mode: forwards keeps the ring invisible after the animation ends.
+   Max scale is 1.15 per spec.
+
+   JS skips adding .cs-pulse-active entirely when reduced motion is active,
+   but the @media block below is a CSS-level safety net.
+
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.cs-availability-ring {
+  background: #34d399; /* emerald-400 */
+  opacity: 0;          /* hidden until pulse is triggered */
+}
+
+.cs-availability-ring.cs-pulse-active {
+  animation: csPulse 1s ease-out 2 forwards;
+}
+
+@keyframes csPulse {
+  0%   { transform: scale(1);    opacity: 0.75; }
+  60%  { transform: scale(1.15); opacity: 0.35; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE  (< 768 px)
+   ═══════════════════════════════════════════════════════════════════════════
+
+   – Movement reduced to 8 px (from 16 px desktop)
+   – Column stack order is form-first then details (Tailwind grid handles this)
+   – Faster stagger timing is set via MOBILE delays in ContactSection.tsx
+
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  .contact-section [data-cr="up"]    { transform: translateY(8px); }
+  .contact-section [data-cr="left"]  { transform: translateX(-8px); }
+  .contact-section [data-cr="right"] { transform: translateX(8px); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+
+   JS (useReducedMotion) returns early and never sets data-cr on any element,
+   so all content is always visible. This block is a CSS-level safety net in
+   case data-cr is set by some other means.
+
+   Hover and focus colour / border transitions are preserved — they do not
+   involve movement and remain fully functional.
+
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-section [data-cr] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .cs-availability-ring.cs-pulse-active {
+    animation: none;
+  }
+
+  /* Disable arrow movement while keeping colour feedback */
+  .cs-row--external:hover        .cs-row-arrow--external,
+  .cs-row--external:focus-visible .cs-row-arrow--external,
+  .cs-row--download:hover         .cs-row-arrow--download,
+  .cs-row--download:focus-visible .cs-row-arrow--download {
+    transform: none;
+  }
+}

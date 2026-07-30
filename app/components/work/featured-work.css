@@ -1,0 +1,496 @@
+/* ===================================================================
+   Featured Work — Selected Work section
+   =================================================================== */
+
+:root {
+  /* Nav pill (~52px) + padding-top (~12px) + breathing room (16px) */
+  --sw-nav-clearance: 80px;
+}
+
+.featured-work {
+  position: relative;
+  background: #fff;
+}
+
+/* Screen-reader only utility (mirrors Tailwind .sr-only) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+
+.featured-work__header {
+  max-width: 1200px;
+  margin: 0 auto;
+  /* Top padding clears the fixed nav; compact bottom flows into dark showcase */
+  padding: calc(var(--sw-nav-clearance) + 2.5rem) 1.5rem 1.75rem;
+}
+
+.featured-work__header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.featured-work__heading {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: #18181b;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+}
+
+.featured-work__intro {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #71717a;
+  max-width: 520px;
+  margin: 0;
+}
+
+.featured-work__all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3f3f46;
+  text-decoration: none;
+  border: 1.5px solid #d4d4d8;
+  border-radius: 9999px;
+  padding: 0.5rem 1.1rem;
+  flex-shrink: 0;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.featured-work__all-link:hover {
+  color: #8B5CF6;
+  border-color: #8B5CF6;
+  background: #f5f3ff;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────── */
+
+.featured-work__footer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 6rem;
+  text-align: center;
+}
+
+.featured-work__footer-text {
+  font-size: 14px;
+  color: #a1a1aa;
+  margin-bottom: 1rem;
+}
+
+.featured-work__footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  font-size: 14px;
+  font-weight: 600;
+  color: #18181b;
+  border: 1.5px solid #d4d4d8;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.featured-work__footer-link:hover {
+  background: #8B5CF6;
+  color: #fff;
+  border-color: #8B5CF6;
+}
+
+/* ===================================================================
+   Showcase — Full-Screen Sticky Crossfade
+   =================================================================== */
+
+.showcase {
+  position: relative;
+  background: #0e0e0e;
+}
+
+/* ── Sticky frame ────────────────────────────────────────────────────── */
+
+.showcase__sticky {
+  position: sticky;
+  top: var(--sw-nav-clearance);
+  height: calc(100vh - var(--sw-nav-clearance));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Rounded corners — matches nav pill aesthetic */
+  border-radius: 16px 16px 0 0;
+  margin: 0 1rem;
+}
+
+/* ── Cards viewport ──────────────────────────────────────────────────── */
+
+.showcase__viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.showcase__card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Card media ──────────────────────────────────────────────────────── */
+
+.showcase__card-media {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  transform-origin: center center;
+}
+
+.showcase__card-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* Video uses identical sizing to image */
+.showcase__card-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* Gradient overlay behind info text — ensures legibility over any media */
+.showcase__card-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.72) 0%,
+    rgba(0, 0, 0, 0.28) 35%,
+    rgba(0, 0, 0, 0) 65%
+  );
+  pointer-events: none;
+}
+
+.showcase__card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.showcase__card-placeholder span {
+  font-size: 3rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Card info — overlaid at bottom of media ─────────────────────────── */
+
+.showcase__card-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.75rem 2rem;
+}
+
+.showcase__card-info-left {
+  min-width: 0;
+}
+
+.showcase__card-info-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.showcase__card-num {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 0.375rem;
+  letter-spacing: 0.04em;
+}
+
+.showcase__card-category {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 0.3rem;
+}
+
+.showcase__card-dot {
+  color: rgba(255, 255, 255, 0.18);
+}
+
+.showcase__card-title {
+  font-size: clamp(1.375rem, 3.5vw, 2.25rem);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin: 0 0 0.3rem;
+}
+
+.showcase__card-title a {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.showcase__card-title a:hover {
+  opacity: 0.75;
+}
+
+.showcase__card-title a:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.showcase__card-role {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0;
+}
+
+/* ── Card CTA ────────────────────────────────────────────────────────── */
+
+.showcase__card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.125rem;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.showcase__card-cta:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.showcase__card-cta:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 3px;
+}
+
+.showcase__card-ext {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.showcase__card-ext:hover {
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.showcase__card-ext:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ── Progress bar ────────────────────────────────────────────────────── */
+
+.showcase__progress-track {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.showcase__progress-fill {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.4);
+  transition: width 0.08s linear;
+}
+
+/* ===================================================================
+   Showcase — Reduced Motion Fallback
+   =================================================================== */
+
+.showcase--reduced {
+  height: auto !important;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-radius: 0;
+  margin: 0;
+}
+
+.showcase__card-reduced {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2rem;
+  padding: 2.5rem;
+  align-items: center;
+}
+
+.showcase__card-media-reduced {
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.showcase__card-media-reduced .showcase__card-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.showcase__card-info-reduced {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-height: 160px;
+}
+
+.showcase--reduced .showcase__card-category {
+  margin-bottom: 0.375rem;
+}
+
+.showcase--reduced .showcase__card-title {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+}
+
+.showcase--reduced .showcase__card-role {
+  margin-top: 0.375rem;
+}
+
+.showcase--reduced .showcase__card-cta {
+  align-self: flex-start;
+}
+
+/* ===================================================================
+   Responsive
+   =================================================================== */
+
+@media (max-width: 1024px) {
+  .featured-work__header {
+    padding-top: calc(var(--sw-nav-clearance) + 2rem);
+  }
+
+  .showcase__sticky {
+    margin: 0 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sw-nav-clearance: 72px;
+  }
+
+  .featured-work__header {
+    padding: calc(var(--sw-nav-clearance) + 1.5rem) 1.25rem 1.25rem;
+  }
+
+  .featured-work__header-inner {
+    gap: 1rem;
+  }
+
+  .featured-work__footer {
+    padding: 3rem 1.25rem 4rem;
+  }
+
+  .showcase__sticky {
+    border-radius: 10px 10px 0 0;
+    margin: 0 0.25rem;
+  }
+
+  .showcase__card-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1.25rem 1.25rem 1rem;
+  }
+
+  .showcase__card-info-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .showcase__card-title {
+    font-size: clamp(1.125rem, 6vw, 1.75rem);
+  }
+
+  /* Reduced-motion mobile */
+  .showcase__card-reduced {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .showcase__card-info-reduced {
+    min-height: auto;
+    gap: 1rem;
+  }
+}
+
+/* ===================================================================
+   Reduced Motion
+   =================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .showcase__progress-fill {
+    transition: none !important;
+  }
+
+  .showcase__card-video {
+    /* Hide video, poster remains visible via the element's poster attribute */
+    display: none;
+  }
+}
