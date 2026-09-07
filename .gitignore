@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+dist-ssr/
+
+# logs
+*.log
+
+# editor / OS
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# keep vanilla backup out of git noise (optional - remove line if you want it committed)
+# vanilla-backup/
