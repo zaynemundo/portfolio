@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { profile, stats, expertise, tools, jobs, works, education } from './data.js'
+import { profile, brands, stats, cases, phases, expertise, tools, jobs, faqs, education } from './data.js'
 import { Reveal, Counter } from './components.jsx'
 
 function Navbar() {
@@ -7,14 +7,12 @@ function Navbar() {
   return (
     <header className="nav">
       <div className="container nav-inner">
-        <a href="#top" className="logo">ZM<span>.</span></a>
+        <a href="#top" className="logo">Zayne Mundo<span>.</span></a>
         <nav className={`nav-links ${open ? 'open' : ''}`}>
-          <a href="#about" onClick={() => setOpen(false)}>About</a>
-          <a href="#experience" onClick={() => setOpen(false)}>Experience</a>
-          <a href="#expertise" onClick={() => setOpen(false)}>Expertise</a>
+          <a href="#top" onClick={() => setOpen(false)}>Index</a>
           <a href="#work" onClick={() => setOpen(false)}>Work</a>
-          <a href="#education" onClick={() => setOpen(false)}>Education</a>
-          <a href="#contact" className="btn btn-small" onClick={() => setOpen(false)}>Hire Me</a>
+          <a href="#about" onClick={() => setOpen(false)}>About</a>
+          <a href={`mailto:${profile.email}?subject=Portfolio%20Inquiry`} className="btn btn-small" onClick={() => setOpen(false)}>Email me</a>
         </nav>
         <button className="nav-toggle" aria-label="Toggle menu" onClick={() => setOpen((v) => !v)}>☰</button>
       </div>
@@ -27,34 +25,44 @@ function Hero() {
     <section className="hero container">
       <div className="hero-text">
         <p className="eyebrow">{profile.role}</p>
-        <h1>ZAYNE<br />MUNDO</h1>
-        <p className="lede">{profile.lede}</p>
+        <h1>{profile.headline}</h1>
+        <p className="lede">{profile.intro}</p>
         <div className="hero-cta">
-          <a href="#work" className="btn">View Capabilities</a>
-          <a href="/Resume.pdf" className="btn btn-ghost" download>Download Resume ↓</a>
+          <a className="btn" href={`mailto:${profile.email}?subject=Portfolio%20Inquiry`}>Email me</a>
+          <a href="#work" className="btn btn-ghost">See selected work</a>
         </div>
-        <div className="hero-meta">
-          <div><strong>✉</strong> <a href={`mailto:${profile.email}`}>{profile.email}</a></div>
-          <div><strong>✆</strong> <a href={profile.phoneHref}>{profile.phone}</a></div>
-        </div>
-      </div>
-      <div className="hero-card">
-        <div className="avatar">ZM</div>
-        <h3>Visual Design • Web • Social</h3>
-        <p>Creating cohesive identities across social media, websites, and large-format branding.</p>
-        <ul className="tags">
-          <li>Photoshop</li><li>Illustrator</li><li>Figma</li><li>WordPress</li><li>HTML5</li><li>CSS3</li><li>JavaScript</li>
-        </ul>
-        <div className="availability"><span className="dot"></span> Open for freelance &amp; full-time</div>
+        <div className="availability"><span className="dot"></span> {profile.current} • open for select freelance</div>
       </div>
     </section>
   )
 }
 
-function Stats() {
+function BrandStrip() {
+  const row = [...brands, ...brands]
   return (
-    <section className="stats">
-      <div className="container stats-grid">
+    <section className="brands">
+      <p className="brands-label">Teams & products I&apos;ve worked with</p>
+      <div className="marquee">
+        <div className="marquee-track">
+          {row.map((b, i) => (
+            <span key={i} className="brand">{b}<span className="brand-sep">✦</span></span>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Growth() {
+  return (
+    <section className="section container">
+      <h2 className="section-title">Growth comes from shipping faster than your competition</h2>
+      <p className="large" style={{ maxWidth: '640px' }}>
+        I embed with your team as a force multiplier. I set the visual direction so everyone builds
+        toward the same outcome, turn your site and content into a speed advantage, and validate
+        ideas before they cost you time. The team you already have ships faster — and growth follows.
+      </p>
+      <div className="stats-grid" style={{ marginTop: '28px' }}>
         {stats.map((s) => (
           <Reveal key={s.label} className="stat">
             <Counter target={s.target} /><span className="suffix">{s.suffix}</span>
@@ -66,34 +74,26 @@ function Stats() {
   )
 }
 
-function About() {
+function Work() {
   return (
-    <section id="about" className="section container">
-      <h2 className="section-title">About</h2>
-      <div className="two-col">
-        <p className="large">I&apos;m Zayne — a designer-developer hybrid. I do design research, build responsive websites, and run data-driven social + SEO that turns engagement into measurable leads.</p>
-        <ul className="checklist">
-          <li>Multi-channel design: social, web, large-format branding</li>
-          <li>Content creation: AI-assisted visuals &amp; illustrations</li>
-          <li>SEO + analytics reporting, funnels for lead generation</li>
-          <li>Client proposals, presentations &amp; relationship management</li>
-        </ul>
-      </div>
-    </section>
-  )
-}
-
-function Experience() {
-  return (
-    <section id="experience" className="section container">
-      <h2 className="section-title">Experience</h2>
-      <div className="timeline">
-        {jobs.map((job) => (
-          <Reveal as="article" key={job.title} className="job">
-            <div className="job-head"><h3>{job.title}</h3><span className="date">{job.date}</span></div>
-            <ul>
-              {job.points.map((p, i) => <li key={i}>{p}</li>)}
-            </ul>
+    <section id="work" className="section container">
+      <h2 className="section-title">Selected work</h2>
+      <div className="case-grid">
+        {cases.map((c) => (
+          <Reveal as="article" key={c.title} className="case">
+            <div className={`case-thumb ${c.thumb}`}></div>
+            <div className="case-body">
+              <p className="case-tag">{c.tag}</p>
+              <h3>{c.title}</h3>
+              <p className="case-outcome">{c.outcome}</p>
+              <a
+                className="case-link"
+                href={c.link}
+                {...(c.link.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}
+              >
+                {c.linkLabel}
+              </a>
+            </div>
           </Reveal>
         ))}
       </div>
@@ -101,10 +101,59 @@ function Experience() {
   )
 }
 
-function Expertise() {
+function HowIWork() {
   return (
-    <section id="expertise" className="section container">
-      <h2 className="section-title">Expertise</h2>
+    <section className="section container">
+      <p className="eyebrow">How I work</p>
+      <h2 className="section-title">Four phases, measurable outcomes</h2>
+      <div className="phase-grid">
+        {phases.map((p) => (
+          <Reveal key={p.n} className="phase">
+            <span className="phase-n">{p.n}</span>
+            <h3>{p.title}</h3>
+            <p>{p.desc}</p>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function About() {
+  return (
+    <section id="about" className="section container">
+      <h2 className="section-title">I&apos;m Zayne. I&apos;ve done this across agencies, healthcare and media.</h2>
+      <div className="two-col">
+        <div>
+          <p className="large">
+            Designer by craft, developer by training. I spent years in agencies and in-house teams
+            shipping e-commerce, campaigns and content — then founded <strong>Corez.pro</strong>, an AI
+            builder that turns ideas into websites, apps and games, which I design and develop myself.
+          </p>
+          <p className="large">
+            Today I work inside the marketing team at <strong>Office Inspirations</strong> as a Graphic
+            Designer / Assistant Marketing. The teams I work with ship sharper. The systems I build keep running.
+          </p>
+          <div className="contact-row">
+            <a className="btn btn-ghost" href="/Resume.pdf" download>Resume.pdf</a>
+            <a className="btn btn-ghost" href={profile.phoneHref}>{profile.phone}</a>
+          </div>
+        </div>
+        <div>
+          <h3 className="subhead" style={{ marginTop: 0 }}>Experience</h3>
+          <div className="timeline">
+            {jobs.map((job) => (
+              <Reveal as="article" key={job.title} className="job">
+                <div className="job-head"><h3>{job.title}</h3><span className="date">{job.date}</span></div>
+                <ul>
+                  {job.points.map((pt, i) => <li key={i}>{pt}</li>)}
+                </ul>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </div>
+      <h3 className="subhead">Expertise</h3>
       <div className="cards">
         {expertise.map((e) => (
           <Reveal key={e.title} className="card"><h3>{e.title}</h3><p>{e.desc}</p></Reveal>
@@ -114,44 +163,27 @@ function Expertise() {
       <ul className="tags big">
         {tools.map((t) => <li key={t}>{t}</li>)}
       </ul>
-    </section>
-  )
-}
-
-function Work() {
-  const [filter, setFilter] = useState('all')
-  const filters = ['all', 'branding', 'social', 'web']
-  const visible = works.filter((w) => filter === 'all' || w.cat === filter)
-  return (
-    <section id="work" className="section container">
-      <h2 className="section-title">Capabilities / Selected Work Types</h2>
-      <div className="work-filters">
-        {filters.map((f) => (
-          <button key={f} className={`filter ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>
-            {f[0].toUpperCase() + f.slice(1)}
-          </button>
-        ))}
-      </div>
-      <div className="work-grid">
-        {visible.map((w) => (
-          <Reveal key={w.title} className="work">
-            <div className={`thumb ${w.thumb}`}></div>
-            <h4>{w.title}</h4><p>{w.sub}</p>
-          </Reveal>
-        ))}
-      </div>
-      <p className="note">Replace these placeholders with your real Behance / Drive links — each card is ready to link.</p>
-    </section>
-  )
-}
-
-function Education() {
-  return (
-    <section id="education" className="section container">
-      <h2 className="section-title">Education</h2>
+      <h3 className="subhead">Education</h3>
       <div className="edu-grid">
         {education.map((e) => (
           <Reveal key={e.title} className="edu"><h3>{e.title}</h3><p>{e.sub}</p></Reveal>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function Faq() {
+  return (
+    <section className="section container">
+      <p className="eyebrow">FAQ</p>
+      <h2 className="section-title">Before you email</h2>
+      <div className="faq">
+        {faqs.map((f) => (
+          <details key={f.q} className="faq-item">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
         ))}
       </div>
     </section>
@@ -176,12 +208,12 @@ function Contact() {
 
   return (
     <section id="contact" className="section container contact">
-      <h2 className="section-title">Let&apos;s work together</h2>
+      <p className="eyebrow">Next step</p>
+      <h2 className="section-title">Let&apos;s make your brand move faster</h2>
       <p className="large">Have a brand, website, or campaign in mind? I reply fast.</p>
       <div className="contact-row">
-        <a className="btn" href={`mailto:${profile.email}?subject=Portfolio%20Inquiry`}>Email Me</a>
+        <a className="btn" href={`mailto:${profile.email}?subject=Portfolio%20Inquiry`}>Email me</a>
         <a className="btn btn-ghost" href={profile.phoneHref}>{profile.phone}</a>
-        <a className="btn btn-ghost" href="/Resume.pdf" download>Resume.pdf</a>
       </div>
       <form className="contact-form" onSubmit={submit}>
         <input type="text" placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
@@ -198,8 +230,8 @@ function Footer() {
   return (
     <footer>
       <div className="container foot">
-        <span>© {new Date().getFullYear()} Zayne Mundo • Graphic Designer</span>
-        <a href="#top">Back to top ↑</a>
+        <span>© {new Date().getFullYear()} {profile.name} • Graphic Designer</span>
+        <span><a href={`mailto:${profile.email}`}>Email</a> • <a href={profile.phoneHref}>Phone</a> • <a href="#top">Back to top ↑</a></span>
       </div>
     </footer>
   )
@@ -211,12 +243,12 @@ export default function App() {
       <Navbar />
       <main id="top">
         <Hero />
-        <Stats />
-        <About />
-        <Experience />
-        <Expertise />
+        <BrandStrip />
+        <Growth />
         <Work />
-        <Education />
+        <HowIWork />
+        <About />
+        <Faq />
         <Contact />
       </main>
       <Footer />
