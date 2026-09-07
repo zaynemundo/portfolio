@@ -16,3 +16,10 @@ Thumbs.db
 
 # keep vanilla backup out of git noise (optional - remove line if you want it committed)
 # vanilla-backup/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
