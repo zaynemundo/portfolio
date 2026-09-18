@@ -18,7 +18,10 @@ export function useScrollProgress(
 ) {
   const rafRef = useRef<number | null>(null);
   const cbRef = useRef(onProgress);
-  cbRef.current = onProgress;
+
+  useEffect(() => {
+    cbRef.current = onProgress;
+  }, [onProgress]);
 
   const compute = useCallback(() => {
     rafRef.current = null;
