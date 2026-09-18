@@ -54,6 +54,9 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
   const [videoReady, setVideoReady] = useState(false);
   const [videoError, setVideoError] = useState(false);
 
+  /* Whether the <video>/<canvas> pair is mounted at all */
+  const showVideo = isDesktop && !reducedMotion && !videoError;
+
   /* ── Video scrub state ─────────────────────────────────────────────────── */
   const videoTargetRef = useRef(0);
   const videoCurrentRef = useRef(0);
@@ -75,18 +78,41 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
 
     let running = true;
 
-    /* Size canvas to match video dimensions */
     const vw = video.videoWidth || 1280;
     const vh = video.videoHeight || 720;
-    canvas.width = vw;
-    canvas.height = vh;
 
-    /* Draw current video frame to canvas */
+    /* Draw current video frame to canvas, cover-style (canvas has no
+       object-fit — the backing store must match the stage or the frame
+       stretches). */
     const paint = () => {
-      ctx.drawImage(video, 0, 0, vw, vh);
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const scale = Math.max(cw / vw, ch / vh);
+      const dw = vw * scale;
+      const dh = vh * scale;
+      ctx.drawImage(video, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
     };
 
-    /* When a seek completes, paint the frame and allow the next seek */
+    /* Size the backing store to the displayed box */
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      paint();
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    /* A seek is in flight until "seeked" lands. The flag lives in a ref
+       shared across effect runs, so it must be cleared on entry and on
+       cleanup — a "seeked" that fires while the listener is detached
+       would otherwise wedge it true and block every later seek. */
+    seekingRef.current = false;
+    videoCurrentRef.current = video.currentTime;
+    let seekIssuedAt = 0;
+
     const onSeeked = () => {
       paint();
       seekingRef.current = false;
@@ -95,6 +121,8 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
 
     /* Force paint of the first frame — seek to a tiny offset to trigger
        the seeked event, which will drawImage the decoded frame. */
+    seekingRef.current = true;
+    seekIssuedAt = performance.now();
     video.currentTime = 0.001;
 
     /* Lerp loop — sets video.currentTime, canvas paints on "seeked" */
@@ -110,9 +138,16 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
       const next = delta < 0.002 ? target : lerp(current, target, factor);
       videoCurrentRef.current = next;
 
+      /* Watchdog — a "seeked" can be lost (coalesced seek, detached
+         listener, backgrounded tab). Never stay gated forever. */
+      if (seekingRef.current && performance.now() - seekIssuedAt > 250) {
+        seekingRef.current = false;
+      }
+
       /* Only issue a new seek when the previous one completed */
       if (!seekingRef.current && Math.abs(video.currentTime - next) > 0.01) {
         seekingRef.current = true;
+        seekIssuedAt = performance.now();
         video.currentTime = next;
       }
 
@@ -123,7 +158,9 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
 
     return () => {
       running = false;
+      seekingRef.current = false;
       video.removeEventListener("seeked", onSeeked);
+      window.removeEventListener("resize", resize);
       if (lerpRafRef.current !== null) cancelAnimationFrame(lerpRafRef.current);
     };
   }, [videoReady, isDesktop, reducedMotion, videoError]);
@@ -217,21 +254,27 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
     };
     const onError = () => setVideoError(true);
 
-    /* canplaythrough = enough data buffered to render frames */
+    /* Already buffered — on a cached load the readiness event fires before
+       this effect can attach, so check state rather than only waiting. */
+    if (video.readyState >= 2) onReady();
+
+    /* readyState 2 (HAVE_CURRENT_DATA) is enough to decode frames for the
+       canvas; canplaythrough is a stricter condition that some browsers
+       never reach for a video that is scrubbed but never played. */
+    video.addEventListener("loadeddata", onReady);
     video.addEventListener("canplaythrough", onReady);
     video.addEventListener("error", onError);
     return () => {
+      video.removeEventListener("loadeddata", onReady);
       video.removeEventListener("canplaythrough", onReady);
       video.removeEventListener("error", onError);
     };
-  }, []);
+  }, [showVideo]);
 
   /* ── Show first scene on mount ──────────────────────────────────────────── */
   useEffect(() => {
     applyProgress(0);
   }, [applyProgress]);
-
-  const showVideo = isDesktop && !reducedMotion && !videoError;
 
   return (
     <section
@@ -250,21 +293,20 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
         {showVideo && (
           <video
             ref={videoRef}
+            src={videoSrc}
             muted
             playsInline
             preload="auto"
             className="absolute w-0 h-0 opacity-0 pointer-events-none"
             aria-hidden="true"
-          >
-            <source src={videoSrc} type="video/mp4" />
-          </video>
+          />
         )}
 
         {/* ── Canvas layer (renders video frames — no flicker) ─────────── */}
         {showVideo && (
           <canvas
             ref={canvasRef}
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            className="absolute inset-0 w-full h-full pointer-events-none"
             style={{ filter: "saturate(1.2)" }}
           />
         )}
