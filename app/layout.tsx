@@ -13,13 +13,13 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://zairamundo.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Zaira Mundo | Front-End Developer & Digital Experience Specialist",
+    default: "Zaira Mundo | Digital Designer & Developer",
     template: "%s | Zaira Mundo",
   },
   description:
-    "Front-End Developer and Digital Experience Specialist building accessible, responsive, and high-performing websites across React, TypeScript, WordPress, and modern web technologies.",
+    "Digital Designer and Developer building accessible, responsive, and high-performing websites — from interface design through to production code — across React, TypeScript, WordPress, and modern web technologies.",
   keywords: [
-    "front-end developer", "web developer", "digital experience",
+    "digital designer", "web designer", "front-end developer", "web developer", "UI/UX design", "digital experience",
     "React", "TypeScript", "WordPress", "accessibility", "technical SEO", "Dubai", "UAE",
   ],
   authors: [{ name: "Zaira Mundo" }],
@@ -29,15 +29,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: siteUrl,
     siteName: "Zaira Mundo",
-    title: "Zaira Mundo | Front-End Developer & Digital Experience Specialist",
+    title: "Zaira Mundo | Digital Designer & Developer",
     description:
-      "Front-End Developer and Digital Experience Specialist building accessible, responsive, and high-performing websites across React, TypeScript, WordPress, and modern web technologies.",
+      "Digital Designer and Developer building accessible, responsive, and high-performing websites — from interface design through to production code — across React, TypeScript, WordPress, and modern web technologies.",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Zaira Mundo" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zaira Mundo | Front-End Developer & Digital Experience Specialist",
-    description: "Front-End Developer and Digital Experience Specialist.",
+    title: "Zaira Mundo | Digital Designer & Developer",
+    description: "Digital Designer and Developer.",
     images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },

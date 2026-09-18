@@ -11,9 +11,9 @@ import { InsightsSection } from "@/app/components/insights/InsightsSection";
 import { ClientLogos } from "@/app/components/ClientLogos";
 
 export const metadata: Metadata = {
-  title: "Zaira Mundo | Web Developer & Digital Experience Specialist",
+  title: "Zaira Mundo | Digital Designer & Developer",
   description:
-    "Web Developer and Digital Experience Specialist building accessible, responsive, and high-performing websites across React, Next.js, WordPress, and modern web technologies.",
+    "Digital Designer and Developer building accessible, responsive, and high-performing websites — from interface design through to production code — across React, Next.js, WordPress, and modern web technologies.",
 };
 
 
@@ -58,7 +58,7 @@ export default async function Home() {
     {
       heading: "Zaira Mundo",
       description:
-        "Web Developer and Digital Communications Specialist building standards-compliant, accessible digital platforms for institutional, commercial, and global audiences \u2014 across React, WordPress, Shopify, and custom systems.",
+        "Digital Designer and Developer building standards-compliant, accessible digital platforms for institutional, commercial, and global audiences \u2014 across React, WordPress, Shopify, and custom systems.",
       start: 0,
       end: 0.28,
     },
@@ -95,7 +95,7 @@ export default async function Home() {
             "@context": "https://schema.org",
             "@type": "Person",
             name: "Zaira Mundo",
-            jobTitle: "Web Developer & Digital Experience Specialist",
+            jobTitle: "Digital Designer & Developer",
             email: "mzaira.mundo@gmail.com",
             url: "https://zairamundo.com",
             sameAs: [

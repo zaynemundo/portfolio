@@ -59,7 +59,7 @@ export const aboutChapters: Chapter[] = [
     type: "text",
     portraitState: "profile",
     paragraphs: [
-      "I am a Web Developer and Digital Experience Specialist with over four years of professional experience delivering accessible, standards-compliant digital platforms. I build web interfaces that translate organizational intent into reliable, production-grade digital solutions.",
+      "I am a Digital Designer and Developer with over four years of professional experience delivering accessible, standards-compliant digital platforms. I design and build web interfaces that translate organizational intent into reliable, production-grade digital solutions.",
       "My work spans institutional platforms, healthcare portals, luxury e-commerce, and corporate web systems — delivering responsive, WCAG-compliant, and high-performing digital services built for long-term maintainability and diverse global audiences.",
     ],
   },
@@ -73,6 +73,10 @@ export const aboutChapters: Chapter[] = [
     introduction:
       "I deliver web platforms that meet international accessibility and performance standards, serve users consistently across devices and regions, and provide organizations with a sustainable, maintainable digital presence over time.",
     items: [
+      "UI/UX Design",
+      "Branding & Logo Design",
+      "Social Media Graphics",
+      "Photo Editing & Retouching",
       "Front-end Development",
       "Responsive Interfaces",
       "WordPress & Shopify",
@@ -89,7 +93,7 @@ export const aboutChapters: Chapter[] = [
     portraitState: "experience",
     principles: [
       {
-        title: "Creativo FZCO — Front-End Developer & Web Designer (2021 – Present)",
+        title: "Creativo FZCO — Web Designer (2021 – Present)",
         body: "Delivering responsive institutional and corporate web platforms, standards-compliant e-commerce systems, and reusable component libraries across React, WordPress, and Laravel.",
       },
       {

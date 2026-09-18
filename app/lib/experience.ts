@@ -26,7 +26,7 @@ export interface Certification {
 export const employment: Employment[] = [
   {
     company: "Creativo FZCO",
-    role: "Front-End Developer & Web Designer",
+    role: "Web Designer",
     location: "United Arab Emirates",
     period: "Oct 2021 – Present",
     current: true,
