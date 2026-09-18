@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import type { Project } from "@/app/lib/projects";
 import { posts } from "@/app/lib/posts";
-import { prisma } from "@/app/lib/prisma";
 import { ContactSection } from "@/app/components/ContactSection";
 import { staticProjects } from "@/app/lib/projects-static";
 import { ScrollVideoHero } from "@/app/components/motion/ScrollVideoHero";
@@ -40,90 +39,19 @@ type ProjectCard = Pick<
 };
 
 export default async function Home() {
-  /* ── Data fetching ─────────────────────────────────────────────────────── */
+  const insightPosts: PostSummary[] = posts.slice(0, 3) as PostSummary[];
 
-  // Latest 3 published blog posts
-  let insightPosts: PostSummary[];
-  try {
-    const db = await prisma.blogPost.findMany({
-      where: { published: true },
-      orderBy: { date: "desc" },
-      take: 3,
-      select: {
-        slug: true,
-        title: true,
-        excerpt: true,
-        date: true,
-        dateFormatted: true,
-        readTime: true,
-        category: true,
-      },
-    });
-    insightPosts = db.length > 0 ? db : (posts.slice(0, 3) as PostSummary[]);
-  } catch {
-    insightPosts = posts.slice(0, 3) as PostSummary[];
-  }
-
-  // Featured projects — DB first, static fallback when DB is empty or unreachable.
-  // STATIC FALLBACK: once /admin/projects is populated, the DB rows take over
-  // automatically. Remove this comment (and the fallback lines) when you no
-  // longer need it.
-  let featuredProjects: ProjectCard[] = [];
-  try {
-    const db = await prisma.project.findMany({
-      where: { published: true },
-      orderBy: { sortOrder: "asc" },
-      take: 4,
-      select: {
-        slug: true,
-        name: true,
-        tagline: true,
-        category: true,
-        year: true,
-        technologies: true,
-        role: true,
-        workType: true,
-        images: true,
-        imageAlt: true,
-        liveUrl: true,
-        richContentJson: true,
-      },
-    });
-    featuredProjects = db.map(({ richContentJson, ...p }) => ({
-      ...p,
-      ...((richContentJson ? JSON.parse(richContentJson) : {}) as Partial<ProjectCard>),
-    }));
-  } catch {
-    /* DB unreachable — fall through to static data below */
-  }
-
-  // Curated 3 featured projects for homepage
   const HOMEPAGE_SLUGS = ["monili-jewellers", "scandinavian-physio", "po-marinas"];
-  if (featuredProjects.length === 0) {
-    featuredProjects = staticProjects
-      .filter((p) => HOMEPAGE_SLUGS.includes(p.slug))
-      .sort((a, b) => HOMEPAGE_SLUGS.indexOf(a.slug) - HOMEPAGE_SLUGS.indexOf(b.slug)) as ProjectCard[];
-  } else {
-    featuredProjects = featuredProjects
-      .filter((p) => HOMEPAGE_SLUGS.includes(p.slug))
-      .sort((a, b) => HOMEPAGE_SLUGS.indexOf(a.slug) - HOMEPAGE_SLUGS.indexOf(b.slug));
-  }
+  const featuredProjects: ProjectCard[] = staticProjects
+    .filter((p) => HOMEPAGE_SLUGS.includes(p.slug))
+    .sort((a, b) => HOMEPAGE_SLUGS.indexOf(a.slug) - HOMEPAGE_SLUGS.indexOf(b.slug)) as ProjectCard[];
 
-  // Site settings
-  let siteSettings: Awaited<ReturnType<typeof prisma.siteSettings.findUnique>> = null;
-  try {
-    siteSettings = await prisma.siteSettings.findUnique({ where: { id: "default" } });
-  } catch {
-    /* static */
-  }
-
-  const portraitUrl = siteSettings?.portraitUrl ?? null;
-  const cvPath = siteSettings?.cvPath ?? "/docs/zaira-mundo-cv.pdf";
-  const aboutText = siteSettings?.aboutText ?? null;
-  const email = siteSettings?.email ?? "mzaira.mundo@gmail.com";
-  const phone = siteSettings?.phone ?? "+971 50 562 8417";
-  const linkedinUrl = siteSettings?.linkedinUrl ?? "https://linkedin.com/in/zaira-mundo/";
-  const githubUrl = siteSettings?.githubUrl ?? "https://github.com/mzaira";
+  const portraitUrl = null;
+  const cvPath = "/docs/zaira-mundo-cv.pdf";
+  const email = "mzaira.mundo@gmail.com";
+  const phone = "+971 50 562 8417";
+  const linkedinUrl = "https://linkedin.com/in/zaira-mundo/";
+  const githubUrl = "https://github.com/mzaira";
 
   /* ── Hero scenes ───────────────────────────────────────────────────────── */
   const heroScenes: HeroScene[] = [

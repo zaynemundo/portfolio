@@ -2,7 +2,6 @@
  * Static skills data — used as a fallback (or permanent source) when
  * the DB Skill table is empty or the page doesn't query it.
  *
- * Categories match the admin groupings in /admin/skills.
  * Update these to match what you want displayed on the frontend.
  */
 

@@ -1,10 +1,9 @@
 /*
  * Project shape — types only.
  *
- * Project content lives in the database and is edited through /admin/projects.
- * Nothing here holds data: these types describe the object the case study page
- * and the card grids render, assembled from a Project row plus its
- * richContentJson payload by app/lib/projects-db.ts.
+ * These types describe the object the case study page and the card grids
+ * render, assembled from a Project row plus its richContentJson payload
+ * by app/lib/projects-db.ts.
  */
 
 export interface PerformanceRow {

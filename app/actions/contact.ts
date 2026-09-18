@@ -1,6 +1,5 @@
 "use server";
 
-import { prisma } from "../lib/prisma";
 import { Resend } from "resend";
 
 export interface ContactPayload {
@@ -100,10 +99,6 @@ async function sendNotificationEmail(name: string, email: string, message: strin
               <td style="border-radius:8px;background:#785EF7">
                 <a href="mailto:${email}?subject=Re: Your inquiry&body=Hi ${name},%0A%0A" style="display:inline-block;padding:12px 24px;font-size:13px;font-weight:700;color:#fff;text-decoration:none;letter-spacing:-0.01em">Reply to ${name} →</a>
               </td>
-              <td style="width:12px"></td>
-              <td style="border-radius:8px;border:1px solid #e4e4e7">
-                <a href="https://zairamundo.com/admin/inquiries" style="display:inline-block;padding:12px 24px;font-size:13px;font-weight:600;color:#3f3f46;text-decoration:none;letter-spacing:-0.01em">View in admin</a>
-              </td>
             </tr>
           </table>
 
@@ -146,21 +141,14 @@ export async function submitContact(payload: ContactPayload): Promise<ContactRes
   const cleanMessage = message.trim();
 
   try {
-    await prisma.contactSubmission.create({
-      data: { name: cleanName, email: cleanEmail, message: cleanMessage },
-    });
+    await sendNotificationEmail(cleanName, cleanEmail, cleanMessage);
   } catch (err) {
-    console.error("[contact] Database error:", err);
+    console.error("[contact] Email error:", err);
     return {
       ok: false,
       error: "Unable to send your message right now. Please email me directly at mzaira.mundo@gmail.com",
     };
   }
-
-  // Send email notification — non-blocking, don't fail the submission if it errors
-  sendNotificationEmail(cleanName, cleanEmail, cleanMessage).catch((err) =>
-    console.error("[contact] Email error:", err)
-  );
 
   return { ok: true };
 }

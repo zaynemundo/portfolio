@@ -3,8 +3,8 @@
  * or empty. Mirrors the shape produced by rowToProject() in projects-db.ts.
  *
  * Add entries here to make case study pages available without a DB.
- * Once a project is seeded to the DB via /admin/projects, the DB row wins
- * automatically and this entry becomes an unused fallback.
+ * Once a project is seeded to the DB, the DB row wins automatically
+ * and this entry becomes an unused fallback.
  */
 
 import type { Project } from "@/app/lib/projects";

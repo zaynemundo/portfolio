@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getPublishedProjects } from "@/app/lib/projects-db";
 import { staticProjects } from "@/app/lib/projects-static";
 import { ProjectFilterGrid } from "@/app/components/ProjectFilterGrid";
 import { ClientLogos } from "@/app/components/ClientLogos";
@@ -12,9 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkPage() {
-  const dbProjects = await getPublishedProjects();
-  // STATIC FALLBACK: remove the ternary once /admin/projects is populated
-  const projects = dbProjects.length > 0 ? dbProjects : staticProjects;
+  const projects = staticProjects;
 
   return (
     <div className="min-h-screen bg-white">

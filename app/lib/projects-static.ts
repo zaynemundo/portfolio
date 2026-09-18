@@ -1,5 +1,5 @@
 /**
- * Static project data — sourced from prisma/projects.seed.json.
+ * Static project data for the portfolio.
  *
  * Used as a fallback in page.tsx when the DB is empty or unreachable,
  * so the Selected Work section always renders during frontend development.
@@ -8,8 +8,8 @@
  * ────────────────────
  * page.tsx tries the DB first. If the DB returns rows, those win.
  * These static entries only show when DB projects === 0.
- * Once you populate the DB via /admin/projects, remove the fallback
- * line from page.tsx (look for the "STATIC FALLBACK" comment).
+ * Once you populate the DB, remove the fallback line from page.tsx
+ * (look for the "STATIC FALLBACK" comment).
  *
  * IMAGES
  * ──────

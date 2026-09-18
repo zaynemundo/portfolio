@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { posts } from "@/app/lib/posts";
 import { Reveal } from "@/app/components/Reveal";
-import { prisma } from "@/app/lib/prisma";
 import { InsightsList } from "@/app/components/insights/InsightsList";
 
 export const metadata: Metadata = {
@@ -13,17 +12,7 @@ export const metadata: Metadata = {
 type PostSummary = { slug: string; title: string; excerpt: string; date: string; dateFormatted: string; readTime: string; category: string };
 
 export default async function WritingPage() {
-  let allPosts: PostSummary[];
-  try {
-    const db = await prisma.blogPost.findMany({
-      where: { published: true },
-      orderBy: { date: "desc" },
-      select: { slug: true, title: true, excerpt: true, date: true, dateFormatted: true, readTime: true, category: true },
-    });
-    allPosts = db.length > 0 ? db : (posts as PostSummary[]);
-  } catch {
-    allPosts = posts as PostSummary[];
-  }
+  const allPosts: PostSummary[] = posts as PostSummary[];
 
   return (
     <div className="min-h-screen bg-white">
