@@ -46,7 +46,7 @@ export default async function Home() {
     .filter((p) => HOMEPAGE_SLUGS.includes(p.slug))
     .sort((a, b) => HOMEPAGE_SLUGS.indexOf(a.slug) - HOMEPAGE_SLUGS.indexOf(b.slug)) as ProjectCard[];
 
-  const portraitUrl = null;
+  const portraitUrl = "/portrait.jpg";
   const cvPath = "/docs/zaira-mundo-cv.pdf";
   const email = "mzaira.mundo@gmail.com";
   const phone = "+971 50 562 8417";

@@ -385,6 +385,16 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
                   <div className="flex flex-wrap items-center gap-3">
                     <a
                       href={scene.ctaHref}
+                      onClick={(e) => {
+                        /* Same-page anchor — scroll without stamping #hash into the URL */
+                        if (scene.ctaHref?.startsWith("#")) {
+                          const el = document.getElementById(scene.ctaHref.slice(1));
+                          if (el) {
+                            e.preventDefault();
+                            el.scrollIntoView({ behavior: "smooth" });
+                          }
+                        }
+                      }}
                       className="inline-flex items-center px-6 py-3 rounded-full bg-white text-zinc-900 text-[13.5px] font-semibold hover:bg-[#8B5CF6] hover:text-white transition-colors duration-200"
                       style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.25)" }}
                     >

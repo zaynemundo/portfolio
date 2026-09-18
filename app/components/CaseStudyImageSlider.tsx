@@ -169,9 +169,9 @@ export function CaseStudyImageSlider({
               className="snap-center flex-shrink-0 relative"
               style={{ width: "clamp(300px, 76vw, 920px)" }}
             >
-              {/* Pill label — overlays the boundary between slides */}
+              {/* Pill label — inset in the top-left corner of the slide */}
               <div
-                className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 px-3 py-1.5 rounded-full bg-zinc-900/90 backdrop-blur-sm text-white text-[11px] font-mono font-medium whitespace-nowrap pointer-events-none select-none"
+                className="absolute left-4 top-4 z-10 px-3 py-1.5 rounded-full bg-zinc-900/90 backdrop-blur-sm text-white text-[11px] font-mono font-medium whitespace-nowrap pointer-events-none select-none"
               >
                 {img.label}
               </div>
