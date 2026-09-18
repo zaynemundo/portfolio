@@ -288,16 +288,6 @@ export function ContactForm() {
           </>
         )}
       </button>
-
-      <p className="contact-form__alt">
-        Prefer email?{" "}
-        <a
-          href="mailto:mzaira.mundo@gmail.com"
-          className="contact-form__alt-link"
-        >
-          mzaira.mundo@gmail.com
-        </a>
-      </p>
     </form>
   );
 }

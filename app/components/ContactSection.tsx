@@ -361,34 +361,6 @@ export function ContactSection({
                 </svg>
               </a>
 
-              {/* ── Location + availability ───────────────────────── */}
-              <div className="pt-5 mt-4 flex flex-wrap items-center gap-5 border-t border-zinc-800">
-                <p className="flex items-center gap-2 text-[13px] font-medium text-zinc-300">
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 11 11"
-                    fill="none"
-                    aria-hidden="true"
-                    className="text-zinc-400 shrink-0"
-                  >
-                    <circle
-                      cx="5.5"
-                      cy="4.5"
-                      r="1.5"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                    />
-                    <path
-                      d="M5.5 1C3.567 1 2 2.567 2 4.5c0 2.667 3.5 5.5 3.5 5.5S9 7.167 9 4.5C9 2.567 7.433 1 5.5 1Z"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                    />
-                  </svg>
-                  Dubai, United Arab Emirates
-                </p>
-              </div>
-
             </div>
           </div>
 
