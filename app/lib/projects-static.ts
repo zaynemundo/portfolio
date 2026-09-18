@@ -36,6 +36,8 @@ export const staticProjects: ProjectCard[] = [
     images: ["/case-studies/monili.jpg"],
     theme: { bg: "#ede8e2" },
     logo: { initials: "MJ", bg: "#d9d4cd" },
+    videoMp4: "/case-studies/monili-mockup.mp4",
+    poster: "/case-studies/monili.jpg",
   },
   {
     slug: "po-marinas",
@@ -52,6 +54,8 @@ export const staticProjects: ProjectCard[] = [
     images: ["/case-studies/pno.jpg"],
     theme: { bg: "#dde8f5" },
     logo: { initials: "P&O", bg: "#c0d4ec" },
+    videoMp4: "/case-studies/pno-mockup.mp4",
+    poster: "/case-studies/pno.jpg",
   },
   {
     slug: "vijit-pillai-art",
@@ -84,6 +88,8 @@ export const staticProjects: ProjectCard[] = [
     images: ["/case-studies/scanphys.jpg"],
     theme: { bg: "#dceef8" },
     logo: { initials: "SPC", bg: "#bcd9ee" },
+    videoMp4: "/case-studies/scanphys-mockup.mp4",
+    poster: "/case-studies/scanphys.jpg",
   },
   {
     slug: "rocky-real-estate",
