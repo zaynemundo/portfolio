@@ -65,14 +65,14 @@ export default async function Home() {
     {
       heading: "Websites that work as hard as they look",
       description:
-        "Institutional platforms, healthcare portals, and commercial digital services \u2014 engineered to international accessibility standards, optimised for performance, and built for long-term organizational use.",
+        "Institutional platforms, healthcare portals, and commercial digital services \u2014 designed and engineered to international accessibility standards, optimised for performance, and built for long-term organizational use.",
       start: 0.26,
       end: 0.52,
     },
     {
       heading: "Every detail is a decision",
       description:
-        "WCAG 2.1 AA compliance. Sub-second load times. Semantic information architecture. The technical rigour that makes digital platforms trustworthy, inclusive, and fit for diverse, global audiences.",
+        "Thoughtful visual design paired with WCAG 2.1 AA compliance, sub-second load times, and semantic information architecture — the rigour behind every pixel and every line of code.",
       start: 0.50,
       end: 0.74,
     },
