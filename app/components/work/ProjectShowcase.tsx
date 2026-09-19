@@ -261,6 +261,10 @@ export function ProjectShowcase({ projects }: Props) {
       }
       if (i === activeIndex) {
         if (video.paused) {
+          // readyState 0 (HAVE_NOTHING) means the browser never actually
+          // started fetching — an explicit load() kicks it off. play()
+          // alone doesn't reliably trigger this in every browser.
+          if (video.readyState === 0) video.load();
           video.play().catch(() => {
             /* autoplay may be blocked — poster remains visible */
           });
@@ -375,7 +379,7 @@ export function ProjectShowcase({ projects }: Props) {
                     muted
                     loop
                     playsInline
-                    preload="none"
+                    preload="auto"
                     poster={p.poster ?? p.images?.[0]}
                     aria-label={`${p.name} project preview`}
                   >
