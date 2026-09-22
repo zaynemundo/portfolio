@@ -60,3 +60,45 @@ model SiteSettings {
   portraitUrl String?
   updatedAt   DateTime @updatedAt
 }
+
+/// Portfolio case study. Core fields are plain columns; the long tail of
+/// optional case-study sections (hero metrics, problem/transformation
+/// sections, execution disciplines, results, deliverables, performance
+/// audit table, etc. — see app/lib/projects.ts) lives in `richContent`
+/// as JSON, edited as raw JSON in the dashboard rather than one bespoke
+/// form field per section.
+model Project {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  name             String
+  tagline          String
+  shortDescription String
+  role             String
+  category         String
+  year             String
+  workType         String?
+  technologies     String[]
+  challenge        String
+  approach         String
+  outcome          String
+  highlights       String[]
+  accessibility    String?
+  performance      String?
+  seo              String?
+  imageAlt         String
+  liveUrl          String?
+  client           String?
+  images           String[]
+  imageLabels      String[]
+  theme            Json?
+  logo             Json?
+  videoMp4         String?
+  videoWebm        String?
+  poster           String?
+  richContent      Json     @default("{}")
+  featured         Boolean  @default(false)
+  published        Boolean  @default(false)
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}

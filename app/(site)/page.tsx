@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { Project } from "@/app/lib/projects";
 import { getPublishedPosts } from "@/app/lib/posts-db";
+import { getPublishedProjectCards } from "@/app/lib/projects-db";
 import { getSiteSettings } from "@/app/lib/settings-db";
 import { ContactSection } from "@/app/components/ContactSection";
 import { staticProjects } from "@/app/lib/projects-static";
@@ -35,9 +36,11 @@ export default async function Home() {
   const insightPosts = allPosts.slice(0, 3);
 
   const HOMEPAGE_SLUGS = ["monili-jewellers", "scandinavian-physio", "po-marinas"];
-  const featuredProjects: ProjectCard[] = staticProjects
+  const dbProjects = await getPublishedProjectCards();
+  const allProjects: ProjectCard[] = (dbProjects.length > 0 ? dbProjects : staticProjects) as ProjectCard[];
+  const featuredProjects: ProjectCard[] = allProjects
     .filter((p) => HOMEPAGE_SLUGS.includes(p.slug))
-    .sort((a, b) => HOMEPAGE_SLUGS.indexOf(a.slug) - HOMEPAGE_SLUGS.indexOf(b.slug)) as ProjectCard[];
+    .sort((a, b) => HOMEPAGE_SLUGS.indexOf(a.slug) - HOMEPAGE_SLUGS.indexOf(b.slug));
 
   const settings = await getSiteSettings();
   const { portraitUrl, email, phone, linkedinUrl, githubUrl } = settings;

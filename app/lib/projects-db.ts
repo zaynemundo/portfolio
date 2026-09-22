@@ -1,24 +1,100 @@
 /*
- * Project reads — static data source.
+ * Project reads — database-backed.
  *
- * These functions provide the same interface used by pages, backed by
- * the static full-project data. Replace with a database adapter when ready.
+ * A Project row's scalar columns cover the fields every card/listing
+ * needs; `richContent` carries the long tail of optional case-study
+ * sections (see app/lib/projects.ts) as JSON. rowToProject() merges
+ * the two into the full Project shape pages render.
  */
 
+import { prisma } from "@/app/lib/prisma";
 import type { Project } from "@/app/lib/projects";
-import { staticFullProjects } from "@/app/lib/projects-full-static";
+import type { ProjectCard } from "@/app/components/work/ProjectChapter";
 
-/** Every published project, in order. */
+type ProjectRow = Awaited<ReturnType<typeof prisma.project.findMany>>[number];
+
+function rowToProject(row: ProjectRow): Project {
+  const rich = (row.richContent ?? {}) as Record<string, unknown>;
+  return {
+    slug: row.slug,
+    name: row.name,
+    tagline: row.tagline,
+    shortDescription: row.shortDescription,
+    role: row.role,
+    category: row.category,
+    year: row.year,
+    workType: row.workType ?? undefined,
+    technologies: row.technologies,
+    challenge: row.challenge,
+    approach: row.approach,
+    outcome: row.outcome,
+    highlights: row.highlights,
+    accessibility: row.accessibility ?? undefined,
+    performance: row.performance ?? undefined,
+    seo: row.seo ?? undefined,
+    imageAlt: row.imageAlt,
+    liveUrl: row.liveUrl ?? undefined,
+    client: row.client ?? undefined,
+    images: row.images,
+    imageLabels: row.imageLabels,
+    theme: row.theme as Project["theme"],
+    logo: row.logo as Project["logo"],
+    ...rich,
+  } as Project;
+}
+
+function rowToCard(row: ProjectRow): ProjectCard {
+  return {
+    slug: row.slug,
+    name: row.name,
+    tagline: row.tagline,
+    category: row.category,
+    year: row.year,
+    technologies: row.technologies,
+    role: row.role,
+    workType: row.workType ?? undefined,
+    images: row.images,
+    imageAlt: row.imageAlt,
+    liveUrl: row.liveUrl,
+    theme: row.theme as ProjectCard["theme"],
+    logo: row.logo as ProjectCard["logo"],
+    client: row.client ?? undefined,
+    videoMp4: row.videoMp4 ?? undefined,
+    videoWebm: row.videoWebm ?? undefined,
+    poster: row.poster ?? undefined,
+  };
+}
+
+/** Every published project, in display order. */
 export async function getPublishedProjects(): Promise<Project[]> {
-  return staticFullProjects;
+  const rows = await prisma.project.findMany({
+    where: { published: true },
+    orderBy: { sortOrder: "asc" },
+  });
+  return rows.map(rowToProject);
 }
 
-/** One project by slug, or null if not found. */
+/** Published projects as lightweight cards, in display order. */
+export async function getPublishedProjectCards(): Promise<ProjectCard[]> {
+  const rows = await prisma.project.findMany({
+    where: { published: true },
+    orderBy: { sortOrder: "asc" },
+  });
+  return rows.map(rowToCard);
+}
+
+/** One published project by slug, or null if not found. */
 export async function getPublishedProject(slug: string): Promise<Project | null> {
-  return staticFullProjects.find((p) => p.slug === slug) ?? null;
+  const row = await prisma.project.findFirst({ where: { slug, published: true } });
+  return row ? rowToProject(row) : null;
 }
 
-/** Slug + name of every project, in order. */
+/** Slug + name of every published project, in display order. */
 export async function getPublishedProjectIndex(): Promise<{ slug: string; name: string }[]> {
-  return staticFullProjects.map(({ slug, name }) => ({ slug, name }));
+  const rows = await prisma.project.findMany({
+    where: { published: true },
+    orderBy: { sortOrder: "asc" },
+    select: { slug: true, name: true },
+  });
+  return rows;
 }
