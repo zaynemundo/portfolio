@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { RichEditor } from "./RichEditor";
+import { RichEditor } from "@/app/dashboard/RichEditor";
 import { createPost, updatePost, type PostFormData } from "@/app/actions/posts";
 
 interface Props {
