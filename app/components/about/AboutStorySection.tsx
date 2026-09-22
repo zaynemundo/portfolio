@@ -5,11 +5,13 @@ import { Reveal } from "@/app/components/Reveal";
 import { AboutPortrait } from "./AboutPortrait";
 import { AboutChapter } from "./AboutChapter";
 import { useAboutStory } from "@/app/hooks/useAboutStory";
-import { aboutChapters } from "@/app/data/aboutChapters";
+import type { Chapter } from "@/app/data/aboutChapters";
 
 interface Props {
   /** Uploaded portrait URL from SiteSettings — null shows a placeholder. */
   portraitUrl?: string | null;
+  /** From SiteSettings.aboutChapters, falls back to the static defaults. */
+  chapters: Chapter[];
 }
 
 /**
@@ -23,14 +25,14 @@ interface Props {
  * Mobile: linear stack, no sticky behaviour, all chapters fully opaque.
  * Reduced-motion: all transitions disabled, chapters remain fully opaque.
  */
-export function AboutStorySection({ portraitUrl }: Props) {
+export function AboutStorySection({ portraitUrl, chapters }: Props) {
   const {
     activeIndex,
     activeChapter,
     formattedActiveChapter,
     formattedTotalChapters,
     setActiveChapter,
-  } = useAboutStory(aboutChapters);
+  } = useAboutStory(chapters);
 
   /* refs to each chapter <article> for the IntersectionObserver */
   const chapterRefs = useRef<(HTMLElement | null)[]>([]);
@@ -106,7 +108,7 @@ export function AboutStorySection({ portraitUrl }: Props) {
 
           {/* Chapter scroll column */}
           <div className="about-story__chapters">
-            {aboutChapters.map((chapter, i) => (
+            {chapters.map((chapter, i) => (
               <AboutChapter
                 key={chapter.id}
                 chapter={chapter}

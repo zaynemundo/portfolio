@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Project } from "@/app/lib/projects";
 import { getPublishedPosts } from "@/app/lib/posts-db";
-import { getPublishedProjectCards } from "@/app/lib/projects-db";
+import { getPublishedProjectCards, getFeaturedProjectSlugs } from "@/app/lib/projects-db";
 import { getSiteSettings } from "@/app/lib/settings-db";
 import { ContactSection } from "@/app/components/ContactSection";
 import { staticProjects } from "@/app/lib/projects-static";
@@ -10,13 +10,15 @@ import type { HeroScene } from "@/app/components/motion/ScrollVideoHero";
 import { FeaturedWork } from "@/app/components/work/FeaturedWork";
 import { AboutStorySection } from "@/app/components/about/AboutStorySection";
 import { InsightsSection } from "@/app/components/insights/InsightsSection";
-import { ClientLogos } from "@/app/components/ClientLogos";
 
-export const metadata: Metadata = {
-  title: "Zaira Mundo | Digital Designer & Developer",
-  description:
-    "Digital Designer and Developer building accessible, responsive, and high-performing websites — from interface design through to production code — across React, Next.js, WordPress, and modern web technologies.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { name, jobTitle } = await getSiteSettings();
+  return {
+    title: `${name} | ${jobTitle}`,
+    description:
+      "Digital Designer and Developer building accessible, responsive, and high-performing websites — from interface design through to production code — across React, Next.js, WordPress, and modern web technologies.",
+  };
+}
 
 
 type ProjectCard = Pick<
@@ -35,48 +37,19 @@ export default async function Home() {
   const allPosts = await getPublishedPosts();
   const insightPosts = allPosts.slice(0, 3);
 
-  const HOMEPAGE_SLUGS = ["monili-jewellers", "scandinavian-physio", "po-marinas"];
   const dbProjects = await getPublishedProjectCards();
   const allProjects: ProjectCard[] = (dbProjects.length > 0 ? dbProjects : staticProjects) as ProjectCard[];
-  const featuredProjects: ProjectCard[] = allProjects
-    .filter((p) => HOMEPAGE_SLUGS.includes(p.slug))
-    .sort((a, b) => HOMEPAGE_SLUGS.indexOf(a.slug) - HOMEPAGE_SLUGS.indexOf(b.slug));
+  /* Which projects show here is the "Featured" checkbox on each case study
+     in the dashboard — falls back to the original 3 while DB is empty. */
+  const featuredSlugs = dbProjects.length > 0
+    ? new Set(await getFeaturedProjectSlugs())
+    : new Set(["monili-jewellers", "scandinavian-physio", "po-marinas"]);
+  const featuredProjects: ProjectCard[] = allProjects.filter((p) => featuredSlugs.has(p.slug));
 
   const settings = await getSiteSettings();
-  const { portraitUrl, email, phone, linkedinUrl, githubUrl } = settings;
+  const { portraitUrl, email, phone, linkedinUrl, githubUrl, name, jobTitle, aboutChapters } = settings;
   const cvPath = settings.resumeUrl;
-
-  /* ── Hero scenes ───────────────────────────────────────────────────────── */
-  const heroScenes: HeroScene[] = [
-    {
-      heading: "Zaira Mundo",
-      description:
-        "Digital Designer and Developer building standards-compliant, accessible digital platforms for institutional, commercial, and global audiences \u2014 across React, WordPress, Shopify, and custom systems.",
-      start: 0,
-      end: 0.28,
-    },
-    {
-      heading: "Websites that work as hard as they look",
-      description:
-        "Institutional platforms, healthcare portals, and commercial digital services \u2014 designed and engineered to international accessibility standards, optimised for performance, and built for long-term organizational use.",
-      start: 0.26,
-      end: 0.52,
-    },
-    {
-      heading: "Every detail is a decision",
-      description:
-        "Thoughtful visual design paired with WCAG 2.1 AA compliance, sub-second load times, and semantic information architecture — the rigour behind every pixel and every line of code.",
-      start: 0.50,
-      end: 0.74,
-    },
-    {
-      heading: "Let\u2019s build something that lasts.",
-      ctaLabel: "Get in touch",
-      ctaHref: "#contact",
-      start: 0.72,
-      end: 0.90,
-    },
-  ];
+  const heroScenes: HeroScene[] = settings.heroScenes;
 
   return (
     <>
@@ -87,8 +60,8 @@ export default async function Home() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Person",
-            name: "Zaira Mundo",
-            jobTitle: "Digital Designer & Developer",
+            name,
+            jobTitle,
             email,
             url: "https://zairamundo.com",
             sameAs: [linkedinUrl, githubUrl],
@@ -112,7 +85,7 @@ export default async function Home() {
       <FeaturedWork projects={featuredProjects} />
 
       {/* ── 03 · ABOUT ─────────────────────────────────────────────────────── */}
-      <AboutStorySection portraitUrl={portraitUrl} />
+      <AboutStorySection portraitUrl={portraitUrl} chapters={aboutChapters} />
 
       {/* ── INSIGHTS ──────────────────────────────────────────────────── */}
       <InsightsSection posts={insightPosts} />

@@ -49,16 +49,28 @@ model BlogPost {
   updatedAt     DateTime @updatedAt
 }
 
-/// Singleton row (id always "singleton") — site-wide contact info and assets.
+/// Singleton row (id always "singleton") — site-wide contact info and assets,
+/// plus the homepage copy that used to be hardcoded in app/(site)/page.tsx.
 model SiteSettings {
-  id          String   @id @default("singleton")
-  email       String?
-  phone       String?
-  linkedinUrl String?
-  githubUrl   String?
-  resumeUrl   String?
-  portraitUrl String?
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default("singleton")
+  name          String?
+  jobTitle      String?
+  email         String?
+  phone         String?
+  linkedinUrl   String?
+  githubUrl     String?
+  resumeUrl     String?
+  portraitUrl   String?
+  /// Array of { heading, description, ctaLabel?, ctaHref?, start, end } —
+  /// start/end (scroll-progress fractions) are edited in code, not the
+  /// dashboard form, since they're tied to the hero's scroll animation.
+  heroScenes    Json?
+  /// Array of Chapter objects — see app/data/aboutChapters.ts for the
+  /// shape. Edited as raw JSON in the dashboard, same tradeoff as
+  /// Project.richContent: four differently-shaped chapter types make a
+  /// bespoke form per type disproportionate to the payoff.
+  aboutChapters Json?
+  updatedAt     DateTime @updatedAt
 }
 
 /// Portfolio case study. Core fields are plain columns; the long tail of

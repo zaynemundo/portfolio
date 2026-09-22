@@ -4,6 +4,7 @@ import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
+import { Prisma } from "@/generated/prisma/client/client";
 import type { SiteSettingsData } from "@/app/lib/settings-db";
 
 export interface SettingsActionResult {
@@ -38,6 +39,52 @@ export async function updateSiteSettings(
       phone: data.phone.trim(),
       linkedinUrl: data.linkedinUrl.trim(),
       githubUrl: data.githubUrl.trim(),
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/dashboard/settings");
+  return { ok: true };
+}
+
+export async function updateHomepageContent(data: {
+  name: string;
+  jobTitle: string;
+  heroScenesJson: string;
+  aboutChaptersJson: string;
+}): Promise<SettingsActionResult> {
+  await requireSession();
+
+  let heroScenes: unknown;
+  let aboutChapters: unknown;
+  try {
+    heroScenes = JSON.parse(data.heroScenesJson);
+  } catch {
+    return { ok: false, error: "Hero scenes JSON is not valid." };
+  }
+  try {
+    aboutChapters = JSON.parse(data.aboutChaptersJson);
+  } catch {
+    return { ok: false, error: "About chapters JSON is not valid." };
+  }
+  if (!Array.isArray(heroScenes) || !Array.isArray(aboutChapters)) {
+    return { ok: false, error: "Both fields must be JSON arrays." };
+  }
+
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: {
+      name: data.name.trim(),
+      jobTitle: data.jobTitle.trim(),
+      heroScenes: heroScenes as Prisma.InputJsonValue,
+      aboutChapters: aboutChapters as Prisma.InputJsonValue,
+    },
+    create: {
+      id: "singleton",
+      name: data.name.trim(),
+      jobTitle: data.jobTitle.trim(),
+      heroScenes: heroScenes as Prisma.InputJsonValue,
+      aboutChapters: aboutChapters as Prisma.InputJsonValue,
     },
   });
 

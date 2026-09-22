@@ -98,3 +98,13 @@ export async function getPublishedProjectIndex(): Promise<{ slug: string; name: 
   });
   return rows;
 }
+
+/** Slugs of published projects flagged "Featured" (the homepage's Selected Work). */
+export async function getFeaturedProjectSlugs(): Promise<string[]> {
+  const rows = await prisma.project.findMany({
+    where: { published: true, featured: true },
+    orderBy: { sortOrder: "asc" },
+    select: { slug: true },
+  });
+  return rows.map((r) => r.slug);
+}
