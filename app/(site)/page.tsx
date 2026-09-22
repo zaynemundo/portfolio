@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { Project } from "@/app/lib/projects";
 import { getPublishedPosts } from "@/app/lib/posts-db";
+import { getSiteSettings } from "@/app/lib/settings-db";
 import { ContactSection } from "@/app/components/ContactSection";
 import { staticProjects } from "@/app/lib/projects-static";
 import { ScrollVideoHero } from "@/app/components/motion/ScrollVideoHero";
@@ -38,12 +39,9 @@ export default async function Home() {
     .filter((p) => HOMEPAGE_SLUGS.includes(p.slug))
     .sort((a, b) => HOMEPAGE_SLUGS.indexOf(a.slug) - HOMEPAGE_SLUGS.indexOf(b.slug)) as ProjectCard[];
 
-  const portraitUrl = "/portrait.jpg";
-  const cvPath = "/docs/zaira-mundo-cv.pdf";
-  const email = "mzaira.mundo@gmail.com";
-  const phone = "+971 50 562 8417";
-  const linkedinUrl = "https://linkedin.com/in/zaira-mundo/";
-  const githubUrl = "https://github.com/mzaira";
+  const settings = await getSiteSettings();
+  const { portraitUrl, email, phone, linkedinUrl, githubUrl } = settings;
+  const cvPath = settings.resumeUrl;
 
   /* ── Hero scenes ───────────────────────────────────────────────────────── */
   const heroScenes: HeroScene[] = [
@@ -88,12 +86,9 @@ export default async function Home() {
             "@type": "Person",
             name: "Zaira Mundo",
             jobTitle: "Digital Designer & Developer",
-            email: "mzaira.mundo@gmail.com",
+            email,
             url: "https://zairamundo.com",
-            sameAs: [
-              "https://linkedin.com/in/zaira-mundo/",
-              "https://github.com/mzaira",
-            ],
+            sameAs: [linkedinUrl, githubUrl],
             address: {
               "@type": "PostalAddress",
               addressLocality: "Dubai",

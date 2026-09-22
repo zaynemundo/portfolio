@@ -19,7 +19,11 @@ function scrollToContactEl() {
   document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
 }
 
-export function Nav() {
+interface Props {
+  cvPath?: string;
+}
+
+export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -166,7 +170,7 @@ export function Nav() {
             {/* Desktop right CTAs */}
             <div className="hidden md:flex items-center gap-2">
               <a
-                href="/docs/zaira-mundo-cv.pdf"
+                href={cvPath}
                 download
                 className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium transition-colors duration-150 ${
                   isTransparent
@@ -304,7 +308,7 @@ export function Nav() {
                     Let&apos;s Connect
                   </button>
                   <a
-                    href="/docs/zaira-mundo-cv.pdf"
+                    href={cvPath}
                     download
                     className="flex items-center justify-center w-full py-2.5 rounded-full border border-zinc-200 text-zinc-700 text-[13.5px] font-medium hover:border-[#8B5CF6] hover:text-[#8B5CF6] transition-colors duration-200"
                   >

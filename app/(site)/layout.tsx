@@ -1,11 +1,14 @@
 import { Nav } from "../components/Nav";
 import { Footer } from "../components/Footer";
+import { getSiteSettings } from "@/app/lib/settings-db";
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const { resumeUrl } = await getSiteSettings();
+
   return (
     <>
       <a href="#main" className="skip-link">Skip to main content</a>
-      <Nav />
+      <Nav cvPath={resumeUrl} />
       <main id="main" tabIndex={-1}>
         {children}
       </main>
