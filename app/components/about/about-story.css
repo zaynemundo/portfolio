@@ -199,7 +199,10 @@
 }
 
 .about-chapter:last-child {
-  min-height: calc(100vh - var(--sticky-offset) - 48px);
+  /* Extra scroll room so the last chapter has time to sit centered and
+     readable before the section ends — otherwise it's already scrolling
+     away by the time it reaches the observer's active zone. */
+  min-height: calc(160vh - var(--sticky-offset) - 48px);
   justify-content: center;
 }
 
