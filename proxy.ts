@@ -1,19 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { prisma } from "@/app/lib/prisma";
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Only protect /admin routes
   if (!pathname.startsWith("/admin")) return NextResponse.next();
-  // Always allow login page
-  if (pathname === "/admin/login") return NextResponse.next();
 
-  const session = request.cookies.get("admin_session")?.value;
-  const secret = process.env.ADMIN_SECRET;
+  const sessionId = request.cookies.get("admin_session")?.value;
+  const session = sessionId
+    ? await prisma.session.findUnique({ where: { id: sessionId } })
+    : null;
 
-  if (!session || !secret || session !== secret) {
-    const loginUrl = new URL("/admin/login", request.url);
+  if (!session || session.expiresAt < new Date()) {
+    const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
