@@ -5,8 +5,8 @@ import { prisma } from "@/app/lib/prisma";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only protect /admin routes
-  if (!pathname.startsWith("/admin")) return NextResponse.next();
+  // Only protect /dashboard routes
+  if (!pathname.startsWith("/dashboard")) return NextResponse.next();
 
   const sessionId = request.cookies.get("admin_session")?.value;
   const session = sessionId
@@ -23,5 +23,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/dashboard/:path*"],
 };
