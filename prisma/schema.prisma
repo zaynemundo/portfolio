@@ -102,3 +102,47 @@ model Project {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
+
+enum FreelanceStatus {
+  NOT_STARTED
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+}
+
+/// Freelance work tracker — separate from the public portfolio Project model.
+/// Personal use only, never rendered on the public site.
+model FreelanceProject {
+  id          String            @id @default(cuid())
+  name        String
+  client      String?
+  status      FreelanceStatus   @default(NOT_STARTED)
+  description String?
+  rate        String?
+  deadline    DateTime?
+  archived    Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  tasks       FreelanceTask[]
+}
+
+model FreelanceTask {
+  id        String           @id @default(cuid())
+  projectId String
+  project   FreelanceProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title     String
+  done      Boolean          @default(false)
+  sortOrder Int              @default(0)
+  createdAt DateTime         @default(now())
+}
+
+/// Personal notes / documentation — separate from published blog articles.
+model Note {
+  id          String   @id @default(cuid())
+  title       String
+  contentHtml String
+  tags        String[]
+  pinned      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
