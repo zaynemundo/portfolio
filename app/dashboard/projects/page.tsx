@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/app/lib/prisma";
 import { StatusBadge } from "./StatusBadge";
+import { PageHeader } from "@/app/dashboard/components/PageHeader";
+import { EmptyState } from "@/app/dashboard/components/EmptyState";
+import { routes } from "@/app/dashboard/routes";
 
 const STATUS_ORDER = ["ACTIVE", "ON_HOLD", "NOT_STARTED", "COMPLETED"];
 
@@ -17,23 +20,15 @@ export default async function FreelanceProjectsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-[22px] font-semibold text-zinc-100">Freelance Projects</h1>
-          <p className="text-[13px] text-zinc-500 mt-1">{projects.length} active project{projects.length === 1 ? "" : "s"}</p>
-        </div>
-        <Link
-          href="/dashboard/projects/new"
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
-        >
-          + New project
-        </Link>
-      </div>
+      <PageHeader
+        title="Freelance Projects"
+        subtitle={`${projects.length} active project${projects.length === 1 ? "" : "s"}`}
+        actionHref={routes.projects.new}
+        actionLabel="+ New project"
+      />
 
       {sorted.length === 0 ? (
-        <p className="text-[14px] text-zinc-500 py-12 text-center border border-dashed border-zinc-800 rounded-xl">
-          No freelance projects yet.
-        </p>
+        <EmptyState message="No freelance projects yet." />
       ) : (
         <div className="grid grid-cols-2 gap-4">
           {sorted.map((project) => {
@@ -44,7 +39,7 @@ export default async function FreelanceProjectsPage() {
             return (
               <Link
                 key={project.id}
-                href={`/dashboard/projects/${project.id}`}
+                href={routes.projects.item(project.id)}
                 className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 hover:border-zinc-700 transition-colors"
               >
                 <div className="flex items-start justify-between mb-2">

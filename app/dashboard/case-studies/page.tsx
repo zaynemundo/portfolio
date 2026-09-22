@@ -2,29 +2,25 @@ import Link from "next/link";
 import { prisma } from "@/app/lib/prisma";
 import { DeleteProjectButton } from "./DeleteProjectButton";
 import { ProjectPublishToggle } from "./ProjectPublishToggle";
+import { PageHeader } from "@/app/dashboard/components/PageHeader";
+import { EmptyState } from "@/app/dashboard/components/EmptyState";
+import { FeaturedBadge } from "@/app/dashboard/components/FeaturedBadge";
+import { routes } from "@/app/dashboard/routes";
 
 export default async function CaseStudiesPage() {
   const projects = await prisma.project.findMany({ orderBy: { sortOrder: "asc" } });
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-[22px] font-semibold text-zinc-100">Case Studies</h1>
-          <p className="text-[13px] text-zinc-500 mt-1">{projects.length} project{projects.length === 1 ? "" : "s"}</p>
-        </div>
-        <Link
-          href="/dashboard/case-studies/new"
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
-        >
-          + New case study
-        </Link>
-      </div>
+      <PageHeader
+        title="Case Studies"
+        subtitle={`${projects.length} project${projects.length === 1 ? "" : "s"}`}
+        actionHref={routes.caseStudies.new}
+        actionLabel="+ New case study"
+      />
 
       {projects.length === 0 ? (
-        <p className="text-[14px] text-zinc-500 py-12 text-center border border-dashed border-zinc-800 rounded-xl">
-          No case studies yet.
-        </p>
+        <EmptyState message="No case studies yet." />
       ) : (
         <div className="border border-zinc-800 rounded-xl overflow-hidden">
           <table className="w-full text-left">
@@ -42,16 +38,12 @@ export default async function CaseStudiesPage() {
                 <tr key={project.id} className="border-b border-zinc-800/70 last:border-b-0 hover:bg-zinc-900/40">
                   <td className="px-4 py-3">
                     <Link
-                      href={`/dashboard/case-studies/${project.id}`}
+                      href={routes.caseStudies.item(project.id)}
                       className="text-[13.5px] font-medium text-zinc-100 hover:text-purple-400 transition-colors"
                     >
                       {project.name}
                     </Link>
-                    {project.featured && (
-                      <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-400 align-middle">
-                        Featured
-                      </span>
-                    )}
+                    {project.featured && <FeaturedBadge />}
                   </td>
                   <td className="px-4 py-3 text-[13px] text-zinc-400">{project.category}</td>
                   <td className="px-4 py-3 text-[13px] text-zinc-400">{project.year}</td>
@@ -61,7 +53,7 @@ export default async function CaseStudiesPage() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">
                       <Link
-                        href={`/dashboard/case-studies/${project.id}`}
+                        href={routes.caseStudies.item(project.id)}
                         className="text-[12.5px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
                       >
                         Edit

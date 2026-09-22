@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
 import { ProjectForm } from "../ProjectForm";
+import { BackLink } from "@/app/dashboard/components/BackLink";
+import { routes } from "@/app/dashboard/routes";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -16,7 +18,8 @@ export default async function EditCaseStudyPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-8">Edit case study</h1>
+      <BackLink href={routes.caseStudies.list} label="Case Studies" />
+      <h1 className="text-[22px] font-semibold text-zinc-100 mt-1 mb-8">Edit case study</h1>
       <ProjectForm
         mode="edit"
         projectId={project.id}

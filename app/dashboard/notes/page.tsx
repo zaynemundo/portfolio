@@ -1,36 +1,31 @@
 import Link from "next/link";
 import { prisma } from "@/app/lib/prisma";
 import { PinToggle } from "./PinToggle";
+import { PageHeader } from "@/app/dashboard/components/PageHeader";
+import { EmptyState } from "@/app/dashboard/components/EmptyState";
+import { routes } from "@/app/dashboard/routes";
 
 export default async function NotesPage() {
   const notes = await prisma.note.findMany({ orderBy: [{ pinned: "desc" }, { updatedAt: "desc" }] });
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-[22px] font-semibold text-zinc-100">Notes</h1>
-          <p className="text-[13px] text-zinc-500 mt-1">{notes.length} note{notes.length === 1 ? "" : "s"}</p>
-        </div>
-        <Link
-          href="/dashboard/notes/new"
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
-        >
-          + New note
-        </Link>
-      </div>
+      <PageHeader
+        title="Notes"
+        subtitle={`${notes.length} note${notes.length === 1 ? "" : "s"}`}
+        actionHref={routes.notes.new}
+        actionLabel="+ New note"
+      />
 
       {notes.length === 0 ? (
-        <p className="text-[14px] text-zinc-500 py-12 text-center border border-dashed border-zinc-800 rounded-xl">
-          No notes yet.
-        </p>
+        <EmptyState message="No notes yet." />
       ) : (
         <div className="grid grid-cols-2 gap-4">
           {notes.map((note) => (
             <div key={note.id} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
               <div className="flex items-start justify-between mb-2 gap-2">
                 <Link
-                  href={`/dashboard/notes/${note.id}`}
+                  href={routes.notes.item(note.id)}
                   className="text-[14.5px] font-semibold text-zinc-100 hover:text-emerald-400 transition-colors"
                 >
                   {note.title}

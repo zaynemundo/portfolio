@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
 import { BlogForm } from "../BlogForm";
+import { BackLink } from "@/app/dashboard/components/BackLink";
+import { routes } from "@/app/dashboard/routes";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -13,7 +15,8 @@ export default async function EditBlogPostPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-8">Edit article</h1>
+      <BackLink href={routes.blog.list} label="Blog" />
+      <h1 className="text-[22px] font-semibold text-zinc-100 mt-1 mb-8">Edit article</h1>
       <BlogForm
         mode="edit"
         postId={post.id}

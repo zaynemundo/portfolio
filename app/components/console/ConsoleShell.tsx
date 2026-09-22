@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/app/dashboard/LogoutButton";
+import { routes } from "@/app/dashboard/routes";
 
 interface NavItem {
   href: string;
@@ -11,14 +12,14 @@ interface NavItem {
 }
 
 const CONTENT_ITEMS: NavItem[] = [
-  { href: "/dashboard/blog", label: "Blog", icon: <BlogIcon /> },
-  { href: "/dashboard/case-studies", label: "Case Studies", icon: <CaseStudyIcon /> },
-  { href: "/dashboard/settings", label: "Site Settings", icon: <SettingsIcon /> },
+  { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
+  { href: routes.caseStudies.list, label: "Case Studies", icon: <CaseStudyIcon /> },
+  { href: routes.settings, label: "Site Settings", icon: <SettingsIcon /> },
 ];
 
 const HUB_ITEMS: NavItem[] = [
-  { href: "/dashboard/notes", label: "Notes", icon: <NotesIcon /> },
-  { href: "/dashboard/projects", label: "Freelance Projects", icon: <ProjectsIcon /> },
+  { href: routes.notes.list, label: "Notes", icon: <NotesIcon /> },
+  { href: routes.projects.list, label: "Freelance Projects", icon: <ProjectsIcon /> },
 ];
 
 export function ConsoleShell({ email, children }: { email: string; children: React.ReactNode }) {
@@ -28,7 +29,7 @@ export function ConsoleShell({ email, children }: { email: string; children: Rea
     <div className="min-h-screen bg-zinc-950 flex">
       <aside className="w-60 shrink-0 border-r border-zinc-800 flex flex-col h-screen sticky top-0">
         <div className="h-14 flex items-center px-5 border-b border-zinc-800">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
+          <Link href={routes.home} className="flex items-center gap-2.5">
             <span className="text-[13px] font-extrabold tracking-tight text-white">ZM</span>
             <span className="h-4 w-px bg-zinc-800" aria-hidden="true" />
             <span className="text-[13px] font-medium text-zinc-300">Dashboard</span>

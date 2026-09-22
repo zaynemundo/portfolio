@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { prisma } from "@/app/lib/prisma";
 import { NoteForm } from "../NoteForm";
 import { DeleteNoteButton } from "../DeleteNoteButton";
+import { BackLink } from "@/app/dashboard/components/BackLink";
+import { routes } from "@/app/dashboard/routes";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -17,9 +18,7 @@ export default async function EditNotePage({ params }: Props) {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <Link href="/dashboard/notes" className="text-[12.5px] text-zinc-500 hover:text-zinc-300 transition-colors">
-            ← Notes
-          </Link>
+          <BackLink href={routes.notes.list} label="Notes" />
           <h1 className="text-[22px] font-semibold text-zinc-100 mt-1">Edit note</h1>
         </div>
         <DeleteNoteButton id={note.id} title={note.title} />
