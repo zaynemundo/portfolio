@@ -1,0 +1,120 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { prisma } from "@/app/lib/prisma";
+import { requireSession } from "@/app/lib/session";
+
+export interface PostFormData {
+  title: string;
+  slug: string;
+  excerpt: string;
+  category: string;
+  readTime: string;
+  featured: boolean;
+  published: boolean;
+  contentHtml: string;
+}
+
+export interface PostActionResult {
+  ok: boolean;
+  error?: string;
+}
+
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function validate(data: PostFormData): string | null {
+  if (!data.title.trim()) return "Title is required.";
+  if (!data.excerpt.trim()) return "Excerpt is required.";
+  if (!data.category.trim()) return "Category is required.";
+  if (!data.readTime.trim()) return "Read time is required.";
+  if (!data.contentHtml.trim() || data.contentHtml === "<p></p>") return "Content can't be empty.";
+  return null;
+}
+
+function revalidatePublicPages() {
+  revalidatePath("/");
+  revalidatePath("/blog");
+  revalidatePath("/blog/[slug]", "page");
+  revalidatePath("/sitemap.xml");
+}
+
+export async function createPost(data: PostFormData): Promise<PostActionResult> {
+  await requireSession();
+
+  const error = validate(data);
+  if (error) return { ok: false, error };
+
+  const slug = slugify(data.slug || data.title);
+  const existing = await prisma.blogPost.findUnique({ where: { slug } });
+  if (existing) return { ok: false, error: `A post with slug "${slug}" already exists.` };
+
+  const now = new Date();
+  await prisma.blogPost.create({
+    data: {
+      slug,
+      title: data.title.trim(),
+      excerpt: data.excerpt.trim(),
+      contentHtml: data.contentHtml,
+      category: data.category.trim(),
+      readTime: data.readTime.trim(),
+      featured: data.featured,
+      published: data.published,
+      date: now,
+      dateFormatted: now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
+    },
+  });
+
+  revalidatePublicPages();
+  redirect("/dashboard/blog");
+}
+
+export async function updatePost(id: string, data: PostFormData): Promise<PostActionResult> {
+  await requireSession();
+
+  const error = validate(data);
+  if (error) return { ok: false, error };
+
+  const slug = slugify(data.slug || data.title);
+  const existing = await prisma.blogPost.findUnique({ where: { slug } });
+  if (existing && existing.id !== id) {
+    return { ok: false, error: `A post with slug "${slug}" already exists.` };
+  }
+
+  await prisma.blogPost.update({
+    where: { id },
+    data: {
+      slug,
+      title: data.title.trim(),
+      excerpt: data.excerpt.trim(),
+      contentHtml: data.contentHtml,
+      category: data.category.trim(),
+      readTime: data.readTime.trim(),
+      featured: data.featured,
+      published: data.published,
+    },
+  });
+
+  revalidatePublicPages();
+  redirect("/dashboard/blog");
+}
+
+export async function deletePost(id: string): Promise<void> {
+  await requireSession();
+  await prisma.blogPost.delete({ where: { id } }).catch(() => {});
+  revalidatePublicPages();
+  revalidatePath("/dashboard/blog");
+}
+
+export async function togglePublished(id: string, published: boolean): Promise<void> {
+  await requireSession();
+  await prisma.blogPost.update({ where: { id }, data: { published } });
+  revalidatePublicPages();
+  revalidatePath("/dashboard/blog");
+}

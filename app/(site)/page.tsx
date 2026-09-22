@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { Project } from "@/app/lib/projects";
-import { posts } from "@/app/lib/posts";
+import { getPublishedPosts } from "@/app/lib/posts-db";
 import { ContactSection } from "@/app/components/ContactSection";
 import { staticProjects } from "@/app/lib/projects-static";
 import { ScrollVideoHero } from "@/app/components/motion/ScrollVideoHero";
@@ -17,15 +17,6 @@ export const metadata: Metadata = {
 };
 
 
-type PostSummary = {
-  slug: string;
-  title: string;
-  excerpt: string;
-  date: string;
-  dateFormatted: string;
-  readTime: string;
-  category: string;
-};
 type ProjectCard = Pick<
   Project,
   "slug" | "name" | "tagline" | "category" | "year" | "technologies" | "role" | "workType"
@@ -39,7 +30,8 @@ type ProjectCard = Pick<
 };
 
 export default async function Home() {
-  const insightPosts: PostSummary[] = posts.slice(0, 3) as PostSummary[];
+  const allPosts = await getPublishedPosts();
+  const insightPosts = allPosts.slice(0, 3);
 
   const HOMEPAGE_SLUGS = ["monili-jewellers", "scandinavian-physio", "po-marinas"];
   const featuredProjects: ProjectCard[] = staticProjects

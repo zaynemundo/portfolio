@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { posts, getPost } from "@/app/lib/posts";
+import { getPublishedPost, getPublishedPostSlugs, getPublishedPosts } from "@/app/lib/posts-db";
 import { Reveal } from "@/app/components/Reveal";
 import { ReadingProgress } from "@/app/components/ReadingProgress";
 
@@ -10,12 +10,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return posts.map((p) => ({ slug: p.slug }));
+  const slugs = await getPublishedPostSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPublishedPost(slug);
   if (!post) return { title: "Post not found" };
   return {
     title: post.title,
@@ -26,16 +27,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPublishedPost(slug);
   if (!post) notFound();
 
+  const allPosts = await getPublishedPosts();
+
   // Sidebar: other posts
-  const siblings = posts.filter((p) => p.slug !== slug).slice(0, 3);
+  const siblings = allPosts.filter((p) => p.slug !== slug).slice(0, 3);
 
   // Prev/next
-  const currentIndex = posts.findIndex((p) => p.slug === slug);
-  const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
-  const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+  const currentIndex = allPosts.findIndex((p) => p.slug === slug);
+  const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+  const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
 
   return (
     <div className="min-h-screen bg-white">
@@ -70,14 +73,10 @@ export default async function ArticlePage({ params }: Props) {
         <div className="grid lg:grid-cols-[1fr_260px] gap-16">
 
           <Reveal>
-            <article className="prose prose-zinc max-w-none [&_p]:leading-[1.8] [&_p]:mb-6 [&_h2]:mt-12 [&_h2]:mb-4 [&_h3]:mt-8 [&_h3]:mb-3 [&_li]:leading-[1.75]">
-              {post.content.map((block, i) => {
-                if (block.type === "paragraph") return <p key={i}>{block.text}</p>;
-                if (block.type === "heading") return <h2 key={i}>{block.text}</h2>;
-                if (block.type === "list" && block.items) return <ul key={i}>{block.items.map((item, j) => <li key={j}>{item}</li>)}</ul>;
-                return null;
-              })}
-            </article>
+            <article
+              className="prose prose-zinc max-w-none [&_p]:leading-[1.8] [&_p]:mb-6 [&_h2]:mt-12 [&_h2]:mb-4 [&_h3]:mt-8 [&_h3]:mb-3 [&_li]:leading-[1.75]"
+              dangerouslySetInnerHTML={{ __html: post.contentHtml }}
+            />
           </Reveal>
 
           <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">

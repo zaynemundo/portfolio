@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { posts } from "@/app/lib/posts";
+import { getPublishedPosts } from "@/app/lib/posts-db";
 import { Reveal } from "@/app/components/Reveal";
 import { InsightsList } from "@/app/components/insights/InsightsList";
 
@@ -9,10 +9,8 @@ export const metadata: Metadata = {
     "Insights on front-end development, technical SEO, accessibility, and the craft of building digital products.",
 };
 
-type PostSummary = { slug: string; title: string; excerpt: string; date: string; dateFormatted: string; readTime: string; category: string };
-
 export default async function WritingPage() {
-  const allPosts: PostSummary[] = posts as PostSummary[];
+  const allPosts = await getPublishedPosts();
 
   return (
     <div className="min-h-screen bg-white">

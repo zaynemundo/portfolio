@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getPublishedProjectIndex } from "@/app/lib/projects-db";
-import { posts } from "@/app/lib/posts";
+import { getPublishedPosts } from "@/app/lib/posts-db";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://zairamundo.com";
 
@@ -21,7 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  const postRoutes: MetadataRoute.Sitemap = posts.map((p) => ({
+  const postRoutes: MetadataRoute.Sitemap = (await getPublishedPosts()).map((p) => ({
     url: `${siteUrl}/blog/${p.slug}`,
     lastModified: new Date(p.date),
     changeFrequency: "monthly" as const,

@@ -32,3 +32,19 @@ model PasswordResetToken {
   usedAt    DateTime?
   createdAt DateTime @default(now())
 }
+
+model BlogPost {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  excerpt       String
+  contentHtml   String
+  category      String
+  readTime      String
+  featured      Boolean  @default(false)
+  published     Boolean  @default(false)
+  date          DateTime @default(now())
+  dateFormatted String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
