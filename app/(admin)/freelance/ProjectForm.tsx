@@ -4,22 +4,19 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createFreelanceProject, updateFreelanceProject, uploadFreelanceAttachment, type FreelanceProjectFormData } from "@/app/actions/freelance";
 import { UploadCard } from "@/app/(admin)/_components/UploadCard";
+import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/ClientSelect";
 import { routes } from "@/app/(admin)/_routes";
-
-interface ClientOption {
-  id: string;
-  name: string;
-}
 
 interface Props {
   mode: "new" | "edit";
   projectId?: string;
   initial?: Partial<FreelanceProjectFormData>;
   clients: ClientOption[];
+  onClientCreated?: (client: ClientOption) => void;
   onSuccess?: () => void;
 }
 
-export function ProjectForm({ mode, projectId, initial, clients, onSuccess }: Props) {
+export function ProjectForm({ mode, projectId, initial, clients, onClientCreated, onSuccess }: Props) {
   const router = useRouter();
   const [name, setName] = useState(initial?.name ?? "");
   const [clientId, setClientId] = useState(initial?.clientId ?? "");
@@ -68,10 +65,7 @@ export function ProjectForm({ mode, projectId, initial, clients, onSuccess }: Pr
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="client" className="block text-xs font-medium text-zinc-400 mb-1.5">Client (optional)</label>
-          <select id="client" value={clientId} onChange={(e) => setClientId(e.target.value)} className={inputClass}>
-            <option value="">—</option>
-            {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          <ClientSelect id="client" value={clientId} onChange={setClientId} clients={clients} onClientCreated={onClientCreated} className={inputClass} />
         </div>
         <div>
           <label htmlFor="status" className="block text-xs font-medium text-zinc-400 mb-1.5">Status</label>

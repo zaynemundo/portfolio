@@ -9,11 +9,7 @@ import { ProjectForm } from "./ProjectForm";
 import { ProjectActions } from "./ProjectActions";
 import { TaskList } from "./TaskList";
 import type { FreelanceProjectFormData } from "@/app/actions/freelance";
-
-interface ClientOption {
-  id: string;
-  name: string;
-}
+import type { ClientOption } from "@/app/(admin)/_components/ClientSelect";
 
 export interface TaskRow {
   id: string;
@@ -39,9 +35,14 @@ export interface ProjectRow {
   tasks: TaskRow[];
 }
 
-export function FreelanceClient({ projects, clients }: { projects: ProjectRow[]; clients: ClientOption[] }) {
+export function FreelanceClient({ projects, clients: initialClients }: { projects: ProjectRow[]; clients: ClientOption[] }) {
   const router = useRouter();
   const [modal, setModal] = useState<"new" | ProjectRow | null>(null);
+  const [clients, setClients] = useState(initialClients);
+
+  function addClient(client: ClientOption) {
+    setClients((prev) => [...prev, client].sort((a, b) => a.name.localeCompare(b.name)));
+  }
 
   function close() {
     setModal(null);
@@ -122,12 +123,12 @@ export function FreelanceClient({ projects, clients }: { projects: ProjectRow[];
               <div className="flex justify-end mb-3">
                 <ProjectActions id={editing.id} archived={editing.archived} onDeleted={close} />
               </div>
-              <ProjectForm mode="edit" projectId={editing.id} initial={initial} clients={clients} onSuccess={close} />
+              <ProjectForm mode="edit" projectId={editing.id} initial={initial} clients={clients} onClientCreated={addClient} onSuccess={close} />
             </div>
             <TaskList projectId={editing.id} tasks={editing.tasks} />
           </div>
         ) : (
-          <ProjectForm mode="new" clients={clients} onSuccess={close} />
+          <ProjectForm mode="new" clients={clients} onClientCreated={addClient} onSuccess={close} />
         )}
       </Modal>
     </div>

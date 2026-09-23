@@ -13,6 +13,7 @@ import { TransactionForm } from "./TransactionForm";
 import { InvoiceForm } from "../invoices/InvoiceForm";
 import type { TransactionFormData } from "@/app/actions/finance";
 import type { InvoiceFormData, InvoiceItemInput } from "@/app/actions/invoices";
+import type { ClientOption } from "@/app/(admin)/_components/ClientSelect";
 
 type Tab = "transactions" | "invoices";
 
@@ -59,7 +60,7 @@ interface Props {
   net: number;
   currency: string;
   invoices: InvoiceRow[];
-  clients: Option[];
+  clients: ClientOption[];
   projects: Option[];
 }
 
@@ -70,11 +71,16 @@ const STATUS_STYLES: Record<string, string> = {
   OVERDUE: "bg-red-500/15 text-red-400",
 };
 
-export function FinanceTabs({ month, transactions, income, expense, net, currency, invoices, clients, projects }: Props) {
+export function FinanceTabs({ month, transactions, income, expense, net, currency, invoices, clients: initialClients, projects }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("transactions");
   const [txModal, setTxModal] = useState<"new" | TransactionRow | null>(null);
   const [invModal, setInvModal] = useState<"new" | InvoiceRow | null>(null);
+  const [clients, setClients] = useState(initialClients);
+
+  function addClient(client: ClientOption) {
+    setClients((prev) => [...prev, client].sort((a, b) => a.name.localeCompare(b.name)));
+  }
 
   function closeTx() {
     setTxModal(null);
@@ -264,6 +270,7 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
           transactionId={editingTx?.id}
           initial={txInitial}
           clients={clients}
+          onClientCreated={addClient}
           projects={projects}
           onSuccess={closeTx}
         />
@@ -275,6 +282,7 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
           invoiceId={editingInv?.id}
           initial={invInitial}
           clients={clients}
+          onClientCreated={addClient}
           projects={projects}
           onSuccess={closeInv}
         />

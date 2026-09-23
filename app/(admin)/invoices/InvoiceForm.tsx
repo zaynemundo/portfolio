@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createInvoice, updateInvoice, type InvoiceFormData, type InvoiceItemInput } from "@/app/actions/invoices";
+import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/ClientSelect";
 import { routes } from "@/app/(admin)/_routes";
 
 interface Option {
@@ -14,7 +15,8 @@ interface Props {
   mode: "new" | "edit";
   invoiceId?: string;
   initial?: Partial<InvoiceFormData>;
-  clients: Option[];
+  clients: ClientOption[];
+  onClientCreated?: (client: ClientOption) => void;
   projects: Option[];
   onSuccess?: () => void;
 }
@@ -23,7 +25,7 @@ function emptyItem(): InvoiceItemInput {
   return { description: "", quantity: "1", rate: "" };
 }
 
-export function InvoiceForm({ mode, invoiceId, initial, clients, projects, onSuccess }: Props) {
+export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated, projects, onSuccess }: Props) {
   const router = useRouter();
   const [clientId, setClientId] = useState(initial?.clientId ?? "");
   const [projectId, setProjectId] = useState(initial?.projectId ?? "");
@@ -74,10 +76,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, projects, onSuc
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-medium text-zinc-400 mb-1.5">Client (optional)</label>
-          <select value={clientId} onChange={(e) => setClientId(e.target.value)} className={inputClass}>
-            <option value="">—</option>
-            {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          <ClientSelect value={clientId} onChange={setClientId} clients={clients} onClientCreated={onClientCreated} className={inputClass} />
         </div>
         <div>
           <label className="block text-xs font-medium text-zinc-400 mb-1.5">Project (optional)</label>

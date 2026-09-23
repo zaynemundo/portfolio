@@ -3,6 +3,7 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
+import { TableKit } from "@tiptap/extension-table";
 
 interface Props {
   content: string;
@@ -15,6 +16,7 @@ export function RichEditor({ content, onChange }: Props) {
     extensions: [
       StarterKit,
       Link.configure({ openOnClick: false, autolink: true }),
+      TableKit.configure({ table: { resizable: true } }),
     ],
     content,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
@@ -28,7 +30,11 @@ export function RichEditor({ content, onChange }: Props) {
           "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 " +
           "[&_blockquote]:border-l-2 [&_blockquote]:border-zinc-700 [&_blockquote]:pl-3 [&_blockquote]:text-zinc-400 [&_blockquote]:italic " +
           "[&_code]:bg-zinc-800 [&_code]:rounded [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[13px] " +
-          "[&_a]:text-purple-400 [&_a]:underline",
+          "[&_a]:text-purple-400 [&_a]:underline " +
+          "[&_table]:w-full [&_table]:my-3 [&_table]:border-collapse " +
+          "[&_th]:border [&_th]:border-zinc-700 [&_th]:bg-zinc-800 [&_th]:px-2.5 [&_th]:py-1.5 [&_th]:text-left [&_th]:font-semibold " +
+          "[&_td]:border [&_td]:border-zinc-700 [&_td]:px-2.5 [&_td]:py-1.5 [&_td]:align-top " +
+          "[&_.selectedCell]:bg-zinc-700/40",
       },
     },
   });
@@ -66,6 +72,8 @@ function Toolbar({ editor }: { editor: NonNullable<ReturnType<typeof useEditor>>
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   }
 
+  const inTable = editor.isActive("table");
+
   return (
     <div className="flex flex-wrap items-center gap-1 border-b border-zinc-800 bg-zinc-950 px-2 py-1.5">
       {items.map((item) => (
@@ -89,6 +97,36 @@ function Toolbar({ editor }: { editor: NonNullable<ReturnType<typeof useEditor>>
       >
         Link
       </button>
+
+      <div className="w-px self-stretch bg-zinc-800 mx-1" />
+
+      {!inTable ? (
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+          className="px-2.5 py-1.5 rounded text-[12.5px] font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
+        >
+          Table
+        </button>
+      ) : (
+        <>
+          <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} className="px-2.5 py-1.5 rounded text-[12.5px] font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors">
+            +Col
+          </button>
+          <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} className="px-2.5 py-1.5 rounded text-[12.5px] font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors">
+            +Row
+          </button>
+          <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} className="px-2.5 py-1.5 rounded text-[12.5px] font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors">
+            −Col
+          </button>
+          <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} className="px-2.5 py-1.5 rounded text-[12.5px] font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors">
+            −Row
+          </button>
+          <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} className="px-2.5 py-1.5 rounded text-[12.5px] font-medium text-red-400/80 hover:bg-zinc-800 hover:text-red-400 transition-colors">
+            Delete table
+          </button>
+        </>
+      )}
     </div>
   );
 }
