@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/app/(admin)/_components/LogoutButton";
 import { routes } from "@/app/(admin)/_routes";
@@ -27,9 +28,13 @@ function buildContentItems(unreadInquiries: number): NavItem[] {
 
 const HUB_ITEMS: NavItem[] = [
   { href: routes.notes.list, label: "Notes", icon: <NotesIcon /> },
-  { href: routes.projects.list, label: "Freelance Projects", icon: <ProjectsIcon /> },
-  { href: routes.clients.list, label: "Clients", icon: <ClientsIcon /> },
+];
+
+const FREELANCE_DROPDOWN_ITEMS: NavItem[] = [
+  { href: routes.projects.list, label: "Projects", icon: <ProjectsIcon /> },
   { href: routes.finance.list, label: "Finance", icon: <FinanceIcon /> },
+  { href: routes.clients.list, label: "Customers", icon: <ClientsIcon /> },
+  { href: routes.invoices.list, label: "Invoices", icon: <InvoicesIcon /> },
 ];
 
 export function ConsoleShell({
@@ -43,8 +48,8 @@ export function ConsoleShell({
   const contentItems = buildContentItems(unreadInquiries);
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex">
-      <aside className="w-60 shrink-0 border-r border-zinc-800 flex flex-col h-screen sticky top-0">
+    <div className="min-h-screen bg-zinc-950 flex print:bg-white">
+      <aside className="w-60 shrink-0 border-r border-zinc-800 flex flex-col h-screen sticky top-0 print:hidden">
         <div className="h-14 flex items-center px-5 border-b border-zinc-800">
           <Link href={routes.home} className="flex items-center gap-2.5">
             <span className="text-[13px] font-extrabold tracking-tight text-white">ZM</span>
@@ -56,7 +61,22 @@ export function ConsoleShell({
         <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
           <DashboardLink item={DASHBOARD_ITEM} pathname={pathname} />
           <NavGroup label="Content" accent="purple" items={contentItems} pathname={pathname} />
-          <NavGroup label="Hub" accent="emerald" items={HUB_ITEMS} pathname={pathname} />
+          <div>
+            <p className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-zinc-600 flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
+              Hub
+            </p>
+            <ul className="space-y-0.5">
+              {HUB_ITEMS.map((item) => (
+                <li key={item.href}>
+                  <NavLink item={item} pathname={pathname} activeClasses="bg-emerald-500/10 text-emerald-300" />
+                </li>
+              ))}
+              <li>
+                <FreelanceDropdown items={FREELANCE_DROPDOWN_ITEMS} pathname={pathname} />
+              </li>
+            </ul>
+          </div>
         </nav>
 
         <div className="p-4 border-t border-zinc-800">
@@ -65,8 +85,8 @@ export function ConsoleShell({
         </div>
       </aside>
 
-      <main className="flex-1 min-w-0">
-        <div className="max-w-[1100px] mx-auto px-8 py-10">{children}</div>
+      <main className="flex-1 min-w-0 print:bg-white">
+        <div className="max-w-[1100px] mx-auto px-8 py-10 print:max-w-none print:p-0">{children}</div>
       </main>
     </div>
   );
@@ -101,6 +121,45 @@ function DashboardLink({ item, pathname }: { item: NavItem; pathname: string }) 
   return (
     <div className="pb-4 mb-1 border-b border-zinc-800">
       <NavLink item={item} pathname={pathname} activeClasses="bg-zinc-100/10 text-zinc-100" />
+    </div>
+  );
+}
+
+/** Groups Projects/Finance/Customers/Invoices under one collapsible "Freelance"
+ *  item — these all revolve around the same freelance work, so they don't need
+ *  four separate top-level Hub entries. Auto-expands when any sub-page is active. */
+function FreelanceDropdown({ items, pathname }: { items: NavItem[]; pathname: string }) {
+  const hasActiveChild = items.some((item) => isNavActive(pathname, item.href));
+  const [manualOpen, setManualOpen] = useState<boolean | null>(null);
+  const open = manualOpen ?? hasActiveChild;
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setManualOpen(!open)}
+        className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+          hasActiveChild ? "bg-emerald-500/10 text-emerald-300" : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+        }`}
+      >
+        <FreelanceIcon />
+        <span className="flex-1 text-left">Freelance</span>
+        <svg
+          width="12" height="12" viewBox="0 0 20 20" fill="none" aria-hidden="true"
+          className={`transition-transform ${open ? "rotate-90" : ""}`}
+        >
+          <path d="M7 4.5 12.5 10 7 15.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && (
+        <ul className="mt-0.5 ml-2 pl-3 border-l border-zinc-800 space-y-0.5">
+          {items.map((item) => (
+            <li key={item.href}>
+              <NavLink item={item} pathname={pathname} activeClasses="bg-emerald-500/10 text-emerald-300" />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -229,6 +288,23 @@ function FinanceIcon() {
       <path d="M3 15V8l4-3 3 2 3-2 4 3v7" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
       <path d="M10 7v9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
       <path d="M2.5 15.5h15" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+function InvoicesIcon() {
+  return (
+    <svg {...iconProps()}>
+      <path d="M5 2.5h10v15l-2.5-1.5-2.5 1.5-2.5-1.5-2.5 1.5v-15Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M7.5 6.5h5M7.5 9.5h5M7.5 12.5h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+function FreelanceIcon() {
+  return (
+    <svg {...iconProps()}>
+      <rect x="2.5" y="5.5" width="15" height="10.5" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M7 5.5V4a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 13 4v1.5" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M2.5 10h15" stroke="currentColor" strokeWidth="1.4" />
     </svg>
   );
 }

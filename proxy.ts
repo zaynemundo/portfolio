@@ -43,5 +43,8 @@ export const config = {
     "/case-studies/:path*",
     "/notes/:path*",
     "/freelance/:path*",
+    "/clients/:path*",
+    "/finance/:path*",
+    "/invoices/:path*",
   ],
 };

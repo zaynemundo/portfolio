@@ -180,6 +180,7 @@ model Client {
   updatedAt    DateTime           @updatedAt
   projects     FreelanceProject[]
   transactions Transaction[]
+  invoices     Invoice[]
 }
 
 /// Freelance work tracker — separate from the public portfolio Project model.
@@ -209,6 +210,7 @@ model FreelanceProject {
   updatedAt     DateTime        @updatedAt
   tasks         FreelanceTask[]
   transactions  Transaction[]
+  invoices      Invoice[]
 }
 
 model FreelanceTask {
@@ -240,6 +242,34 @@ model Transaction {
   projectId   String?
   project     FreelanceProject? @relation(fields: [projectId], references: [id])
   createdAt   DateTime          @default(now())
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+}
+
+/// Client invoices — line items stored as JSON ({description, quantity, rate}[]),
+/// total is computed on read, never stored (avoids drift if items are edited).
+/// Downloaded as a PDF via the browser print dialog on the invoice view page,
+/// not a server-generated file — no PDF library dependency needed.
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  clientId      String?
+  client        Client?       @relation(fields: [clientId], references: [id])
+  projectId     String?
+  project       FreelanceProject? @relation(fields: [projectId], references: [id])
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime
+  dueDate       DateTime?
+  currency      String        @default("AED")
+  items         Json
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 /// Personal notes / documentation — separate from published blog articles.
