@@ -13,6 +13,7 @@ interface NavItem {
 
 const CONTENT_ITEMS: NavItem[] = [
   { href: routes.homepage.index, label: "Homepage", icon: <HomeIcon /> },
+  { href: routes.workPage, label: "Work Page", icon: <WorkPageIcon /> },
   { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
   { href: routes.caseStudies.list, label: "Case Studies", icon: <CaseStudyIcon /> },
   { href: routes.settings, label: "Site Settings", icon: <SettingsIcon /> },
@@ -105,6 +106,15 @@ function HomeIcon() {
     <svg {...iconProps()}>
       <path d="M3 9.5 10 3l7 6.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M5 8v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function WorkPageIcon() {
+  return (
+    <svg {...iconProps()}>
+      <rect x="2.5" y="6" width="15" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M6.5 6V4.75A1.25 1.25 0 0 1 7.75 3.5h4.5a1.25 1.25 0 0 1 1.25 1.25V6" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M2.5 11h15" stroke="currentColor" strokeWidth="1.4" />
     </svg>
   );
 }

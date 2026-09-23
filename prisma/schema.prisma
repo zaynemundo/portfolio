@@ -80,7 +80,22 @@ model SiteSettings {
   /// always the 3 latest published BlogPost rows — not editable here.
   insightsHeading     String?
   insightsIntro       String?
+  /// /work page ("Selected Work") header heading + intro copy.
+  workPageHeading     String?
+  workPageIntro       String?
   updatedAt           DateTime @updatedAt
+}
+
+/// Client/brand logos shown in the marquee ticker on the /work page.
+/// Not every entry has a case study — some are logo-only client mentions.
+model ClientLogo {
+  id        String   @id @default(cuid())
+  name      String
+  initials  String
+  bg        String
+  light     Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
 }
 
 /// Portfolio case study. Core fields are plain columns; the long tail of

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getPublishedProjectCards } from "@/app/lib/projects-db";
 import { staticProjects } from "@/app/lib/projects-static";
+import { getSiteSettings } from "@/app/lib/settings-db";
+import { getClientLogos } from "@/app/lib/client-logos-db";
 import { ProjectFilterGrid } from "@/app/components/ProjectFilterGrid";
 import { ClientLogos } from "@/app/components/ClientLogos";
 import { Reveal } from "@/app/components/Reveal";
@@ -14,6 +16,8 @@ export const metadata: Metadata = {
 export default async function WorkPage() {
   const dbProjects = await getPublishedProjectCards();
   const projects = dbProjects.length > 0 ? dbProjects : staticProjects;
+  const { workPageHeading, workPageIntro } = await getSiteSettings();
+  const clientLogos = await getClientLogos();
 
   return (
     <div className="min-h-screen bg-white">
@@ -25,11 +29,10 @@ export default async function WorkPage() {
               className="font-extrabold text-white tracking-tight mb-6 md:mb-8"
               style={{ fontSize: "clamp(2.25rem, 5.5vw, 3.75rem)", letterSpacing: "-0.04em" }}
             >
-              Selected Work
+              {workPageHeading}
             </h1>
             <p className="text-[15.5px] text-zinc-400 max-w-xl leading-relaxed">
-              A collection of front-end engineering, custom e-commerce storefronts,
-              corporate web builds, and technical performance optimizations.
+              {workPageIntro}
             </p>
           </Reveal>
         </div>
@@ -41,7 +44,7 @@ export default async function WorkPage() {
       </div>
 
       {/* Moving Brand Logos Ticker */}
-      <ClientLogos />
+      <ClientLogos brands={clientLogos} />
     </div>
   );
 }

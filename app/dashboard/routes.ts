@@ -6,6 +6,7 @@
 export const routes = {
   home: "/dashboard",
   settings: "/dashboard/settings",
+  workPage: "/dashboard/work-page",
   homepage: {
     index: "/dashboard/homepage",
     hero: "/dashboard/homepage/hero",

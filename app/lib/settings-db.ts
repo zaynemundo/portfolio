@@ -27,6 +27,8 @@ export interface SiteSettingsData {
   aboutChapters: Chapter[];
   insightsHeading: string;
   insightsIntro: string;
+  workPageHeading: string;
+  workPageIntro: string;
 }
 
 const DEFAULT_HERO_SCENES: HeroSceneData[] = [
@@ -80,6 +82,9 @@ const DEFAULTS: SiteSettingsData = {
   insightsHeading: "Perspectives on accessible, standards-compliant digital platforms.",
   insightsIntro:
     "Perspectives on web accessibility, technical performance, information architecture, front-end implementation, and the standards-based systems behind reliable, inclusive digital services.",
+  workPageHeading: "Selected Work",
+  workPageIntro:
+    "A collection of front-end engineering, custom e-commerce storefronts, corporate web builds, and technical performance optimizations.",
 };
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {
@@ -111,5 +116,7 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
     aboutChapters: chapters,
     insightsHeading: row.insightsHeading || DEFAULTS.insightsHeading,
     insightsIntro: row.insightsIntro || DEFAULTS.insightsIntro,
+    workPageHeading: row.workPageHeading || DEFAULTS.workPageHeading,
+    workPageIntro: row.workPageIntro || DEFAULTS.workPageIntro,
   };
 }

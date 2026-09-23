@@ -26,6 +26,11 @@ function revalidateHomepage() {
   revalidatePath("/dashboard/homepage/insights");
 }
 
+function revalidateWorkPage() {
+  revalidatePath("/work");
+  revalidatePath("/dashboard/work-page");
+}
+
 export async function updateSiteSettings(
   data: { email: string; phone: string; linkedinUrl: string; githubUrl: string; name: string; jobTitle: string }
 ): Promise<SettingsActionResult> {
@@ -226,5 +231,53 @@ export async function updateInsightsCopy(data: { heading: string; intro: string 
   });
 
   revalidateHomepage();
+  return { ok: true };
+}
+
+/* ── /work page ────────────────────────────────────────────────────────── */
+
+export async function updateWorkPageCopy(data: { heading: string; intro: string }): Promise<SettingsActionResult> {
+  await requireSession();
+
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: { workPageHeading: data.heading.trim(), workPageIntro: data.intro.trim() },
+    create: { id: "singleton", workPageHeading: data.heading.trim(), workPageIntro: data.intro.trim() },
+  });
+
+  revalidateWorkPage();
+  return { ok: true };
+}
+
+export interface ClientLogoInput {
+  id: string;
+  name: string;
+  initials: string;
+  bg: string;
+  light: boolean;
+}
+
+export async function updateClientLogos(items: ClientLogoInput[]): Promise<SettingsActionResult> {
+  await requireSession();
+
+  const existingIds = items.filter((i) => !i.id.startsWith("new-")).map((i) => i.id);
+  await prisma.clientLogo.deleteMany({ where: { id: { notIn: existingIds } } });
+
+  await Promise.all(
+    items.map((item, index) => {
+      const data = {
+        name: item.name.trim(),
+        initials: item.initials.trim(),
+        bg: item.bg.trim(),
+        light: item.light,
+        sortOrder: index,
+      };
+      return item.id.startsWith("new-")
+        ? prisma.clientLogo.create({ data })
+        : prisma.clientLogo.update({ where: { id: item.id }, data });
+    })
+  );
+
+  revalidateWorkPage();
   return { ok: true };
 }
