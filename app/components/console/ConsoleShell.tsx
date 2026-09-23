@@ -50,7 +50,7 @@ export function ConsoleShell({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const searchItems: NavItem[] = [
+  const allNavItems: NavItem[] = [
     DASHBOARD_ITEM,
     ...contentItems,
     ...HUB_ITEMS,
@@ -70,7 +70,7 @@ export function ConsoleShell({
 
   return (
     <div className="min-h-screen bg-zinc-950 flex print:bg-white">
-      {sidebarOpen && (
+      {sidebarOpen ? (
         <aside className="w-60 shrink-0 border-r border-zinc-800 flex flex-col h-screen sticky top-0 print:hidden">
           <div className="h-14 flex items-center justify-between px-4 border-b border-zinc-800">
             <Link href={routes.home} aria-label="Dashboard" className="text-[13px] font-extrabold tracking-tight text-white">
@@ -134,38 +134,91 @@ export function ConsoleShell({
             </div>
           </div>
         </aside>
+      ) : (
+        <CollapsedRail
+          items={allNavItems}
+          pathname={pathname}
+          email={email}
+          onExpand={() => setSidebarOpen(true)}
+          onSearch={() => setSearchOpen(true)}
+        />
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        {!sidebarOpen && (
-          <header className="h-14 shrink-0 flex items-center gap-1 px-4 border-b border-zinc-800 print:hidden">
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Expand sidebar"
-              className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
-            >
-              <SidebarToggleIcon />
-            </button>
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              aria-label="Search"
-              className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
-            >
-              <TopBarSearchIcon />
-            </button>
-            <span className="text-[13px] font-bold tracking-tight text-zinc-100 ml-1">ZM</span>
-          </header>
-        )}
-
         <main className="flex-1 min-w-0 print:bg-white">
           <div className="max-w-[1100px] mx-auto px-8 py-10 print:max-w-none print:p-0">{children}</div>
         </main>
       </div>
 
-      {searchOpen && <CommandPalette items={searchItems} onClose={() => setSearchOpen(false)} />}
+      {searchOpen && <CommandPalette items={allNavItems} onClose={() => setSearchOpen(false)} />}
     </div>
+  );
+}
+
+/** Collapsed state of the sidebar — a narrow icon-only rail (like ChatGPT's
+ *  collapsed sidebar), not a fully hidden nav. Every top-level destination
+ *  stays one click away, just without labels; hover/aria-label carries the name. */
+function CollapsedRail({
+  items, pathname, email, onExpand, onSearch,
+}: {
+  items: NavItem[];
+  pathname: string;
+  email: string;
+  onExpand: () => void;
+  onSearch: () => void;
+}) {
+  return (
+    <aside className="w-14 shrink-0 border-r border-zinc-800 flex flex-col items-center h-screen sticky top-0 print:hidden py-3 gap-1">
+      <button
+        type="button"
+        onClick={onExpand}
+        aria-label="Expand sidebar"
+        className="h-9 w-9 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+      >
+        <SidebarToggleIcon />
+      </button>
+      <button
+        type="button"
+        onClick={onSearch}
+        aria-label="Search"
+        className="h-9 w-9 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+      >
+        <TopBarSearchIcon />
+      </button>
+
+      <div className="w-6 h-px bg-zinc-800 my-1.5" aria-hidden="true" />
+
+      <nav className="flex-1 flex flex-col items-center gap-1 overflow-y-auto">
+        {items.map((item) => {
+          const isActive = isNavActive(pathname, item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              title={item.label}
+              aria-label={item.label}
+              className={`relative h-9 w-9 rounded-lg flex items-center justify-center transition-colors ${
+                isActive ? "bg-purple-500/10 text-purple-300" : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+              }`}
+            >
+              {item.icon}
+              {!!item.badge && (
+                <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <Link
+        href={routes.account}
+        title={email}
+        aria-label="Account"
+        className="h-8 w-8 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center text-[12px] font-semibold shrink-0 mb-1"
+      >
+        {email.charAt(0).toUpperCase()}
+      </Link>
+    </aside>
   );
 }
 
