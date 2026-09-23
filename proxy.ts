@@ -1,23 +1,30 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { prisma } from "@/app/lib/prisma";
 import { PROTECTED_TOP_LEVEL_PATHS } from "@/app/(admin)/_routes";
 
 function isProtected(pathname: string): boolean {
   return PROTECTED_TOP_LEVEL_PATHS.some((base) => pathname === base || pathname.startsWith(base + "/"));
 }
 
+/**
+ * Cheap cookie-presence gate only — no DB query here. Middleware runs at the
+ * edge, geographically close to the visitor but far from the Neon database,
+ * so a session lookup here was adding a very long round-trip to every single
+ * navigation (on top of the same lookup already happening, cached, in
+ * app/(admin)/layout.tsx via requireSession()). requireSession() remains the
+ * real authority: it validates the session against the DB and redirects to
+ * /login itself if the cookie is missing, invalid, or expired. This is only
+ * a fast first filter to keep fully unauthenticated requests from rendering
+ * anything at all.
+ */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!isProtected(pathname)) return NextResponse.next();
 
   const sessionId = request.cookies.get("admin_session")?.value;
-  const session = sessionId
-    ? await prisma.session.findUnique({ where: { id: sessionId } })
-    : null;
 
-  if (!session || session.expiresAt < new Date()) {
+  if (!sessionId) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
