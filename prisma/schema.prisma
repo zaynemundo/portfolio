@@ -83,6 +83,10 @@ model SiteSettings {
   /// /work page ("Selected Work") header heading + intro copy.
   workPageHeading     String?
   workPageIntro       String?
+  /// /insights (blog list) page header heading + intro copy. Distinct from
+  /// insightsHeading/insightsIntro above, which is the homepage teaser.
+  blogPageHeading     String?
+  blogPageIntro       String?
   updatedAt           DateTime @updatedAt
 }
 
@@ -95,6 +99,18 @@ model ClientLogo {
   bg        String
   light     Boolean  @default(false)
   sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+/// Contact form submissions. Saved here in addition to the best-effort
+/// Resend notification email, so a submission is never lost to a bounced
+/// or misconfigured mailer — visible at /dashboard/inquiries.
+model Inquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 

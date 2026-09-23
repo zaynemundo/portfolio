@@ -29,6 +29,8 @@ export interface SiteSettingsData {
   insightsIntro: string;
   workPageHeading: string;
   workPageIntro: string;
+  blogPageHeading: string;
+  blogPageIntro: string;
 }
 
 const DEFAULT_HERO_SCENES: HeroSceneData[] = [
@@ -85,6 +87,8 @@ const DEFAULTS: SiteSettingsData = {
   workPageHeading: "Selected Work",
   workPageIntro:
     "A collection of front-end engineering, custom e-commerce storefronts, corporate web builds, and technical performance optimizations.",
+  blogPageHeading: "Insights",
+  blogPageIntro: "Thoughts on front-end development, technical SEO, accessibility, and building for the web.",
 };
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {
@@ -118,5 +122,7 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
     insightsIntro: row.insightsIntro || DEFAULTS.insightsIntro,
     workPageHeading: row.workPageHeading || DEFAULTS.workPageHeading,
     workPageIntro: row.workPageIntro || DEFAULTS.workPageIntro,
+    blogPageHeading: row.blogPageHeading || DEFAULTS.blogPageHeading,
+    blogPageIntro: row.blogPageIntro || DEFAULTS.blogPageIntro,
   };
 }

@@ -7,6 +7,11 @@ export const routes = {
   home: "/dashboard",
   settings: "/dashboard/settings",
   workPage: "/dashboard/work-page",
+  blogPage: "/dashboard/blog-page",
+  inquiries: {
+    list: "/dashboard/inquiries",
+    item: (id: string) => `/dashboard/inquiries/${id}`,
+  },
   homepage: {
     index: "/dashboard/homepage",
     hero: "/dashboard/homepage/hero",

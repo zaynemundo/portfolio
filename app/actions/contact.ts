@@ -1,6 +1,7 @@
 "use server";
 
 import { Resend } from "resend";
+import { prisma } from "@/app/lib/prisma";
 
 export interface ContactPayload {
   name: string;
@@ -141,13 +142,20 @@ export async function submitContact(payload: ContactPayload): Promise<ContactRes
   const cleanMessage = message.trim();
 
   try {
-    await sendNotificationEmail(cleanName, cleanEmail, cleanMessage);
+    await prisma.inquiry.create({ data: { name: cleanName, email: cleanEmail, message: cleanMessage } });
   } catch (err) {
-    console.error("[contact] Email error:", err);
+    console.error("[contact] DB error:", err);
     return {
       ok: false,
       error: "Unable to send your message right now. Please email me directly at mzaira.mundo@gmail.com",
     };
+  }
+
+  try {
+    await sendNotificationEmail(cleanName, cleanEmail, cleanMessage);
+  } catch (err) {
+    // Non-fatal — the inquiry is already saved and visible in the dashboard.
+    console.error("[contact] Email error:", err);
   }
 
   return { ok: true };

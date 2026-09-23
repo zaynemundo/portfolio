@@ -9,23 +9,35 @@ interface NavItem {
   href: string;
   label: string;
   icon: React.ReactNode;
+  badge?: number;
 }
 
-const CONTENT_ITEMS: NavItem[] = [
-  { href: routes.homepage.index, label: "Homepage", icon: <HomeIcon /> },
-  { href: routes.workPage, label: "Work Page", icon: <WorkPageIcon /> },
-  { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
-  { href: routes.caseStudies.list, label: "Case Studies", icon: <CaseStudyIcon /> },
-  { href: routes.settings, label: "Site Settings", icon: <SettingsIcon /> },
-];
+function buildContentItems(unreadInquiries: number): NavItem[] {
+  return [
+    { href: routes.homepage.index, label: "Homepage", icon: <HomeIcon /> },
+    { href: routes.workPage, label: "Work Page", icon: <WorkPageIcon /> },
+    { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
+    { href: routes.blogPage, label: "Insights Page", icon: <InsightsPageIcon /> },
+    { href: routes.caseStudies.list, label: "Case Studies", icon: <CaseStudyIcon /> },
+    { href: routes.inquiries.list, label: "Inquiries", icon: <InquiriesIcon />, badge: unreadInquiries },
+    { href: routes.settings, label: "Site Settings", icon: <SettingsIcon /> },
+  ];
+}
 
 const HUB_ITEMS: NavItem[] = [
   { href: routes.notes.list, label: "Notes", icon: <NotesIcon /> },
   { href: routes.projects.list, label: "Freelance Projects", icon: <ProjectsIcon /> },
 ];
 
-export function ConsoleShell({ email, children }: { email: string; children: React.ReactNode }) {
+export function ConsoleShell({
+  email, children, unreadInquiries = 0,
+}: {
+  email: string;
+  children: React.ReactNode;
+  unreadInquiries?: number;
+}) {
   const pathname = usePathname();
+  const contentItems = buildContentItems(unreadInquiries);
 
   return (
     <div className="min-h-screen bg-zinc-950 flex">
@@ -39,7 +51,7 @@ export function ConsoleShell({ email, children }: { email: string; children: Rea
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
-          <NavGroup label="Content" accent="purple" items={CONTENT_ITEMS} pathname={pathname} />
+          <NavGroup label="Content" accent="purple" items={contentItems} pathname={pathname} />
           <NavGroup label="Hub" accent="emerald" items={HUB_ITEMS} pathname={pathname} />
         </nav>
 
@@ -87,7 +99,12 @@ function NavGroup({
                 }`}
               >
                 {item.icon}
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {!!item.badge && (
+                  <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10.5px] font-semibold flex items-center justify-center">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             </li>
           );
@@ -126,11 +143,27 @@ function BlogIcon() {
     </svg>
   );
 }
+function InsightsPageIcon() {
+  return (
+    <svg {...iconProps()}>
+      <path d="M4 14.5V6a1.5 1.5 0 0 1 1.5-1.5h9A1.5 1.5 0 0 1 16 6v8.5l-2.5-1.5-2 1.5-2-1.5-2 1.5-3.5-1.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M6.5 7.5h6M6.5 10h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
 function CaseStudyIcon() {
   return (
     <svg {...iconProps()}>
       <rect x="2.5" y="5.5" width="15" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
       <path d="M7 5.5V4a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 13 4v1.5" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+function InquiriesIcon() {
+  return (
+    <svg {...iconProps()}>
+      <path d="M3 5.5h14v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M3 5.5 10 11l7-5.5" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
     </svg>
   );
 }

@@ -31,6 +31,11 @@ function revalidateWorkPage() {
   revalidatePath("/dashboard/work-page");
 }
 
+function revalidateBlogPage() {
+  revalidatePath("/insights");
+  revalidatePath("/dashboard/blog-page");
+}
+
 export async function updateSiteSettings(
   data: { email: string; phone: string; linkedinUrl: string; githubUrl: string; name: string; jobTitle: string }
 ): Promise<SettingsActionResult> {
@@ -246,6 +251,19 @@ export async function updateWorkPageCopy(data: { heading: string; intro: string 
   });
 
   revalidateWorkPage();
+  return { ok: true };
+}
+
+export async function updateBlogPageCopy(data: { heading: string; intro: string }): Promise<SettingsActionResult> {
+  await requireSession();
+
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: { blogPageHeading: data.heading.trim(), blogPageIntro: data.intro.trim() },
+    create: { id: "singleton", blogPageHeading: data.heading.trim(), blogPageIntro: data.intro.trim() },
+  });
+
+  revalidateBlogPage();
   return { ok: true };
 }
 

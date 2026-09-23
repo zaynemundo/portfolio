@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getPublishedPosts } from "@/app/lib/posts-db";
+import { getSiteSettings } from "@/app/lib/settings-db";
 import { Reveal } from "@/app/components/Reveal";
 import { InsightsList } from "@/app/components/insights/InsightsList";
 
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 
 export default async function WritingPage() {
   const allPosts = await getPublishedPosts();
+  const { blogPageHeading, blogPageIntro } = await getSiteSettings();
 
   return (
     <div className="min-h-screen bg-white">
@@ -23,11 +25,10 @@ export default async function WritingPage() {
               className="font-extrabold text-white tracking-tight mb-4 md:mb-5"
               style={{ fontSize: "clamp(2.25rem, 5.5vw, 3.75rem)", letterSpacing: "-0.04em" }}
             >
-              Insights
+              {blogPageHeading}
             </h1>
             <p className="text-[15.5px] text-zinc-400 max-w-xl leading-relaxed">
-              Thoughts on front-end development, technical SEO, accessibility, and
-              building for the web.
+              {blogPageIntro}
             </p>
           </Reveal>
         </div>
