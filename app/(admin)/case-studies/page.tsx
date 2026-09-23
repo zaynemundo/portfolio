@@ -17,6 +17,8 @@ export default async function CaseStudiesPage() {
         subtitle={`${projects.length} project${projects.length === 1 ? "" : "s"}`}
         actionHref={routes.caseStudies.new}
         actionLabel="+ New case study"
+        secondaryHref={routes.workPage}
+        secondaryLabel="Edit Work page"
       />
 
       {projects.length === 0 ? (

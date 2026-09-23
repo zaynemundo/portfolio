@@ -17,6 +17,8 @@ export default async function DashboardBlogPage() {
         subtitle={`${posts.length} article${posts.length === 1 ? "" : "s"}`}
         actionHref={routes.blog.new}
         actionLabel="+ New article"
+        secondaryHref={routes.blogPage}
+        secondaryLabel="Edit Insights page"
       />
 
       {posts.length === 0 ? (

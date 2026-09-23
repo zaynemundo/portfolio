@@ -16,12 +16,9 @@ function buildContentItems(unreadInquiries: number): NavItem[] {
   return [
     { href: routes.home, label: "Dashboard", icon: <OverviewIcon /> },
     { href: routes.homepage.index, label: "Homepage", icon: <HomeIcon /> },
-    { href: routes.workPage, label: "Work Page", icon: <WorkPageIcon /> },
     { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
-    { href: routes.blogPage, label: "Insights Page", icon: <InsightsPageIcon /> },
     { href: routes.caseStudies.list, label: "Case Studies", icon: <CaseStudyIcon /> },
     { href: routes.inquiries.list, label: "Inquiries", icon: <InquiriesIcon />, badge: unreadInquiries },
-    { href: routes.settings, label: "Site Settings", icon: <SettingsIcon /> },
   ];
 }
 
@@ -137,28 +134,11 @@ function HomeIcon() {
     </svg>
   );
 }
-function WorkPageIcon() {
-  return (
-    <svg {...iconProps()}>
-      <rect x="2.5" y="6" width="15" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M6.5 6V4.75A1.25 1.25 0 0 1 7.75 3.5h4.5a1.25 1.25 0 0 1 1.25 1.25V6" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M2.5 11h15" stroke="currentColor" strokeWidth="1.4" />
-    </svg>
-  );
-}
 function BlogIcon() {
   return (
     <svg {...iconProps()}>
       <path d="M4 3.5h9l3 3v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
       <path d="M7 8.5h6M7 11.5h6M7 14.5h3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
-function InsightsPageIcon() {
-  return (
-    <svg {...iconProps()}>
-      <path d="M4 14.5V6a1.5 1.5 0 0 1 1.5-1.5h9A1.5 1.5 0 0 1 16 6v8.5l-2.5-1.5-2 1.5-2-1.5-2 1.5-3.5-1.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M6.5 7.5h6M6.5 10h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }
@@ -175,14 +155,6 @@ function InquiriesIcon() {
     <svg {...iconProps()}>
       <path d="M3 5.5h14v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
       <path d="M3 5.5 10 11l7-5.5" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function SettingsIcon() {
-  return (
-    <svg {...iconProps()}>
-      <circle cx="10" cy="10" r="2.75" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.36 4.64l-1.41 1.41M6.05 13.95l-1.41 1.41M15.36 15.36l-1.41-1.41M6.05 6.05 4.64 4.64" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }

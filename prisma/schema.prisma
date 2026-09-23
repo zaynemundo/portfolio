@@ -95,9 +95,7 @@ model SiteSettings {
 model ClientLogo {
   id        String   @id @default(cuid())
   name      String
-  initials  String
-  bg        String
-  light     Boolean  @default(false)
+  logoUrl   String
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
 }

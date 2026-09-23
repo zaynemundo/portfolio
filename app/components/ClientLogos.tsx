@@ -1,6 +1,5 @@
 "use client";
 
-import { ProjectLogo } from "@/app/components/ProjectLogo";
 import type { ClientLogoData } from "@/app/lib/client-logos";
 import { STATIC_CLIENT_LOGOS } from "@/app/lib/client-logos";
 
@@ -32,14 +31,25 @@ export function ClientLogos({ brands = STATIC_CLIENT_LOGOS }: Props) {
         <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10" />
         <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10" />
 
-        <div className="animate-marquee flex items-center gap-12 md:gap-20">
+        <div className="animate-marquee flex items-center gap-14 md:gap-24">
           {marqueeItems.map((brand, i) => (
             <div
               key={`${brand.id}-${i}`}
-              className="flex items-center gap-3.5 shrink-0 cursor-default group"
+              className="relative flex items-center justify-center shrink-0 cursor-default group h-12"
             >
-              <ProjectLogo name={brand.name} logo={{ initials: brand.initials, bg: brand.bg, light: brand.light }} size={42} radius={10} />
-              <span className="text-[17px] md:text-[19px] font-bold text-zinc-800 group-hover:text-zinc-950 transition-colors whitespace-nowrap tracking-tight">
+              {brand.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={brand.logoUrl}
+                  alt={brand.name}
+                  className="h-10 md:h-12 w-auto max-w-[140px] object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-200"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400 text-[15px] font-bold group-hover:bg-zinc-200 transition-colors">
+                  {brand.name.charAt(0)}
+                </div>
+              )}
+              <span className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[12px] font-semibold text-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 {brand.name}
               </span>
             </div>

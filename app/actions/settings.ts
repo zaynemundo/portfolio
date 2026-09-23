@@ -267,12 +267,17 @@ export async function updateBlogPageCopy(data: { heading: string; intro: string 
   return { ok: true };
 }
 
+export async function uploadClientLogoImage(formData: FormData): Promise<UploadResult> {
+  const file = formData.get("file") as File | null;
+  if (!file) return { ok: false, error: "No file provided." };
+
+  return uploadAsset(file, "client-logo", ["image/jpeg", "image/png", "image/webp", "image/svg+xml"]);
+}
+
 export interface ClientLogoInput {
   id: string;
   name: string;
-  initials: string;
-  bg: string;
-  light: boolean;
+  logoUrl: string;
 }
 
 export async function updateClientLogos(items: ClientLogoInput[]): Promise<SettingsActionResult> {
@@ -285,9 +290,7 @@ export async function updateClientLogos(items: ClientLogoInput[]): Promise<Setti
     items.map((item, index) => {
       const data = {
         name: item.name.trim(),
-        initials: item.initials.trim(),
-        bg: item.bg.trim(),
-        light: item.light,
+        logoUrl: item.logoUrl.trim(),
         sortOrder: index,
       };
       return item.id.startsWith("new-")
