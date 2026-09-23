@@ -12,6 +12,7 @@ interface NavItem {
 }
 
 const CONTENT_ITEMS: NavItem[] = [
+  { href: routes.homepage.index, label: "Homepage", icon: <HomeIcon /> },
   { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
   { href: routes.caseStudies.list, label: "Case Studies", icon: <CaseStudyIcon /> },
   { href: routes.settings, label: "Site Settings", icon: <SettingsIcon /> },
@@ -99,6 +100,14 @@ function iconProps() {
   return { width: 15, height: 15, viewBox: "0 0 20 20", fill: "none" as const, "aria-hidden": true };
 }
 
+function HomeIcon() {
+  return (
+    <svg {...iconProps()}>
+      <path d="M3 9.5 10 3l7 6.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 8v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  );
+}
 function BlogIcon() {
   return (
     <svg {...iconProps()}>

@@ -5,7 +5,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { Prisma } from "@/generated/prisma/client/client";
-import type { SiteSettingsData } from "@/app/lib/settings-db";
+import { getSiteSettings, type HeroSceneData } from "@/app/lib/settings-db";
+import type { Chapter } from "@/app/data/aboutChapters";
 
 export interface SettingsActionResult {
   ok: boolean;
@@ -16,8 +17,17 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function revalidateHomepage() {
+  revalidatePath("/");
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/homepage/hero");
+  revalidatePath("/dashboard/homepage/selected-work");
+  revalidatePath("/dashboard/homepage/about");
+  revalidatePath("/dashboard/homepage/insights");
+}
+
 export async function updateSiteSettings(
-  data: Pick<SiteSettingsData, "email" | "phone" | "linkedinUrl" | "githubUrl">
+  data: { email: string; phone: string; linkedinUrl: string; githubUrl: string; name: string; jobTitle: string }
 ): Promise<SettingsActionResult> {
   await requireSession();
 
@@ -32,6 +42,8 @@ export async function updateSiteSettings(
       phone: data.phone.trim(),
       linkedinUrl: data.linkedinUrl.trim(),
       githubUrl: data.githubUrl.trim(),
+      name: data.name.trim(),
+      jobTitle: data.jobTitle.trim(),
     },
     create: {
       id: "singleton",
@@ -39,52 +51,8 @@ export async function updateSiteSettings(
       phone: data.phone.trim(),
       linkedinUrl: data.linkedinUrl.trim(),
       githubUrl: data.githubUrl.trim(),
-    },
-  });
-
-  revalidatePath("/");
-  revalidatePath("/dashboard/settings");
-  return { ok: true };
-}
-
-export async function updateHomepageContent(data: {
-  name: string;
-  jobTitle: string;
-  heroScenesJson: string;
-  aboutChaptersJson: string;
-}): Promise<SettingsActionResult> {
-  await requireSession();
-
-  let heroScenes: unknown;
-  let aboutChapters: unknown;
-  try {
-    heroScenes = JSON.parse(data.heroScenesJson);
-  } catch {
-    return { ok: false, error: "Hero scenes JSON is not valid." };
-  }
-  try {
-    aboutChapters = JSON.parse(data.aboutChaptersJson);
-  } catch {
-    return { ok: false, error: "About chapters JSON is not valid." };
-  }
-  if (!Array.isArray(heroScenes) || !Array.isArray(aboutChapters)) {
-    return { ok: false, error: "Both fields must be JSON arrays." };
-  }
-
-  await prisma.siteSettings.upsert({
-    where: { id: "singleton" },
-    update: {
       name: data.name.trim(),
       jobTitle: data.jobTitle.trim(),
-      heroScenes: heroScenes as Prisma.InputJsonValue,
-      aboutChapters: aboutChapters as Prisma.InputJsonValue,
-    },
-    create: {
-      id: "singleton",
-      name: data.name.trim(),
-      jobTitle: data.jobTitle.trim(),
-      heroScenes: heroScenes as Prisma.InputJsonValue,
-      aboutChapters: aboutChapters as Prisma.InputJsonValue,
     },
   });
 
@@ -100,15 +68,16 @@ export interface UploadResult {
 }
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10MB
+const MAX_VIDEO_UPLOAD_BYTES = 100 * 1024 * 1024; // 100MB
 
-async function uploadAsset(file: File, prefix: string, allowedTypes: string[]): Promise<UploadResult> {
+async function uploadAsset(file: File, prefix: string, allowedTypes: string[], maxBytes = MAX_UPLOAD_BYTES): Promise<UploadResult> {
   await requireSession();
 
   if (!allowedTypes.includes(file.type)) {
     return { ok: false, error: `Unsupported file type: ${file.type || "unknown"}.` };
   }
-  if (file.size > MAX_UPLOAD_BYTES) {
-    return { ok: false, error: "File is too large (max 10MB)." };
+  if (file.size > maxBytes) {
+    return { ok: false, error: `File is too large (max ${Math.round(maxBytes / (1024 * 1024))}MB).` };
   }
 
   const blob = await put(`${prefix}/${Date.now()}-${file.name}`, file, {
@@ -153,4 +122,109 @@ export async function uploadPortrait(formData: FormData): Promise<UploadResult> 
   revalidatePath("/");
   revalidatePath("/dashboard/settings");
   return result;
+}
+
+/* ── Homepage: hero banner ────────────────────────────────────────────── */
+
+export async function uploadHeroVideo(formData: FormData): Promise<UploadResult> {
+  const file = formData.get("file") as File | null;
+  if (!file) return { ok: false, error: "No file provided." };
+
+  const result = await uploadAsset(file, "hero-video", ["video/mp4", "video/webm"], MAX_VIDEO_UPLOAD_BYTES);
+  if (!result.ok || !result.url) return result;
+
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: { heroVideoUrl: result.url },
+    create: { id: "singleton", heroVideoUrl: result.url },
+  });
+
+  revalidateHomepage();
+  return result;
+}
+
+export async function uploadHeroPoster(formData: FormData): Promise<UploadResult> {
+  const file = formData.get("file") as File | null;
+  if (!file) return { ok: false, error: "No file provided." };
+
+  const result = await uploadAsset(file, "hero-poster", ["image/jpeg", "image/png", "image/webp"]);
+  if (!result.ok || !result.url) return result;
+
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: { heroPosterUrl: result.url },
+    create: { id: "singleton", heroPosterUrl: result.url },
+  });
+
+  revalidateHomepage();
+  return result;
+}
+
+export async function updateHeroScenes(scenes: HeroSceneData[]): Promise<SettingsActionResult> {
+  await requireSession();
+
+  if (!Array.isArray(scenes) || scenes.some((s) => typeof s.heading !== "string" || typeof s.start !== "number" || typeof s.end !== "number")) {
+    return { ok: false, error: "Each scene needs a heading, start, and end." };
+  }
+
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: { heroScenes: scenes as unknown as Prisma.InputJsonValue },
+    create: { id: "singleton", heroScenes: scenes as unknown as Prisma.InputJsonValue },
+  });
+
+  revalidateHomepage();
+  return { ok: true };
+}
+
+/* ── Homepage: Selected Work ──────────────────────────────────────────── */
+
+export async function updateSelectedWorkCopy(data: { heading: string; intro: string }): Promise<SettingsActionResult> {
+  await requireSession();
+
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: { selectedWorkHeading: data.heading.trim(), selectedWorkIntro: data.intro.trim() },
+    create: { id: "singleton", selectedWorkHeading: data.heading.trim(), selectedWorkIntro: data.intro.trim() },
+  });
+
+  revalidateHomepage();
+  return { ok: true };
+}
+
+/* ── Homepage: About chapters ─────────────────────────────────────────── */
+
+async function replaceAboutChapter(id: string, updated: Chapter): Promise<SettingsActionResult> {
+  await requireSession();
+
+  const { aboutChapters } = await getSiteSettings();
+  const next = aboutChapters.map((c) => (c.id === id ? updated : c));
+
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: { aboutChapters: next as unknown as Prisma.InputJsonValue },
+    create: { id: "singleton", aboutChapters: next as unknown as Prisma.InputJsonValue },
+  });
+
+  revalidateHomepage();
+  return { ok: true };
+}
+
+export async function updateAboutChapter(chapter: Chapter): Promise<SettingsActionResult> {
+  return replaceAboutChapter(chapter.id, chapter);
+}
+
+/* ── Homepage: Insights ───────────────────────────────────────────────── */
+
+export async function updateInsightsCopy(data: { heading: string; intro: string }): Promise<SettingsActionResult> {
+  await requireSession();
+
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: { insightsHeading: data.heading.trim(), insightsIntro: data.intro.trim() },
+    create: { id: "singleton", insightsHeading: data.heading.trim(), insightsIntro: data.intro.trim() },
+  });
+
+  revalidateHomepage();
+  return { ok: true };
 }

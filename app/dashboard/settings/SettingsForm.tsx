@@ -5,6 +5,8 @@ import { updateSiteSettings } from "@/app/actions/settings";
 import type { SiteSettingsData } from "@/app/lib/settings-db";
 
 export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
+  const [name, setName] = useState(initial.name);
+  const [jobTitle, setJobTitle] = useState(initial.jobTitle);
   const [email, setEmail] = useState(initial.email);
   const [phone, setPhone] = useState(initial.phone);
   const [linkedinUrl, setLinkedinUrl] = useState(initial.linkedinUrl);
@@ -18,7 +20,7 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
     setError(null);
     setSaved(false);
     startTransition(async () => {
-      const result = await updateSiteSettings({ email, phone, linkedinUrl, githubUrl });
+      const result = await updateSiteSettings({ name, jobTitle, email, phone, linkedinUrl, githubUrl });
       if (!result.ok) {
         setError(result.error ?? "Something went wrong.");
         return;
@@ -29,6 +31,10 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
 
   return (
     <form onSubmit={handleSubmit} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-5">
+      <div className="grid grid-cols-2 gap-4">
+        <Field label="Name" id="name" value={name} onChange={setName} />
+        <Field label="Job title" id="jobTitle" value={jobTitle} onChange={setJobTitle} />
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <Field label="Email" id="email" value={email} onChange={setEmail} type="email" />
         <Field label="Phone" id="phone" value={phone} onChange={setPhone} />

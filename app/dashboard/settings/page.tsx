@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { getSiteSettings } from "@/app/lib/settings-db";
 import { SettingsForm } from "./SettingsForm";
 import { FileUploadCard } from "./FileUploadCard";
-import { HomepageContentForm } from "./HomepageContentForm";
+import { routes } from "@/app/dashboard/routes";
 
 export default async function SettingsPage() {
   const settings = await getSiteSettings();
@@ -10,7 +11,9 @@ export default async function SettingsPage() {
     <div className="max-w-2xl">
       <h1 className="text-[22px] font-semibold text-zinc-100 mb-1">Site Settings</h1>
       <p className="text-[13px] text-zinc-500 mb-8">
-        Contact info, assets, and homepage content shown on the public site.
+        Name, contact info, and assets shown across the public site. Homepage
+        section content (hero, selected work, about, insights) lives under{" "}
+        <Link href={routes.homepage.hero} className="text-purple-400 hover:text-purple-300">Homepage</Link> in the sidebar.
       </p>
 
       <div className="space-y-8">
@@ -32,8 +35,6 @@ export default async function SettingsPage() {
             kind="portrait"
           />
         </div>
-
-        <HomepageContentForm initial={settings} />
       </div>
     </div>
   );

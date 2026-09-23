@@ -5,9 +5,11 @@ import type { ProjectCard } from "./ProjectChapter";
 
 interface Props {
   projects: ProjectCard[];
+  heading?: string;
+  intro?: string;
 }
 
-export function FeaturedWork({ projects }: Props) {
+export function FeaturedWork({ projects, heading = "Selected Work", intro }: Props) {
   if (projects.length === 0) return null;
 
   return (
@@ -19,13 +21,13 @@ export function FeaturedWork({ projects }: Props) {
       <div className="featured-work__header mb-16 md:mb-20">
         <Reveal>
           <h2 id="work-heading" className="featured-work__heading">
-            Selected Work
+            {heading}
           </h2>
         </Reveal>
         <Reveal delay={80}>
           <div className="featured-work__header-inner">
             <p className="featured-work__intro">
-              A selection of digital platforms delivered across institutional, healthcare, and commercial sectors — where accessibility standards, information clarity, and long-term technical sustainability were central to every engagement.
+              {intro ?? "A selection of digital platforms delivered across institutional, healthcare, and commercial sectors — where accessibility standards, information clarity, and long-term technical sustainability were central to every engagement."}
             </p>
             <Link href="/work" className="featured-work__all-link">
               View all work

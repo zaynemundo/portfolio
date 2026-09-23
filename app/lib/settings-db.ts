@@ -19,8 +19,14 @@ export interface SiteSettingsData {
   githubUrl: string;
   resumeUrl: string;
   portraitUrl: string;
+  heroVideoUrl: string;
+  heroPosterUrl: string;
   heroScenes: HeroSceneData[];
+  selectedWorkHeading: string;
+  selectedWorkIntro: string;
   aboutChapters: Chapter[];
+  insightsHeading: string;
+  insightsIntro: string;
 }
 
 const DEFAULT_HERO_SCENES: HeroSceneData[] = [
@@ -64,8 +70,16 @@ const DEFAULTS: SiteSettingsData = {
   githubUrl: "https://github.com/mzaira",
   resumeUrl: "/docs/zaira-mundo-cv.pdf",
   portraitUrl: "/portrait.jpg",
+  heroVideoUrl: "/hero-banner-scroll.mp4",
+  heroPosterUrl: "/hero-poster.jpg",
   heroScenes: DEFAULT_HERO_SCENES,
+  selectedWorkHeading: "Selected Work",
+  selectedWorkIntro:
+    "A selection of digital platforms delivered across institutional, healthcare, and commercial sectors — where accessibility standards, information clarity, and long-term technical sustainability were central to every engagement.",
   aboutChapters: DEFAULT_ABOUT_CHAPTERS,
+  insightsHeading: "Perspectives on accessible, standards-compliant digital platforms.",
+  insightsIntro:
+    "Perspectives on web accessibility, technical performance, information architecture, front-end implementation, and the standards-based systems behind reliable, inclusive digital services.",
 };
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {
@@ -89,7 +103,13 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
     githubUrl: row.githubUrl || DEFAULTS.githubUrl,
     resumeUrl: row.resumeUrl || DEFAULTS.resumeUrl,
     portraitUrl: row.portraitUrl || DEFAULTS.portraitUrl,
+    heroVideoUrl: row.heroVideoUrl || DEFAULTS.heroVideoUrl,
+    heroPosterUrl: row.heroPosterUrl || DEFAULTS.heroPosterUrl,
     heroScenes,
+    selectedWorkHeading: row.selectedWorkHeading || DEFAULTS.selectedWorkHeading,
+    selectedWorkIntro: row.selectedWorkIntro || DEFAULTS.selectedWorkIntro,
     aboutChapters: chapters,
+    insightsHeading: row.insightsHeading || DEFAULTS.insightsHeading,
+    insightsIntro: row.insightsIntro || DEFAULTS.insightsIntro,
   };
 }

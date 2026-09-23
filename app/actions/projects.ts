@@ -176,6 +176,41 @@ export async function toggleProjectPublished(id: string, published: boolean): Pr
   revalidatePath("/dashboard/case-studies");
 }
 
+export interface FeaturedProjectUpdate {
+  id: string;
+  featured: boolean;
+  sortOrder: number;
+  videoMp4: string;
+  poster: string;
+  shortDescription: string;
+}
+
+/** Used by the Homepage → Selected Work dashboard page to pick which case
+ *  studies show on the homepage and set their homepage video/description. */
+export async function updateFeaturedProjects(items: FeaturedProjectUpdate[]): Promise<{ ok: boolean }> {
+  await requireSession();
+
+  await Promise.all(
+    items.map((item) =>
+      prisma.project.update({
+        where: { id: item.id },
+        data: {
+          featured: item.featured,
+          sortOrder: item.sortOrder,
+          videoMp4: item.videoMp4.trim() || null,
+          poster: item.poster.trim() || null,
+          shortDescription: item.shortDescription.trim(),
+        },
+      })
+    )
+  );
+
+  revalidatePublicPages();
+  revalidatePath("/dashboard/case-studies");
+  revalidatePath("/dashboard/homepage/selected-work");
+  return { ok: true };
+}
+
 export interface ImageUploadResult {
   ok: boolean;
   url?: string;

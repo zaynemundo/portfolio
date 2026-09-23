@@ -47,7 +47,11 @@ export default async function Home() {
   const featuredProjects: ProjectCard[] = allProjects.filter((p) => featuredSlugs.has(p.slug));
 
   const settings = await getSiteSettings();
-  const { portraitUrl, email, phone, linkedinUrl, githubUrl, name, jobTitle, aboutChapters } = settings;
+  const {
+    portraitUrl, email, phone, linkedinUrl, githubUrl, name, jobTitle, aboutChapters,
+    heroVideoUrl, heroPosterUrl, selectedWorkHeading, selectedWorkIntro,
+    insightsHeading, insightsIntro,
+  } = settings;
   const cvPath = settings.resumeUrl;
   const heroScenes: HeroScene[] = settings.heroScenes;
 
@@ -76,19 +80,19 @@ export default async function Home() {
 
       {/* ── 01 · HERO — Scroll-scrubbed video ──────────────────────────────── */}
       <ScrollVideoHero
-        videoSrc="/hero-banner-scroll.mp4"
-        posterSrc="/hero-poster.jpg"
+        videoSrc={heroVideoUrl}
+        posterSrc={heroPosterUrl}
         scenes={heroScenes}
       />
 
       {/* ── 02 · SELECTED WORK ─────────────────────────────────────────────── */}
-      <FeaturedWork projects={featuredProjects} />
+      <FeaturedWork projects={featuredProjects} heading={selectedWorkHeading} intro={selectedWorkIntro} />
 
       {/* ── 03 · ABOUT ─────────────────────────────────────────────────────── */}
       <AboutStorySection portraitUrl={portraitUrl} chapters={aboutChapters} />
 
       {/* ── INSIGHTS ──────────────────────────────────────────────────── */}
-      <InsightsSection posts={insightPosts} />
+      <InsightsSection posts={insightPosts} heading={insightsHeading} intro={insightsIntro} />
 
       {/* ── CONTACT ───────────────────────────────────────────────────── */}
       <ContactSection

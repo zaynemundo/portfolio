@@ -50,27 +50,37 @@ model BlogPost {
 }
 
 /// Singleton row (id always "singleton") — site-wide contact info and assets,
-/// plus the homepage copy that used to be hardcoded in app/(site)/page.tsx.
+/// plus every homepage section that used to be hardcoded in app/(site)/page.tsx.
 model SiteSettings {
-  id            String   @id @default("singleton")
-  name          String?
-  jobTitle      String?
-  email         String?
-  phone         String?
-  linkedinUrl   String?
-  githubUrl     String?
-  resumeUrl     String?
-  portraitUrl   String?
-  /// Array of { heading, description, ctaLabel?, ctaHref?, start, end } —
-  /// start/end (scroll-progress fractions) are edited in code, not the
-  /// dashboard form, since they're tied to the hero's scroll animation.
-  heroScenes    Json?
+  id                  String   @id @default("singleton")
+  name                String?
+  jobTitle            String?
+  email               String?
+  phone               String?
+  linkedinUrl         String?
+  githubUrl           String?
+  resumeUrl           String?
+  portraitUrl         String?
+  /// Hero banner background video + poster frame, edited via dashboard upload.
+  heroVideoUrl        String?
+  heroPosterUrl       String?
+  /// Array of { heading, description?, ctaLabel?, ctaHref?, start, end } —
+  /// start/end are scroll-progress fractions (0-1) driving the hero video
+  /// scrub. Edited via a structured repeatable-scene form in the dashboard.
+  heroScenes          Json?
+  /// "Selected Work" section heading/intro copy. Which projects appear and
+  /// their video/short description are edited on the project itself
+  /// (Project.featured, videoMp4, poster, shortDescription).
+  selectedWorkHeading String?
+  selectedWorkIntro   String?
   /// Array of Chapter objects — see app/data/aboutChapters.ts for the
-  /// shape. Edited as raw JSON in the dashboard, same tradeoff as
-  /// Project.richContent: four differently-shaped chapter types make a
-  /// bespoke form per type disproportionate to the payoff.
-  aboutChapters Json?
-  updatedAt     DateTime @updatedAt
+  /// shape. Edited via a structured per-chapter-type form in the dashboard.
+  aboutChapters       Json?
+  /// Blog/Insights section heading + intro copy. The posts themselves are
+  /// always the 3 latest published BlogPost rows — not editable here.
+  insightsHeading     String?
+  insightsIntro       String?
+  updatedAt           DateTime @updatedAt
 }
 
 /// Portfolio case study. Core fields are plain columns; the long tail of

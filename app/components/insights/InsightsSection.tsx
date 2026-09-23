@@ -18,9 +18,15 @@ export type PostSummary = {
 
 interface Props {
   posts: PostSummary[];
+  heading?: string;
+  intro?: string;
 }
 
-export function InsightsSection({ posts }: Props) {
+export function InsightsSection({
+  posts,
+  heading = "Perspectives on accessible, standards-compliant digital platforms.",
+  intro = "Perspectives on web accessibility, technical performance, information architecture, front-end implementation, and the standards-based systems behind reliable, inclusive digital services.",
+}: Props) {
   if (posts.length === 0) return null;
 
   return (
@@ -38,11 +44,11 @@ export function InsightsSection({ posts }: Props) {
               id="insights-heading"
               className="text-3xl md:text-4xl font-extrabold text-zinc-900 tracking-tight mb-4"
             >
-              Perspectives on accessible, standards-compliant digital platforms.
+              {heading}
             </h2>
 
             <p className="text-[15.5px] text-zinc-500 leading-relaxed">
-              Perspectives on web accessibility, technical performance, information architecture, front&#8209;end implementation, and the standards-based systems behind reliable, inclusive digital services.
+              {intro}
             </p>
           </Reveal>
 
