@@ -1,34 +1,54 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { routes } from "@/app/(admin)/_routes";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
+import { Modal } from "@/app/(admin)/_components/Modal";
 import { MonthFilter } from "./MonthFilter";
 import { DeleteTransactionButton } from "./DeleteTransactionButton";
 import { DeleteInvoiceButton } from "../invoices/DeleteInvoiceButton";
+import { TransactionForm } from "./TransactionForm";
+import { InvoiceForm } from "../invoices/InvoiceForm";
+import type { TransactionFormData } from "@/app/actions/finance";
+import type { InvoiceFormData, InvoiceItemInput } from "@/app/actions/invoices";
 
 type Tab = "transactions" | "invoices";
 
-interface TransactionRow {
+interface Option {
   id: string;
-  date: Date;
-  type: string;
-  amount: number;
-  currency: string;
-  category: string | null;
-  description: string | null;
-  client: { name: string } | null;
+  name: string;
 }
 
-interface InvoiceRow {
+export interface TransactionRow {
+  id: string;
+  date: string; // yyyy-mm-dd
+  displayDate: string;
+  type: string;
+  amount: string;
+  currency: string;
+  category: string;
+  description: string;
+  clientId: string;
+  projectId: string;
+  clientName: string | null;
+}
+
+export interface InvoiceRow {
   id: string;
   invoiceNumber: string;
-  issueDate: Date;
+  clientId: string;
+  projectId: string;
   status: string;
+  issueDate: string; // yyyy-mm-dd
+  displayIssueDate: string;
+  dueDate: string;
   currency: string;
+  notes: string;
+  items: InvoiceItemInput[];
+  clientName: string | null;
   total: number;
-  client: { name: string } | null;
 }
 
 interface Props {
@@ -39,6 +59,8 @@ interface Props {
   net: number;
   currency: string;
   invoices: InvoiceRow[];
+  clients: Option[];
+  projects: Option[];
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -48,8 +70,37 @@ const STATUS_STYLES: Record<string, string> = {
   OVERDUE: "bg-red-500/15 text-red-400",
 };
 
-export function FinanceTabs({ month, transactions, income, expense, net, currency, invoices }: Props) {
+export function FinanceTabs({ month, transactions, income, expense, net, currency, invoices, clients, projects }: Props) {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("transactions");
+  const [txModal, setTxModal] = useState<"new" | TransactionRow | null>(null);
+  const [invModal, setInvModal] = useState<"new" | InvoiceRow | null>(null);
+
+  function closeTx() {
+    setTxModal(null);
+    router.refresh();
+  }
+  function closeInv() {
+    setInvModal(null);
+    router.refresh();
+  }
+
+  const editingTx = txModal && txModal !== "new" ? txModal : null;
+  const txInitial: Partial<TransactionFormData> | undefined = editingTx
+    ? {
+        date: editingTx.date, type: editingTx.type, amount: editingTx.amount, currency: editingTx.currency,
+        category: editingTx.category, description: editingTx.description, clientId: editingTx.clientId, projectId: editingTx.projectId,
+      }
+    : undefined;
+
+  const editingInv = invModal && invModal !== "new" ? invModal : null;
+  const invInitial: Partial<InvoiceFormData> | undefined = editingInv
+    ? {
+        clientId: editingInv.clientId, projectId: editingInv.projectId, status: editingInv.status,
+        issueDate: editingInv.issueDate, dueDate: editingInv.dueDate, currency: editingInv.currency,
+        notes: editingInv.notes, items: editingInv.items,
+      }
+    : undefined;
 
   return (
     <div>
@@ -61,20 +112,22 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
         {tab === "transactions" ? (
           <div className="flex items-center gap-3">
             <MonthFilter month={month} />
-            <Link
-              href={routes.finance.new}
+            <button
+              type="button"
+              onClick={() => setTxModal("new")}
               className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
             >
               + New transaction
-            </Link>
+            </button>
           </div>
         ) : (
-          <Link
-            href={routes.invoices.new}
+          <button
+            type="button"
+            onClick={() => setInvModal("new")}
             className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
           >
             + New invoice
-          </Link>
+          </button>
         )}
       </div>
 
@@ -125,25 +178,23 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
                 <tbody>
                   {transactions.map((t) => (
                     <tr key={t.id} className="border-b border-zinc-800/70 last:border-b-0 hover:bg-zinc-900/40">
-                      <td className="px-4 py-3 text-[13px] text-zinc-400 whitespace-nowrap">
-                        {t.date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                      </td>
+                      <td className="px-4 py-3 text-[13px] text-zinc-400 whitespace-nowrap">{t.displayDate}</td>
                       <td className="px-4 py-3">
-                        <Link href={routes.finance.item(t.id)} className="text-[13.5px] font-medium text-zinc-100 hover:text-purple-400 transition-colors">
+                        <button type="button" onClick={() => setTxModal(t)} className="text-[13.5px] font-medium text-zinc-100 hover:text-purple-400 transition-colors text-left">
                           {t.description || t.category || "—"}
-                        </Link>
+                        </button>
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-zinc-400">{t.client?.name ?? "—"}</td>
-                      <td className="px-4 py-3 text-[13px] text-zinc-400">{t.category ?? "—"}</td>
+                      <td className="px-4 py-3 text-[13px] text-zinc-400">{t.clientName ?? "—"}</td>
+                      <td className="px-4 py-3 text-[13px] text-zinc-400">{t.category || "—"}</td>
                       <td className={`px-4 py-3 text-right text-[13.5px] font-medium ${t.type === "INCOME" ? "text-emerald-400" : "text-red-400"}`}>
-                        {t.type === "INCOME" ? "+" : "-"}{t.amount.toLocaleString()} {t.currency}
+                        {t.type === "INCOME" ? "+" : "-"}{Number(t.amount).toLocaleString()} {t.currency}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-3">
-                          <Link href={routes.finance.item(t.id)} className="text-[12.5px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors">
+                          <button type="button" onClick={() => setTxModal(t)} className="text-[12.5px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors">
                             Edit
-                          </Link>
-                          <DeleteTransactionButton id={t.id} />
+                          </button>
+                          <DeleteTransactionButton id={t.id} onDeleted={() => router.refresh()} />
                         </div>
                       </td>
                     </tr>
@@ -180,10 +231,8 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
                           {inv.invoiceNumber}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-zinc-400">{inv.client?.name ?? "—"}</td>
-                      <td className="px-4 py-3 text-[13px] text-zinc-400 whitespace-nowrap">
-                        {inv.issueDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                      </td>
+                      <td className="px-4 py-3 text-[13px] text-zinc-400">{inv.clientName ?? "—"}</td>
+                      <td className="px-4 py-3 text-[13px] text-zinc-400 whitespace-nowrap">{inv.displayIssueDate}</td>
                       <td className="px-4 py-3">
                         <span className={`text-[11px] font-semibold px-2 py-1 rounded ${STATUS_STYLES[inv.status]}`}>
                           {inv.status}
@@ -194,10 +243,10 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-3">
-                          <Link href={routes.invoices.edit(inv.id)} className="text-[12.5px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors">
+                          <button type="button" onClick={() => setInvModal(inv)} className="text-[12.5px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors">
                             Edit
-                          </Link>
-                          <DeleteInvoiceButton id={inv.id} number={inv.invoiceNumber} />
+                          </button>
+                          <DeleteInvoiceButton id={inv.id} number={inv.invoiceNumber} onDeleted={() => router.refresh()} />
                         </div>
                       </td>
                     </tr>
@@ -208,6 +257,28 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
           )}
         </div>
       )}
+
+      <Modal open={txModal !== null} onClose={closeTx} title={editingTx ? "Edit transaction" : "New transaction"}>
+        <TransactionForm
+          mode={editingTx ? "edit" : "new"}
+          transactionId={editingTx?.id}
+          initial={txInitial}
+          clients={clients}
+          projects={projects}
+          onSuccess={closeTx}
+        />
+      </Modal>
+
+      <Modal open={invModal !== null} onClose={closeInv} title={editingInv ? editingInv.invoiceNumber : "New invoice"} maxWidthClassName="max-w-2xl">
+        <InvoiceForm
+          mode={editingInv ? "edit" : "new"}
+          invoiceId={editingInv?.id}
+          initial={invInitial}
+          clients={clients}
+          projects={projects}
+          onSuccess={closeInv}
+        />
+      </Modal>
     </div>
   );
 }

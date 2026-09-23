@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createTransaction, updateTransaction, type TransactionFormData } from "@/app/actions/finance";
+import { routes } from "@/app/(admin)/_routes";
 
 interface Option {
   id: string;
@@ -15,9 +16,10 @@ interface Props {
   initial?: Partial<TransactionFormData>;
   clients: Option[];
   projects: Option[];
+  onSuccess?: () => void;
 }
 
-export function TransactionForm({ mode, transactionId, initial, clients, projects }: Props) {
+export function TransactionForm({ mode, transactionId, initial, clients, projects, onSuccess }: Props) {
   const router = useRouter();
   const [date, setDate] = useState(initial?.date ?? new Date().toISOString().slice(0, 10));
   const [type, setType] = useState(initial?.type ?? "INCOME");
@@ -40,11 +42,16 @@ export function TransactionForm({ mode, transactionId, initial, clients, project
       const result = mode === "new"
         ? await createTransaction(data)
         : await updateTransaction(transactionId!, data);
-      if (result && !result.ok) {
+      if (!result.ok) {
         setError(result.error ?? "Something went wrong.");
         return;
       }
-      if (mode === "edit") router.refresh();
+      if (onSuccess) {
+        onSuccess();
+        return;
+      }
+      if (mode === "new" && result.id) router.push(routes.finance.item(result.id));
+      else router.refresh();
     });
   }
 

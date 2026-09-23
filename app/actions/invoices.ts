@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { InvoiceStatus, Prisma } from "@/generated/prisma/client/client";
@@ -26,6 +25,7 @@ export interface InvoiceFormData {
 export interface InvoiceActionResult {
   ok: boolean;
   error?: string;
+  id?: string;
 }
 
 function parseDate(value: string): Date | null {
@@ -79,8 +79,9 @@ export async function createInvoice(data: InvoiceFormData): Promise<InvoiceActio
     },
   });
 
+  revalidatePath("/finance");
   revalidatePath("/invoices");
-  redirect(`/invoices/${invoice.id}`);
+  return { ok: true, id: invoice.id };
 }
 
 export async function updateInvoice(id: string, data: InvoiceFormData): Promise<InvoiceActionResult> {
@@ -102,14 +103,16 @@ export async function updateInvoice(id: string, data: InvoiceFormData): Promise<
     },
   });
 
+  revalidatePath("/finance");
   revalidatePath("/invoices");
   revalidatePath(`/invoices/${id}`);
-  redirect(`/invoices/${id}`);
+  return { ok: true, id };
 }
 
 export async function updateInvoiceStatus(id: string, status: string): Promise<void> {
   await requireSession();
   await prisma.invoice.update({ where: { id }, data: { status: status as InvoiceStatus } });
+  revalidatePath("/finance");
   revalidatePath("/invoices");
   revalidatePath(`/invoices/${id}`);
 }
@@ -117,6 +120,6 @@ export async function updateInvoiceStatus(id: string, status: string): Promise<v
 export async function deleteInvoice(id: string): Promise<void> {
   await requireSession();
   await prisma.invoice.delete({ where: { id } }).catch(() => {});
+  revalidatePath("/finance");
   revalidatePath("/invoices");
-  redirect("/invoices");
 }

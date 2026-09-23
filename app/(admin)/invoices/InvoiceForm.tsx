@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { createInvoice, updateInvoice, type InvoiceFormData, type InvoiceItemInput } from "@/app/actions/invoices";
+import { routes } from "@/app/(admin)/_routes";
 
 interface Option {
   id: string;
@@ -14,13 +16,15 @@ interface Props {
   initial?: Partial<InvoiceFormData>;
   clients: Option[];
   projects: Option[];
+  onSuccess?: () => void;
 }
 
 function emptyItem(): InvoiceItemInput {
   return { description: "", quantity: "1", rate: "" };
 }
 
-export function InvoiceForm({ mode, invoiceId, initial, clients, projects }: Props) {
+export function InvoiceForm({ mode, invoiceId, initial, clients, projects, onSuccess }: Props) {
+  const router = useRouter();
   const [clientId, setClientId] = useState(initial?.clientId ?? "");
   const [projectId, setProjectId] = useState(initial?.projectId ?? "");
   const [status, setStatus] = useState(initial?.status ?? "DRAFT");
@@ -52,9 +56,16 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, projects }: Pro
       const result = mode === "new"
         ? await createInvoice(data)
         : await updateInvoice(invoiceId!, data);
-      if (result && !result.ok) {
+      if (!result.ok) {
         setError(result.error ?? "Something went wrong.");
+        return;
       }
+      if (onSuccess) {
+        onSuccess();
+        return;
+      }
+      if (result.id) router.push(routes.invoices.item(result.id));
+      else router.refresh();
     });
   }
 

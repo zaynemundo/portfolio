@@ -1,14 +1,21 @@
 "use client";
 
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { deleteFreelanceProject, archiveFreelanceProject } from "@/app/actions/freelance";
+import { routes } from "@/app/(admin)/_routes";
 
-export function ProjectActions({ id, archived }: { id: string; archived: boolean }) {
+export function ProjectActions({ id, archived, onDeleted }: { id: string; archived: boolean; onDeleted?: () => void }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
     if (!window.confirm("Delete this project and all its tasks? This can't be undone.")) return;
-    startTransition(() => deleteFreelanceProject(id));
+    startTransition(async () => {
+      await deleteFreelanceProject(id);
+      if (onDeleted) onDeleted();
+      else router.push(routes.projects.list);
+    });
   }
 
   return (

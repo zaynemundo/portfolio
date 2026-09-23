@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 
@@ -16,6 +15,7 @@ export interface ClientFormData {
 export interface ClientActionResult {
   ok: boolean;
   error?: string;
+  id?: string;
 }
 
 export async function createClient(data: ClientFormData): Promise<ClientActionResult> {
@@ -33,7 +33,7 @@ export async function createClient(data: ClientFormData): Promise<ClientActionRe
   });
 
   revalidatePath("/clients");
-  redirect(`/clients/${client.id}`);
+  return { ok: true, id: client.id };
 }
 
 export async function updateClient(id: string, data: ClientFormData): Promise<ClientActionResult> {
@@ -62,5 +62,4 @@ export async function deleteClient(id: string): Promise<void> {
   revalidatePath("/clients");
   revalidatePath("/freelance");
   revalidatePath("/finance");
-  redirect("/clients");
 }

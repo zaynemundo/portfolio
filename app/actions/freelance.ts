@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { put } from "@vercel/blob";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
@@ -23,6 +22,7 @@ export interface FreelanceProjectFormData {
 export interface FreelanceActionResult {
   ok: boolean;
   error?: string;
+  id?: string;
 }
 
 function parseDeadline(value: string): Date | null {
@@ -53,7 +53,7 @@ export async function createFreelanceProject(data: FreelanceProjectFormData): Pr
   const project = await prisma.freelanceProject.create({ data: buildData(data) });
 
   revalidatePath("/freelance");
-  redirect(`/freelance/${project.id}`);
+  return { ok: true, id: project.id };
 }
 
 export async function updateFreelanceProject(id: string, data: FreelanceProjectFormData): Promise<FreelanceActionResult> {
@@ -72,7 +72,6 @@ export async function deleteFreelanceProject(id: string): Promise<void> {
   await requireSession();
   await prisma.freelanceProject.delete({ where: { id } }).catch(() => {});
   revalidatePath("/freelance");
-  redirect("/freelance");
 }
 
 export async function archiveFreelanceProject(id: string, archived: boolean): Promise<void> {

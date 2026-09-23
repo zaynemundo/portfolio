@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createFreelanceProject, updateFreelanceProject, uploadFreelanceAttachment, type FreelanceProjectFormData } from "@/app/actions/freelance";
 import { UploadCard } from "@/app/(admin)/_components/UploadCard";
+import { routes } from "@/app/(admin)/_routes";
 
 interface ClientOption {
   id: string;
@@ -15,9 +16,10 @@ interface Props {
   projectId?: string;
   initial?: Partial<FreelanceProjectFormData>;
   clients: ClientOption[];
+  onSuccess?: () => void;
 }
 
-export function ProjectForm({ mode, projectId, initial, clients }: Props) {
+export function ProjectForm({ mode, projectId, initial, clients, onSuccess }: Props) {
   const router = useRouter();
   const [name, setName] = useState(initial?.name ?? "");
   const [clientId, setClientId] = useState(initial?.clientId ?? "");
@@ -43,11 +45,16 @@ export function ProjectForm({ mode, projectId, initial, clients }: Props) {
       const result = mode === "new"
         ? await createFreelanceProject(data)
         : await updateFreelanceProject(projectId!, data);
-      if (result && !result.ok) {
+      if (!result.ok) {
         setError(result.error ?? "Something went wrong.");
         return;
       }
-      if (mode === "edit") router.refresh();
+      if (onSuccess) {
+        onSuccess();
+        return;
+      }
+      if (mode === "new" && result.id) router.push(routes.projects.item(result.id));
+      else router.refresh();
     });
   }
 

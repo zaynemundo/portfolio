@@ -1,16 +1,23 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { createNote, updateNote, type NoteFormData } from "@/app/actions/notes";
 import { RichEditor } from "@/app/(admin)/_components/RichEditor";
+import { routes } from "@/app/(admin)/_routes";
 
 interface Props {
   mode: "new" | "edit";
   noteId?: string;
   initial?: Partial<NoteFormData>;
+  /** Called after a successful save. If omitted, falls back to the standalone-page
+   *  default: redirect to the note on create, router.refresh() on edit. Pass this
+   *  when rendering the form inside a Modal to close it instead. */
+  onSuccess?: () => void;
 }
 
-export function NoteForm({ mode, noteId, initial }: Props) {
+export function NoteForm({ mode, noteId, initial, onSuccess }: Props) {
+  const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? "");
   const [tags, setTags] = useState(initial?.tags ?? "");
   const [pinned, setPinned] = useState(initial?.pinned ?? false);
@@ -26,9 +33,16 @@ export function NoteForm({ mode, noteId, initial }: Props) {
 
     startTransition(async () => {
       const result = mode === "new" ? await createNote(data) : await updateNote(noteId!, data);
-      if (result && !result.ok) {
+      if (!result.ok) {
         setError(result.error ?? "Something went wrong.");
+        return;
       }
+      if (onSuccess) {
+        onSuccess();
+        return;
+      }
+      if (mode === "new" && result.id) router.push(routes.notes.item(result.id));
+      else router.refresh();
     });
   }
 

@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { TransactionType } from "@/generated/prisma/client/client";
@@ -20,6 +19,7 @@ export interface TransactionFormData {
 export interface TransactionActionResult {
   ok: boolean;
   error?: string;
+  id?: string;
 }
 
 function buildData(data: TransactionFormData) {
@@ -48,10 +48,10 @@ export async function createTransaction(data: TransactionFormData): Promise<Tran
   const error = validate(data);
   if (error) return { ok: false, error };
 
-  await prisma.transaction.create({ data: buildData(data) });
+  const transaction = await prisma.transaction.create({ data: buildData(data) });
 
   revalidatePath("/finance");
-  redirect("/finance");
+  return { ok: true, id: transaction.id };
 }
 
 export async function updateTransaction(id: string, data: TransactionFormData): Promise<TransactionActionResult> {
@@ -70,5 +70,4 @@ export async function deleteTransaction(id: string): Promise<void> {
   await requireSession();
   await prisma.transaction.delete({ where: { id } }).catch(() => {});
   revalidatePath("/finance");
-  redirect("/finance");
 }

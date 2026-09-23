@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 
@@ -15,6 +14,7 @@ export interface NoteFormData {
 export interface NoteActionResult {
   ok: boolean;
   error?: string;
+  id?: string;
 }
 
 function splitTags(text: string): string[] {
@@ -43,7 +43,7 @@ export async function createNote(data: NoteFormData): Promise<NoteActionResult> 
   });
 
   revalidatePath("/notes");
-  redirect(`/notes/${note.id}`);
+  return { ok: true, id: note.id };
 }
 
 export async function updateNote(id: string, data: NoteFormData): Promise<NoteActionResult> {
@@ -71,7 +71,6 @@ export async function deleteNote(id: string): Promise<void> {
   await requireSession();
   await prisma.note.delete({ where: { id } }).catch(() => {});
   revalidatePath("/notes");
-  redirect("/notes");
 }
 
 export async function toggleNotePinned(id: string, pinned: boolean): Promise<void> {

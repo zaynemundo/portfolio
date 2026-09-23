@@ -3,14 +3,16 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, updateClient, type ClientFormData } from "@/app/actions/clients";
+import { routes } from "@/app/(admin)/_routes";
 
 interface Props {
   mode: "new" | "edit";
   clientId?: string;
   initial?: Partial<ClientFormData>;
+  onSuccess?: () => void;
 }
 
-export function ClientForm({ mode, clientId, initial }: Props) {
+export function ClientForm({ mode, clientId, initial, onSuccess }: Props) {
   const router = useRouter();
   const [name, setName] = useState(initial?.name ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
@@ -30,11 +32,16 @@ export function ClientForm({ mode, clientId, initial }: Props) {
       const result = mode === "new"
         ? await createClient(data)
         : await updateClient(clientId!, data);
-      if (result && !result.ok) {
+      if (!result.ok) {
         setError(result.error ?? "Something went wrong.");
         return;
       }
-      if (mode === "edit") router.refresh();
+      if (onSuccess) {
+        onSuccess();
+        return;
+      }
+      if (mode === "new" && result.id) router.push(routes.clients.item(result.id));
+      else router.refresh();
     });
   }
 
