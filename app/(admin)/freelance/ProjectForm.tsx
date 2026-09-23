@@ -2,20 +2,30 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { createFreelanceProject, updateFreelanceProject, type FreelanceProjectFormData } from "@/app/actions/freelance";
+import { createFreelanceProject, updateFreelanceProject, uploadFreelanceAttachment, type FreelanceProjectFormData } from "@/app/actions/freelance";
+import { UploadCard } from "@/app/(admin)/_components/UploadCard";
+
+interface ClientOption {
+  id: string;
+  name: string;
+}
 
 interface Props {
   mode: "new" | "edit";
   projectId?: string;
   initial?: Partial<FreelanceProjectFormData>;
+  clients: ClientOption[];
 }
 
-export function ProjectForm({ mode, projectId, initial }: Props) {
+export function ProjectForm({ mode, projectId, initial, clients }: Props) {
   const router = useRouter();
   const [name, setName] = useState(initial?.name ?? "");
-  const [client, setClient] = useState(initial?.client ?? "");
+  const [clientId, setClientId] = useState(initial?.clientId ?? "");
   const [status, setStatus] = useState(initial?.status ?? "NOT_STARTED");
-  const [rate, setRate] = useState(initial?.rate ?? "");
+  const [rateAmount, setRateAmount] = useState(initial?.rateAmount ?? "");
+  const [rateCurrency, setRateCurrency] = useState(initial?.rateCurrency ?? "AED");
+  const [rateType, setRateType] = useState(initial?.rateType ?? "");
+  const [attachmentUrl, setAttachmentUrl] = useState(initial?.attachmentUrl ?? "");
   const [deadline, setDeadline] = useState(initial?.deadline ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +35,9 @@ export function ProjectForm({ mode, projectId, initial }: Props) {
     e.preventDefault();
     setError(null);
 
-    const data: FreelanceProjectFormData = { name, client, status, description, rate, deadline };
+    const data: FreelanceProjectFormData = {
+      name, clientId, status, description, rateAmount, rateCurrency, rateType, attachmentUrl, deadline,
+    };
 
     startTransition(async () => {
       const result = mode === "new"
@@ -49,7 +61,10 @@ export function ProjectForm({ mode, projectId, initial }: Props) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="client" className="block text-xs font-medium text-zinc-400 mb-1.5">Client (optional)</label>
-          <input id="client" value={client} onChange={(e) => setClient(e.target.value)} className={inputClass} />
+          <select id="client" value={clientId} onChange={(e) => setClientId(e.target.value)} className={inputClass}>
+            <option value="">—</option>
+            {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
         </div>
         <div>
           <label htmlFor="status" className="block text-xs font-medium text-zinc-400 mb-1.5">Status</label>
@@ -62,21 +77,42 @@ export function ProjectForm({ mode, projectId, initial }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="rate" className="block text-xs font-medium text-zinc-400 mb-1.5">Rate (optional)</label>
-          <input id="rate" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="e.g. AED 8,000 fixed" className={inputClass} />
+      <div>
+        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Rate (optional)</label>
+        <div className="grid grid-cols-3 gap-3">
+          <input type="number" min="0" step="0.01" value={rateAmount} onChange={(e) => setRateAmount(e.target.value)} placeholder="Amount" className={inputClass} />
+          <input value={rateCurrency} onChange={(e) => setRateCurrency(e.target.value)} placeholder="AED" className={inputClass} />
+          <select value={rateType} onChange={(e) => setRateType(e.target.value)} className={inputClass}>
+            <option value="">Type…</option>
+            <option value="FIXED">Fixed</option>
+            <option value="HOURLY">Hourly</option>
+            <option value="RETAINER">Retainer</option>
+          </select>
         </div>
-        <div>
-          <label htmlFor="deadline" className="block text-xs font-medium text-zinc-400 mb-1.5">Deadline (optional)</label>
-          <input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass} />
-        </div>
+      </div>
+
+      <div>
+        <label htmlFor="deadline" className="block text-xs font-medium text-zinc-400 mb-1.5">Deadline (optional)</label>
+        <input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass} />
       </div>
 
       <div>
         <label htmlFor="description" className="block text-xs font-medium text-zinc-400 mb-1.5">Notes / description</label>
         <textarea id="description" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} className={`${inputClass} resize-none`} />
       </div>
+
+      <UploadCard
+        title="Contract / invoice / deliverable"
+        description="PDF, image, or any file up to 15MB"
+        currentUrl={attachmentUrl}
+        accept="*/*"
+        kind="file"
+        uploadAction={async (formData) => {
+          const result = await uploadFreelanceAttachment(formData);
+          if (result.ok && result.url) setAttachmentUrl(result.url);
+          return result;
+        }}
+      />
 
       {error && <p className="text-[13px] text-red-400" role="alert">{error}</p>}
 

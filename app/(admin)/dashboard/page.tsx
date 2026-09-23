@@ -3,9 +3,14 @@ import { prisma } from "@/app/lib/prisma";
 import { routes } from "@/app/(admin)/_routes";
 
 export default async function DashboardPage() {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
   const [
     posts, inquiries, notes, projects, unreadCount,
     publishedArticles, publishedCaseStudies, notesCount, activeProjects, totalInquiries,
+    monthTransactions, recentTransactions,
   ] = await Promise.all([
     prisma.blogPost.findMany({ orderBy: { date: "desc" }, take: 5 }),
     prisma.inquiry.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
@@ -17,7 +22,14 @@ export default async function DashboardPage() {
     prisma.note.count(),
     prisma.freelanceProject.count({ where: { archived: false } }),
     prisma.inquiry.count(),
+    prisma.transaction.findMany({ where: { date: { gte: monthStart, lt: monthEnd } } }),
+    prisma.transaction.findMany({ orderBy: { date: "desc" }, take: 5, include: { client: true } }),
   ]);
+
+  const monthIncome = monthTransactions.filter((t) => t.type === "INCOME").reduce((sum, t) => sum + t.amount, 0);
+  const monthExpense = monthTransactions.filter((t) => t.type === "EXPENSE").reduce((sum, t) => sum + t.amount, 0);
+  const monthNet = monthIncome - monthExpense;
+  const currency = monthTransactions[0]?.currency ?? "AED";
 
   return (
     <div>
@@ -25,20 +37,27 @@ export default async function DashboardPage() {
       <p className="text-[13px] text-zinc-500 mb-8">An overview of your site and workspace.</p>
 
       {/* Stats */}
-      <div className="grid grid-cols-5 gap-3 mb-8">
+      <div className="grid grid-cols-6 gap-3 mb-8">
         <StatCard href={routes.blog.list} value={publishedArticles} label="Published articles" accent="purple" />
         <StatCard href={routes.caseStudies.list} value={publishedCaseStudies} label="Case studies" accent="purple" />
         <StatCard href={routes.inquiries.list} value={totalInquiries} label="Inquiries" sublabel={unreadCount > 0 ? `${unreadCount} unread` : undefined} accent="purple" />
         <StatCard href={routes.notes.list} value={notesCount} label="Notes" accent="emerald" />
         <StatCard href={routes.projects.list} value={activeProjects} label="Active projects" accent="emerald" />
+        <StatCard
+          href={routes.finance.list}
+          value={`${monthNet >= 0 ? "+" : ""}${monthNet.toLocaleString()}`}
+          label={`This month (${currency})`}
+          accent={monthNet >= 0 ? "emerald" : "red"}
+        />
       </div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-4 gap-3 mb-10">
+      <div className="grid grid-cols-5 gap-3 mb-10">
         <QuickAction href={routes.blog.new} label="New article" accent="purple" />
         <QuickAction href={routes.caseStudies.new} label="New case study" accent="purple" />
         <QuickAction href={routes.notes.new} label="New note" accent="emerald" />
         <QuickAction href={routes.projects.new} label="New freelance project" accent="emerald" />
+        <QuickAction href={routes.finance.new} label="New transaction" accent="emerald" />
       </div>
 
       <div className="grid grid-cols-2 gap-6">
@@ -80,6 +99,17 @@ export default async function DashboardPage() {
             <RecentRow key={p.id} href={routes.projects.item(p.id)} primary={p.name} secondary={p.status.replace("_", " ")} />
           ))}
         </RecentCard>
+
+        <RecentCard title="Recent transactions" emptyLabel="No transactions yet.">
+          {recentTransactions.map((t) => (
+            <RecentRow
+              key={t.id}
+              href={routes.finance.item(t.id)}
+              primary={t.description || t.category || t.client?.name || "—"}
+              secondary={`${t.type === "INCOME" ? "+" : "-"}${t.amount.toLocaleString()} ${t.currency}`}
+            />
+          ))}
+        </RecentCard>
       </div>
     </div>
   );
@@ -89,14 +119,16 @@ function StatCard({
   href, value, label, sublabel, accent,
 }: {
   href: string;
-  value: number;
+  value: number | string;
   label: string;
   sublabel?: string;
-  accent: "purple" | "emerald";
+  accent: "purple" | "emerald" | "red";
 }) {
   const accentClasses = accent === "purple"
     ? "hover:border-purple-500/50 hover:bg-purple-500/[0.04]"
-    : "hover:border-emerald-500/50 hover:bg-emerald-500/[0.04]";
+    : accent === "emerald"
+    ? "hover:border-emerald-500/50 hover:bg-emerald-500/[0.04]"
+    : "hover:border-red-500/50 hover:bg-red-500/[0.04]";
   return (
     <Link
       href={href}

@@ -161,20 +161,54 @@ enum FreelanceStatus {
   COMPLETED
 }
 
+enum RateType {
+  HOURLY
+  FIXED
+  RETAINER
+}
+
+/// A freelance client — shared across FreelanceProject and Transaction so
+/// income/spend and work history can be viewed per-client.
+model Client {
+  id           String             @id @default(cuid())
+  name         String
+  email        String?
+  phone        String?
+  company      String?
+  notes        String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  projects     FreelanceProject[]
+  transactions Transaction[]
+}
+
 /// Freelance work tracker — separate from the public portfolio Project model.
 /// Personal use only, never rendered on the public site.
 model FreelanceProject {
-  id          String            @id @default(cuid())
+  id          String          @id @default(cuid())
   name        String
+  /// Deprecated free-text client name — superseded by clientId/clientRecord.
+  /// Kept (rather than dropped) to avoid a destructive schema migration;
+  /// unused by current code.
   client      String?
-  status      FreelanceStatus   @default(NOT_STARTED)
-  description String?
+  /// Deprecated free-text rate — superseded by rateAmount/rateCurrency/rateType.
+  /// Kept for the same reason; unused by current code.
   rate        String?
-  deadline    DateTime?
-  archived    Boolean           @default(false)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  tasks       FreelanceTask[]
+  clientId     String?
+  clientRecord Client?         @relation(fields: [clientId], references: [id])
+  status       FreelanceStatus @default(NOT_STARTED)
+  description  String?
+  rateAmount    Float?
+  rateCurrency  String?        @default("AED")
+  rateType      RateType?
+  /// Link to a contract/invoice/deliverable (Vercel Blob upload or external URL).
+  attachmentUrl String?
+  deadline      DateTime?
+  archived      Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  tasks         FreelanceTask[]
+  transactions  Transaction[]
 }
 
 model FreelanceTask {
@@ -185,6 +219,27 @@ model FreelanceTask {
   done      Boolean          @default(false)
   sortOrder Int              @default(0)
   createdAt DateTime         @default(now())
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+/// Simple income/expense tracker for freelance finances.
+model Transaction {
+  id          String            @id @default(cuid())
+  date        DateTime
+  type        TransactionType
+  amount      Float
+  currency    String            @default("AED")
+  category    String?
+  description String?
+  clientId    String?
+  client      Client?           @relation(fields: [clientId], references: [id])
+  projectId   String?
+  project     FreelanceProject? @relation(fields: [projectId], references: [id])
+  createdAt   DateTime          @default(now())
 }
 
 /// Personal notes / documentation — separate from published blog articles.

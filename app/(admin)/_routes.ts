@@ -40,6 +40,16 @@ export const routes = {
     new: "/freelance/new",
     item: (id: string) => `/freelance/${id}`,
   },
+  clients: {
+    list: "/clients",
+    new: "/clients/new",
+    item: (id: string) => `/clients/${id}`,
+  },
+  finance: {
+    list: "/finance",
+    new: "/finance/new",
+    item: (id: string) => `/finance/${id}`,
+  },
 } as const;
 
 /** Every top-level path segment covered above — used by proxy.ts to build its auth matcher. */
@@ -55,4 +65,6 @@ export const PROTECTED_TOP_LEVEL_PATHS = [
   routes.caseStudies.list,
   routes.notes.list,
   routes.projects.list,
+  routes.clients.list,
+  routes.finance.list,
 ] as const;

@@ -27,6 +27,8 @@ function buildContentItems(unreadInquiries: number): NavItem[] {
 const HUB_ITEMS: NavItem[] = [
   { href: routes.notes.list, label: "Notes", icon: <NotesIcon /> },
   { href: routes.projects.list, label: "Freelance Projects", icon: <ProjectsIcon /> },
+  { href: routes.clients.list, label: "Clients", icon: <ClientsIcon /> },
+  { href: routes.finance.list, label: "Finance", icon: <FinanceIcon /> },
 ];
 
 export function ConsoleShell({
@@ -189,6 +191,25 @@ function ProjectsIcon() {
   return (
     <svg {...iconProps()}>
       <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h3l1.5 2h6.5A1.5 1.5 0 0 1 17 8.5v6A1.5 1.5 0 0 1 15.5 16h-11A1.5 1.5 0 0 1 3 14.5v-8Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function ClientsIcon() {
+  return (
+    <svg {...iconProps()}>
+      <circle cx="7" cy="7" r="2.25" stroke="currentColor" strokeWidth="1.4" />
+      <circle cx="13.5" cy="8" r="1.75" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M2.5 16c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M12 12.3c1.9.2 3 1.4 3 3.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+function FinanceIcon() {
+  return (
+    <svg {...iconProps()}>
+      <path d="M3 15V8l4-3 3 2 3-2 4 3v7" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M10 7v9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M2.5 15.5h15" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }

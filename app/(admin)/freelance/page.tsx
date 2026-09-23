@@ -10,7 +10,7 @@ const STATUS_ORDER = ["ACTIVE", "ON_HOLD", "NOT_STARTED", "COMPLETED"];
 export default async function FreelanceProjectsPage() {
   const projects = await prisma.freelanceProject.findMany({
     where: { archived: false },
-    include: { tasks: true },
+    include: { tasks: true, clientRecord: true },
     orderBy: { updatedAt: "desc" },
   });
 
@@ -46,7 +46,7 @@ export default async function FreelanceProjectsPage() {
                   <h3 className="text-[14.5px] font-semibold text-zinc-100">{project.name}</h3>
                   <StatusBadge status={project.status} />
                 </div>
-                {project.client && <p className="text-[12.5px] text-zinc-500 mb-3">{project.client}</p>}
+                {project.clientRecord && <p className="text-[12.5px] text-zinc-500 mb-3">{project.clientRecord.name}</p>}
 
                 <div className="flex items-center justify-between text-[12px] text-zinc-500">
                   <span>

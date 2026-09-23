@@ -2,16 +2,21 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { put } from "@vercel/blob";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
-import { FreelanceStatus } from "@/generated/prisma/client/client";
+import { FreelanceStatus, RateType } from "@/generated/prisma/client/client";
+import type { UploadResult } from "@/app/actions/settings";
 
 export interface FreelanceProjectFormData {
   name: string;
-  client: string;
+  clientId: string;
   status: string;
   description: string;
-  rate: string;
+  rateAmount: string; // numeric string from the input, "" if unset
+  rateCurrency: string;
+  rateType: string; // "" | "HOURLY" | "FIXED" | "RETAINER"
+  attachmentUrl: string;
   deadline: string; // yyyy-mm-dd or ""
 }
 
@@ -26,21 +31,26 @@ function parseDeadline(value: string): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+function buildData(data: FreelanceProjectFormData) {
+  return {
+    name: data.name.trim(),
+    clientId: data.clientId || null,
+    status: data.status as FreelanceStatus,
+    description: data.description.trim() || null,
+    rateAmount: data.rateAmount.trim() ? Number(data.rateAmount) : null,
+    rateCurrency: data.rateCurrency.trim() || "AED",
+    rateType: (data.rateType || null) as RateType | null,
+    attachmentUrl: data.attachmentUrl.trim() || null,
+    deadline: parseDeadline(data.deadline),
+  };
+}
+
 export async function createFreelanceProject(data: FreelanceProjectFormData): Promise<FreelanceActionResult> {
   await requireSession();
 
   if (!data.name.trim()) return { ok: false, error: "Name is required." };
 
-  const project = await prisma.freelanceProject.create({
-    data: {
-      name: data.name.trim(),
-      client: data.client.trim() || null,
-      status: data.status as FreelanceStatus,
-      description: data.description.trim() || null,
-      rate: data.rate.trim() || null,
-      deadline: parseDeadline(data.deadline),
-    },
-  });
+  const project = await prisma.freelanceProject.create({ data: buildData(data) });
 
   revalidatePath("/freelance");
   redirect(`/freelance/${project.id}`);
@@ -51,17 +61,7 @@ export async function updateFreelanceProject(id: string, data: FreelanceProjectF
 
   if (!data.name.trim()) return { ok: false, error: "Name is required." };
 
-  await prisma.freelanceProject.update({
-    where: { id },
-    data: {
-      name: data.name.trim(),
-      client: data.client.trim() || null,
-      status: data.status as FreelanceStatus,
-      description: data.description.trim() || null,
-      rate: data.rate.trim() || null,
-      deadline: parseDeadline(data.deadline),
-    },
-  });
+  await prisma.freelanceProject.update({ where: { id }, data: buildData(data) });
 
   revalidatePath("/freelance");
   revalidatePath(`/freelance/${id}`);
@@ -80,6 +80,21 @@ export async function archiveFreelanceProject(id: string, archived: boolean): Pr
   await prisma.freelanceProject.update({ where: { id }, data: { archived } });
   revalidatePath("/freelance");
   revalidatePath(`/freelance/${id}`);
+}
+
+export async function uploadFreelanceAttachment(formData: FormData): Promise<UploadResult> {
+  await requireSession();
+
+  const file = formData.get("file") as File | null;
+  if (!file) return { ok: false, error: "No file provided." };
+  if (file.size > 15 * 1024 * 1024) return { ok: false, error: "File is too large (max 15MB)." };
+
+  const blob = await put(`freelance-attachment/${Date.now()}-${file.name}`, file, {
+    access: "public",
+    addRandomSuffix: false,
+  });
+
+  return { ok: true, url: blob.url };
 }
 
 /* ── Tasks ─────────────────────────────────────────────────────────── */

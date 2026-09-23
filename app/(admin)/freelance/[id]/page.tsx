@@ -12,10 +12,13 @@ interface Props {
 
 export default async function FreelanceProjectDetailPage({ params }: Props) {
   const { id } = await params;
-  const project = await prisma.freelanceProject.findUnique({
-    where: { id },
-    include: { tasks: { orderBy: { sortOrder: "asc" } } },
-  });
+  const [project, clients] = await Promise.all([
+    prisma.freelanceProject.findUnique({
+      where: { id },
+      include: { tasks: { orderBy: { sortOrder: "asc" } } },
+    }),
+    prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+  ]);
   if (!project) notFound();
 
   return (
@@ -32,11 +35,15 @@ export default async function FreelanceProjectDetailPage({ params }: Props) {
         <ProjectForm
           mode="edit"
           projectId={project.id}
+          clients={clients}
           initial={{
             name: project.name,
-            client: project.client ?? "",
+            clientId: project.clientId ?? "",
             status: project.status,
-            rate: project.rate ?? "",
+            rateAmount: project.rateAmount != null ? String(project.rateAmount) : "",
+            rateCurrency: project.rateCurrency ?? "AED",
+            rateType: project.rateType ?? "",
+            attachmentUrl: project.attachmentUrl ?? "",
             deadline: project.deadline ? project.deadline.toISOString().slice(0, 10) : "",
             description: project.description ?? "",
           }}
