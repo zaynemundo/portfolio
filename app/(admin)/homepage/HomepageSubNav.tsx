@@ -38,7 +38,7 @@ export function HomepageSubNav() {
         href={routes.settings}
         className="text-[12.5px] font-medium text-zinc-500 hover:text-zinc-300 transition-colors mb-2.5"
       >
-        Site Settings →
+CV &amp; Settings →
       </Link>
     </div>
   );
