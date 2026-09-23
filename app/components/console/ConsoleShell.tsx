@@ -72,7 +72,10 @@ export function ConsoleShell({
     <div className="min-h-screen bg-zinc-950 flex print:bg-white">
       {sidebarOpen && (
         <aside className="w-60 shrink-0 border-r border-zinc-800 flex flex-col h-screen sticky top-0 print:hidden">
-          <div className="h-14 flex items-center justify-end px-4 border-b border-zinc-800">
+          <div className="h-14 flex items-center justify-between px-4 border-b border-zinc-800">
+            <Link href={routes.home} aria-label="Dashboard" className="text-[13px] font-extrabold tracking-tight text-white">
+              ZM
+            </Link>
             <div className="flex items-center gap-0.5 shrink-0">
               <button
                 type="button"
@@ -114,16 +117,21 @@ export function ConsoleShell({
             </div>
           </nav>
 
-          <div className="p-4 border-t border-zinc-800 space-y-2">
-            <p className="text-[12px] text-zinc-500 truncate">{email}</p>
-            <Link
-              href={routes.account}
-              className="flex items-center gap-1.5 text-[12.5px] font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
-            >
-              <AccountSettingsIcon />
-              Change password
-            </Link>
-            <LogoutButton />
+          <div className="p-3 border-t border-zinc-800">
+            <div className="flex items-center gap-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 p-2.5">
+              <div className="h-8 w-8 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center text-[12px] font-semibold shrink-0">
+                {email.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[12px] text-zinc-300 font-medium truncate">{email}</p>
+                <div className="flex items-center gap-3 mt-0.5">
+                  <Link href={routes.account} className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors">
+                    Change password
+                  </Link>
+                  <LogoutButton />
+                </div>
+              </div>
+            </div>
           </div>
         </aside>
       )}
@@ -340,14 +348,6 @@ function SettingsIcon() {
     <svg {...iconProps()}>
       <circle cx="10" cy="10" r="2.75" stroke="currentColor" strokeWidth="1.4" />
       <path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.36 4.64l-1.41 1.41M6.05 13.95l-1.41 1.41M15.36 15.36l-1.41-1.41M6.05 6.05 4.64 4.64" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
-function AccountSettingsIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M10 3v2M10 15v2M17 10h-2M5 10H3M14.9 5.1l-1.4 1.4M6.5 13.5l-1.4 1.4M14.9 14.9l-1.4-1.4M6.5 6.5 5.1 5.1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }
