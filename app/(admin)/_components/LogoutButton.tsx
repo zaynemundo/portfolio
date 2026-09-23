@@ -10,7 +10,7 @@ export function LogoutButton() {
     <button
       onClick={() => startTransition(() => logout())}
       disabled={isPending}
-      className="w-full flex items-center justify-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[12.5px] font-semibold px-3 py-2 hover:bg-red-500/15 hover:text-red-300 hover:border-red-500/30 transition-colors disabled:opacity-50"
+      className="flex items-center gap-1.5 text-[12.5px] font-semibold text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
     >
       <SignOutIcon />
       Sign out

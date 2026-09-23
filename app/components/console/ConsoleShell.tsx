@@ -72,12 +72,7 @@ export function ConsoleShell({
     <div className="min-h-screen bg-zinc-950 flex print:bg-white">
       {sidebarOpen && (
         <aside className="w-60 shrink-0 border-r border-zinc-800 flex flex-col h-screen sticky top-0 print:hidden">
-          <div className="h-14 flex items-center justify-between px-4 border-b border-zinc-800">
-            <Link href={routes.home} className="flex items-center gap-2.5 min-w-0">
-              <span className="text-[13px] font-extrabold tracking-tight text-white shrink-0">ZM</span>
-              <span className="h-4 w-px bg-zinc-800 shrink-0" aria-hidden="true" />
-              <span className="text-[13px] font-medium text-zinc-300 truncate">Dashboard</span>
-            </Link>
+          <div className="h-14 flex items-center justify-end px-4 border-b border-zinc-800">
             <div className="flex items-center gap-0.5 shrink-0">
               <button
                 type="button"
@@ -119,17 +114,15 @@ export function ConsoleShell({
             </div>
           </nav>
 
-          <div className="p-4 border-t border-zinc-800 space-y-2.5">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-[12px] text-zinc-500 truncate">{email}</p>
-              <Link
-                href={routes.account}
-                aria-label="Account settings"
-                className="shrink-0 h-6 w-6 rounded-md flex items-center justify-center text-zinc-500 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
-              >
-                <AccountSettingsIcon />
-              </Link>
-            </div>
+          <div className="p-4 border-t border-zinc-800 space-y-2">
+            <p className="text-[12px] text-zinc-500 truncate">{email}</p>
+            <Link
+              href={routes.account}
+              className="flex items-center gap-1.5 text-[12.5px] font-medium text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              <AccountSettingsIcon />
+              Change password
+            </Link>
             <LogoutButton />
           </div>
         </aside>
@@ -228,7 +221,7 @@ function FreelanceDropdown({ items, pathname }: { items: NavItem[]; pathname: st
         </svg>
       </button>
       {open && (
-        <ul className="mt-0.5 ml-2 pl-3 border-l border-zinc-800 space-y-0.5">
+        <ul className="mt-0.5 ml-2 pl-3 space-y-0.5">
           {items.map((item) => (
             <li key={item.href}>
               <NavLink item={item} pathname={pathname} activeClasses="bg-emerald-500/10 text-emerald-300" />
