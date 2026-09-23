@@ -10,6 +10,7 @@
 export const routes = {
   home: "/dashboard",
   settings: "/settings",
+  account: "/account",
   cv: "/cv",
   workPage: "/work-settings",
   blogPage: "/insights-settings",
@@ -62,6 +63,7 @@ export const routes = {
 export const PROTECTED_TOP_LEVEL_PATHS = [
   routes.home,
   routes.settings,
+  routes.account,
   routes.cv,
   routes.workPage,
   routes.blogPage,

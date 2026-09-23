@@ -5,6 +5,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Resend } from "resend";
 import { prisma } from "@/app/lib/prisma";
+import { requireSession } from "@/app/lib/session";
 
 const SESSION_COOKIE = "admin_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
@@ -136,6 +137,33 @@ export async function resetPassword(token: string, newPassword: string): Promise
     }),
     // Invalidate all existing sessions for this user on password change
     prisma.session.deleteMany({ where: { userId: resetToken.userId } }),
+  ]);
+
+  return { ok: true };
+}
+
+export interface ChangePasswordResult {
+  ok: boolean;
+  error?: string;
+}
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<ChangePasswordResult> {
+  const session = await requireSession();
+
+  if (!verifyPassword(currentPassword, session.user.passwordHash)) {
+    return { ok: false, error: "Current password is incorrect." };
+  }
+  if (newPassword.length < 8) {
+    return { ok: false, error: "New password must be at least 8 characters." };
+  }
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: session.user.id },
+      data: { passwordHash: hashPassword(newPassword) },
+    }),
+    // Keep the current session alive, sign out everywhere else
+    prisma.session.deleteMany({ where: { userId: session.user.id, id: { not: session.id } } }),
   ]);
 
   return { ok: true };

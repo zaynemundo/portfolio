@@ -2,39 +2,70 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { searchAll, type SearchResult } from "@/app/actions/search";
 
-interface SearchItem {
+interface NavSearchItem {
   href: string;
   label: string;
   icon: React.ReactNode;
 }
 
+interface ResultRow {
+  href: string;
+  label: string;
+  category: string;
+}
+
 interface Props {
-  items: SearchItem[];
+  items: NavSearchItem[];
   onClose: () => void;
 }
 
-/** Lightweight "jump to" search over the admin's own nav items — filters as you
- *  type, arrow keys + Enter to navigate, Escape or backdrop click to dismiss. */
+const DEBOUNCE_MS = 250;
+
+/** Top-bar search: shows nav destinations by default, and once you type 2+
+ *  characters, also searches across content (blog posts, case studies, notes,
+ *  clients, freelance projects, invoices, inquiries) via the searchAll action. */
 export function CommandPalette({ items, onClose }: Props) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [contentResults, setContentResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const results = useMemo(() => {
+  const navMatches = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((item) => item.label.toLowerCase().includes(q));
+    const matches = q ? items.filter((item) => item.label.toLowerCase().includes(q)) : items;
+    return matches.map((item) => ({ href: item.href, label: item.label, category: "Pages" }));
   }, [items, query]);
 
-  // Clamped at render time instead of reset via an effect — avoids a
-  // setState-in-effect render cascade for what's just a derived value.
+  const trimmedQuery = query.trim();
+  const effectiveContentResults = trimmedQuery.length < 2 ? [] : contentResults;
+  const results: ResultRow[] = [...navMatches, ...effectiveContentResults];
+
   const safeActiveIndex = Math.min(activeIndex, Math.max(results.length - 1, 0));
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (trimmedQuery.length < 2) return;
+
+    debounceRef.current = setTimeout(() => {
+      setIsSearching(true);
+      searchAll(trimmedQuery).then((rows) => {
+        setContentResults(rows);
+        setIsSearching(false);
+      });
+    }, DEBOUNCE_MS);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [trimmedQuery]);
 
   function go(href: string) {
     router.push(href);
@@ -57,6 +88,19 @@ export function CommandPalette({ items, onClose }: Props) {
     }
   }
 
+  // Group results by category, preserving first-seen order.
+  const grouped: { category: string; rows: ResultRow[] }[] = [];
+  for (const row of results) {
+    let group = grouped.find((g) => g.category === row.category);
+    if (!group) {
+      group = { category: row.category, rows: [] };
+      grouped.push(group);
+    }
+    group.rows.push(row);
+  }
+
+  let rowCursor = 0;
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
@@ -71,31 +115,45 @@ export function CommandPalette({ items, onClose }: Props) {
               setActiveIndex(0);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Jump to…"
+            placeholder="Search everything…"
             className="flex-1 bg-transparent text-[14px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none"
           />
+          {isSearching && <span className="h-3.5 w-3.5 rounded-full border-2 border-zinc-700 border-t-purple-400 animate-spin" aria-hidden="true" />}
           <kbd className="text-[10.5px] text-zinc-600 border border-zinc-800 rounded px-1.5 py-0.5">Esc</kbd>
         </div>
-        <ul className="max-h-80 overflow-y-auto py-1.5">
+        <div className="max-h-96 overflow-y-auto py-1.5">
           {results.length === 0 && (
-            <li className="px-4 py-6 text-center text-[13px] text-zinc-600">No matches.</li>
+            <p className="px-4 py-6 text-center text-[13px] text-zinc-600">
+              {query.trim().length >= 2 && isSearching ? "Searching…" : "No matches."}
+            </p>
           )}
-          {results.map((item, i) => (
-            <li key={item.href}>
-              <button
-                type="button"
-                onMouseEnter={() => setActiveIndex(i)}
-                onClick={() => go(item.href)}
-                className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-[13.5px] font-medium text-left transition-colors ${
-                  i === safeActiveIndex ? "bg-purple-500/10 text-purple-300" : "text-zinc-300"
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            </li>
+          {grouped.map((group) => (
+            <div key={group.category}>
+              <p className="px-4 pt-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-zinc-600">
+                {group.category}
+              </p>
+              <ul>
+                {group.rows.map((row) => {
+                  const i = rowCursor++;
+                  return (
+                    <li key={`${row.category}-${row.href}-${row.label}`}>
+                      <button
+                        type="button"
+                        onMouseEnter={() => setActiveIndex(i)}
+                        onClick={() => go(row.href)}
+                        className={`w-full flex items-center gap-2.5 px-4 py-2 text-[13.5px] font-medium text-left transition-colors truncate ${
+                          i === safeActiveIndex ? "bg-purple-500/10 text-purple-300" : "text-zinc-300"
+                        }`}
+                      >
+                        {row.label}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );

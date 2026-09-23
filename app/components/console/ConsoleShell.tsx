@@ -101,8 +101,17 @@ export function ConsoleShell({
             </div>
           </nav>
 
-          <div className="p-4 border-t border-zinc-800">
-            <p className="text-[12px] text-zinc-500 truncate mb-2">{email}</p>
+          <div className="p-4 border-t border-zinc-800 space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[12px] text-zinc-500 truncate">{email}</p>
+              <Link
+                href={routes.account}
+                aria-label="Account settings"
+                className="shrink-0 h-6 w-6 rounded-md flex items-center justify-center text-zinc-500 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+              >
+                <AccountSettingsIcon />
+              </Link>
+            </div>
             <LogoutButton />
           </div>
         </aside>
@@ -175,7 +184,7 @@ function NavLink({ item, pathname, activeClasses }: { item: NavItem; pathname: s
 /** Dashboard sits above the Content/Hub groups, ungrouped — it's the main landing page, not "content". */
 function DashboardLink({ item, pathname }: { item: NavItem; pathname: string }) {
   return (
-    <div className="pb-4 mb-1 border-b border-zinc-800">
+    <div className="pb-2">
       <NavLink item={item} pathname={pathname} activeClasses="bg-zinc-100/10 text-zinc-100" />
     </div>
   );
@@ -327,6 +336,14 @@ function SettingsIcon() {
     <svg {...iconProps()}>
       <circle cx="10" cy="10" r="2.75" stroke="currentColor" strokeWidth="1.4" />
       <path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.36 4.64l-1.41 1.41M6.05 13.95l-1.41 1.41M15.36 15.36l-1.41-1.41M6.05 6.05 4.64 4.64" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+function AccountSettingsIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M10 3v2M10 15v2M17 10h-2M5 10H3M14.9 5.1l-1.4 1.4M6.5 13.5l-1.4 1.4M14.9 14.9l-1.4-1.4M6.5 6.5 5.1 5.1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }
