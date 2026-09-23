@@ -1,33 +1,52 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { getSiteSettings } from "@/app/lib/settings-db";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { routes } from "@/app/(admin)/_routes";
+
+const getDashboardData = unstable_cache(
+  async (monthKey: string) => {
+    const [year, month] = monthKey.split("-").map(Number);
+    const monthStart = new Date(year, month, 1);
+    const monthEnd = new Date(year, month + 1, 1);
+
+    return Promise.all([
+      getSiteSettings(),
+      prisma.blogPost.findMany({ orderBy: { date: "desc" }, take: 5 }),
+      prisma.inquiry.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
+      prisma.note.findMany({ orderBy: { updatedAt: "desc" }, take: 5 }),
+      prisma.freelanceProject.findMany({ where: { archived: false }, orderBy: { updatedAt: "desc" }, take: 5 }),
+      prisma.inquiry.count({ where: { read: false } }),
+      prisma.blogPost.count({ where: { published: true } }),
+      prisma.project.count({ where: { published: true } }),
+      prisma.note.count(),
+      prisma.freelanceProject.count({ where: { archived: false } }),
+      prisma.inquiry.count(),
+      prisma.transaction.findMany({ where: { date: { gte: monthStart, lt: monthEnd } } }),
+      prisma.transaction.findMany({ orderBy: { date: "desc" }, take: 5, include: { client: true } }),
+    ]);
+  },
+  ["dashboard-data"],
+  {
+    tags: [
+      CACHE_TAGS.blog, CACHE_TAGS.caseStudies, CACHE_TAGS.inquiries, CACHE_TAGS.notes,
+      CACHE_TAGS.freelance, CACHE_TAGS.transactions, CACHE_TAGS.settings,
+    ],
+    revalidate: 60,
+  }
+);
 
 export default async function DashboardPage() {
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
 
   const [
     settings,
     posts, inquiries, notes, projects, unreadCount,
     publishedArticles, publishedCaseStudies, notesCount, activeProjects, totalInquiries,
     monthTransactions, recentTransactions,
-  ] = await Promise.all([
-    getSiteSettings(),
-    prisma.blogPost.findMany({ orderBy: { date: "desc" }, take: 5 }),
-    prisma.inquiry.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
-    prisma.note.findMany({ orderBy: { updatedAt: "desc" }, take: 5 }),
-    prisma.freelanceProject.findMany({ where: { archived: false }, orderBy: { updatedAt: "desc" }, take: 5 }),
-    prisma.inquiry.count({ where: { read: false } }),
-    prisma.blogPost.count({ where: { published: true } }),
-    prisma.project.count({ where: { published: true } }),
-    prisma.note.count(),
-    prisma.freelanceProject.count({ where: { archived: false } }),
-    prisma.inquiry.count(),
-    prisma.transaction.findMany({ where: { date: { gte: monthStart, lt: monthEnd } } }),
-    prisma.transaction.findMany({ orderBy: { date: "desc" }, take: 5, include: { client: true } }),
-  ]);
+  ] = await getDashboardData(monthKey);
 
   const monthIncome = monthTransactions.filter((t) => t.type === "INCOME").reduce((sum, t) => sum + t.amount, 0);
   const monthExpense = monthTransactions.filter((t) => t.type === "EXPENSE").reduce((sum, t) => sum + t.amount, 0);
@@ -108,7 +127,7 @@ export default async function DashboardPage() {
               key={n.id}
               href={routes.notes.item(n.id)}
               primary={n.title}
-              secondary={n.updatedAt.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+              secondary={new Date(n.updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
             />
           ))}
         </RecentCard>

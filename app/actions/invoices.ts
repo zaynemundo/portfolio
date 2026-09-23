@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { InvoiceStatus, Prisma } from "@/generated/prisma/client/client";
 
 export interface InvoiceItemInput {
@@ -81,6 +83,7 @@ export async function createInvoice(data: InvoiceFormData): Promise<InvoiceActio
 
   revalidatePath("/finance");
   revalidatePath("/invoices");
+  updateTag(CACHE_TAGS.invoices);
   return { ok: true, id: invoice.id };
 }
 
@@ -106,6 +109,7 @@ export async function updateInvoice(id: string, data: InvoiceFormData): Promise<
   revalidatePath("/finance");
   revalidatePath("/invoices");
   revalidatePath(`/invoices/${id}`);
+  updateTag(CACHE_TAGS.invoices);
   return { ok: true, id };
 }
 
@@ -115,6 +119,7 @@ export async function updateInvoiceStatus(id: string, status: string): Promise<v
   revalidatePath("/finance");
   revalidatePath("/invoices");
   revalidatePath(`/invoices/${id}`);
+  updateTag(CACHE_TAGS.invoices);
 }
 
 export async function deleteInvoice(id: string): Promise<void> {
@@ -122,4 +127,5 @@ export async function deleteInvoice(id: string): Promise<void> {
   await prisma.invoice.delete({ where: { id } }).catch(() => {});
   revalidatePath("/finance");
   revalidatePath("/invoices");
+  updateTag(CACHE_TAGS.invoices);
 }

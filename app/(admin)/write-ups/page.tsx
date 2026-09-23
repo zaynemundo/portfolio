@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { DeleteButton } from "./DeleteButton";
 import { PublishToggle } from "./PublishToggle";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
@@ -7,8 +9,14 @@ import { EmptyState } from "@/app/(admin)/_components/EmptyState";
 import { FeaturedBadge } from "@/app/(admin)/_components/FeaturedBadge";
 import { routes } from "@/app/(admin)/_routes";
 
+const getBlogPosts = unstable_cache(
+  () => prisma.blogPost.findMany({ orderBy: { date: "desc" } }),
+  ["blog-list"],
+  { tags: [CACHE_TAGS.blog], revalidate: 60 }
+);
+
 export default async function DashboardBlogPage() {
-  const posts = await prisma.blogPost.findMany({ orderBy: { date: "desc" } });
+  const posts = await getBlogPosts();
 
   return (
     <div>

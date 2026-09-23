@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { ProjectForm } from "../ProjectForm";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
@@ -8,9 +10,15 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+const getCaseStudy = unstable_cache(
+  (id: string) => prisma.project.findUnique({ where: { id } }),
+  ["case-study-detail"],
+  { tags: [CACHE_TAGS.caseStudies], revalidate: 60 }
+);
+
 export default async function EditCaseStudyPage({ params }: Props) {
   const { id } = await params;
-  const project = await prisma.project.findUnique({ where: { id } });
+  const project = await getCaseStudy(id);
   if (!project) notFound();
 
   const theme = (project.theme ?? {}) as { bg?: string };

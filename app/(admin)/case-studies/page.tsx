@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { DeleteProjectButton } from "./DeleteProjectButton";
 import { ProjectPublishToggle } from "./ProjectPublishToggle";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
@@ -7,8 +9,14 @@ import { EmptyState } from "@/app/(admin)/_components/EmptyState";
 import { FeaturedBadge } from "@/app/(admin)/_components/FeaturedBadge";
 import { routes } from "@/app/(admin)/_routes";
 
+const getCaseStudies = unstable_cache(
+  () => prisma.project.findMany({ orderBy: { sortOrder: "asc" } }),
+  ["case-studies-list"],
+  { tags: [CACHE_TAGS.caseStudies], revalidate: 60 }
+);
+
 export default async function CaseStudiesPage() {
-  const projects = await prisma.project.findMany({ orderBy: { sortOrder: "asc" } });
+  const projects = await getCaseStudies();
 
   return (
     <div>

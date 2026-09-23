@@ -1,5 +1,7 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { aboutChapters as DEFAULT_ABOUT_CHAPTERS, type Chapter } from "@/app/data/aboutChapters";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 
 export interface HeroSceneData {
   heading: string;
@@ -91,7 +93,13 @@ const DEFAULTS: SiteSettingsData = {
   blogPageIntro: "Thoughts on front-end development, technical SEO, accessibility, and building for the web.",
 };
 
-export async function getSiteSettings(): Promise<SiteSettingsData> {
+export const getSiteSettings = unstable_cache(
+  async (): Promise<SiteSettingsData> => fetchSiteSettings(),
+  ["site-settings"],
+  { tags: [CACHE_TAGS.settings], revalidate: 60 }
+);
+
+async function fetchSiteSettings(): Promise<SiteSettingsData> {
   const row = await prisma.siteSettings.findUnique({ where: { id: "singleton" } });
   if (!row) return DEFAULTS;
 

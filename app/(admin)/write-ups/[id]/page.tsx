@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { BlogForm } from "../BlogForm";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
@@ -8,9 +10,15 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+const getBlogPost = unstable_cache(
+  (id: string) => prisma.blogPost.findUnique({ where: { id } }),
+  ["blog-post-detail"],
+  { tags: [CACHE_TAGS.blog], revalidate: 60 }
+);
+
 export default async function EditBlogPostPage({ params }: Props) {
   const { id } = await params;
-  const post = await prisma.blogPost.findUnique({ where: { id } });
+  const post = await getBlogPost(id);
   if (!post) notFound();
 
   return (

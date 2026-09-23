@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 
 export interface PostFormData {
   title: string;
@@ -72,6 +74,7 @@ export async function createPost(data: PostFormData): Promise<PostActionResult> 
   });
 
   revalidatePublicPages();
+  updateTag(CACHE_TAGS.blog);
   redirect("/write-ups");
 }
 
@@ -102,6 +105,7 @@ export async function updatePost(id: string, data: PostFormData): Promise<PostAc
   });
 
   revalidatePublicPages();
+  updateTag(CACHE_TAGS.blog);
   redirect("/write-ups");
 }
 
@@ -110,6 +114,7 @@ export async function deletePost(id: string): Promise<void> {
   await prisma.blogPost.delete({ where: { id } }).catch(() => {});
   revalidatePublicPages();
   revalidatePath("/write-ups");
+  updateTag(CACHE_TAGS.blog);
 }
 
 export async function togglePublished(id: string, published: boolean): Promise<void> {
@@ -117,4 +122,5 @@ export async function togglePublished(id: string, published: boolean): Promise<v
   await prisma.blogPost.update({ where: { id }, data: { published } });
   revalidatePublicPages();
   revalidatePath("/write-ups");
+  updateTag(CACHE_TAGS.blog);
 }

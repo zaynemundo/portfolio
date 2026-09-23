@@ -3,9 +3,11 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { updateTag } from "next/cache";
 import { Resend } from "resend";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 
 const SESSION_COOKIE = "admin_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
@@ -72,6 +74,7 @@ export async function logout(): Promise<void> {
     await prisma.session.delete({ where: { id: sessionId } }).catch(() => {});
   }
   cookieStore.delete(SESSION_COOKIE);
+  updateTag(CACHE_TAGS.sessions);
   redirect("/login");
 }
 
@@ -139,6 +142,7 @@ export async function resetPassword(token: string, newPassword: string): Promise
     prisma.session.deleteMany({ where: { userId: resetToken.userId } }),
   ]);
 
+  updateTag(CACHE_TAGS.sessions);
   return { ok: true };
 }
 
@@ -166,5 +170,6 @@ export async function changePassword(currentPassword: string, newPassword: strin
     prisma.session.deleteMany({ where: { userId: session.user.id, id: { not: session.id } } }),
   ]);
 
+  updateTag(CACHE_TAGS.sessions);
   return { ok: true };
 }

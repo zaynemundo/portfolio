@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { TransactionType } from "@/generated/prisma/client/client";
 
 export interface TransactionFormData {
@@ -51,6 +53,7 @@ export async function createTransaction(data: TransactionFormData): Promise<Tran
   const transaction = await prisma.transaction.create({ data: buildData(data) });
 
   revalidatePath("/finance");
+  updateTag(CACHE_TAGS.transactions);
   return { ok: true, id: transaction.id };
 }
 
@@ -63,6 +66,7 @@ export async function updateTransaction(id: string, data: TransactionFormData): 
 
   revalidatePath("/finance");
   revalidatePath(`/finance/${id}`);
+  updateTag(CACHE_TAGS.transactions);
   return { ok: true };
 }
 
@@ -70,4 +74,5 @@ export async function deleteTransaction(id: string): Promise<void> {
   await requireSession();
   await prisma.transaction.delete({ where: { id } }).catch(() => {});
   revalidatePath("/finance");
+  updateTag(CACHE_TAGS.transactions);
 }

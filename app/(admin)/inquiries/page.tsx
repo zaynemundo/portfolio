@@ -1,12 +1,20 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
 import { DeleteInquiryButton } from "./DeleteInquiryButton";
 import { routes } from "@/app/(admin)/_routes";
 
+const getInquiries = unstable_cache(
+  () => prisma.inquiry.findMany({ orderBy: { createdAt: "desc" } }),
+  ["inquiries-list"],
+  { tags: [CACHE_TAGS.inquiries], revalidate: 30 }
+);
+
 export default async function InquiriesPage() {
-  const inquiries = await prisma.inquiry.findMany({ orderBy: { createdAt: "desc" } });
+  const inquiries = await getInquiries();
   const unreadCount = inquiries.filter((i) => !i.read).length;
 
   return (
@@ -48,7 +56,7 @@ export default async function InquiriesPage() {
                   </td>
                   <td className="px-4 py-3 text-[13px] text-zinc-400 max-w-[360px] truncate">{inquiry.message}</td>
                   <td className="px-4 py-3 text-[13px] text-zinc-400 whitespace-nowrap">
-                    {inquiry.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                    {new Date(inquiry.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">

@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 
 export interface NoteFormData {
   title: string;
@@ -43,6 +45,7 @@ export async function createNote(data: NoteFormData): Promise<NoteActionResult> 
   });
 
   revalidatePath("/notes");
+  updateTag(CACHE_TAGS.notes);
   return { ok: true, id: note.id };
 }
 
@@ -64,6 +67,7 @@ export async function updateNote(id: string, data: NoteFormData): Promise<NoteAc
 
   revalidatePath("/notes");
   revalidatePath(`/notes/${id}`);
+  updateTag(CACHE_TAGS.notes);
   return { ok: true };
 }
 
@@ -71,10 +75,12 @@ export async function deleteNote(id: string): Promise<void> {
   await requireSession();
   await prisma.note.delete({ where: { id } }).catch(() => {});
   revalidatePath("/notes");
+  updateTag(CACHE_TAGS.notes);
 }
 
 export async function toggleNotePinned(id: string, pinned: boolean): Promise<void> {
   await requireSession();
   await prisma.note.update({ where: { id }, data: { pinned } });
   revalidatePath("/notes");
+  updateTag(CACHE_TAGS.notes);
 }

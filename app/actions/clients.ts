@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 
 export interface ClientFormData {
   name: string;
@@ -33,6 +35,7 @@ export async function createClient(data: ClientFormData): Promise<ClientActionRe
   });
 
   revalidatePath("/clients");
+  updateTag(CACHE_TAGS.clients);
   return { ok: true, id: client.id };
 }
 
@@ -53,6 +56,7 @@ export async function updateClient(id: string, data: ClientFormData): Promise<Cl
 
   revalidatePath("/clients");
   revalidatePath(`/clients/${id}`);
+  updateTag(CACHE_TAGS.clients);
   return { ok: true };
 }
 
@@ -62,4 +66,8 @@ export async function deleteClient(id: string): Promise<void> {
   revalidatePath("/clients");
   revalidatePath("/freelance");
   revalidatePath("/finance");
+  updateTag(CACHE_TAGS.clients);
+  updateTag(CACHE_TAGS.freelance);
+  updateTag(CACHE_TAGS.transactions);
+  updateTag(CACHE_TAGS.invoices);
 }

@@ -2,10 +2,12 @@
 
 import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { Prisma } from "@/generated/prisma/client/client";
 import { getSiteSettings, type HeroSceneData } from "@/app/lib/settings-db";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import type { Chapter } from "@/app/data/aboutChapters";
 
 export interface SettingsActionResult {
@@ -24,16 +26,19 @@ function revalidateHomepage() {
   revalidatePath("/homepage/selected-work");
   revalidatePath("/homepage/about");
   revalidatePath("/homepage/insights");
+  updateTag(CACHE_TAGS.settings);
 }
 
 function revalidateWorkPage() {
   revalidatePath("/work");
   revalidatePath("/work-settings");
+  updateTag(CACHE_TAGS.settings);
 }
 
 function revalidateBlogPage() {
   revalidatePath("/insights");
   revalidatePath("/insights-settings");
+  updateTag(CACHE_TAGS.settings);
 }
 
 export async function updateSiteSettings(
@@ -68,6 +73,7 @@ export async function updateSiteSettings(
 
   revalidatePath("/");
   revalidatePath("/settings");
+  updateTag(CACHE_TAGS.settings);
   return { ok: true };
 }
 
@@ -113,6 +119,7 @@ export async function uploadResume(formData: FormData): Promise<UploadResult> {
 
   revalidatePath("/");
   revalidatePath("/settings");
+  updateTag(CACHE_TAGS.settings);
   return result;
 }
 
@@ -131,6 +138,7 @@ export async function uploadPortrait(formData: FormData): Promise<UploadResult> 
 
   revalidatePath("/");
   revalidatePath("/settings");
+  updateTag(CACHE_TAGS.settings);
   return result;
 }
 

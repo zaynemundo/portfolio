@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { put } from "@vercel/blob";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
+import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { Prisma } from "@/generated/prisma/client/client";
 
 export interface ProjectFormData {
@@ -135,6 +137,7 @@ export async function createProject(data: ProjectFormData): Promise<ProjectActio
   });
 
   revalidatePublicPages();
+  updateTag(CACHE_TAGS.caseStudies);
   redirect("/case-studies");
 }
 
@@ -159,6 +162,7 @@ export async function updateProject(id: string, data: ProjectFormData): Promise<
   });
 
   revalidatePublicPages();
+  updateTag(CACHE_TAGS.caseStudies);
   redirect("/case-studies");
 }
 
@@ -167,6 +171,7 @@ export async function deleteProject(id: string): Promise<void> {
   await prisma.project.delete({ where: { id } }).catch(() => {});
   revalidatePublicPages();
   revalidatePath("/case-studies");
+  updateTag(CACHE_TAGS.caseStudies);
 }
 
 export async function toggleProjectPublished(id: string, published: boolean): Promise<void> {
@@ -174,6 +179,7 @@ export async function toggleProjectPublished(id: string, published: boolean): Pr
   await prisma.project.update({ where: { id }, data: { published } });
   revalidatePublicPages();
   revalidatePath("/case-studies");
+  updateTag(CACHE_TAGS.caseStudies);
 }
 
 export interface FeaturedProjectUpdate {
@@ -208,6 +214,7 @@ export async function updateFeaturedProjects(items: FeaturedProjectUpdate[]): Pr
   revalidatePublicPages();
   revalidatePath("/case-studies");
   revalidatePath("/homepage/selected-work");
+  updateTag(CACHE_TAGS.caseStudies);
   return { ok: true };
 }
 
@@ -246,6 +253,7 @@ export async function addProjectImage(id: string, url: string): Promise<void> {
   });
   revalidatePublicPages();
   revalidatePath(`/case-studies/${id}`);
+  updateTag(CACHE_TAGS.caseStudies);
 }
 
 export async function removeProjectImage(id: string, url: string): Promise<void> {
@@ -258,4 +266,5 @@ export async function removeProjectImage(id: string, url: string): Promise<void>
   });
   revalidatePublicPages();
   revalidatePath(`/case-studies/${id}`);
+  updateTag(CACHE_TAGS.caseStudies);
 }
