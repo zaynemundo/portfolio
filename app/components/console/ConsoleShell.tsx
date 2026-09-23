@@ -72,12 +72,30 @@ export function ConsoleShell({
     <div className="min-h-screen bg-zinc-950 flex print:bg-white">
       {sidebarOpen && (
         <aside className="w-60 shrink-0 border-r border-zinc-800 flex flex-col h-screen sticky top-0 print:hidden">
-          <div className="h-14 flex items-center px-5 border-b border-zinc-800">
-            <Link href={routes.home} className="flex items-center gap-2.5">
-              <span className="text-[13px] font-extrabold tracking-tight text-white">ZM</span>
-              <span className="h-4 w-px bg-zinc-800" aria-hidden="true" />
-              <span className="text-[13px] font-medium text-zinc-300">Dashboard</span>
+          <div className="h-14 flex items-center justify-between px-4 border-b border-zinc-800">
+            <Link href={routes.home} className="flex items-center gap-2.5 min-w-0">
+              <span className="text-[13px] font-extrabold tracking-tight text-white shrink-0">ZM</span>
+              <span className="h-4 w-px bg-zinc-800 shrink-0" aria-hidden="true" />
+              <span className="text-[13px] font-medium text-zinc-300 truncate">Dashboard</span>
             </Link>
+            <div className="flex items-center gap-0.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                aria-label="Search"
+                className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+              >
+                <TopBarSearchIcon />
+              </button>
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(false)}
+                aria-label="Collapse sidebar"
+                className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+              >
+                <SidebarToggleIcon />
+              </button>
+            </div>
           </div>
 
           <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
@@ -118,34 +136,27 @@ export function ConsoleShell({
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="h-14 shrink-0 flex items-center justify-between px-5 border-b border-zinc-800 print:hidden">
-          <div className="flex items-center gap-2.5">
-            {!sidebarOpen && (
-              <Link href={routes.home} className="flex items-center gap-2.5 mr-1">
-                <span className="text-[13px] font-extrabold tracking-tight text-white">ZM</span>
-              </Link>
-            )}
-            <span className="text-[14px] font-bold tracking-tight text-zinc-100">Admin</span>
-          </div>
-          <div className="flex items-center gap-1.5">
+        {!sidebarOpen && (
+          <header className="h-14 shrink-0 flex items-center gap-1 px-4 border-b border-zinc-800 print:hidden">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Expand sidebar"
+              className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+            >
+              <SidebarToggleIcon />
+            </button>
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="Search"
-              className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+              className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
             >
               <TopBarSearchIcon />
             </button>
-            <button
-              type="button"
-              onClick={() => setSidebarOpen((v) => !v)}
-              aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-              className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
-            >
-              <SidebarToggleIcon />
-            </button>
-          </div>
-        </header>
+            <span className="text-[13px] font-bold tracking-tight text-zinc-100 ml-1">ZM</span>
+          </header>
+        )}
 
         <main className="flex-1 min-w-0 print:bg-white">
           <div className="max-w-[1100px] mx-auto px-8 py-10 print:max-w-none print:p-0">{children}</div>
