@@ -16,13 +16,9 @@ export const routes = {
     list: "/inquiries",
     item: (id: string) => `/inquiries/${id}`,
   },
-  homepage: {
-    index: "/homepage",
-    hero: "/homepage/hero",
-    selectedWork: "/homepage/selected-work",
-    about: "/homepage/about",
-    insights: "/homepage/insights",
-  },
+  /** Single page with client-side tabs (Hero/Selected Work/About/Insights) —
+   *  not separate routes, so switching tabs doesn't re-hit the database. */
+  homepage: "/homepage",
   blog: {
     list: "/write-ups",
     new: "/write-ups/new",
@@ -52,7 +48,7 @@ export const PROTECTED_TOP_LEVEL_PATHS = [
   routes.workPage,
   routes.blogPage,
   routes.inquiries.list,
-  routes.homepage.index,
+  routes.homepage,
   routes.blog.list,
   routes.caseStudies.list,
   routes.notes.list,

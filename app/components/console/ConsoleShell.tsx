@@ -15,7 +15,7 @@ interface NavItem {
 function buildContentItems(unreadInquiries: number): NavItem[] {
   return [
     { href: routes.home, label: "Dashboard", icon: <OverviewIcon /> },
-    { href: routes.homepage.index, label: "Homepage", icon: <HomeIcon /> },
+    { href: routes.homepage, label: "Homepage", icon: <HomeIcon /> },
     { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
     { href: routes.caseStudies.list, label: "Case Studies", icon: <CaseStudyIcon /> },
     { href: routes.inquiries.list, label: "Inquiries", icon: <InquiriesIcon />, badge: unreadInquiries },

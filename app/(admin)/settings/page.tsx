@@ -24,7 +24,7 @@ export default async function SettingsPage() {
       <p className="text-[13px] text-zinc-500 mb-8">
         Your name, contact info, resume, and CV content (what you do, experience, education &amp; skills) — all
         shown across the public site. Homepage hero/selected-work/about-intro/insights copy lives under{" "}
-        <Link href={routes.homepage.hero} className="text-purple-400 hover:text-purple-300">Homepage</Link> instead.
+        <Link href={routes.homepage} className="text-purple-400 hover:text-purple-300">Homepage</Link> instead.
       </p>
 
       <div className="space-y-8">
