@@ -72,7 +72,7 @@ export async function createPost(data: PostFormData): Promise<PostActionResult> 
   });
 
   revalidatePublicPages();
-  redirect("/dashboard/blog");
+  redirect("/write-ups");
 }
 
 export async function updatePost(id: string, data: PostFormData): Promise<PostActionResult> {
@@ -102,19 +102,19 @@ export async function updatePost(id: string, data: PostFormData): Promise<PostAc
   });
 
   revalidatePublicPages();
-  redirect("/dashboard/blog");
+  redirect("/write-ups");
 }
 
 export async function deletePost(id: string): Promise<void> {
   await requireSession();
   await prisma.blogPost.delete({ where: { id } }).catch(() => {});
   revalidatePublicPages();
-  revalidatePath("/dashboard/blog");
+  revalidatePath("/write-ups");
 }
 
 export async function togglePublished(id: string, published: boolean): Promise<void> {
   await requireSession();
   await prisma.blogPost.update({ where: { id }, data: { published } });
   revalidatePublicPages();
-  revalidatePath("/dashboard/blog");
+  revalidatePath("/write-ups");
 }

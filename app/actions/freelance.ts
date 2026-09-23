@@ -42,8 +42,8 @@ export async function createFreelanceProject(data: FreelanceProjectFormData): Pr
     },
   });
 
-  revalidatePath("/dashboard/projects");
-  redirect(`/dashboard/projects/${project.id}`);
+  revalidatePath("/freelance");
+  redirect(`/freelance/${project.id}`);
 }
 
 export async function updateFreelanceProject(id: string, data: FreelanceProjectFormData): Promise<FreelanceActionResult> {
@@ -63,23 +63,23 @@ export async function updateFreelanceProject(id: string, data: FreelanceProjectF
     },
   });
 
-  revalidatePath("/dashboard/projects");
-  revalidatePath(`/dashboard/projects/${id}`);
+  revalidatePath("/freelance");
+  revalidatePath(`/freelance/${id}`);
   return { ok: true };
 }
 
 export async function deleteFreelanceProject(id: string): Promise<void> {
   await requireSession();
   await prisma.freelanceProject.delete({ where: { id } }).catch(() => {});
-  revalidatePath("/dashboard/projects");
-  redirect("/dashboard/projects");
+  revalidatePath("/freelance");
+  redirect("/freelance");
 }
 
 export async function archiveFreelanceProject(id: string, archived: boolean): Promise<void> {
   await requireSession();
   await prisma.freelanceProject.update({ where: { id }, data: { archived } });
-  revalidatePath("/dashboard/projects");
-  revalidatePath(`/dashboard/projects/${id}`);
+  revalidatePath("/freelance");
+  revalidatePath(`/freelance/${id}`);
 }
 
 /* ── Tasks ─────────────────────────────────────────────────────────── */
@@ -96,17 +96,17 @@ export async function addTask(projectId: string, title: string): Promise<void> {
   await prisma.freelanceTask.create({
     data: { projectId, title: title.trim(), sortOrder: (max._max.sortOrder ?? -1) + 1 },
   });
-  revalidatePath(`/dashboard/projects/${projectId}`);
+  revalidatePath(`/freelance/${projectId}`);
 }
 
 export async function toggleTask(taskId: string, projectId: string, done: boolean): Promise<void> {
   await requireSession();
   await prisma.freelanceTask.update({ where: { id: taskId }, data: { done } });
-  revalidatePath(`/dashboard/projects/${projectId}`);
+  revalidatePath(`/freelance/${projectId}`);
 }
 
 export async function deleteTask(taskId: string, projectId: string): Promise<void> {
   await requireSession();
   await prisma.freelanceTask.delete({ where: { id: taskId } }).catch(() => {});
-  revalidatePath(`/dashboard/projects/${projectId}`);
+  revalidatePath(`/freelance/${projectId}`);
 }

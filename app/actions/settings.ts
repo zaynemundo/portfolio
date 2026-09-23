@@ -19,21 +19,21 @@ function isValidEmail(email: string): boolean {
 
 function revalidateHomepage() {
   revalidatePath("/");
-  revalidatePath("/dashboard/settings");
-  revalidatePath("/dashboard/homepage/hero");
-  revalidatePath("/dashboard/homepage/selected-work");
-  revalidatePath("/dashboard/homepage/about");
-  revalidatePath("/dashboard/homepage/insights");
+  revalidatePath("/settings");
+  revalidatePath("/homepage/hero");
+  revalidatePath("/homepage/selected-work");
+  revalidatePath("/homepage/about");
+  revalidatePath("/homepage/insights");
 }
 
 function revalidateWorkPage() {
   revalidatePath("/work");
-  revalidatePath("/dashboard/work-page");
+  revalidatePath("/work-settings");
 }
 
 function revalidateBlogPage() {
   revalidatePath("/insights");
-  revalidatePath("/dashboard/blog-page");
+  revalidatePath("/insights-settings");
 }
 
 export async function updateSiteSettings(
@@ -67,7 +67,7 @@ export async function updateSiteSettings(
   });
 
   revalidatePath("/");
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/settings");
   return { ok: true };
 }
 
@@ -112,7 +112,7 @@ export async function uploadResume(formData: FormData): Promise<UploadResult> {
   });
 
   revalidatePath("/");
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/settings");
   return result;
 }
 
@@ -130,7 +130,7 @@ export async function uploadPortrait(formData: FormData): Promise<UploadResult> 
   });
 
   revalidatePath("/");
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/settings");
   return result;
 }
 

@@ -42,8 +42,8 @@ export async function createNote(data: NoteFormData): Promise<NoteActionResult> 
     },
   });
 
-  revalidatePath("/dashboard/notes");
-  redirect(`/dashboard/notes/${note.id}`);
+  revalidatePath("/notes");
+  redirect(`/notes/${note.id}`);
 }
 
 export async function updateNote(id: string, data: NoteFormData): Promise<NoteActionResult> {
@@ -62,20 +62,20 @@ export async function updateNote(id: string, data: NoteFormData): Promise<NoteAc
     },
   });
 
-  revalidatePath("/dashboard/notes");
-  revalidatePath(`/dashboard/notes/${id}`);
+  revalidatePath("/notes");
+  revalidatePath(`/notes/${id}`);
   return { ok: true };
 }
 
 export async function deleteNote(id: string): Promise<void> {
   await requireSession();
   await prisma.note.delete({ where: { id } }).catch(() => {});
-  revalidatePath("/dashboard/notes");
-  redirect("/dashboard/notes");
+  revalidatePath("/notes");
+  redirect("/notes");
 }
 
 export async function toggleNotePinned(id: string, pinned: boolean): Promise<void> {
   await requireSession();
   await prisma.note.update({ where: { id }, data: { pinned } });
-  revalidatePath("/dashboard/notes");
+  revalidatePath("/notes");
 }

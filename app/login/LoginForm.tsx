@@ -5,11 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { login } from "@/app/actions/auth";
 import { PasswordField } from "./PasswordField";
+import { routes } from "@/app/(admin)/_routes";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const from = searchParams.get("from") ?? "/dashboard";
+  const from = searchParams.get("from") ?? routes.home;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

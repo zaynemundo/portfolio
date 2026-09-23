@@ -135,7 +135,7 @@ export async function createProject(data: ProjectFormData): Promise<ProjectActio
   });
 
   revalidatePublicPages();
-  redirect("/dashboard/case-studies");
+  redirect("/case-studies");
 }
 
 export async function updateProject(id: string, data: ProjectFormData): Promise<ProjectActionResult> {
@@ -159,21 +159,21 @@ export async function updateProject(id: string, data: ProjectFormData): Promise<
   });
 
   revalidatePublicPages();
-  redirect("/dashboard/case-studies");
+  redirect("/case-studies");
 }
 
 export async function deleteProject(id: string): Promise<void> {
   await requireSession();
   await prisma.project.delete({ where: { id } }).catch(() => {});
   revalidatePublicPages();
-  revalidatePath("/dashboard/case-studies");
+  revalidatePath("/case-studies");
 }
 
 export async function toggleProjectPublished(id: string, published: boolean): Promise<void> {
   await requireSession();
   await prisma.project.update({ where: { id }, data: { published } });
   revalidatePublicPages();
-  revalidatePath("/dashboard/case-studies");
+  revalidatePath("/case-studies");
 }
 
 export interface FeaturedProjectUpdate {
@@ -206,8 +206,8 @@ export async function updateFeaturedProjects(items: FeaturedProjectUpdate[]): Pr
   );
 
   revalidatePublicPages();
-  revalidatePath("/dashboard/case-studies");
-  revalidatePath("/dashboard/homepage/selected-work");
+  revalidatePath("/case-studies");
+  revalidatePath("/homepage/selected-work");
   return { ok: true };
 }
 
@@ -245,7 +245,7 @@ export async function addProjectImage(id: string, url: string): Promise<void> {
     data: { images: [...project.images, url] },
   });
   revalidatePublicPages();
-  revalidatePath(`/dashboard/case-studies/${id}`);
+  revalidatePath(`/case-studies/${id}`);
 }
 
 export async function removeProjectImage(id: string, url: string): Promise<void> {
@@ -257,5 +257,5 @@ export async function removeProjectImage(id: string, url: string): Promise<void>
     data: { images: project.images.filter((img) => img !== url) },
   });
   revalidatePublicPages();
-  revalidatePath(`/dashboard/case-studies/${id}`);
+  revalidatePath(`/case-studies/${id}`);
 }

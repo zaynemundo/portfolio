@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogoutButton } from "@/app/dashboard/LogoutButton";
-import { routes } from "@/app/dashboard/routes";
+import { LogoutButton } from "@/app/(admin)/_components/LogoutButton";
+import { routes } from "@/app/(admin)/_routes";
 
 interface NavItem {
   href: string;
@@ -14,6 +14,7 @@ interface NavItem {
 
 function buildContentItems(unreadInquiries: number): NavItem[] {
   return [
+    { href: routes.home, label: "Overview", icon: <OverviewIcon /> },
     { href: routes.homepage.index, label: "Homepage", icon: <HomeIcon /> },
     { href: routes.workPage, label: "Work Page", icon: <WorkPageIcon /> },
     { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
@@ -46,7 +47,7 @@ export function ConsoleShell({
           <Link href={routes.home} className="flex items-center gap-2.5">
             <span className="text-[13px] font-extrabold tracking-tight text-white">ZM</span>
             <span className="h-4 w-px bg-zinc-800" aria-hidden="true" />
-            <span className="text-[13px] font-medium text-zinc-300">Dashboard</span>
+            <span className="text-[13px] font-medium text-zinc-300">Admin</span>
           </Link>
         </div>
 
@@ -118,6 +119,16 @@ function iconProps() {
   return { width: 15, height: 15, viewBox: "0 0 20 20", fill: "none" as const, "aria-hidden": true };
 }
 
+function OverviewIcon() {
+  return (
+    <svg {...iconProps()}>
+      <rect x="2.5" y="2.5" width="6.5" height="6.5" rx="1.3" stroke="currentColor" strokeWidth="1.4" />
+      <rect x="11" y="2.5" width="6.5" height="6.5" rx="1.3" stroke="currentColor" strokeWidth="1.4" />
+      <rect x="2.5" y="11" width="6.5" height="6.5" rx="1.3" stroke="currentColor" strokeWidth="1.4" />
+      <rect x="11" y="11" width="6.5" height="6.5" rx="1.3" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
 function HomeIcon() {
   return (
     <svg {...iconProps()}>
