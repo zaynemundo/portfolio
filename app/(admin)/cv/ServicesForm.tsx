@@ -35,10 +35,7 @@ export function ServicesForm({ chapter }: { chapter: Chapter }) {
 
   return (
     <form onSubmit={handleSubmit} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-4">
-      <div>
-        <h2 className="text-[15px] font-semibold text-zinc-100 mb-1">02 · What I Do</h2>
-        <p className="text-[12.5px] text-zinc-500">Services headline, intro text, and the list of capabilities.</p>
-      </div>
+      <p className="text-[12.5px] text-zinc-500">Services headline, intro text, and the list of capabilities.</p>
 
       <div>
         <label className="block text-xs font-medium text-zinc-400 mb-1.5">Headline</label>

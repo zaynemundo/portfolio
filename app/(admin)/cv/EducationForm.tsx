@@ -34,10 +34,7 @@ export function EducationForm({ chapter }: { chapter: Chapter }) {
 
   return (
     <form onSubmit={handleSubmit} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-5">
-      <div>
-        <h2 className="text-[15px] font-semibold text-zinc-100 mb-1">04 · Education &amp; Skills</h2>
-        <p className="text-[12.5px] text-zinc-500">Degree info and grouped skill tags.</p>
-      </div>
+      <p className="text-[12.5px] text-zinc-500">Degree info and grouped skill tags.</p>
 
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">

@@ -16,9 +16,11 @@ function buildContentItems(unreadInquiries: number): NavItem[] {
   return [
     { href: routes.home, label: "Dashboard", icon: <OverviewIcon /> },
     { href: routes.homepage, label: "Homepage", icon: <HomeIcon /> },
+    { href: routes.cv, label: "CV", icon: <CvIcon /> },
     { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
     { href: routes.caseStudies.list, label: "Case Studies", icon: <CaseStudyIcon /> },
     { href: routes.inquiries.list, label: "Inquiries", icon: <InquiriesIcon />, badge: unreadInquiries },
+    { href: routes.settings, label: "Site Settings", icon: <SettingsIcon /> },
   ];
 }
 
@@ -134,6 +136,15 @@ function HomeIcon() {
     </svg>
   );
 }
+function CvIcon() {
+  return (
+    <svg {...iconProps()}>
+      <rect x="4" y="2.5" width="12" height="15" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+      <circle cx="10" cy="7.5" r="1.75" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M6.5 13c0-1.5 1.5-2.5 3.5-2.5s3.5 1 3.5 2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
 function BlogIcon() {
   return (
     <svg {...iconProps()}>
@@ -155,6 +166,14 @@ function InquiriesIcon() {
     <svg {...iconProps()}>
       <path d="M3 5.5h14v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
       <path d="M3 5.5 10 11l7-5.5" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function SettingsIcon() {
+  return (
+    <svg {...iconProps()}>
+      <circle cx="10" cy="10" r="2.75" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.36 4.64l-1.41 1.41M6.05 13.95l-1.41 1.41M15.36 15.36l-1.41-1.41M6.05 6.05 4.64 4.64" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }

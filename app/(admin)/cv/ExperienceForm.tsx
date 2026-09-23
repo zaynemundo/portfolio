@@ -24,10 +24,7 @@ export function ExperienceForm({ chapter }: { chapter: Chapter }) {
 
   return (
     <form onSubmit={handleSubmit} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-4">
-      <div>
-        <h2 className="text-[15px] font-semibold text-zinc-100 mb-1">03 · Experience</h2>
-        <p className="text-[12.5px] text-zinc-500">Roles shown in the Experience chapter, most recent first.</p>
-      </div>
+      <p className="text-[12.5px] text-zinc-500">Roles shown in the Experience chapter, most recent first.</p>
 
       <div className="space-y-3">
         {principles.map((p, i) => (

@@ -3,18 +3,35 @@ import { prisma } from "@/app/lib/prisma";
 import { routes } from "@/app/(admin)/_routes";
 
 export default async function DashboardPage() {
-  const [posts, inquiries, notes, projects, unreadCount] = await Promise.all([
+  const [
+    posts, inquiries, notes, projects, unreadCount,
+    publishedArticles, publishedCaseStudies, notesCount, activeProjects, totalInquiries,
+  ] = await Promise.all([
     prisma.blogPost.findMany({ orderBy: { date: "desc" }, take: 5 }),
     prisma.inquiry.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
     prisma.note.findMany({ orderBy: { updatedAt: "desc" }, take: 5 }),
     prisma.freelanceProject.findMany({ where: { archived: false }, orderBy: { updatedAt: "desc" }, take: 5 }),
     prisma.inquiry.count({ where: { read: false } }),
+    prisma.blogPost.count({ where: { published: true } }),
+    prisma.project.count({ where: { published: true } }),
+    prisma.note.count(),
+    prisma.freelanceProject.count({ where: { archived: false } }),
+    prisma.inquiry.count(),
   ]);
 
   return (
     <div>
       <h1 className="text-[22px] font-semibold text-zinc-100 mb-1">Dashboard</h1>
-      <p className="text-[13px] text-zinc-500 mb-8">Quick actions and what&rsquo;s recently changed.</p>
+      <p className="text-[13px] text-zinc-500 mb-8">An overview of your site and workspace.</p>
+
+      {/* Stats */}
+      <div className="grid grid-cols-5 gap-3 mb-8">
+        <StatCard href={routes.blog.list} value={publishedArticles} label="Published articles" accent="purple" />
+        <StatCard href={routes.caseStudies.list} value={publishedCaseStudies} label="Case studies" accent="purple" />
+        <StatCard href={routes.inquiries.list} value={totalInquiries} label="Inquiries" sublabel={unreadCount > 0 ? `${unreadCount} unread` : undefined} accent="purple" />
+        <StatCard href={routes.notes.list} value={notesCount} label="Notes" accent="emerald" />
+        <StatCard href={routes.projects.list} value={activeProjects} label="Active projects" accent="emerald" />
+      </div>
 
       {/* Quick actions */}
       <div className="grid grid-cols-4 gap-3 mb-10">
@@ -65,6 +82,30 @@ export default async function DashboardPage() {
         </RecentCard>
       </div>
     </div>
+  );
+}
+
+function StatCard({
+  href, value, label, sublabel, accent,
+}: {
+  href: string;
+  value: number;
+  label: string;
+  sublabel?: string;
+  accent: "purple" | "emerald";
+}) {
+  const accentClasses = accent === "purple"
+    ? "hover:border-purple-500/50 hover:bg-purple-500/[0.04]"
+    : "hover:border-emerald-500/50 hover:bg-emerald-500/[0.04]";
+  return (
+    <Link
+      href={href}
+      className={`rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 transition-colors ${accentClasses}`}
+    >
+      <div className="text-[24px] font-semibold text-zinc-100 leading-none mb-1.5">{value}</div>
+      <div className="text-[12px] text-zinc-500">{label}</div>
+      {sublabel && <div className="text-[11px] text-red-400 font-medium mt-0.5">{sublabel}</div>}
+    </Link>
   );
 }
 
