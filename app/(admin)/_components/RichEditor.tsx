@@ -8,9 +8,11 @@ import { TableKit } from "@tiptap/extension-table";
 interface Props {
   content: string;
   onChange: (html: string) => void;
+  /** Set false for a seamless, borderless look that blends into its container (e.g. Apple-Notes-style). Defaults to the boxed look used by Blog. */
+  bordered?: boolean;
 }
 
-export function RichEditor({ content, onChange }: Props) {
+export function RichEditor({ content, onChange, bordered = true }: Props) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -42,14 +44,14 @@ export function RichEditor({ content, onChange }: Props) {
   if (!editor) return null;
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden">
-      <Toolbar editor={editor} />
+    <div className={bordered ? "rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden" : ""}>
+      <Toolbar bordered={bordered} editor={editor} />
       <EditorContent editor={editor} />
     </div>
   );
 }
 
-function Toolbar({ editor }: { editor: NonNullable<ReturnType<typeof useEditor>> }) {
+function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof useEditor>>; bordered: boolean }) {
   const items: { label: string; active: boolean; onClick: () => void }[] = [
     { label: "B", active: editor.isActive("bold"), onClick: () => editor.chain().focus().toggleBold().run() },
     { label: "I", active: editor.isActive("italic"), onClick: () => editor.chain().focus().toggleItalic().run() },
@@ -75,7 +77,11 @@ function Toolbar({ editor }: { editor: NonNullable<ReturnType<typeof useEditor>>
   const inTable = editor.isActive("table");
 
   return (
-    <div className="flex flex-wrap items-center gap-1 border-b border-zinc-800 bg-zinc-950 px-2 py-1.5">
+    <div
+      className={`flex flex-wrap items-center gap-1 px-2 py-1.5 ${
+        bordered ? "border-b border-zinc-800 bg-zinc-950" : "border-b border-zinc-800/60 -mx-1"
+      }`}
+    >
       {items.map((item) => (
         <button
           key={item.label}

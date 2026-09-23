@@ -1,10 +1,14 @@
 import { NoteForm } from "../NoteForm";
+import { BackLink } from "@/app/(admin)/_components/BackLink";
+import { routes } from "@/app/(admin)/_routes";
 
 export default function NewNotePage() {
   return (
-    <div>
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-8">New note</h1>
-      <NoteForm mode="new" />
+    <div className="max-w-3xl mx-auto">
+      <BackLink href={routes.notes.list} label="Notes" />
+      <div className="mt-4">
+        <NoteForm />
+      </div>
     </div>
   );
 }
