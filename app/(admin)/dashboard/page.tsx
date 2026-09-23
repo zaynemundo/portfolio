@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/app/lib/prisma";
 import { routes } from "@/app/(admin)/_routes";
 
-export default async function OverviewPage() {
+export default async function DashboardPage() {
   const [posts, inquiries, notes, projects, unreadCount] = await Promise.all([
     prisma.blogPost.findMany({ orderBy: { date: "desc" }, take: 5 }),
     prisma.inquiry.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
@@ -13,7 +13,7 @@ export default async function OverviewPage() {
 
   return (
     <div>
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-1">Overview</h1>
+      <h1 className="text-[22px] font-semibold text-zinc-100 mb-1">Dashboard</h1>
       <p className="text-[13px] text-zinc-500 mb-8">Quick actions and what&rsquo;s recently changed.</p>
 
       {/* Quick actions */}

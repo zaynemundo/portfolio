@@ -14,7 +14,7 @@ interface NavItem {
 
 function buildContentItems(unreadInquiries: number): NavItem[] {
   return [
-    { href: routes.home, label: "Overview", icon: <OverviewIcon /> },
+    { href: routes.home, label: "Dashboard", icon: <OverviewIcon /> },
     { href: routes.homepage.index, label: "Homepage", icon: <HomeIcon /> },
     { href: routes.workPage, label: "Work Page", icon: <WorkPageIcon /> },
     { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
@@ -47,7 +47,7 @@ export function ConsoleShell({
           <Link href={routes.home} className="flex items-center gap-2.5">
             <span className="text-[13px] font-extrabold tracking-tight text-white">ZM</span>
             <span className="h-4 w-px bg-zinc-800" aria-hidden="true" />
-            <span className="text-[13px] font-medium text-zinc-300">Admin</span>
+            <span className="text-[13px] font-medium text-zinc-300">Dashboard</span>
           </Link>
         </div>
 

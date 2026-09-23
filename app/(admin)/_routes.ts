@@ -1,13 +1,14 @@
 /**
  * Single source of truth for every admin URL. Pages and nav import from
  * here instead of hardcoding path strings, so a path only needs to change
- * in one place. These are top-level routes (no shared "/dashboard" prefix)
- * living in the app/(admin) route group — names are chosen to avoid
- * colliding with public routes (/, /blog, /projects, and their /insights
- * and /work rewrite aliases).
+ * in one place. These are top-level routes living in the app/(admin) route
+ * group — /dashboard is the landing/overview page itself (not a shared
+ * prefix — nothing lives at /dashboard/blog etc. anymore); every other
+ * section is its own top-level path, named to avoid colliding with public
+ * routes (/, /blog, /projects, and their /insights and /work rewrite aliases).
  */
 export const routes = {
-  home: "/overview",
+  home: "/dashboard",
   settings: "/settings",
   workPage: "/work-settings",
   blogPage: "/insights-settings",

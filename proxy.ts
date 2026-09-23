@@ -32,7 +32,7 @@ export async function proxy(request: NextRequest) {
 // gates access and is the safety net if this list ever drifts.
 export const config = {
   matcher: [
-    "/overview/:path*",
+    "/dashboard/:path*",
     "/settings/:path*",
     "/work-settings/:path*",
     "/insights-settings/:path*",
