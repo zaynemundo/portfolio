@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/app/lib/prisma";
+import { getSiteSettings } from "@/app/lib/settings-db";
 import { routes } from "@/app/(admin)/_routes";
 
 export default async function DashboardPage() {
@@ -8,10 +9,12 @@ export default async function DashboardPage() {
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
   const [
+    settings,
     posts, inquiries, notes, projects, unreadCount,
     publishedArticles, publishedCaseStudies, notesCount, activeProjects, totalInquiries,
     monthTransactions, recentTransactions,
   ] = await Promise.all([
+    getSiteSettings(),
     prisma.blogPost.findMany({ orderBy: { date: "desc" }, take: 5 }),
     prisma.inquiry.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
     prisma.note.findMany({ orderBy: { updatedAt: "desc" }, take: 5 }),
@@ -30,23 +33,39 @@ export default async function DashboardPage() {
   const monthExpense = monthTransactions.filter((t) => t.type === "EXPENSE").reduce((sum, t) => sum + t.amount, 0);
   const monthNet = monthIncome - monthExpense;
   const currency = monthTransactions[0]?.currency ?? "AED";
+  const firstName = settings.name.split(" ")[0];
+  const todayLabel = now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
   return (
     <div>
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-1">Dashboard</h1>
-      <p className="text-[13px] text-zinc-500 mb-8">An overview of your site and workspace.</p>
+      {/* Greeting banner */}
+      <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-600/20 via-purple-500/10 to-zinc-900/40 px-7 py-8 mb-8">
+        <div className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl" aria-hidden="true" />
+        <div className="pointer-events-none absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-purple-400/10 blur-3xl" aria-hidden="true" />
+        <div className="relative">
+          <p className="text-[12.5px] text-purple-300/80 font-medium mb-1.5">{todayLabel}</p>
+          <h1 className="text-[26px] font-bold text-zinc-100 mb-1.5">Hi, {firstName}!</h1>
+          <p className="text-[13.5px] text-zinc-400">
+            {unreadCount > 0
+              ? `You have ${unreadCount} unread inquir${unreadCount === 1 ? "y" : "ies"} waiting.`
+              : "You're all caught up on inquiries."}
+            {" "}This month&rsquo;s net is {monthNet >= 0 ? "+" : ""}{monthNet.toLocaleString()} {currency}.
+          </p>
+        </div>
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-6 gap-3 mb-8">
-        <StatCard href={routes.blog.list} value={publishedArticles} label="Published articles" accent="purple" />
-        <StatCard href={routes.caseStudies.list} value={publishedCaseStudies} label="Case studies" accent="purple" />
-        <StatCard href={routes.inquiries.list} value={totalInquiries} label="Inquiries" sublabel={unreadCount > 0 ? `${unreadCount} unread` : undefined} accent="purple" />
-        <StatCard href={routes.notes.list} value={notesCount} label="Notes" accent="emerald" />
-        <StatCard href={routes.projects.list} value={activeProjects} label="Active projects" accent="emerald" />
+        <StatCard href={routes.blog.list} value={publishedArticles} label="Published articles" icon={<StatBlogIcon />} accent="purple" />
+        <StatCard href={routes.caseStudies.list} value={publishedCaseStudies} label="Case studies" icon={<StatCaseIcon />} accent="purple" />
+        <StatCard href={routes.inquiries.list} value={totalInquiries} label="Inquiries" sublabel={unreadCount > 0 ? `${unreadCount} unread` : undefined} icon={<StatInquiryIcon />} accent="purple" />
+        <StatCard href={routes.notes.list} value={notesCount} label="Notes" icon={<StatNotesIcon />} accent="emerald" />
+        <StatCard href={routes.projects.list} value={activeProjects} label="Active projects" icon={<StatProjectsIcon />} accent="emerald" />
         <StatCard
           href={routes.finance.list}
           value={`${monthNet >= 0 ? "+" : ""}${monthNet.toLocaleString()}`}
           label={`This month (${currency})`}
+          icon={<StatFinanceIcon />}
           accent={monthNet >= 0 ? "emerald" : "red"}
         />
       </div>
@@ -116,12 +135,13 @@ export default async function DashboardPage() {
 }
 
 function StatCard({
-  href, value, label, sublabel, accent,
+  href, value, label, sublabel, icon, accent,
 }: {
   href: string;
   value: number | string;
   label: string;
   sublabel?: string;
+  icon: React.ReactNode;
   accent: "purple" | "emerald" | "red";
 }) {
   const accentClasses = accent === "purple"
@@ -129,12 +149,16 @@ function StatCard({
     : accent === "emerald"
     ? "hover:border-emerald-500/50 hover:bg-emerald-500/[0.04]"
     : "hover:border-red-500/50 hover:bg-red-500/[0.04]";
+  const iconBg = accent === "purple" ? "bg-purple-500/10 text-purple-400" : accent === "emerald" ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400";
   return (
     <Link
       href={href}
-      className={`rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 transition-colors ${accentClasses}`}
+      className={`rounded-2xl border border-zinc-800 bg-zinc-900/40 px-4 py-4 transition-colors ${accentClasses}`}
     >
-      <div className="text-[24px] font-semibold text-zinc-100 leading-none mb-1.5">{value}</div>
+      <div className={`h-8 w-8 rounded-lg flex items-center justify-center mb-3 ${iconBg}`}>
+        {icon}
+      </div>
+      <div className="text-[22px] font-semibold text-zinc-100 leading-none mb-1.5">{value}</div>
       <div className="text-[12px] text-zinc-500">{label}</div>
       {sublabel && <div className="text-[11px] text-red-400 font-medium mt-0.5">{sublabel}</div>}
     </Link>
@@ -148,7 +172,7 @@ function QuickAction({ href, label, accent }: { href: string; label: string; acc
   return (
     <Link
       href={href}
-      className={`rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 text-[13px] font-medium text-zinc-200 transition-colors ${accentClasses}`}
+      className={`rounded-2xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 text-[13px] font-medium text-zinc-200 transition-colors ${accentClasses}`}
     >
       + {label}
     </Link>
@@ -165,7 +189,7 @@ function RecentCard({
 }) {
   const hasChildren = Array.isArray(children) ? children.length > 0 : !!children;
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
       <div className="flex items-center gap-2 mb-3">
         <h2 className="text-[13.5px] font-semibold text-zinc-100">{title}</h2>
         {!!badge && (
@@ -199,5 +223,57 @@ function RecentRow({
       </span>
       <span className="text-[11.5px] text-zinc-600 shrink-0">{secondary}</span>
     </Link>
+  );
+}
+
+function statIconProps() {
+  return { width: 15, height: 15, viewBox: "0 0 20 20", fill: "none" as const, "aria-hidden": true };
+}
+function StatBlogIcon() {
+  return (
+    <svg {...statIconProps()}>
+      <path d="M4 3.5h9l3 3v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M7 8.5h6M7 11.5h6M7 14.5h3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+function StatCaseIcon() {
+  return (
+    <svg {...statIconProps()}>
+      <rect x="2.5" y="5.5" width="15" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M7 5.5V4a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 13 4v1.5" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+function StatInquiryIcon() {
+  return (
+    <svg {...statIconProps()}>
+      <path d="M3 5.5h14v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M3 5.5 10 11l7-5.5" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function StatNotesIcon() {
+  return (
+    <svg {...statIconProps()}>
+      <path d="M5 3.5h10a1 1 0 0 1 1 1V16l-3-2-3 2-3-2-3 2V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M7.5 7.5h5M7.5 10.5h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+function StatProjectsIcon() {
+  return (
+    <svg {...statIconProps()}>
+      <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h3l1.5 2h6.5A1.5 1.5 0 0 1 17 8.5v6A1.5 1.5 0 0 1 15.5 16h-11A1.5 1.5 0 0 1 3 14.5v-8Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function StatFinanceIcon() {
+  return (
+    <svg {...statIconProps()}>
+      <path d="M3 15V8l4-3 3 2 3-2 4 3v7" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M10 7v9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M2.5 15.5h15" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
   );
 }
