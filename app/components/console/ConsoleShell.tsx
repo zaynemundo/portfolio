@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/app/(admin)/_components/LogoutButton";
 import { routes } from "@/app/(admin)/_routes";
+import { CommandPalette } from "./CommandPalette";
 
 interface NavItem {
   href: string;
@@ -46,48 +47,103 @@ export function ConsoleShell({
 }) {
   const pathname = usePathname();
   const contentItems = buildContentItems(unreadInquiries);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const searchItems: NavItem[] = [
+    DASHBOARD_ITEM,
+    ...contentItems,
+    ...HUB_ITEMS,
+    ...FREELANCE_DROPDOWN_ITEMS,
+  ];
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="min-h-screen bg-zinc-950 flex print:bg-white">
-      <aside className="w-60 shrink-0 border-r border-zinc-800 flex flex-col h-screen sticky top-0 print:hidden">
-        <div className="h-14 flex items-center px-5 border-b border-zinc-800">
-          <Link href={routes.home} className="flex items-center gap-2.5">
-            <span className="text-[13px] font-extrabold tracking-tight text-white">ZM</span>
-            <span className="h-4 w-px bg-zinc-800" aria-hidden="true" />
-            <span className="text-[13px] font-medium text-zinc-300">Dashboard</span>
-          </Link>
-        </div>
-
-        <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
-          <DashboardLink item={DASHBOARD_ITEM} pathname={pathname} />
-          <NavGroup label="Content" accent="purple" items={contentItems} pathname={pathname} />
-          <div>
-            <p className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-zinc-600 flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
-              Hub
-            </p>
-            <ul className="space-y-0.5">
-              {HUB_ITEMS.map((item) => (
-                <li key={item.href}>
-                  <NavLink item={item} pathname={pathname} activeClasses="bg-emerald-500/10 text-emerald-300" />
-                </li>
-              ))}
-              <li>
-                <FreelanceDropdown items={FREELANCE_DROPDOWN_ITEMS} pathname={pathname} />
-              </li>
-            </ul>
+      {sidebarOpen && (
+        <aside className="w-60 shrink-0 border-r border-zinc-800 flex flex-col h-screen sticky top-0 print:hidden">
+          <div className="h-14 flex items-center px-5 border-b border-zinc-800">
+            <Link href={routes.home} className="flex items-center gap-2.5">
+              <span className="text-[13px] font-extrabold tracking-tight text-white">ZM</span>
+              <span className="h-4 w-px bg-zinc-800" aria-hidden="true" />
+              <span className="text-[13px] font-medium text-zinc-300">Dashboard</span>
+            </Link>
           </div>
-        </nav>
 
-        <div className="p-4 border-t border-zinc-800">
-          <p className="text-[12px] text-zinc-500 truncate mb-2">{email}</p>
-          <LogoutButton />
-        </div>
-      </aside>
+          <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
+            <DashboardLink item={DASHBOARD_ITEM} pathname={pathname} />
+            <NavGroup label="Content" accent="purple" items={contentItems} pathname={pathname} />
+            <div>
+              <p className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-zinc-600 flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
+                Hub
+              </p>
+              <ul className="space-y-0.5">
+                {HUB_ITEMS.map((item) => (
+                  <li key={item.href}>
+                    <NavLink item={item} pathname={pathname} activeClasses="bg-emerald-500/10 text-emerald-300" />
+                  </li>
+                ))}
+                <li>
+                  <FreelanceDropdown items={FREELANCE_DROPDOWN_ITEMS} pathname={pathname} />
+                </li>
+              </ul>
+            </div>
+          </nav>
 
-      <main className="flex-1 min-w-0 print:bg-white">
-        <div className="max-w-[1100px] mx-auto px-8 py-10 print:max-w-none print:p-0">{children}</div>
-      </main>
+          <div className="p-4 border-t border-zinc-800">
+            <p className="text-[12px] text-zinc-500 truncate mb-2">{email}</p>
+            <LogoutButton />
+          </div>
+        </aside>
+      )}
+
+      <div className="flex-1 min-w-0 flex flex-col">
+        <header className="h-14 shrink-0 flex items-center justify-between px-5 border-b border-zinc-800 print:hidden">
+          <div className="flex items-center gap-2.5">
+            {!sidebarOpen && (
+              <Link href={routes.home} className="flex items-center gap-2.5 mr-1">
+                <span className="text-[13px] font-extrabold tracking-tight text-white">ZM</span>
+              </Link>
+            )}
+            <span className="text-[14px] font-bold tracking-tight text-zinc-100">Admin</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search"
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+            >
+              <TopBarSearchIcon />
+            </button>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen((v) => !v)}
+              aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+            >
+              <SidebarToggleIcon />
+            </button>
+          </div>
+        </header>
+
+        <main className="flex-1 min-w-0 print:bg-white">
+          <div className="max-w-[1100px] mx-auto px-8 py-10 print:max-w-none print:p-0">{children}</div>
+        </main>
+      </div>
+
+      {searchOpen && <CommandPalette items={searchItems} onClose={() => setSearchOpen(false)} />}
     </div>
   );
 }
@@ -191,6 +247,23 @@ function NavGroup({
         ))}
       </ul>
     </div>
+  );
+}
+
+function TopBarSearchIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <circle cx="9" cy="9" r="5.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M13.5 13.5 17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+function SidebarToggleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <rect x="2.5" y="3.5" width="15" height="13" rx="1.75" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M8 3.5v13" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
   );
 }
 
