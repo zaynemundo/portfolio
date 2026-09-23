@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Modal } from "@/app/(admin)/_components/Modal";
+import { Drawer } from "@/app/(admin)/_components/Drawer";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
 import { NoteForm } from "./NoteForm";
 import { PinToggle } from "./PinToggle";
@@ -20,14 +20,14 @@ export interface NoteRow {
 
 export function NotesClient({ notes }: { notes: NoteRow[] }) {
   const router = useRouter();
-  const [modal, setModal] = useState<"new" | NoteRow | null>(null);
+  const [drawer, setDrawer] = useState<"new" | NoteRow | null>(null);
 
   function close() {
-    setModal(null);
+    setDrawer(null);
     router.refresh();
   }
 
-  const editing = modal && modal !== "new" ? modal : null;
+  const editing = drawer && drawer !== "new" ? drawer : null;
   const initial: Partial<NoteFormData> | undefined = editing
     ? { title: editing.title, tags: editing.tags.join(", "), pinned: editing.pinned, contentHtml: editing.contentHtml }
     : undefined;
@@ -41,7 +41,7 @@ export function NotesClient({ notes }: { notes: NoteRow[] }) {
         </div>
         <button
           type="button"
-          onClick={() => setModal("new")}
+          onClick={() => setDrawer("new")}
           className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
         >
           + New note
@@ -53,11 +53,14 @@ export function NotesClient({ notes }: { notes: NoteRow[] }) {
       ) : (
         <div className="grid grid-cols-2 gap-4">
           {notes.map((note) => (
-            <div key={note.id} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+            <div
+              key={note.id}
+              className="group relative rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 hover:border-zinc-700 transition-colors"
+            >
               <div className="flex items-start justify-between mb-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => setModal(note)}
+                  onClick={() => setDrawer(note)}
                   className="text-[14.5px] font-semibold text-zinc-100 hover:text-emerald-400 transition-colors text-left"
                 >
                   {note.title}
@@ -78,19 +81,30 @@ export function NotesClient({ notes }: { notes: NoteRow[] }) {
               <p className="text-[12px] text-zinc-600">
                 Updated {note.updatedAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
               </p>
+
+              <div className="absolute bottom-4 right-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  type="button"
+                  onClick={() => setDrawer(note)}
+                  className="text-[12px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
+                >
+                  Edit
+                </button>
+                <DeleteNoteButton id={note.id} title={note.title} onDeleted={() => router.refresh()} />
+              </div>
             </div>
           ))}
         </div>
       )}
 
-      <Modal open={modal !== null} onClose={close} title={editing ? editing.title : "New note"} maxWidthClassName="max-w-2xl">
+      <Drawer open={drawer !== null} onClose={close} title={editing ? editing.title : "New note"}>
         <NoteForm mode={editing ? "edit" : "new"} noteId={editing?.id} initial={initial} onSuccess={close} />
         {editing && (
           <div className="mt-4 pt-4 border-t border-zinc-800">
             <DeleteNoteButton id={editing.id} title={editing.title} onDeleted={close} />
           </div>
         )}
-      </Modal>
+      </Drawer>
     </div>
   );
 }
