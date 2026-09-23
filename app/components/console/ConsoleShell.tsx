@@ -12,9 +12,10 @@ interface NavItem {
   badge?: number;
 }
 
+const DASHBOARD_ITEM: NavItem = { href: routes.home, label: "Dashboard", icon: <OverviewIcon /> };
+
 function buildContentItems(unreadInquiries: number): NavItem[] {
   return [
-    { href: routes.home, label: "Dashboard", icon: <OverviewIcon /> },
     { href: routes.homepage, label: "Homepage", icon: <HomeIcon /> },
     { href: routes.cv, label: "CV", icon: <CvIcon /> },
     { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
@@ -53,6 +54,7 @@ export function ConsoleShell({
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
+          <DashboardLink item={DASHBOARD_ITEM} pathname={pathname} />
           <NavGroup label="Content" accent="purple" items={contentItems} pathname={pathname} />
           <NavGroup label="Hub" accent="emerald" items={HUB_ITEMS} pathname={pathname} />
         </nav>
@@ -66,6 +68,39 @@ export function ConsoleShell({
       <main className="flex-1 min-w-0">
         <div className="max-w-[1100px] mx-auto px-8 py-10">{children}</div>
       </main>
+    </div>
+  );
+}
+
+function isNavActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(href + "/");
+}
+
+function NavLink({ item, pathname, activeClasses }: { item: NavItem; pathname: string; activeClasses: string }) {
+  const isActive = isNavActive(pathname, item.href);
+  return (
+    <Link
+      href={item.href}
+      className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
+        isActive ? activeClasses : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+      }`}
+    >
+      {item.icon}
+      <span className="flex-1">{item.label}</span>
+      {!!item.badge && (
+        <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10.5px] font-semibold flex items-center justify-center">
+          {item.badge}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+/** Dashboard sits above the Content/Hub groups, ungrouped — it's the main landing page, not "content". */
+function DashboardLink({ item, pathname }: { item: NavItem; pathname: string }) {
+  return (
+    <div className="pb-4 mb-1 border-b border-zinc-800">
+      <NavLink item={item} pathname={pathname} activeClasses="bg-zinc-100/10 text-zinc-100" />
     </div>
   );
 }
@@ -90,27 +125,11 @@ function NavGroup({
         {label}
       </p>
       <ul className="space-y-0.5">
-        {items.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-          return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-                  isActive ? activeClasses : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
-                }`}
-              >
-                {item.icon}
-                <span className="flex-1">{item.label}</span>
-                {!!item.badge && (
-                  <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10.5px] font-semibold flex items-center justify-center">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            </li>
-          );
-        })}
+        {items.map((item) => (
+          <li key={item.href}>
+            <NavLink item={item} pathname={pathname} activeClasses={activeClasses} />
+          </li>
+        ))}
       </ul>
     </div>
   );
