@@ -41,18 +41,19 @@ export default async function NotesPage() {
               key={note.id}
               className="group relative rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 hover:border-zinc-700 transition-colors"
             >
+              <Link href={routes.notes.item(note.id)} className="absolute inset-0 z-0" aria-label={`Open ${note.title}`} />
+
               <div className="flex items-start justify-between mb-2 gap-2">
-                <Link
-                  href={routes.notes.item(note.id)}
-                  className="text-[14.5px] font-semibold text-zinc-100 hover:text-emerald-400 transition-colors text-left"
-                >
+                <span className="text-[14.5px] font-semibold text-zinc-100 group-hover:text-emerald-400 transition-colors text-left pointer-events-none">
                   {note.title}
-                </Link>
-                <PinToggle id={note.id} pinned={note.pinned} />
+                </span>
+                <div className="relative z-10">
+                  <PinToggle id={note.id} pinned={note.pinned} />
+                </div>
               </div>
 
               {note.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-2">
+                <div className="flex flex-wrap gap-1.5 mb-2 pointer-events-none">
                   {note.tags.map((tag) => (
                     <span key={tag} className="text-[10.5px] font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
                       {tag}
@@ -61,17 +62,11 @@ export default async function NotesPage() {
                 </div>
               )}
 
-              <p className="text-[12px] text-zinc-600">
+              <p className="text-[12px] text-zinc-600 pointer-events-none">
                 Updated {note.updatedAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
               </p>
 
-              <div className="absolute bottom-4 right-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Link
-                  href={routes.notes.item(note.id)}
-                  className="text-[12px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
-                >
-                  Edit
-                </Link>
+              <div className="absolute bottom-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                 <DeleteNoteButton id={note.id} title={note.title} />
               </div>
             </div>
