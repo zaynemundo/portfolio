@@ -60,22 +60,28 @@ export function NoteForm({ noteId, initial, onDeleted }: Props) {
   }, [title, tags, pinned, contentHtml]);
 
   return (
-    <div>
-      <div className="flex items-center justify-between gap-3 mb-1">
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6">
+      <div className="flex items-start justify-between gap-3 mb-1">
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Title"
-          className="w-full text-[20px] font-semibold text-zinc-100 placeholder:text-zinc-600 bg-transparent focus:outline-none"
+          className="w-full text-[21px] font-semibold text-zinc-100 placeholder:text-zinc-600 bg-transparent focus:outline-none"
         />
-        <button
-          type="button"
-          onClick={() => setPinned((p) => !p)}
-          aria-label={pinned ? "Unpin" : "Pin"}
-          className={`shrink-0 text-lg transition-colors ${pinned ? "text-amber-400" : "text-zinc-600 hover:text-zinc-400"}`}
-        >
-          ★
-        </button>
+        <div className="flex items-center gap-1 shrink-0 mt-0.5">
+          <button
+            type="button"
+            onClick={() => setPinned((p) => !p)}
+            aria-label={pinned ? "Unpin" : "Pin"}
+            title={pinned ? "Unpin" : "Pin"}
+            className={`h-8 w-8 flex items-center justify-center rounded-lg transition-colors ${
+              pinned ? "text-amber-400 bg-amber-400/10" : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+            }`}
+          >
+            <StarIcon filled={pinned} />
+          </button>
+          {id && <DeleteNoteButton id={id} title={title} onDeleted={onDeleted} />}
+        </div>
       </div>
 
       <input
@@ -85,16 +91,26 @@ export function NoteForm({ noteId, initial, onDeleted }: Props) {
         className="w-full text-[12px] text-zinc-500 placeholder:text-zinc-700 bg-transparent focus:outline-none mb-4"
       />
 
-      <RichEditor content={contentHtml} onChange={setContentHtml} bordered={false} />
+      <RichEditor content={contentHtml} onChange={setContentHtml} />
 
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
-        <p className="text-[11.5px] text-zinc-600">
-          {status === "saving" && "Saving…"}
-          {status === "saved" && "Saved"}
-          {status === "error" && <span className="text-red-400">Couldn&apos;t save — check your connection.</span>}
-        </p>
-        {id && <DeleteNoteButton id={id} title={title} onDeleted={onDeleted} />}
-      </div>
+      <p className="text-[11.5px] text-zinc-600 mt-3">
+        {status === "saving" && "Saving…"}
+        {status === "saved" && "Saved"}
+        {status === "error" && <span className="text-red-400">Couldn&apos;t save — check your connection.</span>}
+      </p>
     </div>
+  );
+}
+
+function StarIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 20 20" fill={filled ? "currentColor" : "none"} aria-hidden="true">
+      <path
+        d="M10 2.5 12.35 7.9l5.87.63-4.4 3.98 1.24 5.79L10 15.35l-5.06 2.95 1.24-5.79-4.4-3.98 5.87-.63L10 2.5Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
