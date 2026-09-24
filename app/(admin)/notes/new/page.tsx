@@ -4,7 +4,7 @@ import { routes } from "@/app/(admin)/_routes";
 
 export default function NewNotePage() {
   return (
-    <div className="max-w-3xl mx-auto">
+    <div>
       <BackLink href={routes.notes.list} label="Notes" />
       <div className="mt-4">
         <NoteForm />
