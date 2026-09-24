@@ -60,7 +60,7 @@ export function NoteForm({ noteId, initial, onDeleted }: Props) {
   }, [title, tags, pinned, contentHtml]);
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="flex items-center justify-between gap-3 mb-1">
         <input
           value={title}
