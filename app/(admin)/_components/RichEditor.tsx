@@ -78,8 +78,8 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
 
   return (
     <div
-      className={`flex flex-wrap items-center gap-0.5 px-2 py-1.5 ${
-        bordered ? "border-b border-zinc-800 bg-zinc-950" : "border-b border-zinc-800/60 -mx-1"
+      className={`flex flex-wrap items-center gap-0.5 ${
+        bordered ? "px-2 py-1.5 border-b border-zinc-800 bg-zinc-950" : "inline-flex px-1.5 py-1 rounded-full bg-zinc-800/60 mb-4"
       }`}
     >
       {items.map((item) => (

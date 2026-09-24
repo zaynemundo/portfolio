@@ -60,7 +60,7 @@ export function NoteForm({ noteId, initial, onDeleted }: Props) {
   }, [title, tags, pinned, contentHtml]);
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6">
+    <div>
       <div className="flex items-start justify-between gap-3 mb-1">
         <input
           value={title}
@@ -68,14 +68,14 @@ export function NoteForm({ noteId, initial, onDeleted }: Props) {
           placeholder="Title"
           className="w-full text-[21px] font-semibold text-zinc-100 placeholder:text-zinc-600 bg-transparent focus:outline-none"
         />
-        <div className="flex items-center gap-1 shrink-0 mt-0.5">
+        <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
           <button
             type="button"
             onClick={() => setPinned((p) => !p)}
             aria-label={pinned ? "Unpin" : "Pin"}
             title={pinned ? "Unpin" : "Pin"}
-            className={`h-8 w-8 flex items-center justify-center rounded-lg transition-colors ${
-              pinned ? "text-amber-400 bg-amber-400/10" : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+            className={`h-8 w-8 flex items-center justify-center rounded-full transition-colors ${
+              pinned ? "text-amber-400 bg-amber-400/10" : "text-zinc-400 bg-zinc-800/60 hover:text-zinc-100 hover:bg-zinc-800"
             }`}
           >
             <StarIcon filled={pinned} />
@@ -84,20 +84,23 @@ export function NoteForm({ noteId, initial, onDeleted }: Props) {
         </div>
       </div>
 
-      <input
-        value={tags}
-        onChange={(e) => setTags(e.target.value)}
-        placeholder="Add tags, comma-separated"
-        className="w-full text-[12px] text-zinc-500 placeholder:text-zinc-700 bg-transparent focus:outline-none mb-4"
-      />
+      <div className="flex items-center gap-2 mb-4">
+        <input
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          placeholder="Add tags, comma-separated"
+          className="text-[12px] text-zinc-500 placeholder:text-zinc-700 bg-transparent focus:outline-none"
+        />
+        {status !== "idle" && (
+          <span className="text-[11px] text-zinc-600">
+            · {status === "saving" && "Saving…"}
+            {status === "saved" && "Saved"}
+            {status === "error" && <span className="text-red-400">Couldn&apos;t save</span>}
+          </span>
+        )}
+      </div>
 
-      <RichEditor content={contentHtml} onChange={setContentHtml} />
-
-      <p className="text-[11.5px] text-zinc-600 mt-3">
-        {status === "saving" && "Saving…"}
-        {status === "saved" && "Saved"}
-        {status === "error" && <span className="text-red-400">Couldn&apos;t save — check your connection.</span>}
-      </p>
+      <RichEditor content={contentHtml} onChange={setContentHtml} bordered={false} />
     </div>
   );
 }

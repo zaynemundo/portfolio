@@ -24,7 +24,7 @@ export function DeleteNoteButton({ id, title, onDeleted }: { id: string; title: 
       disabled={isPending}
       aria-label="Delete note"
       title="Delete note"
-      className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+      className="h-8 w-8 flex items-center justify-center rounded-full bg-zinc-800/60 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
     >
       <TrashIcon />
     </button>
