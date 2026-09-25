@@ -23,7 +23,7 @@ export default async function EditNotePage({ params }: Props) {
 
   return (
     <div>
-      <BackLink href={routes.notes.list} label="Notes" />
+      <BackLink href={routes.notes.list} label="Notes" iconOnly />
       <div className="mt-4">
         <NoteForm
           noteId={note.id}

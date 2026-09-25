@@ -24,6 +24,7 @@ export function RichEditor({ content, onChange, bordered = true }: Props) {
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
+        style: "outline: none;",
         class:
           "max-w-none min-h-[320px] px-4 py-3 text-[14.5px] text-zinc-200 focus:outline-none " +
           "[&_p]:leading-relaxed [&_p]:mb-3 " +

@@ -5,7 +5,7 @@ import { routes } from "@/app/(admin)/_routes";
 export default function NewNotePage() {
   return (
     <div>
-      <BackLink href={routes.notes.list} label="Notes" />
+      <BackLink href={routes.notes.list} label="Notes" iconOnly />
       <div className="mt-4">
         <NoteForm />
       </div>
