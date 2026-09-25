@@ -13,8 +13,8 @@ export function PinToggle({ id, pinned }: { id: string; pinned: boolean }) {
       disabled={isPending}
       aria-label={pinned ? "Unpin note" : "Pin note"}
       title={pinned ? "Unpin" : "Pin"}
-      className={`h-8 w-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-50 ${
-        pinned ? "text-amber-400 bg-amber-400/10" : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800"
+      className={`h-8 w-8 flex items-center justify-center rounded-full bg-zinc-800/60 transition-colors disabled:opacity-50 ${
+        pinned ? "text-amber-400" : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
       }`}
     >
       <StarIcon filled={pinned} />
