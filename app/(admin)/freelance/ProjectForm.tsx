@@ -1,23 +1,34 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createFreelanceProject, updateFreelanceProject, uploadFreelanceAttachment, type FreelanceProjectFormData } from "@/app/actions/freelance";
+import {
+  createFreelanceProject,
+  updateFreelanceProject,
+  deleteFreelanceProject,
+  archiveFreelanceProject,
+  uploadFreelanceAttachment,
+  type FreelanceProjectFormData,
+} from "@/app/actions/freelance";
 import { UploadCard } from "@/app/(admin)/_components/UploadCard";
 import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/ClientSelect";
 import { routes } from "@/app/(admin)/_routes";
 
 interface Props {
-  mode: "new" | "edit";
   projectId?: string;
-  initial?: Partial<FreelanceProjectFormData>;
+  initial?: Partial<FreelanceProjectFormData> & { archived?: boolean };
   clients: ClientOption[];
   onClientCreated?: (client: ClientOption) => void;
-  onSuccess?: () => void;
+  /** Called after the project is deleted, so the parent can e.g. navigate away. */
+  onDeleted?: () => void;
 }
 
-export function ProjectForm({ mode, projectId, initial, clients, onClientCreated, onSuccess }: Props) {
+type SaveStatus = "idle" | "saving" | "saved" | "error";
+
+/** Apple-Notes-style: no separate edit mode, no Save button — every change autosaves. */
+export function ProjectForm({ projectId, initial, clients, onClientCreated, onDeleted }: Props) {
   const router = useRouter();
+  const [id, setId] = useState(projectId ?? null);
   const [name, setName] = useState(initial?.name ?? "");
   const [clientId, setClientId] = useState(initial?.clientId ?? "");
   const [status, setStatus] = useState(initial?.status ?? "NOT_STARTED");
@@ -27,49 +38,117 @@ export function ProjectForm({ mode, projectId, initial, clients, onClientCreated
   const [attachmentUrl, setAttachmentUrl] = useState(initial?.attachmentUrl ?? "");
   const [deadline, setDeadline] = useState(initial?.deadline ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [archived, setArchived] = useState(initial?.archived ?? false);
+  const [saveStatus, setStatusMsg] = useState<SaveStatus>("idle");
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+  const isFirstRender = useRef(true);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const data: FreelanceProjectFormData = {
-      name, clientId, status, description, rateAmount, rateCurrency, rateType, attachmentUrl, deadline,
-    };
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!name.trim()) return;
 
-    startTransition(async () => {
-      const result = mode === "new"
-        ? await createFreelanceProject(data)
-        : await updateFreelanceProject(projectId!, data);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(async () => {
+      setStatusMsg("saving");
+      const data: FreelanceProjectFormData = {
+        name, clientId, status, description, rateAmount, rateCurrency, rateType, attachmentUrl, deadline,
+      };
+      const result = id ? await updateFreelanceProject(id, data) : await createFreelanceProject(data);
       if (!result.ok) {
-        setError(result.error ?? "Something went wrong.");
+        setStatusMsg("error");
         return;
       }
-      if (onSuccess) {
-        onSuccess();
-        return;
+      if (!id && result.id) {
+        setId(result.id);
+        router.replace(routes.projects.item(result.id));
       }
-      if (mode === "new" && result.id) router.push(routes.projects.item(result.id));
-      else router.refresh();
+      setStatusMsg("saved");
+      router.refresh();
+    }, 700);
+
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name, clientId, status, rateAmount, rateCurrency, rateType, attachmentUrl, deadline, description]);
+
+  function toggleArchive() {
+    if (!id) return;
+    const next = !archived;
+    setArchived(next);
+    archiveFreelanceProject(id, next).then(() => router.refresh());
+  }
+
+  function handleDelete() {
+    if (!id) return;
+    if (!window.confirm(`Delete "${name}" and all its tasks? This can't be undone.`)) return;
+    setIsDeleting(true);
+    deleteFreelanceProject(id).then(() => {
+      if (onDeleted) onDeleted();
+      else router.push(routes.projects.list);
     });
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">
-      <div>
-        <label htmlFor="name" className="block text-xs font-medium text-zinc-400 mb-1.5">Project name</label>
-        <input id="name" required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+    <div>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Project name"
+          style={{ outline: "none" }}
+          className="w-full text-[21px] font-semibold text-zinc-100 placeholder:text-zinc-600 bg-transparent"
+        />
+        {id && (
+          <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+            <button
+              type="button"
+              onClick={toggleArchive}
+              aria-label={archived ? "Unarchive" : "Archive"}
+              title={archived ? "Unarchive" : "Archive"}
+              className={`h-8 w-8 flex items-center justify-center rounded-full bg-zinc-800/60 transition-colors ${
+                archived ? "text-emerald-400" : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+              }`}
+            >
+              <ArchiveIcon />
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              aria-label="Delete project"
+              title="Delete project"
+              className="h-8 w-8 flex items-center justify-center rounded-full bg-zinc-800/60 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+            >
+              <TrashIcon />
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 mb-3">
         <div>
-          <label htmlFor="client" className="block text-xs font-medium text-zinc-400 mb-1.5">Client (optional)</label>
-          <ClientSelect id="client" value={clientId} onChange={setClientId} clients={clients} onClientCreated={onClientCreated} className={inputClass} />
+          <label className="block text-[11px] text-zinc-600 mb-1">Client</label>
+          <ClientSelect
+            value={clientId}
+            onChange={setClientId}
+            clients={clients}
+            onClientCreated={onClientCreated}
+            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 focus:outline-none"
+          />
         </div>
         <div>
-          <label htmlFor="status" className="block text-xs font-medium text-zinc-400 mb-1.5">Status</label>
-          <select id="status" value={status} onChange={(e) => setStatus(e.target.value)} className={inputClass}>
+          <label className="block text-[11px] text-zinc-600 mb-1">Status</label>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 focus:outline-none"
+          >
             <option value="NOT_STARTED">Not started</option>
             <option value="ACTIVE">Active</option>
             <option value="ON_HOLD">On hold</option>
@@ -78,12 +157,31 @@ export function ProjectForm({ mode, projectId, initial, clients, onClientCreated
         </div>
       </div>
 
-      <div>
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Rate (optional)</label>
-        <div className="grid grid-cols-3 gap-3">
-          <input type="number" min="0" step="0.01" value={rateAmount} onChange={(e) => setRateAmount(e.target.value)} placeholder="Amount" className={inputClass} />
-          <input value={rateCurrency} onChange={(e) => setRateCurrency(e.target.value)} placeholder="AED" className={inputClass} />
-          <select value={rateType} onChange={(e) => setRateType(e.target.value)} className={inputClass}>
+      <div className="mb-3">
+        <label className="block text-[11px] text-zinc-600 mb-1">Rate (optional)</label>
+        <div className="grid grid-cols-3 gap-2">
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={rateAmount}
+            onChange={(e) => setRateAmount(e.target.value)}
+            placeholder="Amount"
+            style={{ outline: "none" }}
+            className="rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 placeholder:text-zinc-600"
+          />
+          <input
+            value={rateCurrency}
+            onChange={(e) => setRateCurrency(e.target.value)}
+            placeholder="AED"
+            style={{ outline: "none" }}
+            className="rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 placeholder:text-zinc-600"
+          />
+          <select
+            value={rateType}
+            onChange={(e) => setRateType(e.target.value)}
+            className="rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 focus:outline-none"
+          >
             <option value="">Type…</option>
             <option value="FIXED">Fixed</option>
             <option value="HOURLY">Hourly</option>
@@ -92,15 +190,25 @@ export function ProjectForm({ mode, projectId, initial, clients, onClientCreated
         </div>
       </div>
 
-      <div>
-        <label htmlFor="deadline" className="block text-xs font-medium text-zinc-400 mb-1.5">Deadline (optional)</label>
-        <input id="deadline" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass} />
+      <div className="mb-4">
+        <label className="block text-[11px] text-zinc-600 mb-1">Deadline (optional)</label>
+        <input
+          type="date"
+          value={deadline}
+          onChange={(e) => setDeadline(e.target.value)}
+          style={{ outline: "none" }}
+          className="rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200"
+        />
       </div>
 
-      <div>
-        <label htmlFor="description" className="block text-xs font-medium text-zinc-400 mb-1.5">Notes / description</label>
-        <textarea id="description" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} className={`${inputClass} resize-none`} />
-      </div>
+      <textarea
+        rows={5}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Notes / description…"
+        style={{ outline: "none" }}
+        className="w-full bg-transparent text-[14.5px] text-zinc-200 placeholder:text-zinc-600 resize-none mb-4"
+      />
 
       <UploadCard
         title="Contract / invoice / deliverable"
@@ -115,17 +223,28 @@ export function ProjectForm({ mode, projectId, initial, clients, onClientCreated
         }}
       />
 
-      {error && <p className="text-[13px] text-red-400" role="alert">{error}</p>}
-
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-5 py-2.5 hover:bg-white transition-colors disabled:opacity-50"
-      >
-        {isPending ? "Saving…" : mode === "new" ? "Create project" : "Save changes"}
-      </button>
-    </form>
+      <p className="text-[11.5px] text-zinc-600 mt-3">
+        {saveStatus === "saving" && "Saving…"}
+        {saveStatus === "saved" && "Saved"}
+        {saveStatus === "error" && <span className="text-red-400">Couldn&apos;t save — check your connection.</span>}
+      </p>
+    </div>
   );
 }
 
-const inputClass = "w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors";
+function ArchiveIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <rect x="3" y="4" width="14" height="3.5" rx="1" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M4 7.5V15a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7.5" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M8.2 10.5h3.6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+function TrashIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M8 4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V5h3.25a.75.75 0 0 1 0 1.5h-.482l-.78 9.36A2 2 0 0 1 11.995 17.7H8.005a2 2 0 0 1-1.993-1.84l-.78-9.36H4.75a.75.75 0 0 1 0-1.5H8v-.5Zm1.5.5h1V5h-1v-0Zm-2.223 1.5.766 9.24a.5.5 0 0 0 .498.46h3.99a.5.5 0 0 0 .498-.46l.766-9.24H7.277Z" />
+    </svg>
+  );
+}

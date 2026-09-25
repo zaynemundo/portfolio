@@ -1,13 +1,17 @@
 import { prisma } from "@/app/lib/prisma";
 import { ProjectForm } from "../ProjectForm";
+import { BackLink } from "@/app/(admin)/_components/BackLink";
+import { routes } from "@/app/(admin)/_routes";
 
 export default async function NewFreelanceProjectPage() {
   const clients = await prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } });
 
   return (
-    <div>
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-8">New freelance project</h1>
-      <ProjectForm mode="new" clients={clients} />
+    <div className="max-w-2xl">
+      <BackLink href={routes.projects.list} label="Freelance Projects" iconOnly />
+      <div className="mt-4">
+        <ProjectForm clients={clients} />
+      </div>
     </div>
   );
 }

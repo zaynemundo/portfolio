@@ -10,9 +10,9 @@ interface Props {
   maxWidthClassName?: string;
 }
 
-/** Shared modal shell for Hub-section forms (Notes, Freelance, Clients, Finance,
- *  Invoices) — Content pages (Homepage/CV/Blog/Case Studies/Inquiries/Settings)
- *  intentionally stay full pages, this is only for the Hub. */
+/** Shared modal shell for Hub-section forms (Clients, Finance, Invoices) — Notes
+ *  and Freelance moved to full pages with Apple-Notes-style autosave; Content
+ *  pages (Homepage/CV/Blog/Case Studies/Inquiries/Settings) stay full pages too. */
 export function Modal({ open, onClose, title, children, maxWidthClassName = "max-w-lg" }: Props) {
   useEffect(() => {
     if (!open) return;
