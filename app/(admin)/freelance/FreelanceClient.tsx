@@ -116,7 +116,7 @@ export function FreelanceClient({ projects, clients: initialClients }: { project
         </div>
       )}
 
-      <Modal open={modal !== null} onClose={close} title={editing ? editing.name : "New freelance project"} maxWidthClassName="max-w-3xl">
+      <Modal open={modal !== null} onClose={close} title={editing ? editing.name : "New freelance project"} maxWidthClassName={editing ? "max-w-3xl" : "max-w-xl"}>
         {editing ? (
           <div className="grid grid-cols-[1fr_280px] gap-8">
             <div>
