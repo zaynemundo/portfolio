@@ -35,8 +35,9 @@ export function RichEditor({ content, onChange, bordered = true }: Props) {
           "[&_code]:bg-zinc-800 [&_code]:rounded [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[13px] " +
           "[&_a]:text-purple-400 [&_a]:underline " +
           "[&_table]:w-full [&_table]:my-3 [&_table]:border-collapse " +
-          "[&_th]:border [&_th]:border-zinc-700 [&_th]:bg-zinc-800 [&_th]:px-2.5 [&_th]:py-1.5 [&_th]:text-left [&_th]:font-semibold " +
-          "[&_td]:border [&_td]:border-zinc-700 [&_td]:px-2.5 [&_td]:py-1.5 [&_td]:align-top " +
+          "[&_th]:border [&_th]:border-zinc-700 [&_th]:bg-zinc-800 [&_th]:px-2.5 [&_th]:py-1.5 [&_th]:text-left [&_th]:font-semibold [&_th]:align-middle " +
+          "[&_td]:border [&_td]:border-zinc-700 [&_td]:px-2.5 [&_td]:py-1.5 [&_td]:align-middle " +
+          "[&_th_p]:mb-0 [&_td_p]:mb-0 " +
           "[&_.selectedCell]:bg-zinc-700/40",
       },
     },
