@@ -3,8 +3,7 @@ import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
-import { PinToggle } from "./PinToggle";
-import { DeleteNoteButton } from "./DeleteNoteButton";
+import { NoteCardMenu } from "./NoteCardMenu";
 import { routes } from "@/app/(admin)/_routes";
 
 const getNotes = unstable_cache(
@@ -44,14 +43,16 @@ export default async function NotesPage() {
               <Link href={routes.notes.item(note.id)} className="absolute inset-0 z-0" aria-label={`Open ${note.title}`} />
 
               <div className="flex items-start justify-between mb-2 gap-2">
-                <span className="text-[14.5px] font-semibold text-zinc-100 group-hover:text-emerald-400 transition-colors text-left pointer-events-none">
+                <span className="text-[14.5px] font-semibold text-zinc-100 group-hover:text-emerald-400 transition-colors text-left pointer-events-none flex items-center gap-1.5">
+                  {note.pinned && (
+                    <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor" className="text-amber-400 shrink-0" aria-hidden="true">
+                      <path d="M10 2.5 12.35 7.9l5.87.63-4.4 3.98 1.24 5.79L10 15.35l-5.06 2.95 1.24-5.79-4.4-3.98 5.87-.63L10 2.5Z" />
+                    </svg>
+                  )}
                   {note.title}
                 </span>
-                <div className="relative z-10 flex items-center gap-1 shrink-0">
-                  <PinToggle id={note.id} pinned={note.pinned} />
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <DeleteNoteButton id={note.id} title={note.title} />
-                  </div>
+                <div className="relative z-10 shrink-0">
+                  <NoteCardMenu id={note.id} title={note.title} pinned={note.pinned} />
                 </div>
               </div>
 
