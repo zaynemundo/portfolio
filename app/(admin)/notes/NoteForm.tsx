@@ -66,6 +66,7 @@ export function NoteForm({ noteId, initial, onDeleted }: Props) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Title"
+          style={{ outline: "none" }}
           className="w-full text-[21px] font-semibold text-zinc-100 placeholder:text-zinc-600 bg-transparent focus:outline-none"
         />
         <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
@@ -89,6 +90,7 @@ export function NoteForm({ noteId, initial, onDeleted }: Props) {
           value={tags}
           onChange={(e) => setTags(e.target.value)}
           placeholder="Add tags, comma-separated"
+          style={{ outline: "none" }}
           className="text-[12px] text-zinc-500 placeholder:text-zinc-700 bg-transparent focus:outline-none"
         />
         {status !== "idle" && (
