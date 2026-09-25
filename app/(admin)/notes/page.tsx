@@ -47,8 +47,11 @@ export default async function NotesPage() {
                 <span className="text-[14.5px] font-semibold text-zinc-100 group-hover:text-emerald-400 transition-colors text-left pointer-events-none">
                   {note.title}
                 </span>
-                <div className="relative z-10">
+                <div className="relative z-10 flex items-center gap-1 shrink-0">
                   <PinToggle id={note.id} pinned={note.pinned} />
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <DeleteNoteButton id={note.id} title={note.title} />
+                  </div>
                 </div>
               </div>
 
@@ -65,10 +68,6 @@ export default async function NotesPage() {
               <p className="text-[12px] text-zinc-600 pointer-events-none">
                 Updated {note.updatedAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
               </p>
-
-              <div className="absolute bottom-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                <DeleteNoteButton id={note.id} title={note.title} />
-              </div>
             </div>
           ))}
         </div>
