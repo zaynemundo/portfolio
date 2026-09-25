@@ -84,6 +84,29 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
         bordered ? "px-2 py-1.5 border-b border-zinc-800 bg-zinc-950" : "inline-flex px-1.5 py-1 rounded-full bg-zinc-800/60 mb-4"
       }`}
     >
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().undo().run()}
+        disabled={!editor.can().undo()}
+        aria-label="Undo"
+        title="Undo"
+        className="h-7 w-7 flex items-center justify-center rounded text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none"
+      >
+        <UndoIcon />
+      </button>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().redo().run()}
+        disabled={!editor.can().redo()}
+        aria-label="Redo"
+        title="Redo"
+        className="h-7 w-7 flex items-center justify-center rounded text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none"
+      >
+        <RedoIcon />
+      </button>
+
+      <div className="w-px self-stretch bg-zinc-700 mx-1" />
+
       {items.map((item) => (
         <button
           key={item.label}
@@ -149,6 +172,22 @@ function iconProps() {
   return { width: 17, height: 17, viewBox: "0 0 20 20", fill: "none" as const, "aria-hidden": true };
 }
 
+function UndoIcon() {
+  return (
+    <svg {...iconProps()}>
+      <path d="M6 6H14.5a3.5 3.5 0 0 1 0 7H9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 3 5.5 6.5 9 10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function RedoIcon() {
+  return (
+    <svg {...iconProps()}>
+      <path d="M14 6H5.5a3.5 3.5 0 0 0 0 7H11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M11 3 14.5 6.5 11 10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 function BoldIcon() {
   return (
     <svg {...iconProps()}>
