@@ -167,11 +167,17 @@ enum RateType {
   RETAINER
 }
 
+enum ClientType {
+  COMPANY
+  INDIVIDUAL
+}
+
 /// A freelance client — shared across FreelanceProject and Transaction so
 /// income/spend and work history can be viewed per-client.
 model Client {
   id           String             @id @default(cuid())
   name         String
+  type         ClientType?
   email        String?
   phone        String?
   company      String?
@@ -214,6 +220,7 @@ model FreelanceProject {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   tasks         FreelanceTask[]
+  services      FreelanceServiceItem[]
   transactions  Transaction[]
   invoices      Invoice[]
 }
@@ -224,6 +231,21 @@ model FreelanceTask {
   project   FreelanceProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
   title     String
   done      Boolean          @default(false)
+  sortOrder Int              @default(0)
+  createdAt DateTime         @default(now())
+}
+
+/// A billable service performed for a client within a FreelanceProject,
+/// with its own date range — distinct from the project's overall
+/// start/end dates, since one project can bundle several services done
+/// at different times.
+model FreelanceServiceItem {
+  id        String           @id @default(cuid())
+  projectId String
+  project   FreelanceProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  startDate DateTime?
+  endDate   DateTime?
   sortOrder Int              @default(0)
   createdAt DateTime         @default(now())
 }

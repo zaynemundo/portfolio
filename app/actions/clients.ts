@@ -5,9 +5,11 @@ import { updateTag } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
+import { ClientType } from "@/generated/prisma/client/client";
 
 export interface ClientFormData {
   name: string;
+  type: string; // "" | "COMPANY" | "INDIVIDUAL"
   email: string;
   phone: string;
   company: string;
@@ -27,6 +29,7 @@ export async function createClient(data: ClientFormData): Promise<ClientActionRe
   const client = await prisma.client.create({
     data: {
       name: data.name.trim(),
+      type: (data.type || null) as ClientType | null,
       email: data.email.trim() || null,
       phone: data.phone.trim() || null,
       company: data.company.trim() || null,
@@ -47,6 +50,7 @@ export async function updateClient(id: string, data: ClientFormData): Promise<Cl
     where: { id },
     data: {
       name: data.name.trim(),
+      type: (data.type || null) as ClientType | null,
       email: data.email.trim() || null,
       phone: data.phone.trim() || null,
       company: data.company.trim() || null,

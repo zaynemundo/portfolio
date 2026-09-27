@@ -135,3 +135,43 @@ export async function deleteTask(taskId: string, projectId: string): Promise<voi
   revalidatePath(`/freelance/${projectId}`);
   updateTag(CACHE_TAGS.freelance);
 }
+
+/* ── Services ──────────────────────────────────────────────────────── */
+
+export async function addService(projectId: string, name: string): Promise<void> {
+  await requireSession();
+  if (!name.trim()) return;
+
+  const max = await prisma.freelanceServiceItem.aggregate({
+    where: { projectId },
+    _max: { sortOrder: true },
+  });
+
+  await prisma.freelanceServiceItem.create({
+    data: { projectId, name: name.trim(), sortOrder: (max._max.sortOrder ?? -1) + 1 },
+  });
+  revalidatePath(`/freelance/${projectId}`);
+  updateTag(CACHE_TAGS.freelance);
+}
+
+export async function updateServiceDates(
+  serviceId: string,
+  projectId: string,
+  startDate: string,
+  endDate: string
+): Promise<void> {
+  await requireSession();
+  await prisma.freelanceServiceItem.update({
+    where: { id: serviceId },
+    data: { startDate: parseDate(startDate), endDate: parseDate(endDate) },
+  });
+  revalidatePath(`/freelance/${projectId}`);
+  updateTag(CACHE_TAGS.freelance);
+}
+
+export async function deleteService(serviceId: string, projectId: string): Promise<void> {
+  await requireSession();
+  await prisma.freelanceServiceItem.delete({ where: { id: serviceId } }).catch(() => {});
+  revalidatePath(`/freelance/${projectId}`);
+  updateTag(CACHE_TAGS.freelance);
+}

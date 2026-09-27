@@ -13,6 +13,7 @@ import type { ClientFormData } from "@/app/actions/clients";
 export interface ClientRow {
   id: string;
   name: string;
+  type: string | null;
   email: string | null;
   phone: string | null;
   company: string | null;
@@ -32,7 +33,7 @@ export function ClientsClient({ clients }: { clients: ClientRow[] }) {
 
   const editing = modal && modal !== "new" ? modal : null;
   const initial: Partial<ClientFormData> | undefined = editing
-    ? { name: editing.name, email: editing.email ?? "", phone: editing.phone ?? "", company: editing.company ?? "", notes: editing.notes ?? "" }
+    ? { name: editing.name, type: editing.type ?? "", email: editing.email ?? "", phone: editing.phone ?? "", company: editing.company ?? "", notes: editing.notes ?? "" }
     : undefined;
 
   return (
@@ -62,7 +63,14 @@ export function ClientsClient({ clients }: { clients: ClientRow[] }) {
               onClick={() => setModal(client)}
               className="text-left rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 hover:border-zinc-700 transition-colors"
             >
-              <h3 className="text-[14.5px] font-semibold text-zinc-100 mb-0.5">{client.name}</h3>
+              <div className="flex items-center gap-2 mb-0.5">
+                <h3 className="text-[14.5px] font-semibold text-zinc-100">{client.name}</h3>
+                {client.type && (
+                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+                    {client.type === "COMPANY" ? "Company" : "Individual"}
+                  </span>
+                )}
+              </div>
               {client.company && <p className="text-[12.5px] text-zinc-500 mb-3">{client.company}</p>}
               <div className="flex items-center gap-4 text-[12px] text-zinc-500">
                 <span>{client.projectCount} project{client.projectCount === 1 ? "" : "s"}</span>

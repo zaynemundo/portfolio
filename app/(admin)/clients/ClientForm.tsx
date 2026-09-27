@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, updateClient, type ClientFormData } from "@/app/actions/clients";
+import { Select } from "@/app/(admin)/_components/Select";
 import { routes } from "@/app/(admin)/_routes";
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 export function ClientForm({ mode, clientId, initial, onSuccess }: Props) {
   const router = useRouter();
   const [name, setName] = useState(initial?.name ?? "");
+  const [type, setType] = useState(initial?.type ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
   const [phone, setPhone] = useState(initial?.phone ?? "");
   const [company, setCompany] = useState(initial?.company ?? "");
@@ -26,7 +28,7 @@ export function ClientForm({ mode, clientId, initial, onSuccess }: Props) {
     e.preventDefault();
     setError(null);
 
-    const data: ClientFormData = { name, email, phone, company, notes };
+    const data: ClientFormData = { name, type, email, phone, company, notes };
 
     startTransition(async () => {
       const result = mode === "new"
@@ -47,9 +49,24 @@ export function ClientForm({ mode, clientId, initial, onSuccess }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">
-      <div>
-        <label htmlFor="name" className="block text-xs font-medium text-zinc-400 mb-1.5">Name</label>
-        <input id="name" required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+      <div className="grid grid-cols-[1fr_160px] gap-4">
+        <div>
+          <label htmlFor="name" className="block text-xs font-medium text-zinc-400 mb-1.5">Name</label>
+          <input id="name" required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-zinc-400 mb-1.5">Type</label>
+          <Select
+            value={type}
+            onChange={setType}
+            className={selectClass}
+            placeholder="—"
+            options={[
+              { value: "COMPANY", label: "Company" },
+              { value: "INDIVIDUAL", label: "Individual" },
+            ]}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -87,3 +104,4 @@ export function ClientForm({ mode, clientId, initial, onSuccess }: Props) {
 }
 
 const inputClass = "w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors";
+const selectClass = `${inputClass} flex items-center justify-between gap-2`;

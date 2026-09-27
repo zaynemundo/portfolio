@@ -28,7 +28,7 @@ export function ClientSelect({ value, onChange, clients, onClientCreated, classN
     if (!name || !name.trim()) return;
 
     startTransition(async () => {
-      const result = await createClient({ name, email: "", phone: "", company: "", notes: "" });
+      const result = await createClient({ name, type: "", email: "", phone: "", company: "", notes: "" });
       if (result.ok && result.id) {
         const client = { id: result.id, name: name.trim() };
         onChange(client.id);
