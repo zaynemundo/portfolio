@@ -30,7 +30,8 @@ export default async function FreelanceProjectDetailPage({ params }: Props) {
   if (!project) notFound();
 
   // unstable_cache round-trips through JSON, so Date fields come back as strings.
-  const deadline = project.deadline ? new Date(project.deadline) : null;
+  const startDate = project.startDate ? new Date(project.startDate) : null;
+  const endDate = project.endDate ? new Date(project.endDate) : null;
 
   return (
     <div>
@@ -48,7 +49,8 @@ export default async function FreelanceProjectDetailPage({ params }: Props) {
             rateCurrency: project.rateCurrency ?? "AED",
             rateType: project.rateType ?? "",
             attachmentUrl: project.attachmentUrl ?? "",
-            deadline: deadline ? deadline.toISOString().slice(0, 10) : "",
+            startDate: startDate ? startDate.toISOString().slice(0, 10) : "",
+            endDate: endDate ? endDate.toISOString().slice(0, 10) : "",
             description: project.description ?? "",
             archived: project.archived,
           }}

@@ -30,7 +30,7 @@ export default async function FreelanceProjectsPage() {
 
   const projects = sorted.map((p) => {
     // unstable_cache round-trips through JSON, so Date fields come back as strings.
-    const deadline = p.deadline ? new Date(p.deadline) : null;
+    const endDate = p.endDate ? new Date(p.endDate) : null;
     const doneCount = p.tasks.filter((t) => t.done).length;
     const totalCount = p.tasks.length;
     return {
@@ -39,8 +39,8 @@ export default async function FreelanceProjectsPage() {
       clientName: p.clientRecord?.name ?? null,
       status: p.status,
       archived: p.archived,
-      displayDeadline: deadline ? deadline.toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "",
-      isOverdue: !!(deadline && deadline < now && p.status !== "COMPLETED"),
+      displayEndDate: endDate ? endDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "",
+      isOverdue: !!(endDate && endDate < now && p.status !== "COMPLETED"),
       doneCount,
       totalCount,
     };
@@ -87,10 +87,10 @@ export default async function FreelanceProjectsPage() {
 
               <div className="flex items-center justify-between text-[12px] text-zinc-500 pointer-events-none">
                 <span>{project.totalCount > 0 ? `${project.doneCount}/${project.totalCount} tasks done` : "No tasks yet"}</span>
-                {project.displayDeadline && (
+                {project.displayEndDate && (
                   <span className={project.isOverdue ? "text-red-400 font-medium" : ""}>
                     {project.isOverdue ? "Overdue: " : "Due "}
-                    {project.displayDeadline}
+                    {project.displayEndDate}
                   </span>
                 )}
               </div>

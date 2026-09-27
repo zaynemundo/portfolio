@@ -204,7 +204,12 @@ model FreelanceProject {
   rateType      RateType?
   /// Link to a contract/invoice/deliverable (Vercel Blob upload or external URL).
   attachmentUrl String?
+  /// Deprecated single deadline — superseded by startDate/endDate. Kept
+  /// (rather than dropped) to avoid a destructive schema migration; unused
+  /// by current code.
   deadline      DateTime?
+  startDate     DateTime?
+  endDate       DateTime?
   archived      Boolean         @default(false)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt

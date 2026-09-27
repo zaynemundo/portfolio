@@ -18,7 +18,8 @@ export interface FreelanceProjectFormData {
   rateCurrency: string;
   rateType: string; // "" | "HOURLY" | "FIXED" | "RETAINER"
   attachmentUrl: string;
-  deadline: string; // yyyy-mm-dd or ""
+  startDate: string; // yyyy-mm-dd or ""
+  endDate: string; // yyyy-mm-dd or ""
 }
 
 export interface FreelanceActionResult {
@@ -27,7 +28,7 @@ export interface FreelanceActionResult {
   id?: string;
 }
 
-function parseDeadline(value: string): Date | null {
+function parseDate(value: string): Date | null {
   if (!value.trim()) return null;
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? null : d;
@@ -43,7 +44,8 @@ function buildData(data: FreelanceProjectFormData) {
     rateCurrency: data.rateCurrency.trim() || "AED",
     rateType: (data.rateType || null) as RateType | null,
     attachmentUrl: data.attachmentUrl.trim() || null,
-    deadline: parseDeadline(data.deadline),
+    startDate: parseDate(data.startDate),
+    endDate: parseDate(data.endDate),
   };
 }
 

@@ -39,7 +39,8 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
   const [rateCurrency, setRateCurrency] = useState(initial?.rateCurrency ?? "AED");
   const [rateType, setRateType] = useState(initial?.rateType ?? "");
   const [attachmentUrl, setAttachmentUrl] = useState(initial?.attachmentUrl ?? "");
-  const [deadline, setDeadline] = useState(initial?.deadline ?? "");
+  const [startDate, setStartDate] = useState(initial?.startDate ?? "");
+  const [endDate, setEndDate] = useState(initial?.endDate ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [archived, setArchived] = useState(initial?.archived ?? false);
   const [saveStatus, setStatusMsg] = useState<SaveStatus>("idle");
@@ -59,7 +60,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
     saveTimer.current = setTimeout(async () => {
       setStatusMsg("saving");
       const data: FreelanceProjectFormData = {
-        name, clientId, status, description, rateAmount, rateCurrency, rateType, attachmentUrl, deadline,
+        name, clientId, status, description, rateAmount, rateCurrency, rateType, attachmentUrl, startDate, endDate,
       };
       const result = id ? await updateFreelanceProject(id, data) : await createFreelanceProject(data);
       if (!result.ok) {
@@ -78,7 +79,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, clientId, status, rateAmount, rateCurrency, rateType, attachmentUrl, deadline, description]);
+  }, [name, clientId, status, rateAmount, rateCurrency, rateType, attachmentUrl, startDate, endDate, description]);
 
   function toggleArchive() {
     if (!id) return;
@@ -195,15 +196,27 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
         </div>
       </div>
 
-      <div className="mb-4">
-        <label className="block text-[11px] text-zinc-600 mb-1">Deadline (optional)</label>
-        <input
-          type="date"
-          value={deadline}
-          onChange={(e) => setDeadline(e.target.value)}
-          style={{ outline: "none" }}
-          className="rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200"
-        />
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div>
+          <label className="block text-[11px] text-zinc-600 mb-1">Start date (optional)</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            style={{ outline: "none" }}
+            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200"
+          />
+        </div>
+        <div>
+          <label className="block text-[11px] text-zinc-600 mb-1">End date (optional)</label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            style={{ outline: "none" }}
+            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200"
+          />
+        </div>
       </div>
 
       <textarea
