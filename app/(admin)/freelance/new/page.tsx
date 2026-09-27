@@ -7,7 +7,7 @@ export default async function NewFreelanceProjectPage() {
   const clients = await prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } });
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <BackLink href={routes.projects.list} label="Freelance Projects" iconOnly />
       <div className="mt-4">
         <ProjectForm clients={clients} />
