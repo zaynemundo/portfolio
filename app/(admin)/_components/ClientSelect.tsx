@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/app/actions/clients";
+import { Select } from "./Select";
 
 export interface ClientOption {
   id: string;
@@ -18,19 +19,11 @@ interface Props {
   className?: string;
 }
 
-const ADD_NEW = "__add_new_client__";
-
-export function ClientSelect({ id, value, onChange, clients, onClientCreated, className }: Props) {
+export function ClientSelect({ value, onChange, clients, onClientCreated, className }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const selected = e.target.value;
-    if (selected !== ADD_NEW) {
-      onChange(selected);
-      return;
-    }
-
+  function handleAddNew() {
     const name = window.prompt("New client name");
     if (!name || !name.trim()) return;
 
@@ -48,12 +41,12 @@ export function ClientSelect({ id, value, onChange, clients, onClientCreated, cl
   }
 
   return (
-    <select id={id} value={value} onChange={handleChange} disabled={isPending} className={className}>
-      <option value="">—</option>
-      {clients.map((c) => (
-        <option key={c.id} value={c.id}>{c.name}</option>
-      ))}
-      <option value={ADD_NEW}>+ Add new client…</option>
-    </select>
+    <Select
+      value={value}
+      onChange={onChange}
+      options={[{ value: "", label: "—" }, ...clients.map((c) => ({ value: c.id, label: c.name }))]}
+      extraAction={{ label: "+ Add new client…", onSelect: handleAddNew }}
+      className={isPending ? `${className} opacity-50 pointer-events-none` : className}
+    />
   );
 }

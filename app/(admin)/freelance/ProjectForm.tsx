@@ -12,7 +12,10 @@ import {
 } from "@/app/actions/freelance";
 import { UploadCard } from "@/app/(admin)/_components/UploadCard";
 import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/ClientSelect";
+import { Select } from "@/app/(admin)/_components/Select";
 import { routes } from "@/app/(admin)/_routes";
+
+const SELECT_CLASS = "w-full flex items-center justify-between gap-2 rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 hover:bg-zinc-800 transition-colors";
 
 interface Props {
   projectId?: string;
@@ -139,21 +142,22 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
             onChange={setClientId}
             clients={clients}
             onClientCreated={onClientCreated}
-            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 focus:outline-none"
+            className={SELECT_CLASS}
           />
         </div>
         <div>
           <label className="block text-[11px] text-zinc-600 mb-1">Status</label>
-          <select
+          <Select
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 focus:outline-none"
-          >
-            <option value="NOT_STARTED">Not started</option>
-            <option value="ACTIVE">Active</option>
-            <option value="ON_HOLD">On hold</option>
-            <option value="COMPLETED">Completed</option>
-          </select>
+            onChange={setStatus}
+            className={SELECT_CLASS}
+            options={[
+              { value: "NOT_STARTED", label: "Not started" },
+              { value: "ACTIVE", label: "Active" },
+              { value: "ON_HOLD", label: "On hold" },
+              { value: "COMPLETED", label: "Completed" },
+            ]}
+          />
         </div>
       </div>
 
@@ -177,16 +181,17 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
             style={{ outline: "none" }}
             className="rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 placeholder:text-zinc-600"
           />
-          <select
+          <Select
             value={rateType}
-            onChange={(e) => setRateType(e.target.value)}
-            className="rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 focus:outline-none"
-          >
-            <option value="">Type…</option>
-            <option value="FIXED">Fixed</option>
-            <option value="HOURLY">Hourly</option>
-            <option value="RETAINER">Retainer</option>
-          </select>
+            onChange={setRateType}
+            className={SELECT_CLASS}
+            placeholder="Type…"
+            options={[
+              { value: "FIXED", label: "Fixed" },
+              { value: "HOURLY", label: "Hourly" },
+              { value: "RETAINER", label: "Retainer" },
+            ]}
+          />
         </div>
       </div>
 

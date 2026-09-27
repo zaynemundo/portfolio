@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createTransaction, updateTransaction, type TransactionFormData } from "@/app/actions/finance";
 import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/ClientSelect";
+import { Select } from "@/app/(admin)/_components/Select";
 import { routes } from "@/app/(admin)/_routes";
 
 interface Option {
@@ -62,10 +63,15 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="type" className="block text-xs font-medium text-zinc-400 mb-1.5">Type</label>
-          <select id="type" value={type} onChange={(e) => setType(e.target.value)} className={inputClass}>
-            <option value="INCOME">Income</option>
-            <option value="EXPENSE">Expense</option>
-          </select>
+          <Select
+            value={type}
+            onChange={setType}
+            className={selectClass}
+            options={[
+              { value: "INCOME", label: "Income" },
+              { value: "EXPENSE", label: "Expense" },
+            ]}
+          />
         </div>
         <div>
           <label htmlFor="date" className="block text-xs font-medium text-zinc-400 mb-1.5">Date</label>
@@ -92,14 +98,16 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="clientId" className="block text-xs font-medium text-zinc-400 mb-1.5">Client (optional)</label>
-          <ClientSelect id="clientId" value={clientId} onChange={setClientId} clients={clients} onClientCreated={onClientCreated} className={inputClass} />
+          <ClientSelect value={clientId} onChange={setClientId} clients={clients} onClientCreated={onClientCreated} className={selectClass} />
         </div>
         <div>
           <label htmlFor="projectId" className="block text-xs font-medium text-zinc-400 mb-1.5">Project (optional)</label>
-          <select id="projectId" value={projectId} onChange={(e) => setProjectId(e.target.value)} className={inputClass}>
-            <option value="">—</option>
-            {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          <Select
+            value={projectId}
+            onChange={setProjectId}
+            className={selectClass}
+            options={[{ value: "", label: "—" }, ...projects.map((p) => ({ value: p.id, label: p.name }))]}
+          />
         </div>
       </div>
 
@@ -122,3 +130,4 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
 }
 
 const inputClass = "w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors";
+const selectClass = `${inputClass} flex items-center justify-between gap-2`;

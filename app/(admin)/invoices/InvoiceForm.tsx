@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createInvoice, updateInvoice, type InvoiceFormData, type InvoiceItemInput } from "@/app/actions/invoices";
 import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/ClientSelect";
+import { Select } from "@/app/(admin)/_components/Select";
 import { routes } from "@/app/(admin)/_routes";
 
 interface Option {
@@ -76,26 +77,33 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-medium text-zinc-400 mb-1.5">Client (optional)</label>
-          <ClientSelect value={clientId} onChange={setClientId} clients={clients} onClientCreated={onClientCreated} className={inputClass} />
+          <ClientSelect value={clientId} onChange={setClientId} clients={clients} onClientCreated={onClientCreated} className={selectClass} />
         </div>
         <div>
           <label className="block text-xs font-medium text-zinc-400 mb-1.5">Project (optional)</label>
-          <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className={inputClass}>
-            <option value="">—</option>
-            {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          <Select
+            value={projectId}
+            onChange={setProjectId}
+            className={selectClass}
+            options={[{ value: "", label: "—" }, ...projects.map((p) => ({ value: p.id, label: p.name }))]}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-4 gap-4">
         <div>
           <label className="block text-xs font-medium text-zinc-400 mb-1.5">Status</label>
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className={inputClass}>
-            <option value="DRAFT">Draft</option>
-            <option value="SENT">Sent</option>
-            <option value="PAID">Paid</option>
-            <option value="OVERDUE">Overdue</option>
-          </select>
+          <Select
+            value={status}
+            onChange={setStatus}
+            className={selectClass}
+            options={[
+              { value: "DRAFT", label: "Draft" },
+              { value: "SENT", label: "Sent" },
+              { value: "PAID", label: "Paid" },
+              { value: "OVERDUE", label: "Overdue" },
+            ]}
+          />
         </div>
         <div>
           <label className="block text-xs font-medium text-zinc-400 mb-1.5">Issue date</label>
@@ -186,3 +194,4 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
 }
 
 const inputClass = "w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors";
+const selectClass = `${inputClass} flex items-center justify-between gap-2`;
