@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/app/lib/prisma";
 import { ClientForm } from "../ClientForm";
-import { DeleteClientButton } from "../DeleteClientButton";
 import { ContactList } from "../ContactList";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
@@ -28,17 +27,10 @@ export default async function ClientDetailPage({ params }: Props) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <BackLink href={routes.clients.list} label="Clients" />
-          <h1 className="text-[22px] font-semibold text-zinc-100 mt-1">{client.name}</h1>
-        </div>
-        <DeleteClientButton id={client.id} name={client.name} />
-      </div>
+      <BackLink href={routes.clients.list} label="Clients" iconOnly />
 
-      <div className="grid grid-cols-[1fr_320px] gap-10">
+      <div className="grid grid-cols-[1fr_320px] gap-10 mt-4">
         <ClientForm
-          mode="edit"
           clientId={client.id}
           initial={{
             name: client.name,

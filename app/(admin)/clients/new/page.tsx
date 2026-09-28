@@ -1,10 +1,14 @@
 import { ClientForm } from "../ClientForm";
+import { BackLink } from "@/app/(admin)/_components/BackLink";
+import { routes } from "@/app/(admin)/_routes";
 
 export default function NewClientPage() {
   return (
     <div>
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-8">New client</h1>
-      <ClientForm mode="new" />
+      <BackLink href={routes.clients.list} label="Clients" iconOnly />
+      <div className="mt-4 max-w-xl">
+        <ClientForm />
+      </div>
     </div>
   );
 }
