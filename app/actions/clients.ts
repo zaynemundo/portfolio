@@ -10,7 +10,6 @@ import { ClientType } from "@/generated/prisma/client/client";
 export interface ClientFormData {
   name: string;
   type: string; // "" | "COMPANY" | "INDIVIDUAL"
-  email: string;
   phone: string;
   company: string;
 }
@@ -29,7 +28,6 @@ export async function createClient(data: ClientFormData): Promise<ClientActionRe
     data: {
       name: data.name.trim(),
       type: (data.type || null) as ClientType | null,
-      email: data.email.trim() || null,
       phone: data.phone.trim() || null,
       company: data.company.trim() || null,
     },
@@ -49,7 +47,6 @@ export async function updateClient(id: string, data: ClientFormData): Promise<Cl
     data: {
       name: data.name.trim(),
       type: (data.type || null) as ClientType | null,
-      email: data.email.trim() || null,
       phone: data.phone.trim() || null,
       company: data.company.trim() || null,
     },

@@ -178,6 +178,7 @@ model Client {
   id           String             @id @default(cuid())
   name         String
   type         ClientType?
+  /// Deprecated 2026-09-28 — removed from the UI; per-Contact email under this Client is the source of truth now (fides-creativo-style separation). Column kept, unused.
   email        String?
   phone        String?
   company      String?

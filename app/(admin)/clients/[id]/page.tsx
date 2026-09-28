@@ -37,7 +37,6 @@ export default async function ClientDetailPage({ params }: Props) {
           initial={{
             name: client.name,
             type: client.type ?? "",
-            email: client.email ?? "",
             phone: client.phone ?? "",
             company: client.company ?? "",
           }}
