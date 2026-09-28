@@ -181,6 +181,7 @@ model Client {
   email        String?
   phone        String?
   company      String?
+  /// Deprecated 2026-09-28 — removed from the UI, "not needed" per user. Column kept, unused.
   notes        String?
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt

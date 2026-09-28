@@ -38,7 +38,6 @@ export default async function ClientDetailPage({ params }: Props) {
             email: client.email ?? "",
             phone: client.phone ?? "",
             company: client.company ?? "",
-            notes: client.notes ?? "",
           }}
         />
 

@@ -13,7 +13,6 @@ export interface ClientFormData {
   email: string;
   phone: string;
   company: string;
-  notes: string;
 }
 
 export interface ClientActionResult {
@@ -33,7 +32,6 @@ export async function createClient(data: ClientFormData): Promise<ClientActionRe
       email: data.email.trim() || null,
       phone: data.phone.trim() || null,
       company: data.company.trim() || null,
-      notes: data.notes.trim() || null,
     },
   });
 
@@ -54,7 +52,6 @@ export async function updateClient(id: string, data: ClientFormData): Promise<Cl
       email: data.email.trim() || null,
       phone: data.phone.trim() || null,
       company: data.company.trim() || null,
-      notes: data.notes.trim() || null,
     },
   });
 

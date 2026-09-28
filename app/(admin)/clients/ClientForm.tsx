@@ -22,7 +22,6 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
   const [email, setEmail] = useState(initial?.email ?? "");
   const [phone, setPhone] = useState(initial?.phone ?? "");
   const [company, setCompany] = useState(initial?.company ?? "");
-  const [notes, setNotes] = useState(initial?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -31,7 +30,7 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
     e.preventDefault();
     setError(null);
 
-    const data: ClientFormData = { name, type, email, phone, company, notes };
+    const data: ClientFormData = { name, type, email, phone, company };
 
     startTransition(async () => {
       const result = clientId ? await updateClient(clientId, data) : await createClient(data);
@@ -93,7 +92,7 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-2 gap-3 mb-4">
         <div>
           <label className="block text-[11px] text-zinc-400 mb-1">Email (optional)</label>
           <input
@@ -115,24 +114,18 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
         </div>
       </div>
 
-      <div className="mb-4">
-        <label className="block text-[11px] text-zinc-400 mb-1">Company (optional)</label>
-        <input
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          style={{ outline: "none" }}
-          className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 placeholder:text-zinc-500"
-        />
-      </div>
-
-      <textarea
-        rows={5}
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        placeholder="Notes…"
-        style={{ outline: "none" }}
-        className="w-full bg-transparent text-[14.5px] text-zinc-200 placeholder:text-zinc-500 resize-none mb-4"
-      />
+      {type === "INDIVIDUAL" && (
+        <div className="mb-4">
+          <label className="block text-[11px] text-zinc-400 mb-1">Company (optional)</label>
+          <input
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            placeholder="Who they work for"
+            style={{ outline: "none" }}
+            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 placeholder:text-zinc-500"
+          />
+        </div>
+      )}
 
       {error && <p className="text-[13px] text-red-400 mb-3" role="alert">{error}</p>}
 
