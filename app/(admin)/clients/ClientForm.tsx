@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient, updateClient, deleteClient, type ClientFormData } from "@/app/actions/clients";
 import { Select } from "@/app/(admin)/_components/Select";
@@ -15,75 +15,57 @@ interface Props {
   onDeleted?: () => void;
 }
 
-type SaveStatus = "idle" | "saving" | "saved" | "error";
-
-/** Apple-Notes-style: no separate edit mode, no Save button — every change autosaves. */
 export function ClientForm({ clientId, initial, onDeleted }: Props) {
   const router = useRouter();
-  const [id, setId] = useState(clientId ?? null);
   const [name, setName] = useState(initial?.name ?? "");
   const [type, setType] = useState(initial?.type ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
   const [phone, setPhone] = useState(initial?.phone ?? "");
   const [company, setCompany] = useState(initial?.company ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const isFirstRender = useRef(true);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
 
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    if (!name.trim()) return;
+    const data: ClientFormData = { name, type, email, phone, company, notes };
 
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(async () => {
-      setSaveStatus("saving");
-      const data: ClientFormData = { name, type, email, phone, company, notes };
-      const result = id ? await updateClient(id, data) : await createClient(data);
+    startTransition(async () => {
+      const result = clientId ? await updateClient(clientId, data) : await createClient(data);
       if (!result.ok) {
-        setSaveStatus("error");
+        setError(result.error ?? "Something went wrong.");
         return;
       }
-      if (!id && result.id) {
-        setId(result.id);
-        router.replace(routes.clients.item(result.id));
-      }
-      setSaveStatus("saved");
-      router.refresh();
-    }, 700);
-
-    return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, type, email, phone, company, notes]);
+      if (!clientId && result.id) router.push(routes.clients.item(result.id));
+      else router.refresh();
+    });
+  }
 
   function handleDelete() {
-    if (!id) return;
+    if (!clientId) return;
     if (!window.confirm(`Delete "${name}"? Projects and transactions linked to them keep their history but lose the client link. This can't be undone.`)) return;
     setIsDeleting(true);
-    deleteClient(id).then(() => {
+    deleteClient(clientId).then(() => {
       if (onDeleted) onDeleted();
       else router.push(routes.clients.list);
     });
   }
 
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <div className="flex items-start justify-between gap-3 mb-4">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Client name"
+          required
           style={{ outline: "none" }}
           className="w-full text-[21px] font-semibold text-zinc-100 placeholder:text-zinc-500 bg-transparent"
         />
-        {id && (
+        {clientId && (
           <button
             type="button"
             onClick={handleDelete}
@@ -149,15 +131,19 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
         onChange={(e) => setNotes(e.target.value)}
         placeholder="Notes…"
         style={{ outline: "none" }}
-        className="w-full bg-transparent text-[14.5px] text-zinc-200 placeholder:text-zinc-500 resize-none mb-3"
+        className="w-full bg-transparent text-[14.5px] text-zinc-200 placeholder:text-zinc-500 resize-none mb-4"
       />
 
-      <p className="text-[11.5px] text-zinc-500">
-        {saveStatus === "saving" && "Saving…"}
-        {saveStatus === "saved" && "Saved"}
-        {saveStatus === "error" && <span className="text-red-400">Couldn&apos;t save — check your connection.</span>}
-      </p>
-    </div>
+      {error && <p className="text-[13px] text-red-400 mb-3" role="alert">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={isPending}
+        className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-5 py-2.5 hover:bg-white transition-colors disabled:opacity-50"
+      >
+        {isPending ? "Saving…" : clientId ? "Save changes" : "Add client"}
+      </button>
+    </form>
   );
 }
 
