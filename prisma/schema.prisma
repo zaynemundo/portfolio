@@ -189,6 +189,7 @@ model Client {
   contacts     Contact[]
   transactions Transaction[]
   invoices     Invoice[]
+  documents    Document[]
 }
 
 /// A person at a Client — a Client (company or individual) can have several
@@ -204,6 +205,19 @@ model Contact {
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// An uploaded file attached to a Client or a Project (2026-09-28, replaces
+/// the standalone Notes feature) — belongs to exactly one of the two.
+model Document {
+  id        String            @id @default(cuid())
+  name      String
+  fileUrl   String
+  clientId  String?
+  client    Client?           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projectId String?
+  project   FreelanceProject? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime          @default(now())
 }
 
 /// Freelance work tracker — separate from the public portfolio Project model.
@@ -240,6 +254,7 @@ model FreelanceProject {
   services      FreelanceServiceItem[]
   transactions  Transaction[]
   invoices      Invoice[]
+  documents     Document[]
 }
 
 model FreelanceTask {
@@ -319,6 +334,7 @@ model Invoice {
 }
 
 /// Personal notes / documentation — separate from published blog articles.
+/// Deprecated 2026-09-28 — standalone Notes UI removed, replaced by per-Client/per-Project Documents. Table kept, unused, data preserved.
 model Note {
   id          String   @id @default(cuid())
   title       String

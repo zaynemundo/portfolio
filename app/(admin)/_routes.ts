@@ -31,11 +31,6 @@ export const routes = {
     new: "/case-studies/new",
     item: (id: string) => `/case-studies/${id}`,
   },
-  notes: {
-    list: "/notes",
-    new: "/notes/new",
-    item: (id: string) => `/notes/${id}`,
-  },
   projects: {
     list: "/freelance",
     new: "/freelance/new",
@@ -74,7 +69,6 @@ export const PROTECTED_TOP_LEVEL_PATHS = [
   routes.homepage,
   routes.blog.list,
   routes.caseStudies.list,
-  routes.notes.list,
   routes.projects.list,
   routes.clients.list,
   routes.contacts.list,

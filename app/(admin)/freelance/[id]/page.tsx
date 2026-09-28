@@ -6,6 +6,7 @@ import { ProjectForm } from "../ProjectForm";
 import { TaskList } from "../TaskList";
 import { ServiceList } from "../ServiceList";
 import { InvoiceList } from "../InvoiceList";
+import { DocumentList } from "@/app/(admin)/_components/DocumentList";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
 
@@ -33,6 +34,7 @@ const getProjectDetail = unstable_cache(
           tasks: { orderBy: { sortOrder: "asc" } },
           services: { orderBy: { sortOrder: "asc" } },
           invoices: { orderBy: { issueDate: "desc" } },
+          documents: { orderBy: { createdAt: "desc" } },
         },
       }),
       prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
@@ -103,7 +105,13 @@ export default async function FreelanceProjectDetailPage({ params }: Props) {
           />
         </div>
 
-        <TaskList projectId={project.id} tasks={project.tasks} />
+        <div className="space-y-5">
+          <TaskList projectId={project.id} tasks={project.tasks} />
+          <DocumentList
+            projectId={project.id}
+            documents={project.documents.map((d) => ({ id: d.id, name: d.name, fileUrl: d.fileUrl }))}
+          />
+        </div>
       </div>
     </div>
   );

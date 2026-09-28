@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/app/lib/prisma";
 import { ClientForm } from "../ClientForm";
 import { ContactList } from "../ContactList";
+import { DocumentList } from "@/app/(admin)/_components/DocumentList";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
 
@@ -18,6 +19,7 @@ export default async function ClientDetailPage({ params }: Props) {
       projects: { orderBy: { updatedAt: "desc" } },
       transactions: { orderBy: { date: "desc" } },
       contacts: { orderBy: { sortOrder: "asc" } },
+      documents: { orderBy: { createdAt: "desc" } },
     },
   });
   if (!client) notFound();
@@ -51,6 +53,11 @@ export default async function ClientDetailPage({ params }: Props) {
               email: c.email ?? "",
               phone: c.phone ?? "",
             }))}
+          />
+
+          <DocumentList
+            clientId={client.id}
+            documents={client.documents.map((d) => ({ id: d.id, name: d.name, fileUrl: d.fileUrl }))}
           />
 
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">

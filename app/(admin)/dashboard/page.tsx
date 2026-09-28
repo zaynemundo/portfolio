@@ -15,12 +15,10 @@ const getDashboardData = unstable_cache(
       getSiteSettings(),
       prisma.blogPost.findMany({ orderBy: { date: "desc" }, take: 5 }),
       prisma.inquiry.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
-      prisma.note.findMany({ orderBy: { updatedAt: "desc" }, take: 5 }),
       prisma.freelanceProject.findMany({ where: { archived: false }, orderBy: { updatedAt: "desc" }, take: 5 }),
       prisma.inquiry.count({ where: { read: false } }),
       prisma.blogPost.count({ where: { published: true } }),
       prisma.project.count({ where: { published: true } }),
-      prisma.note.count(),
       prisma.freelanceProject.count({ where: { archived: false } }),
       prisma.inquiry.count(),
       prisma.transaction.findMany({ where: { date: { gte: monthStart, lt: monthEnd } } }),
@@ -30,7 +28,7 @@ const getDashboardData = unstable_cache(
   ["dashboard-data"],
   {
     tags: [
-      CACHE_TAGS.blog, CACHE_TAGS.caseStudies, CACHE_TAGS.inquiries, CACHE_TAGS.notes,
+      CACHE_TAGS.blog, CACHE_TAGS.caseStudies, CACHE_TAGS.inquiries,
       CACHE_TAGS.freelance, CACHE_TAGS.transactions, CACHE_TAGS.settings,
     ],
     revalidate: 60,
@@ -43,8 +41,8 @@ export default async function DashboardPage() {
 
   const [
     settings,
-    posts, inquiries, notes, projects, unreadCount,
-    publishedArticles, publishedCaseStudies, notesCount, activeProjects, totalInquiries,
+    posts, inquiries, projects, unreadCount,
+    publishedArticles, publishedCaseStudies, activeProjects, totalInquiries,
     monthTransactions, recentTransactions,
   ] = await getDashboardData(monthKey);
 
@@ -74,11 +72,10 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-6 gap-3 mb-8">
+      <div className="grid grid-cols-5 gap-3 mb-8">
         <StatCard href={routes.blog.list} value={publishedArticles} label="Published articles" icon={<StatBlogIcon />} accent="purple" />
         <StatCard href={routes.caseStudies.list} value={publishedCaseStudies} label="Case studies" icon={<StatCaseIcon />} accent="purple" />
         <StatCard href={routes.inquiries.list} value={totalInquiries} label="Inquiries" sublabel={unreadCount > 0 ? `${unreadCount} unread` : undefined} icon={<StatInquiryIcon />} accent="purple" />
-        <StatCard href={routes.notes.list} value={notesCount} label="Notes" icon={<StatNotesIcon />} accent="emerald" />
         <StatCard href={routes.projects.list} value={activeProjects} label="Active projects" icon={<StatProjectsIcon />} accent="emerald" />
         <StatCard
           href={routes.finance.list}
@@ -90,10 +87,9 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-5 gap-3 mb-10">
+      <div className="grid grid-cols-4 gap-3 mb-10">
         <QuickAction href={routes.blog.new} label="New article" accent="purple" />
         <QuickAction href={routes.caseStudies.new} label="New case study" accent="purple" />
-        <QuickAction href={routes.notes.new} label="New note" accent="emerald" />
         <QuickAction href={routes.projects.new} label="New freelance project" accent="emerald" />
         <QuickAction href={routes.finance.new} label="New transaction" accent="emerald" />
       </div>
@@ -117,17 +113,6 @@ export default async function DashboardPage() {
               primary={i.name}
               secondary={i.message.slice(0, 60)}
               unread={!i.read}
-            />
-          ))}
-        </RecentCard>
-
-        <RecentCard title="Recent notes" emptyLabel="No notes yet.">
-          {notes.map((n) => (
-            <RecentRow
-              key={n.id}
-              href={routes.notes.item(n.id)}
-              primary={n.title}
-              secondary={new Date(n.updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
             />
           ))}
         </RecentCard>
@@ -269,14 +254,6 @@ function StatInquiryIcon() {
     <svg {...statIconProps()}>
       <path d="M3 5.5h14v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
       <path d="M3 5.5 10 11l7-5.5" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function StatNotesIcon() {
-  return (
-    <svg {...statIconProps()}>
-      <path d="M5 3.5h10a1 1 0 0 1 1 1V16l-3-2-3 2-3-2-3 2V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M7.5 7.5h5M7.5 10.5h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }

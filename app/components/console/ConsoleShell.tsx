@@ -27,10 +27,6 @@ function buildContentItems(unreadInquiries: number): NavItem[] {
   ];
 }
 
-const HUB_ITEMS: NavItem[] = [
-  { href: routes.notes.list, label: "Notes", icon: <NotesIcon /> },
-];
-
 const FREELANCE_DROPDOWN_ITEMS: NavItem[] = [
   { href: routes.clients.list, label: "Clients", icon: <ClientsIcon /> },
   { href: routes.projects.list, label: "Projects", icon: <ProjectsIcon /> },
@@ -53,7 +49,6 @@ export function ConsoleShell({
   const allNavItems: NavItem[] = [
     DASHBOARD_ITEM,
     ...contentItems,
-    ...HUB_ITEMS,
     ...FREELANCE_DROPDOWN_ITEMS,
   ];
 
@@ -105,11 +100,6 @@ export function ConsoleShell({
                 Hub
               </p>
               <ul className="space-y-0.5">
-                {HUB_ITEMS.map((item) => (
-                  <li key={item.href}>
-                    <NavLink item={item} pathname={pathname} activeClasses="bg-emerald-500/10 text-emerald-300" />
-                  </li>
-                ))}
                 <li>
                   <FreelanceDropdown items={FREELANCE_DROPDOWN_ITEMS} pathname={pathname} />
                 </li>
@@ -401,14 +391,6 @@ function SettingsIcon() {
     <svg {...iconProps()}>
       <circle cx="10" cy="10" r="2.75" stroke="currentColor" strokeWidth="1.4" />
       <path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.36 4.64l-1.41 1.41M6.05 13.95l-1.41 1.41M15.36 15.36l-1.41-1.41M6.05 6.05 4.64 4.64" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
-function NotesIcon() {
-  return (
-    <svg {...iconProps()}>
-      <path d="M5 3.5h10a1 1 0 0 1 1 1V16l-3-2-3 2-3-2-3 2V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M7.5 7.5h5M7.5 10.5h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }
