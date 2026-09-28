@@ -4,7 +4,6 @@ import { prisma } from "@/app/lib/prisma";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { ProjectForm } from "../ProjectForm";
 import { TaskList } from "../TaskList";
-import { ServiceList } from "../ServiceList";
 import { InvoiceList } from "../InvoiceList";
 import { DocumentList } from "@/app/(admin)/_components/DocumentList";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
@@ -32,7 +31,6 @@ const getProjectDetail = unstable_cache(
         where: { id },
         include: {
           tasks: { orderBy: { sortOrder: "asc" } },
-          services: { orderBy: { sortOrder: "asc" } },
           invoices: { orderBy: { issueDate: "desc" } },
           documents: { orderBy: { createdAt: "desc" } },
         },
@@ -56,62 +54,45 @@ export default async function FreelanceProjectDetailPage({ params }: Props) {
     <div>
       <BackLink href={routes.projects.list} label="Freelance Projects" iconOnly />
 
-      <div className="grid grid-cols-[1fr_320px] gap-10 mt-4">
-        <div>
-          <ProjectForm
-            projectId={project.id}
-            clients={clients}
-            initial={{
-              name: project.name,
-              clientId: project.clientId ?? "",
-              status: project.status,
-              rateAmount: project.rateAmount != null ? String(project.rateAmount) : "",
-              rateCurrency: project.rateCurrency ?? "AED",
-              rateType: project.rateType ?? "",
-              attachmentUrl: project.attachmentUrl ?? "",
-              startDate: startDate ? startDate.toISOString().slice(0, 10) : "",
-              endDate: endDate ? endDate.toISOString().slice(0, 10) : "",
-              description: project.description ?? "",
-              archived: project.archived,
-            }}
-          />
+      <div className="mt-4 max-w-3xl">
+        <ProjectForm
+          projectId={project.id}
+          clients={clients}
+          initial={{
+            name: project.name,
+            clientId: project.clientId ?? "",
+            status: project.status,
+            rateAmount: project.rateAmount != null ? String(project.rateAmount) : "",
+            rateCurrency: project.rateCurrency ?? "AED",
+            rateType: project.rateType ?? "",
+            attachmentUrl: project.attachmentUrl ?? "",
+            startDate: startDate ? startDate.toISOString().slice(0, 10) : "",
+            endDate: endDate ? endDate.toISOString().slice(0, 10) : "",
+            description: project.description ?? "",
+            archived: project.archived,
+          }}
+        />
+      </div>
 
-          <div className="mt-6">
-            <ServiceList
-              projectId={project.id}
-              services={project.services.map((s) => {
-                // unstable_cache round-trips through JSON, so Date fields come back as strings.
-                const svcStart = s.startDate ? new Date(s.startDate) : null;
-                const svcEnd = s.endDate ? new Date(s.endDate) : null;
-                return {
-                  id: s.id,
-                  name: s.name,
-                  startDate: svcStart ? svcStart.toISOString().slice(0, 10) : "",
-                  endDate: svcEnd ? svcEnd.toISOString().slice(0, 10) : "",
-                };
-              })}
-            />
-          </div>
+      <div className="grid grid-cols-2 gap-5 mt-10">
+        <TaskList projectId={project.id} tasks={project.tasks} />
+        <DocumentList
+          projectId={project.id}
+          documents={project.documents.map((d) => ({ id: d.id, name: d.name, fileUrl: d.fileUrl }))}
+        />
+      </div>
 
-          <InvoiceList
-            projectId={project.id}
-            invoices={project.invoices.map((inv) => ({
-              id: inv.id,
-              invoiceNumber: inv.invoiceNumber,
-              status: inv.status,
-              currency: inv.currency,
-              total: computeInvoiceTotal(inv.items),
-            }))}
-          />
-        </div>
-
-        <div className="space-y-5">
-          <TaskList projectId={project.id} tasks={project.tasks} />
-          <DocumentList
-            projectId={project.id}
-            documents={project.documents.map((d) => ({ id: d.id, name: d.name, fileUrl: d.fileUrl }))}
-          />
-        </div>
+      <div className="mt-10 max-w-3xl">
+        <InvoiceList
+          projectId={project.id}
+          invoices={project.invoices.map((inv) => ({
+            id: inv.id,
+            invoiceNumber: inv.invoiceNumber,
+            status: inv.status,
+            currency: inv.currency,
+            total: computeInvoiceTotal(inv.items),
+          }))}
+        />
       </div>
     </div>
   );

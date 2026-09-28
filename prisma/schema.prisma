@@ -180,6 +180,7 @@ model Client {
   type         ClientType?
   /// Deprecated 2026-09-28 — removed from the UI; per-Contact email under this Client is the source of truth now (fides-creativo-style separation). Column kept, unused.
   email        String?
+  /// Deprecated 2026-09-28 — removed from the UI, same reasoning as `email`: per-Contact phone is the source of truth now.
   phone        String?
   company      String?
   /// Deprecated 2026-09-28 — removed from the UI, "not needed" per user. Column kept, unused.
@@ -268,10 +269,9 @@ model FreelanceTask {
   createdAt DateTime         @default(now())
 }
 
-/// A billable service performed for a client within a FreelanceProject,
-/// with its own date range — distinct from the project's overall
-/// start/end dates, since one project can bundle several services done
-/// at different times.
+/// Deprecated 2026-09-28 — removed from the UI. Now that Projects are
+/// properly separated per Client, a distinct piece of work should be its
+/// own Project instead of a "service" nested inside one. Table kept, unused.
 model FreelanceServiceItem {
   id        String           @id @default(cuid())
   projectId String

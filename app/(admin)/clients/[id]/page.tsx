@@ -4,6 +4,7 @@ import { prisma } from "@/app/lib/prisma";
 import { ClientForm } from "../ClientForm";
 import { ContactList } from "../ContactList";
 import { DocumentList } from "@/app/(admin)/_components/DocumentList";
+import { StatusBadge } from "../../freelance/StatusBadge";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
 
@@ -37,7 +38,6 @@ export default async function ClientDetailPage({ params }: Props) {
           initial={{
             name: client.name,
             type: client.type ?? "",
-            phone: client.phone ?? "",
             company: client.company ?? "",
           }}
         />
@@ -85,16 +85,33 @@ export default async function ClientDetailPage({ params }: Props) {
         {client.projects.length === 0 ? (
           <p className="text-[13px] text-muted-foreground/70">No projects yet.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {client.projects.map((p) => (
-              <Link
-                key={p.id}
-                href={routes.projects.item(p.id)}
-                className="rounded-xl border border-border bg-card/40 px-4 py-3 text-[13.5px] text-foreground/80 hover:text-foreground hover:border-ring transition-colors truncate"
-              >
-                {p.name}
-              </Link>
-            ))}
+          <div className="border border-border rounded-xl overflow-hidden">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-border bg-card/40">
+                  <th className="px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
+                  <th className="px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+                  <th className="px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {client.projects.map((p) => (
+                  <tr key={p.id} className="border-b border-border last:border-b-0 hover:bg-card/40 transition-colors">
+                    <td className="px-4 py-2.5">
+                      <Link href={routes.projects.item(p.id)} className="text-[13.5px] text-foreground/90 hover:text-foreground transition-colors">
+                        {p.name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <StatusBadge status={p.status} />
+                    </td>
+                    <td className="px-4 py-2.5 text-[12.5px] text-muted-foreground text-right whitespace-nowrap">
+                      {new Date(p.updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

@@ -19,7 +19,6 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
   const router = useRouter();
   const [name, setName] = useState(initial?.name ?? "");
   const [type, setType] = useState(initial?.type ?? "");
-  const [phone, setPhone] = useState(initial?.phone ?? "");
   const [company, setCompany] = useState(initial?.company ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -29,7 +28,7 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
     e.preventDefault();
     setError(null);
 
-    const data: ClientFormData = { name, type, phone, company };
+    const data: ClientFormData = { name, type, company };
 
     startTransition(async () => {
       const result = clientId ? await updateClient(clientId, data) : await createClient(data);
@@ -88,16 +87,6 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
             { value: "COMPANY", label: "Company" },
             { value: "INDIVIDUAL", label: "Individual" },
           ]}
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-[11px] text-muted-foreground mb-1">Phone (optional)</label>
-        <input
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          style={{ outline: "none" }}
-          className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 placeholder:text-muted-foreground"
         />
       </div>
 

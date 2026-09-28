@@ -42,33 +42,44 @@ export function DocumentList({ documents, ...owner }: { documents: DocumentItem[
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card/40 p-5">
-      <h2 className="text-[13px] font-semibold text-foreground mb-3">Documents</h2>
+    <div>
+      <h2 className="text-[15px] font-semibold text-foreground mb-3">Documents</h2>
 
-      <div className="space-y-2 mb-3">
-        {documents.map((doc) => (
-          <div key={doc.id} className="flex items-center justify-between gap-2 group">
-            <a
-              href={doc.fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 min-w-0 text-[12.5px] text-foreground/70 hover:text-foreground transition-colors"
-            >
-              <FileIcon />
-              <span className="truncate">{doc.name}</span>
-            </a>
-            <button
-              type="button"
-              onClick={() => startTransition(() => deleteDocument(doc.id, owner))}
-              className="text-muted-foreground/70 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 text-[13px] shrink-0"
-              aria-label={`Delete ${doc.name}`}
-            >
-              ×
-            </button>
-          </div>
-        ))}
-        {documents.length === 0 && <p className="text-[12.5px] text-muted-foreground/70">No documents yet.</p>}
-      </div>
+      {documents.length === 0 ? (
+        <p className="text-[13px] text-muted-foreground/70 mb-3">No documents yet.</p>
+      ) : (
+        <div className="border border-border rounded-xl overflow-hidden mb-3">
+          <table className="w-full text-left">
+            <tbody>
+              {documents.map((doc) => (
+                <tr key={doc.id} className="border-b border-border last:border-b-0 hover:bg-card/40 transition-colors group">
+                  <td className="px-4 py-2.5 w-full">
+                    <a
+                      href={doc.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 min-w-0 text-[13px] text-foreground/70 hover:text-foreground transition-colors"
+                    >
+                      <FileIcon />
+                      <span className="truncate">{doc.name}</span>
+                    </a>
+                  </td>
+                  <td className="px-4 py-2.5 text-right">
+                    <button
+                      type="button"
+                      onClick={() => startTransition(() => deleteDocument(doc.id, owner))}
+                      className="text-muted-foreground/70 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 text-[13px]"
+                      aria-label={`Delete ${doc.name}`}
+                    >
+                      ×
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <input
         ref={inputRef}
