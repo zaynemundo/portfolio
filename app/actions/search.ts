@@ -35,7 +35,7 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
     ...posts.map((p) => ({ href: routes.blog.item(p.id), label: p.title, category: "Blog" })),
     ...projects.map((p) => ({ href: routes.caseStudies.item(p.id), label: p.name, category: "Case Studies" })),
     ...notes.map((n) => ({ href: routes.notes.item(n.id), label: n.title, category: "Notes" })),
-    ...clients.map((c) => ({ href: routes.clients.item(c.id), label: c.name, category: "Customers" })),
+    ...clients.map((c) => ({ href: routes.clients.item(c.id), label: c.name, category: "Clients" })),
     ...freelanceProjects.map((p) => ({ href: routes.projects.item(p.id), label: p.name, category: "Freelance Projects" })),
     ...invoices.map((i) => ({ href: routes.invoices.item(i.id), label: i.invoiceNumber, category: "Invoices" })),
     ...inquiries.map((i) => ({ href: routes.inquiries.item(i.id), label: i.name, category: "Inquiries" })),

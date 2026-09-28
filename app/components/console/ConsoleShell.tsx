@@ -34,7 +34,7 @@ const HUB_ITEMS: NavItem[] = [
 const FREELANCE_DROPDOWN_ITEMS: NavItem[] = [
   { href: routes.projects.list, label: "Projects", icon: <ProjectsIcon /> },
   { href: routes.finance.list, label: "Finance", icon: <FinanceIcon /> },
-  { href: routes.clients.list, label: "Customers", icon: <ClientsIcon /> },
+  { href: routes.clients.list, label: "Clients", icon: <ClientsIcon /> },
   { href: routes.contacts.list, label: "Contacts", icon: <ContactsIcon /> },
 ];
 
@@ -255,7 +255,7 @@ function DashboardLink({ item, pathname }: { item: NavItem; pathname: string }) 
   );
 }
 
-/** Groups Projects/Finance/Customers/Contacts under one collapsible "Freelance"
+/** Groups Projects/Finance/Clients/Contacts under one collapsible "Freelance"
  *  item — these all revolve around the same freelance work, so they don't need
  *  four separate top-level Hub entries. Auto-expands when any sub-page is active. */
 function FreelanceDropdown({ items, pathname }: { items: NavItem[]; pathname: string }) {
