@@ -20,12 +20,12 @@ export function ForgotForm() {
   if (sent) {
     return (
       <div className="w-full max-w-sm text-center">
-        <p className="text-[14px] text-zinc-300">
+        <p className="text-[14px] text-foreground/80">
           If that email is registered, a reset link is on its way. Check your inbox.
         </p>
         <Link
           href="/login"
-          className="mt-6 inline-block text-[13px] text-zinc-400 hover:text-zinc-200 transition-colors"
+          className="mt-6 inline-block text-[13px] text-muted-foreground hover:text-foreground transition-colors"
         >
           ← Back to sign in
         </Link>
@@ -36,7 +36,7 @@ export function ForgotForm() {
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-sm">
       <div className="mb-6">
-        <label htmlFor="email" className="block text-xs font-medium text-zinc-400 mb-2">
+        <label htmlFor="email" className="block text-xs font-medium text-muted-foreground mb-2">
           Email
         </label>
         <input
@@ -46,7 +46,8 @@ export function ForgotForm() {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
+          style={{ outline: "none" }}
+          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground placeholder:text-muted-foreground focus:border-ring transition-colors"
           placeholder="you@example.com"
         />
       </div>
@@ -54,14 +55,14 @@ export function ForgotForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-lg bg-zinc-100 text-zinc-900 text-[14px] font-semibold py-2.5 hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-lg bg-primary text-primary-foreground text-[14px] font-semibold py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isPending ? "Sending…" : "Send reset link"}
       </button>
 
       <Link
         href="/login"
-        className="mt-4 block text-center text-[13px] text-zinc-400 hover:text-zinc-200 transition-colors"
+        className="mt-4 block text-center text-[13px] text-muted-foreground hover:text-foreground transition-colors"
       >
         ← Back to sign in
       </Link>

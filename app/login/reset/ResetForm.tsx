@@ -40,8 +40,8 @@ export function ResetForm() {
   if (!token) {
     return (
       <div className="w-full max-w-sm text-center">
-        <p className="text-[14px] text-zinc-300">This reset link is missing its token.</p>
-        <Link href="/login/forgot" className="mt-6 inline-block text-[13px] text-zinc-400 hover:text-zinc-200 transition-colors">
+        <p className="text-[14px] text-foreground/80">This reset link is missing its token.</p>
+        <Link href="/login/forgot" className="mt-6 inline-block text-[13px] text-muted-foreground hover:text-foreground transition-colors">
           Request a new link
         </Link>
       </div>
@@ -50,7 +50,7 @@ export function ResetForm() {
 
   if (done) {
     return (
-      <p className="w-full max-w-sm text-center text-[14px] text-zinc-300">
+      <p className="w-full max-w-sm text-center text-[14px] text-foreground/80">
         Password updated. Redirecting to sign in…
       </p>
     );
@@ -59,7 +59,7 @@ export function ResetForm() {
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-sm">
       <div className="mb-5">
-        <label htmlFor="password" className="block text-xs font-medium text-zinc-400 mb-2">
+        <label htmlFor="password" className="block text-xs font-medium text-muted-foreground mb-2">
           New password
         </label>
         <PasswordField
@@ -71,7 +71,7 @@ export function ResetForm() {
       </div>
 
       <div className="mb-6">
-        <label htmlFor="confirm" className="block text-xs font-medium text-zinc-400 mb-2">
+        <label htmlFor="confirm" className="block text-xs font-medium text-muted-foreground mb-2">
           Confirm password
         </label>
         <PasswordField
@@ -83,7 +83,7 @@ export function ResetForm() {
       </div>
 
       {error && (
-        <p className="mb-4 text-[13px] text-red-400" role="alert">
+        <p className="mb-4 text-[13px] text-destructive" role="alert">
           {error}
         </p>
       )}
@@ -91,7 +91,7 @@ export function ResetForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-lg bg-zinc-100 text-zinc-900 text-[14px] font-semibold py-2.5 hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-lg bg-primary text-primary-foreground text-[14px] font-semibold py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isPending ? "Saving…" : "Set new password"}
       </button>

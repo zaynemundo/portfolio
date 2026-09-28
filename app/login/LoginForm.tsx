@@ -34,7 +34,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-sm">
       <div className="mb-6">
-        <label htmlFor="email" className="block text-xs font-medium text-zinc-400 mb-2">
+        <label htmlFor="email" className="block text-xs font-medium text-muted-foreground mb-2">
           Email
         </label>
         <input
@@ -44,19 +44,20 @@ export function LoginForm() {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
+          style={{ outline: "none" }}
+          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground placeholder:text-muted-foreground focus:border-ring transition-colors"
           placeholder="you@example.com"
         />
       </div>
 
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <label htmlFor="password" className="block text-xs font-medium text-zinc-400">
+          <label htmlFor="password" className="block text-xs font-medium text-muted-foreground">
             Password
           </label>
           <Link
             href="/login/forgot"
-            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             Forgot password?
           </Link>
@@ -70,7 +71,7 @@ export function LoginForm() {
       </div>
 
       {error && (
-        <p className="mb-4 text-[13px] text-red-400" role="alert">
+        <p className="mb-4 text-[13px] text-destructive" role="alert">
           {error}
         </p>
       )}
@@ -78,7 +79,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-lg bg-zinc-100 text-zinc-900 text-[14px] font-semibold py-2.5 hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-lg bg-primary text-primary-foreground text-[14px] font-semibold py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isPending ? "Signing in…" : "Sign in"}
       </button>
