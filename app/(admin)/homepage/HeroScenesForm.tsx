@@ -89,7 +89,7 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
 
       {error && <p className="text-[13px] text-red-400" role="alert">{error}</p>}
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-end gap-3">
         <button
           type="submit"
           disabled={isPending}

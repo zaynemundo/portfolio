@@ -182,13 +182,15 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
 
       {error && <p className="text-[13px] text-red-400" role="alert">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-5 py-2.5 hover:bg-white transition-colors disabled:opacity-50"
-      >
-        {isPending ? "Saving…" : mode === "new" ? "Create invoice" : "Save changes"}
-      </button>
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-5 py-2.5 hover:bg-white transition-colors disabled:opacity-50"
+        >
+          {isPending ? "Saving…" : mode === "new" ? "Create invoice" : "Save changes"}
+        </button>
+      </div>
     </form>
   );
 }

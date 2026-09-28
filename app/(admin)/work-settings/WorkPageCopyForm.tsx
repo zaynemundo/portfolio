@@ -42,7 +42,7 @@ export function WorkPageCopyForm({ initialHeading, initialIntro }: { initialHead
           className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[13.5px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors resize-y"
         />
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-end gap-3">
         <button
           type="submit"
           disabled={isPending}
