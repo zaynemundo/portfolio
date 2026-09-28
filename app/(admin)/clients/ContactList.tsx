@@ -39,7 +39,8 @@ export function ContactList({ clientId, contacts }: { clientId: string; contacts
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Add a contact…"
-          className="flex-1 rounded-lg bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-[12.5px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
+          style={{ outline: "none" }}
+          className="flex-1 rounded-lg bg-zinc-900 border border-zinc-800 px-2.5 py-1.5 text-[12.5px] text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-600 transition-colors"
         />
         <button
           type="submit"
