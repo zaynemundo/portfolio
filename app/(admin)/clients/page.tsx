@@ -2,6 +2,7 @@ import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
+import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
 import { ClientCardMenu } from "./ClientCardMenu";
 import { routes } from "@/app/(admin)/_routes";
@@ -21,18 +22,12 @@ export default async function ClientsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-[22px] font-semibold text-foreground">Clients</h1>
-          <p className="text-[13px] text-muted-foreground mt-1">{clients.length} client{clients.length === 1 ? "" : "s"}</p>
-        </div>
-        <Link
-          href={routes.clients.new}
-          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
-        >
-          + New client
-        </Link>
-      </div>
+      <PageHeader
+        title="Clients"
+        subtitle={`${clients.length} client${clients.length === 1 ? "" : "s"}`}
+        actionHref={routes.clients.new}
+        actionLabel="+ New client"
+      />
 
       {clients.length === 0 ? (
         <EmptyState message="No clients yet." />
@@ -47,7 +42,7 @@ export default async function ClientsPage() {
 
               <div className="flex items-start justify-between mb-2 gap-2">
                 <div className="flex items-center gap-2 pointer-events-none">
-                  <h3 className="text-[14.5px] font-semibold text-foreground group-hover:text-success transition-colors">{client.name}</h3>
+                  <h3 className="text-[14.5px] font-semibold text-foreground group-hover:text-primary transition-colors">{client.name}</h3>
                   {client.type && (
                     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
                       {client.type === "COMPANY" ? "Company" : "Individual"}

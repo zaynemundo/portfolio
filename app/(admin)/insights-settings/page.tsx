@@ -1,4 +1,5 @@
 import { getSiteSettings } from "@/app/lib/settings-db";
+import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { BlogPageCopyForm } from "./BlogPageCopyForm";
 
 export default async function BlogPageSettingsPage() {
@@ -6,10 +7,7 @@ export default async function BlogPageSettingsPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-[22px] font-semibold text-foreground mb-1">Insights Page</h1>
-      <p className="text-[13px] text-muted-foreground mb-8">
-        The header banner on /insights. Articles are managed on the Blog page.
-      </p>
+      <PageHeader title="Insights Page" subtitle="The header banner on /insights. Articles are managed on the Blog page." />
 
       <BlogPageCopyForm initialHeading={settings.blogPageHeading} initialIntro={settings.blogPageIntro} />
     </div>

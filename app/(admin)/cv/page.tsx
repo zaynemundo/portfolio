@@ -1,5 +1,6 @@
 import { getSiteSettings } from "@/app/lib/settings-db";
 import { aboutChapters as DEFAULT_CHAPTERS } from "@/app/data/aboutChapters";
+import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { CvTabs } from "./CvTabs";
 
 function findChapter(chapters: typeof DEFAULT_CHAPTERS, id: string) {
@@ -11,10 +12,7 @@ export default async function CvPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-[22px] font-semibold text-foreground mb-1">CV</h1>
-      <p className="text-[13px] text-muted-foreground mb-6">
-        What you do, your experience, and your education &amp; skills — this feeds the About section on the homepage.
-      </p>
+      <PageHeader title="CV" subtitle="What you do, your experience, and your education & skills — this feeds the About section on the homepage." />
 
       <CvTabs
         services={findChapter(aboutChapters, "what-i-do")}

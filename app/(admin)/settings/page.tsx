@@ -1,4 +1,5 @@
 import { getSiteSettings } from "@/app/lib/settings-db";
+import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { SettingsForm } from "./SettingsForm";
 import { FileUploadCard } from "./FileUploadCard";
 
@@ -7,10 +8,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-[22px] font-semibold text-foreground mb-1">Site Settings</h1>
-      <p className="text-[13px] text-muted-foreground mb-8">
-        Name, contact info, and downloadable assets shown across the public site.
-      </p>
+      <PageHeader title="Site Settings" subtitle="Name, contact info, and downloadable assets shown across the public site." />
 
       <div className="space-y-8">
         <SettingsForm initial={settings} />

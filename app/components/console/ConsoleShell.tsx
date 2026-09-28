@@ -223,8 +223,10 @@ function SidebarHeader({
 function SidebarNav({ contentItems, pathname }: { contentItems: NavItem[]; pathname: string }) {
   return (
     <nav className="flex-1 overflow-y-auto px-3 py-5">
-      <DashboardLink item={DASHBOARD_ITEM} pathname={pathname} />
       <ul className="space-y-0.5">
+        <li>
+          <NavLink item={DASHBOARD_ITEM} pathname={pathname} activeClasses="bg-primary/10 text-primary" />
+        </li>
         {contentItems.map((item) => (
           <li key={item.href}>
             <NavLink item={item} pathname={pathname} activeClasses="bg-primary/10 text-primary" />
@@ -360,15 +362,6 @@ function NavLink({ item, pathname, activeClasses }: { item: NavItem; pathname: s
         </span>
       )}
     </Link>
-  );
-}
-
-/** Dashboard sits above the Content/Hub groups, ungrouped — it's the main landing page, not "content". */
-function DashboardLink({ item, pathname }: { item: NavItem; pathname: string }) {
-  return (
-    <div className="pb-2">
-      <NavLink item={item} pathname={pathname} activeClasses="bg-foreground/10 text-foreground" />
-    </div>
   );
 }
 

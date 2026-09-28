@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { HeroSceneData } from "@/app/lib/settings-db";
 import type { Chapter } from "@/app/data/aboutChapters";
 import { UploadCard } from "@/app/(admin)/_components/UploadCard";
+import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { uploadHeroVideo, uploadHeroPoster } from "@/app/actions/settings";
 import { HeroScenesForm } from "./HeroScenesForm";
 import { SelectedWorkCopyForm } from "./SelectedWorkCopyForm";
@@ -45,8 +46,7 @@ export function HomepageTabs(props: Props) {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-[22px] font-semibold text-foreground mb-1">Homepage</h1>
-      <p className="text-[13px] text-muted-foreground mb-6">Every section of the public homepage.</p>
+      <PageHeader title="Homepage" subtitle="Every section of the public homepage." />
 
       <div className="flex items-center gap-1 mb-8 border-b border-border">
         {TABS.map((t) => (

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
+import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
 import { StatusBadge } from "./StatusBadge";
 import { FreelanceCardMenu } from "./FreelanceCardMenu";
@@ -48,18 +49,12 @@ export default async function FreelanceProjectsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-[22px] font-semibold text-foreground">Freelance Projects</h1>
-          <p className="text-[13px] text-muted-foreground mt-1">{projects.length} active project{projects.length === 1 ? "" : "s"}</p>
-        </div>
-        <Link
-          href={routes.projects.new}
-          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
-        >
-          + New project
-        </Link>
-      </div>
+      <PageHeader
+        title="Freelance Projects"
+        subtitle={`${projects.length} active project${projects.length === 1 ? "" : "s"}`}
+        actionHref={routes.projects.new}
+        actionLabel="+ New project"
+      />
 
       {projects.length === 0 ? (
         <EmptyState message="No freelance projects yet." />
@@ -73,7 +68,7 @@ export default async function FreelanceProjectsPage() {
               <Link href={routes.projects.item(project.id)} className="absolute inset-0 z-0" aria-label={`Open ${project.name}`} />
 
               <div className="flex items-start justify-between mb-2 gap-2">
-                <h3 className="text-[14.5px] font-semibold text-foreground group-hover:text-success transition-colors pointer-events-none">{project.name}</h3>
+                <h3 className="text-[14.5px] font-semibold text-foreground group-hover:text-primary transition-colors pointer-events-none">{project.name}</h3>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="pointer-events-none">
                     <StatusBadge status={project.status} />
