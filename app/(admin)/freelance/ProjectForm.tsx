@@ -127,7 +127,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
               disabled={isDeleting}
               aria-label="Delete project"
               title="Delete project"
-              className="h-8 w-8 flex items-center justify-center rounded-full bg-secondary/60 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+              className="h-8 w-8 flex items-center justify-center rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors disabled:opacity-50"
             >
               <TrashIcon />
             </button>

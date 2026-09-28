@@ -3,14 +3,19 @@ import { ProjectForm } from "../ProjectForm";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
 
-export default async function NewFreelanceProjectPage() {
+interface Props {
+  searchParams: Promise<{ clientId?: string }>;
+}
+
+export default async function NewFreelanceProjectPage({ searchParams }: Props) {
+  const { clientId } = await searchParams;
   const clients = await prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } });
 
   return (
     <div>
       <BackLink href={routes.projects.list} label="Freelance Projects" iconOnly />
       <div className="mt-4">
-        <ProjectForm clients={clients} />
+        <ProjectForm clients={clients} initial={clientId ? { clientId } : undefined} />
       </div>
     </div>
   );

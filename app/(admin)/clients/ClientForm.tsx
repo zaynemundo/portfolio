@@ -71,7 +71,7 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
             disabled={isDeleting}
             aria-label="Delete client"
             title="Delete client"
-            className="h-8 w-8 flex items-center justify-center rounded-full bg-secondary/60 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 shrink-0 mt-0.5"
+            className="h-8 w-8 flex items-center justify-center rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors disabled:opacity-50 shrink-0 mt-0.5"
           >
             <TrashIcon />
           </button>
