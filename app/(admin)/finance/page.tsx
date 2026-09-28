@@ -79,6 +79,7 @@ export default async function FinancePage({ searchParams }: Props) {
           clientId: t.clientId ?? "",
           projectId: t.projectId ?? "",
           clientName: t.client?.name ?? null,
+          attachmentUrl: t.attachmentUrl ?? "",
         };
       })}
       invoices={invoices.map((inv) => {

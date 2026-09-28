@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { createTransaction, updateTransaction, type TransactionFormData } from "@/app/actions/finance";
+import { createTransaction, updateTransaction, uploadTransactionAttachment, type TransactionFormData } from "@/app/actions/finance";
 import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/ClientSelect";
 import { Select } from "@/app/(admin)/_components/Select";
+import { UploadCard } from "@/app/(admin)/_components/UploadCard";
 import { routes } from "@/app/(admin)/_routes";
 
 interface Option {
@@ -32,6 +33,7 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
   const [description, setDescription] = useState(initial?.description ?? "");
   const [clientId, setClientId] = useState(initial?.clientId ?? "");
   const [projectId, setProjectId] = useState(initial?.projectId ?? "");
+  const [attachmentUrl, setAttachmentUrl] = useState(initial?.attachmentUrl ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -39,7 +41,7 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
     e.preventDefault();
     setError(null);
 
-    const data: TransactionFormData = { date, type, amount, currency, category, description, clientId, projectId };
+    const data: TransactionFormData = { date, type, amount, currency, category, description, clientId, projectId, attachmentUrl };
 
     startTransition(async () => {
       const result = mode === "new"
@@ -115,6 +117,19 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
         <label htmlFor="description" className="block text-xs font-medium text-zinc-400 mb-1.5">Description (optional)</label>
         <textarea id="description" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} className={`${inputClass} resize-none`} />
       </div>
+
+      <UploadCard
+        title="Receipt / proof (optional)"
+        description="Evidence for this transaction — receipt for an expense, proof of payment for income. PDF or image up to 15MB."
+        currentUrl={attachmentUrl}
+        accept="*/*"
+        kind="file"
+        uploadAction={async (formData) => {
+          const result = await uploadTransactionAttachment(formData);
+          if (result.ok && result.url) setAttachmentUrl(result.url);
+          return result;
+        }}
+      />
 
       {error && <p className="text-[13px] text-red-400" role="alert">{error}</p>}
 

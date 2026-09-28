@@ -32,6 +32,7 @@ export interface TransactionRow {
   clientId: string;
   projectId: string;
   clientName: string | null;
+  attachmentUrl: string;
 }
 
 export interface InvoiceRow {
@@ -88,6 +89,7 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
     ? {
         date: editingTx.date, type: editingTx.type, amount: editingTx.amount, currency: editingTx.currency,
         category: editingTx.category, description: editingTx.description, clientId: editingTx.clientId, projectId: editingTx.projectId,
+        attachmentUrl: editingTx.attachmentUrl,
       }
     : undefined;
 
@@ -168,9 +170,22 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
                     <tr key={t.id} className="border-b border-zinc-800/70 last:border-b-0 hover:bg-zinc-900/40">
                       <td className="px-4 py-3 text-[13px] text-zinc-400 whitespace-nowrap">{t.displayDate}</td>
                       <td className="px-4 py-3">
-                        <button type="button" onClick={() => setTxModal(t)} className="text-[13.5px] font-medium text-zinc-100 hover:text-purple-400 transition-colors text-left">
-                          {t.description || t.category || "—"}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={() => setTxModal(t)} className="text-[13.5px] font-medium text-zinc-100 hover:text-purple-400 transition-colors text-left">
+                            {t.description || t.category || "—"}
+                          </button>
+                          {t.attachmentUrl && (
+                            <a
+                              href={t.attachmentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="View receipt / proof"
+                              className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                            >
+                              <ReceiptIcon />
+                            </a>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-[13px] text-zinc-400">{t.clientName ?? "—"}</td>
                       <td className="px-4 py-3 text-[13px] text-zinc-400">{t.category || "—"}</td>
@@ -279,5 +294,14 @@ function TotalCard({
       </div>
       <div className="text-[12px] text-zinc-500">{label}</div>
     </div>
+  );
+}
+
+function ReceiptIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
+      <path d="M9 8h6M9 12h6" />
+    </svg>
   );
 }

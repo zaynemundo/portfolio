@@ -284,6 +284,8 @@ model Transaction {
   client      Client?           @relation(fields: [clientId], references: [id])
   projectId   String?
   project     FreelanceProject? @relation(fields: [projectId], references: [id])
+  /// Receipt or proof of payment — evidence for the transaction, especially expenses.
+  attachmentUrl String?
   createdAt   DateTime          @default(now())
 }
 

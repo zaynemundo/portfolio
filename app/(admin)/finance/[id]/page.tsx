@@ -42,6 +42,7 @@ export default async function TransactionDetailPage({ params }: Props) {
           description: transaction.description ?? "",
           clientId: transaction.clientId ?? "",
           projectId: transaction.projectId ?? "",
+          attachmentUrl: transaction.attachmentUrl ?? "",
         }}
       />
     </div>

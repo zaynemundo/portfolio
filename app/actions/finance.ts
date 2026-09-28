@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { updateTag } from "next/cache";
+import { put } from "@vercel/blob";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { TransactionType } from "@/generated/prisma/client/client";
+import type { UploadResult } from "@/app/actions/settings";
 
 export interface TransactionFormData {
   date: string; // yyyy-mm-dd
@@ -16,6 +18,7 @@ export interface TransactionFormData {
   description: string;
   clientId: string;
   projectId: string;
+  attachmentUrl: string;
 }
 
 export interface TransactionActionResult {
@@ -35,6 +38,7 @@ function buildData(data: TransactionFormData) {
     description: data.description.trim() || null,
     clientId: data.clientId || null,
     projectId: data.projectId || null,
+    attachmentUrl: data.attachmentUrl.trim() || null,
   };
 }
 
@@ -75,4 +79,19 @@ export async function deleteTransaction(id: string): Promise<void> {
   await prisma.transaction.delete({ where: { id } }).catch(() => {});
   revalidatePath("/finance");
   updateTag(CACHE_TAGS.transactions);
+}
+
+export async function uploadTransactionAttachment(formData: FormData): Promise<UploadResult> {
+  await requireSession();
+
+  const file = formData.get("file") as File | null;
+  if (!file) return { ok: false, error: "No file provided." };
+  if (file.size > 15 * 1024 * 1024) return { ok: false, error: "File is too large (max 15MB)." };
+
+  const blob = await put(`transaction-attachment/${Date.now()}-${file.name}`, file, {
+    access: "public",
+    addRandomSuffix: false,
+  });
+
+  return { ok: true, url: blob.url };
 }
