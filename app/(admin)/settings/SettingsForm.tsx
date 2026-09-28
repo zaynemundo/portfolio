@@ -30,7 +30,7 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-5">
+    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card/40 p-6 space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <Field label="Name" id="name" value={name} onChange={setName} />
         <Field label="Job title" id="jobTitle" value={jobTitle} onChange={setJobTitle} />
@@ -44,17 +44,17 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
         <Field label="GitHub URL" id="github" value={githubUrl} onChange={setGithubUrl} />
       </div>
 
-      {error && <p className="text-[13px] text-red-400" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-destructive" role="alert">{error}</p>}
 
       <div className="flex items-center justify-end gap-3">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors disabled:opacity-50"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {isPending ? "Saving…" : "Save"}
         </button>
-        {saved && <span className="text-[12.5px] text-emerald-400">Saved</span>}
+        {saved && <span className="text-[12.5px] text-success">Saved</span>}
       </div>
     </form>
   );
@@ -71,13 +71,13 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-xs font-medium text-zinc-400 mb-1.5">{label}</label>
+      <label htmlFor={id} className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
       <input
         id={id}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors"
+        className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors"
       />
     </div>
   );

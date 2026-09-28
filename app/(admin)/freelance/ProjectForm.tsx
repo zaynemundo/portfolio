@@ -15,7 +15,7 @@ import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/Clien
 import { Select } from "@/app/(admin)/_components/Select";
 import { routes } from "@/app/(admin)/_routes";
 
-const SELECT_CLASS = "w-full flex items-center justify-between gap-2 rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 hover:bg-zinc-800 transition-colors";
+const SELECT_CLASS = "w-full flex items-center justify-between gap-2 rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 hover:bg-secondary transition-colors";
 
 interface Props {
   projectId?: string;
@@ -106,7 +106,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
           onChange={(e) => setName(e.target.value)}
           placeholder="Project name"
           style={{ outline: "none" }}
-          className="w-full text-[21px] font-semibold text-zinc-100 placeholder:text-zinc-600 bg-transparent"
+          className="w-full text-[21px] font-semibold text-foreground placeholder:text-muted-foreground/70 bg-transparent"
         />
         {id && (
           <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
@@ -115,8 +115,8 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
               onClick={toggleArchive}
               aria-label={archived ? "Unarchive" : "Archive"}
               title={archived ? "Unarchive" : "Archive"}
-              className={`h-8 w-8 flex items-center justify-center rounded-full bg-zinc-800/60 transition-colors ${
-                archived ? "text-emerald-400" : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+              className={`h-8 w-8 flex items-center justify-center rounded-full bg-secondary/60 transition-colors ${
+                archived ? "text-success" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               }`}
             >
               <ArchiveIcon />
@@ -127,7 +127,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
               disabled={isDeleting}
               aria-label="Delete project"
               title="Delete project"
-              className="h-8 w-8 flex items-center justify-center rounded-full bg-zinc-800/60 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+              className="h-8 w-8 flex items-center justify-center rounded-full bg-secondary/60 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
             >
               <TrashIcon />
             </button>
@@ -137,7 +137,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
 
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div>
-          <label className="block text-[11px] text-zinc-600 mb-1">Client</label>
+          <label className="block text-[11px] text-muted-foreground/70 mb-1">Client</label>
           <ClientSelect
             value={clientId}
             onChange={setClientId}
@@ -147,7 +147,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
           />
         </div>
         <div>
-          <label className="block text-[11px] text-zinc-600 mb-1">Status</label>
+          <label className="block text-[11px] text-muted-foreground/70 mb-1">Status</label>
           <Select
             value={status}
             onChange={setStatus}
@@ -163,7 +163,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
       </div>
 
       <div className="mb-3">
-        <label className="block text-[11px] text-zinc-600 mb-1">Rate (optional)</label>
+        <label className="block text-[11px] text-muted-foreground/70 mb-1">Rate (optional)</label>
         <div className="grid grid-cols-3 gap-2">
           <input
             type="number"
@@ -173,14 +173,14 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
             onChange={(e) => setRateAmount(e.target.value)}
             placeholder="Amount"
             style={{ outline: "none" }}
-            className="rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 placeholder:text-zinc-600"
+            className="rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 placeholder:text-muted-foreground/70"
           />
           <input
             value={rateCurrency}
             onChange={(e) => setRateCurrency(e.target.value)}
             placeholder="AED"
             style={{ outline: "none" }}
-            className="rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 placeholder:text-zinc-600"
+            className="rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 placeholder:text-muted-foreground/70"
           />
           <Select
             value={rateType}
@@ -198,23 +198,23 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div>
-          <label className="block text-[11px] text-zinc-600 mb-1">Start date (optional)</label>
+          <label className="block text-[11px] text-muted-foreground/70 mb-1">Start date (optional)</label>
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             style={{ outline: "none" }}
-            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200"
+            className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90"
           />
         </div>
         <div>
-          <label className="block text-[11px] text-zinc-600 mb-1">End date (optional)</label>
+          <label className="block text-[11px] text-muted-foreground/70 mb-1">End date (optional)</label>
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             style={{ outline: "none" }}
-            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200"
+            className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90"
           />
         </div>
       </div>
@@ -225,7 +225,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Notes / description…"
         style={{ outline: "none" }}
-        className="w-full bg-transparent text-[14.5px] text-zinc-200 placeholder:text-zinc-600 resize-none mb-4"
+        className="w-full bg-transparent text-[14.5px] text-foreground/90 placeholder:text-muted-foreground/70 resize-none mb-4"
       />
 
       <UploadCard
@@ -241,10 +241,10 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
         }}
       />
 
-      <p className="text-[11.5px] text-zinc-600 mt-3">
+      <p className="text-[11.5px] text-muted-foreground/70 mt-3">
         {saveStatus === "saving" && "Saving…"}
         {saveStatus === "saved" && "Saved"}
-        {saveStatus === "error" && <span className="text-red-400">Couldn&apos;t save — check your connection.</span>}
+        {saveStatus === "error" && <span className="text-destructive">Couldn&apos;t save — check your connection.</span>}
       </p>
     </div>
   );

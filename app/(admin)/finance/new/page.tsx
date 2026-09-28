@@ -9,7 +9,7 @@ export default async function NewTransactionPage() {
 
   return (
     <div>
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-8">New transaction</h1>
+      <h1 className="text-[22px] font-semibold text-foreground mb-8">New transaction</h1>
       <TransactionForm mode="new" clients={clients} projects={projects} />
     </div>
   );

@@ -7,8 +7,8 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-1">Site Settings</h1>
-      <p className="text-[13px] text-zinc-500 mb-8">
+      <h1 className="text-[22px] font-semibold text-foreground mb-1">Site Settings</h1>
+      <p className="text-[13px] text-muted-foreground mb-8">
         Name, contact info, and downloadable assets shown across the public site.
       </p>
 

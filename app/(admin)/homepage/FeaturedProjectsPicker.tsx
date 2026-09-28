@@ -71,10 +71,10 @@ export function FeaturedProjectsPicker({ initial }: { initial: FeaturedPickerPro
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-5">
+    <div className="rounded-xl border border-border bg-card/40 p-6 space-y-5">
       <div>
-        <h2 className="text-[15px] font-semibold text-zinc-100 mb-1">Featured projects</h2>
-        <p className="text-[12.5px] text-zinc-500">
+        <h2 className="text-[15px] font-semibold text-foreground mb-1">Featured projects</h2>
+        <p className="text-[12.5px] text-muted-foreground">
           Pick which case studies appear in the homepage&rsquo;s Selected Work carousel, and set the video/short description shown there. Reorder with the arrows.
         </p>
       </div>
@@ -84,7 +84,7 @@ export function FeaturedProjectsPicker({ initial }: { initial: FeaturedPickerPro
           <select
             value={pickerValue}
             onChange={(e) => addFeatured(e.target.value)}
-            className="flex-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[13.5px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors"
+            className="flex-1 rounded-lg bg-card border border-border px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:border-ring transition-colors"
           >
             <option value="">+ Add a featured project…</option>
             {available.map((p) => (
@@ -95,49 +95,49 @@ export function FeaturedProjectsPicker({ initial }: { initial: FeaturedPickerPro
       )}
 
       {featured.length === 0 ? (
-        <p className="text-[13px] text-zinc-600 py-6 text-center border border-dashed border-zinc-800 rounded-lg">
+        <p className="text-[13px] text-muted-foreground/70 py-6 text-center border border-dashed border-border rounded-lg">
           No featured projects yet — add one above.
         </p>
       ) : (
         <div className="space-y-3">
           {featured.map((p, i) => (
-            <div key={p.id} className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-4 space-y-3">
+            <div key={p.id} className="rounded-lg border border-border bg-background/50 p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[13.5px] font-semibold text-zinc-100">{p.name}</span>
+                <span className="text-[13.5px] font-semibold text-foreground">{p.name}</span>
                 <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => move(p.id, -1)} disabled={i === 0} className="text-[12px] text-zinc-500 hover:text-zinc-200 disabled:opacity-30 transition-colors">↑</button>
-                  <button type="button" onClick={() => move(p.id, 1)} disabled={i === featured.length - 1} className="text-[12px] text-zinc-500 hover:text-zinc-200 disabled:opacity-30 transition-colors">↓</button>
-                  <button type="button" onClick={() => removeFeatured(p.id)} className="text-[12px] text-red-400 hover:text-red-300 transition-colors">Remove</button>
+                  <button type="button" onClick={() => move(p.id, -1)} disabled={i === 0} className="text-[12px] text-muted-foreground hover:text-foreground/90 disabled:opacity-30 transition-colors">↑</button>
+                  <button type="button" onClick={() => move(p.id, 1)} disabled={i === featured.length - 1} className="text-[12px] text-muted-foreground hover:text-foreground/90 disabled:opacity-30 transition-colors">↓</button>
+                  <button type="button" onClick={() => removeFeatured(p.id)} className="text-[12px] text-destructive hover:text-destructive transition-colors">Remove</button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-zinc-500 mb-1">Video (MP4 URL)</label>
+                <label className="block text-[11px] font-medium text-muted-foreground mb-1">Video (MP4 URL)</label>
                 <input
                   type="text"
                   value={p.videoMp4}
                   onChange={(e) => updateField(p.id, { videoMp4: e.target.value })}
                   placeholder="https://…/clip.mp4"
-                  className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors"
+                  className="w-full rounded-lg bg-card border border-border px-3 py-2 text-[13px] text-foreground focus:outline-none focus:border-ring transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-zinc-500 mb-1">Poster image URL</label>
+                <label className="block text-[11px] font-medium text-muted-foreground mb-1">Poster image URL</label>
                 <input
                   type="text"
                   value={p.poster}
                   onChange={(e) => updateField(p.id, { poster: e.target.value })}
                   placeholder="https://…/poster.jpg"
-                  className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors"
+                  className="w-full rounded-lg bg-card border border-border px-3 py-2 text-[13px] text-foreground focus:outline-none focus:border-ring transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-zinc-500 mb-1">Short description</label>
+                <label className="block text-[11px] font-medium text-muted-foreground mb-1">Short description</label>
                 <textarea
                   value={p.shortDescription}
                   onChange={(e) => updateField(p.id, { shortDescription: e.target.value })}
                   rows={2}
-                  className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors resize-y"
+                  className="w-full rounded-lg bg-card border border-border px-3 py-2 text-[13px] text-foreground focus:outline-none focus:border-ring transition-colors resize-y"
                 />
               </div>
             </div>
@@ -150,11 +150,11 @@ export function FeaturedProjectsPicker({ initial }: { initial: FeaturedPickerPro
           type="button"
           onClick={handleSave}
           disabled={isPending}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors disabled:opacity-50"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {isPending ? "Saving…" : "Save featured projects"}
         </button>
-        {saved && <span className="text-[12.5px] text-emerald-400">Saved</span>}
+        {saved && <span className="text-[12.5px] text-success">Saved</span>}
       </div>
     </div>
   );

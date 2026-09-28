@@ -32,13 +32,13 @@ export default async function DocumentsPage() {
       {documents.length === 0 ? (
         <EmptyState message="No documents yet — add one from a client's or project's page." />
       ) : (
-        <div className="border border-zinc-800 rounded-xl overflow-hidden">
+        <div className="border border-border rounded-xl overflow-hidden">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-900/50">
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Name</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Belongs to</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Added</th>
+              <tr className="border-b border-border bg-card/50">
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Belongs to</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Added</th>
               </tr>
             </thead>
             <tbody>
@@ -46,26 +46,26 @@ export default async function DocumentsPage() {
                 // unstable_cache round-trips through JSON, so Date fields come back as strings.
                 const createdAt = new Date(doc.createdAt);
                 return (
-                  <tr key={doc.id} className="border-b border-zinc-800/70 last:border-b-0 hover:bg-zinc-900/40">
+                  <tr key={doc.id} className="border-b border-border/70 last:border-b-0 hover:bg-card/40">
                     <td className="px-4 py-3">
-                      <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="text-[13.5px] font-medium text-zinc-100 hover:text-purple-400 transition-colors">
+                      <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors">
                         {doc.name}
                       </a>
                     </td>
                     <td className="px-4 py-3 text-[13px]">
                       {doc.client ? (
-                        <Link href={routes.clients.item(doc.client.id)} className="text-purple-400 hover:text-purple-300 transition-colors">
+                        <Link href={routes.clients.item(doc.client.id)} className="text-primary hover:text-primary transition-colors">
                           {doc.client.name}
                         </Link>
                       ) : doc.project ? (
-                        <Link href={routes.projects.item(doc.project.id)} className="text-purple-400 hover:text-purple-300 transition-colors">
+                        <Link href={routes.projects.item(doc.project.id)} className="text-primary hover:text-primary transition-colors">
                           {doc.project.name}
                         </Link>
                       ) : (
                         "—"
                       )}
                     </td>
-                    <td className="px-4 py-3 text-[13px] text-zinc-400 whitespace-nowrap">
+                    <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">
                       {createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                     </td>
                   </tr>

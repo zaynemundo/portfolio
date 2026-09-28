@@ -34,31 +34,31 @@ export function ServicesForm({ chapter }: { chapter: Chapter }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-4">
-      <p className="text-[12.5px] text-zinc-500">Services headline, intro text, and the list of capabilities.</p>
+    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
+      <p className="text-[12.5px] text-muted-foreground">Services headline, intro text, and the list of capabilities.</p>
 
       <div>
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Headline</label>
+        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Headline</label>
         <textarea
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           rows={2}
-          className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors resize-y"
+          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors resize-y"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Intro</label>
+        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Intro</label>
         <textarea
           value={introduction}
           onChange={(e) => setIntroduction(e.target.value)}
           rows={3}
-          className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[13.5px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors resize-y"
+          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:border-ring transition-colors resize-y"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Services</label>
+        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Services</label>
         <div className="space-y-2">
           {items.map((item, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -67,14 +67,14 @@ export function ServicesForm({ chapter }: { chapter: Chapter }) {
                 value={item}
                 onChange={(e) => updateItem(i, e.target.value)}
                 placeholder="e.g. UI/UX Design"
-                className="flex-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[13.5px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors"
+                className="flex-1 rounded-lg bg-card border border-border px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:border-ring transition-colors"
               />
               <button
                 type="button"
                 onClick={() => removeItem(i)}
                 disabled={items.length === 1}
                 aria-label="Remove service"
-                className="shrink-0 h-9 w-9 rounded-lg border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-500/40 transition-colors disabled:opacity-30 disabled:hover:text-zinc-500 disabled:hover:border-zinc-800 flex items-center justify-center text-[15px]"
+                className="shrink-0 h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors disabled:opacity-30 disabled:hover:text-muted-foreground disabled:hover:border-border flex items-center justify-center text-[15px]"
               >
                 −
               </button>
@@ -84,7 +84,7 @@ export function ServicesForm({ chapter }: { chapter: Chapter }) {
         <button
           type="button"
           onClick={addItem}
-          className="mt-2 w-full rounded-lg border border-dashed border-zinc-700 text-zinc-400 text-[12.5px] font-medium py-2 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+          className="mt-2 w-full rounded-lg border border-dashed border-border text-muted-foreground text-[12.5px] font-medium py-2 hover:bg-card hover:text-foreground/90 transition-colors"
         >
           + Add service
         </button>
@@ -94,11 +94,11 @@ export function ServicesForm({ chapter }: { chapter: Chapter }) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors disabled:opacity-50"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {isPending ? "Saving…" : "Save"}
         </button>
-        {saved && <span className="text-[12.5px] text-emerald-400">Saved</span>}
+        {saved && <span className="text-[12.5px] text-success">Saved</span>}
       </div>
     </form>
   );

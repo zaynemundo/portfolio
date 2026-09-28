@@ -43,21 +43,21 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <h2 className="text-[15px] font-semibold text-zinc-100 mb-1">Scroll scenes</h2>
-        <p className="text-[12.5px] text-zinc-500">
+        <h2 className="text-[15px] font-semibold text-foreground mb-1">Scroll scenes</h2>
+        <p className="text-[12.5px] text-muted-foreground">
           Each scene&rsquo;s heading/description appears as the visitor scrolls through the hero video. Start/end are the scroll-progress fractions (0–1) where the scene is visible — leave them evenly spaced across the video&rsquo;s scroll range.
         </p>
       </div>
 
       <div className="space-y-4">
         {scenes.map((scene, i) => (
-          <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 space-y-3">
+          <div key={i} className="rounded-xl border border-border bg-card/40 p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Scene {i + 1}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Scene {i + 1}</span>
               <button
                 type="button"
                 onClick={() => removeScene(i)}
-                className="text-[12px] text-red-400 hover:text-red-300 transition-colors"
+                className="text-[12px] text-destructive hover:text-destructive transition-colors"
               >
                 Remove
               </button>
@@ -82,22 +82,22 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
       <button
         type="button"
         onClick={addScene}
-        className="w-full rounded-lg border border-dashed border-zinc-700 text-zinc-400 text-[13px] font-medium py-2.5 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+        className="w-full rounded-lg border border-dashed border-border text-muted-foreground text-[13px] font-medium py-2.5 hover:bg-card hover:text-foreground/90 transition-colors"
       >
         + Add scene
       </button>
 
-      {error && <p className="text-[13px] text-red-400" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-destructive" role="alert">{error}</p>}
 
       <div className="flex items-center justify-end gap-3">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors disabled:opacity-50"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {isPending ? "Saving…" : "Save scenes"}
         </button>
-        {saved && <span className="text-[12.5px] text-emerald-400">Saved</span>}
+        {saved && <span className="text-[12.5px] text-success">Saved</span>}
       </div>
     </form>
   );
@@ -113,13 +113,13 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-zinc-400 mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
       <input
         type="text"
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors"
+        className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors"
       />
     </div>
   );
@@ -134,12 +134,12 @@ function TextArea({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-zinc-400 mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={2}
-        className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[13.5px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors resize-y"
+        className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:border-ring transition-colors resize-y"
       />
     </div>
   );
@@ -154,7 +154,7 @@ function NumberField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-zinc-400 mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
       <input
         type="number"
         step="0.01"
@@ -162,7 +162,7 @@ function NumberField({
         max="1"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors"
+        className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors"
       />
     </div>
   );

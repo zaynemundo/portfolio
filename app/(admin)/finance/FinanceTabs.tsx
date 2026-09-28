@@ -59,10 +59,10 @@ interface Props {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  DRAFT: "bg-zinc-800 text-zinc-400",
+  DRAFT: "bg-secondary text-muted-foreground",
   SENT: "bg-blue-500/15 text-blue-400",
-  PAID: "bg-emerald-500/15 text-emerald-400",
-  OVERDUE: "bg-red-500/15 text-red-400",
+  PAID: "bg-success/15 text-success",
+  OVERDUE: "bg-destructive/15 text-destructive",
 };
 
 /** Cross-client, cross-project income/expense/invoices view — the deliberately
@@ -97,8 +97,8 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-[22px] font-semibold text-zinc-100 mb-1">Finance</h1>
-          <p className="text-[13px] text-zinc-500">Income, expenses, and invoices across every client and project.</p>
+          <h1 className="text-[22px] font-semibold text-foreground mb-1">Finance</h1>
+          <p className="text-[13px] text-muted-foreground">Income, expenses, and invoices across every client and project.</p>
         </div>
         {tab === "transactions" ? (
           <div className="flex items-center gap-3">
@@ -106,7 +106,7 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
             <button
               type="button"
               onClick={() => setTxModal("new")}
-              className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
+              className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
             >
               + New transaction
             </button>
@@ -114,19 +114,19 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
         ) : (
           <Link
             href={routes.invoices.new}
-            className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
+            className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
           >
             + New invoice
           </Link>
         )}
       </div>
 
-      <div className="flex items-center gap-1 mb-6 border-b border-zinc-800">
+      <div className="flex items-center gap-1 mb-6 border-b border-border">
         <button
           type="button"
           onClick={() => setTab("transactions")}
           className={`px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-            tab === "transactions" ? "border-emerald-400 text-zinc-100" : "border-transparent text-zinc-500 hover:text-zinc-300"
+            tab === "transactions" ? "border-success text-foreground" : "border-transparent text-muted-foreground hover:text-foreground/70"
           }`}
         >
           Transactions
@@ -135,7 +135,7 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
           type="button"
           onClick={() => setTab("invoices")}
           className={`px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-            tab === "invoices" ? "border-emerald-400 text-zinc-100" : "border-transparent text-zinc-500 hover:text-zinc-300"
+            tab === "invoices" ? "border-success text-foreground" : "border-transparent text-muted-foreground hover:text-foreground/70"
           }`}
         >
           Invoices
@@ -153,25 +153,25 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
           {transactions.length === 0 ? (
             <EmptyState message="No transactions this month." />
           ) : (
-            <div className="border border-zinc-800 rounded-xl overflow-hidden">
+            <div className="border border-border rounded-xl overflow-hidden">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-zinc-800 bg-zinc-900/50">
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Date</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Description</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Client</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Category</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 text-right">Amount</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 text-right">Actions</th>
+                  <tr className="border-b border-border bg-card/50">
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Date</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Description</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Category</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Amount</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {transactions.map((t) => (
-                    <tr key={t.id} className="border-b border-zinc-800/70 last:border-b-0 hover:bg-zinc-900/40">
-                      <td className="px-4 py-3 text-[13px] text-zinc-400 whitespace-nowrap">{t.displayDate}</td>
+                    <tr key={t.id} className="border-b border-border/70 last:border-b-0 hover:bg-card/40">
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">{t.displayDate}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <button type="button" onClick={() => setTxModal(t)} className="text-[13.5px] font-medium text-zinc-100 hover:text-purple-400 transition-colors text-left">
+                          <button type="button" onClick={() => setTxModal(t)} className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors text-left">
                             {t.description || t.category || "—"}
                           </button>
                           {t.attachmentUrl && (
@@ -180,21 +180,21 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
                               target="_blank"
                               rel="noopener noreferrer"
                               title="View receipt / proof"
-                              className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                              className="text-muted-foreground hover:text-foreground/70 transition-colors"
                             >
                               <ReceiptIcon />
                             </a>
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-zinc-400">{t.clientName ?? "—"}</td>
-                      <td className="px-4 py-3 text-[13px] text-zinc-400">{t.category || "—"}</td>
-                      <td className={`px-4 py-3 text-right text-[13.5px] font-medium ${t.type === "INCOME" ? "text-emerald-400" : "text-red-400"}`}>
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground">{t.clientName ?? "—"}</td>
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground">{t.category || "—"}</td>
+                      <td className={`px-4 py-3 text-right text-[13.5px] font-medium ${t.type === "INCOME" ? "text-success" : "text-destructive"}`}>
                         {t.type === "INCOME" ? "+" : "-"}{Number(t.amount).toLocaleString()} {t.currency}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-3">
-                          <button type="button" onClick={() => setTxModal(t)} className="text-[12.5px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors">
+                          <button type="button" onClick={() => setTxModal(t)} className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors">
                             Edit
                           </button>
                           <DeleteTransactionButton id={t.id} onDeleted={() => router.refresh()} />
@@ -214,41 +214,41 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
           {invoices.length === 0 ? (
             <EmptyState message="No invoices yet." />
           ) : (
-            <div className="border border-zinc-800 rounded-xl overflow-hidden">
+            <div className="border border-border rounded-xl overflow-hidden">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-zinc-800 bg-zinc-900/50">
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Number</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Client</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Project</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Issued</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Status</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 text-right">Total</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 text-right">Actions</th>
+                  <tr className="border-b border-border bg-card/50">
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Number</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Project</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Issued</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Total</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {invoices.map((inv) => (
-                    <tr key={inv.id} className="border-b border-zinc-800/70 last:border-b-0 hover:bg-zinc-900/40">
+                    <tr key={inv.id} className="border-b border-border/70 last:border-b-0 hover:bg-card/40">
                       <td className="px-4 py-3">
-                        <Link href={routes.invoices.item(inv.id)} className="text-[13.5px] font-medium text-zinc-100 hover:text-purple-400 transition-colors">
+                        <Link href={routes.invoices.item(inv.id)} className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors">
                           {inv.invoiceNumber}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-zinc-400">{inv.clientName ?? "—"}</td>
-                      <td className="px-4 py-3 text-[13px] text-zinc-400">{inv.projectName ?? "—"}</td>
-                      <td className="px-4 py-3 text-[13px] text-zinc-400 whitespace-nowrap">{inv.displayIssueDate}</td>
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground">{inv.clientName ?? "—"}</td>
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground">{inv.projectName ?? "—"}</td>
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">{inv.displayIssueDate}</td>
                       <td className="px-4 py-3">
                         <span className={`text-[11px] font-semibold px-2 py-1 rounded ${STATUS_STYLES[inv.status]}`}>
                           {inv.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right text-[13.5px] font-medium text-zinc-200">
+                      <td className="px-4 py-3 text-right text-[13.5px] font-medium text-foreground/90">
                         {inv.total.toLocaleString()} {inv.currency}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-3">
-                          <Link href={routes.invoices.edit(inv.id)} className="text-[12.5px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors">
+                          <Link href={routes.invoices.edit(inv.id)} className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors">
                             Edit
                           </Link>
                           <DeleteInvoiceButton id={inv.id} number={inv.invoiceNumber} onDeleted={() => router.refresh()} />
@@ -286,13 +286,13 @@ function TotalCard({
   currency: string;
   accent: "emerald" | "red";
 }) {
-  const colorClass = accent === "emerald" ? "text-emerald-400" : "text-red-400";
+  const colorClass = accent === "emerald" ? "text-success" : "text-destructive";
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5">
+    <div className="rounded-xl border border-border bg-card/40 px-4 py-3.5">
       <div className={`text-[22px] font-semibold leading-none mb-1.5 ${colorClass}`}>
         {value.toLocaleString()} <span className="text-[13px] font-medium">{currency}</span>
       </div>
-      <div className="text-[12px] text-zinc-500">{label}</div>
+      <div className="text-[12px] text-muted-foreground">{label}</div>
     </div>
   );
 }

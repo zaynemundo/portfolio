@@ -50,12 +50,12 @@ export default async function FreelanceProjectsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[22px] font-semibold text-zinc-100">Freelance Projects</h1>
-          <p className="text-[13px] text-zinc-500 mt-1">{projects.length} active project{projects.length === 1 ? "" : "s"}</p>
+          <h1 className="text-[22px] font-semibold text-foreground">Freelance Projects</h1>
+          <p className="text-[13px] text-muted-foreground mt-1">{projects.length} active project{projects.length === 1 ? "" : "s"}</p>
         </div>
         <Link
           href={routes.projects.new}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
         >
           + New project
         </Link>
@@ -68,12 +68,12 @@ export default async function FreelanceProjectsPage() {
           {projects.map((project) => (
             <div
               key={project.id}
-              className="group relative rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 hover:border-zinc-700 transition-colors"
+              className="group relative rounded-xl border border-border bg-card/40 p-5 hover:border-border transition-colors"
             >
               <Link href={routes.projects.item(project.id)} className="absolute inset-0 z-0" aria-label={`Open ${project.name}`} />
 
               <div className="flex items-start justify-between mb-2 gap-2">
-                <h3 className="text-[14.5px] font-semibold text-zinc-100 group-hover:text-emerald-400 transition-colors pointer-events-none">{project.name}</h3>
+                <h3 className="text-[14.5px] font-semibold text-foreground group-hover:text-success transition-colors pointer-events-none">{project.name}</h3>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="pointer-events-none">
                     <StatusBadge status={project.status} />
@@ -83,12 +83,12 @@ export default async function FreelanceProjectsPage() {
                   </div>
                 </div>
               </div>
-              {project.clientName && <p className="text-[12.5px] text-zinc-500 mb-3 pointer-events-none">{project.clientName}</p>}
+              {project.clientName && <p className="text-[12.5px] text-muted-foreground mb-3 pointer-events-none">{project.clientName}</p>}
 
-              <div className="flex items-center justify-between text-[12px] text-zinc-500 pointer-events-none">
+              <div className="flex items-center justify-between text-[12px] text-muted-foreground pointer-events-none">
                 <span>{project.totalCount > 0 ? `${project.doneCount}/${project.totalCount} tasks done` : "No tasks yet"}</span>
                 {project.displayEndDate && (
-                  <span className={project.isOverdue ? "text-red-400 font-medium" : ""}>
+                  <span className={project.isOverdue ? "text-destructive font-medium" : ""}>
                     {project.isOverdue ? "Overdue: " : "Due "}
                     {project.displayEndDate}
                   </span>
@@ -96,8 +96,8 @@ export default async function FreelanceProjectsPage() {
               </div>
 
               {project.totalCount > 0 && (
-                <div className="mt-2.5 h-1 rounded-full bg-zinc-800 overflow-hidden pointer-events-none">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(project.doneCount / project.totalCount) * 100}%` }} />
+                <div className="mt-2.5 h-1 rounded-full bg-secondary overflow-hidden pointer-events-none">
+                  <div className="h-full bg-success rounded-full" style={{ width: `${(project.doneCount / project.totalCount) * 100}%` }} />
                 </div>
               )}
             </div>

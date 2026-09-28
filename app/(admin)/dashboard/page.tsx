@@ -56,13 +56,13 @@ export default async function DashboardPage() {
   return (
     <div>
       {/* Greeting banner */}
-      <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-600/20 via-purple-500/10 to-zinc-900/40 px-7 py-8 mb-8">
-        <div className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl" aria-hidden="true" />
-        <div className="pointer-events-none absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-purple-400/10 blur-3xl" aria-hidden="true" />
+      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/20 via-primary/10 to-card/40 px-7 py-8 mb-8">
+        <div className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-primary/20 blur-3xl" aria-hidden="true" />
+        <div className="pointer-events-none absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
         <div className="relative">
-          <p className="text-[12.5px] text-purple-300/80 font-medium mb-1.5">{todayLabel}</p>
-          <h1 className="text-[26px] font-bold text-zinc-100 mb-1.5">Hi, {firstName}!</h1>
-          <p className="text-[13.5px] text-zinc-400">
+          <p className="text-[12.5px] text-primary/80 font-medium mb-1.5">{todayLabel}</p>
+          <h1 className="text-[26px] font-bold text-foreground mb-1.5">Hi, {firstName}!</h1>
+          <p className="text-[13.5px] text-muted-foreground">
             {unreadCount > 0
               ? `You have ${unreadCount} unread inquir${unreadCount === 1 ? "y" : "ies"} waiting.`
               : "You're all caught up on inquiries."}
@@ -149,34 +149,34 @@ function StatCard({
   accent: "purple" | "emerald" | "red";
 }) {
   const accentClasses = accent === "purple"
-    ? "hover:border-purple-500/50 hover:bg-purple-500/[0.04]"
+    ? "hover:border-primary/50 hover:bg-primary/[0.04]"
     : accent === "emerald"
-    ? "hover:border-emerald-500/50 hover:bg-emerald-500/[0.04]"
-    : "hover:border-red-500/50 hover:bg-red-500/[0.04]";
-  const iconBg = accent === "purple" ? "bg-purple-500/10 text-purple-400" : accent === "emerald" ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400";
+    ? "hover:border-success/50 hover:bg-success/[0.04]"
+    : "hover:border-destructive/50 hover:bg-destructive/[0.04]";
+  const iconBg = accent === "purple" ? "bg-primary/10 text-primary" : accent === "emerald" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive";
   return (
     <Link
       href={href}
-      className={`rounded-2xl border border-zinc-800 bg-zinc-900/40 px-4 py-4 transition-colors ${accentClasses}`}
+      className={`rounded-2xl border border-border bg-card/40 px-4 py-4 transition-colors ${accentClasses}`}
     >
       <div className={`h-8 w-8 rounded-lg flex items-center justify-center mb-3 ${iconBg}`}>
         {icon}
       </div>
-      <div className="text-[22px] font-semibold text-zinc-100 leading-none mb-1.5">{value}</div>
-      <div className="text-[12px] text-zinc-500">{label}</div>
-      {sublabel && <div className="text-[11px] text-red-400 font-medium mt-0.5">{sublabel}</div>}
+      <div className="text-[22px] font-semibold text-foreground leading-none mb-1.5">{value}</div>
+      <div className="text-[12px] text-muted-foreground">{label}</div>
+      {sublabel && <div className="text-[11px] text-destructive font-medium mt-0.5">{sublabel}</div>}
     </Link>
   );
 }
 
 function QuickAction({ href, label, accent }: { href: string; label: string; accent: "purple" | "emerald" }) {
   const accentClasses = accent === "purple"
-    ? "hover:border-purple-500/50 hover:bg-purple-500/[0.04]"
-    : "hover:border-emerald-500/50 hover:bg-emerald-500/[0.04]";
+    ? "hover:border-primary/50 hover:bg-primary/[0.04]"
+    : "hover:border-success/50 hover:bg-success/[0.04]";
   return (
     <Link
       href={href}
-      className={`rounded-2xl border border-zinc-800 bg-zinc-900/40 px-4 py-3.5 text-[13px] font-medium text-zinc-200 transition-colors ${accentClasses}`}
+      className={`rounded-2xl border border-border bg-card/40 px-4 py-3.5 text-[13px] font-medium text-foreground/90 transition-colors ${accentClasses}`}
     >
       + {label}
     </Link>
@@ -193,11 +193,11 @@ function RecentCard({
 }) {
   const hasChildren = Array.isArray(children) ? children.length > 0 : !!children;
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+    <div className="rounded-2xl border border-border bg-card/40 p-5">
       <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-[13.5px] font-semibold text-zinc-100">{title}</h2>
+        <h2 className="text-[13.5px] font-semibold text-foreground">{title}</h2>
         {!!badge && (
-          <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10.5px] font-semibold flex items-center justify-center">
+          <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-white text-[10.5px] font-semibold flex items-center justify-center">
             {badge}
           </span>
         )}
@@ -205,7 +205,7 @@ function RecentCard({
       {hasChildren ? (
         <div className="space-y-2.5">{children}</div>
       ) : (
-        <p className="text-[12.5px] text-zinc-600">{emptyLabel}</p>
+        <p className="text-[12.5px] text-muted-foreground/70">{emptyLabel}</p>
       )}
     </div>
   );
@@ -221,11 +221,11 @@ function RecentRow({
 }) {
   return (
     <Link href={href} className="flex items-center justify-between gap-3 group">
-      <span className="text-[13px] text-zinc-300 group-hover:text-zinc-100 transition-colors truncate">
-        {unread && <span className="inline-block h-1.5 w-1.5 rounded-full bg-purple-400 mr-1.5 align-middle" aria-hidden="true" />}
+      <span className="text-[13px] text-foreground/70 group-hover:text-foreground transition-colors truncate">
+        {unread && <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary mr-1.5 align-middle" aria-hidden="true" />}
         {primary}
       </span>
-      <span className="text-[11.5px] text-zinc-600 shrink-0">{secondary}</span>
+      <span className="text-[11.5px] text-muted-foreground/70 shrink-0">{secondary}</span>
     </Link>
   );
 }

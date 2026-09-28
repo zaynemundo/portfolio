@@ -104,8 +104,8 @@ export function CommandPalette({ items, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
-      <div className="relative w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl overflow-hidden">
-        <div className="flex items-center gap-2.5 px-4 py-3 border-b border-zinc-800">
+      <div className="relative w-full max-w-md rounded-xl border border-border bg-card shadow-2xl overflow-hidden">
+        <div className="flex items-center gap-2.5 px-4 py-3 border-b border-border">
           <SearchIcon />
           <input
             ref={inputRef}
@@ -116,20 +116,20 @@ export function CommandPalette({ items, onClose }: Props) {
             }}
             onKeyDown={handleKeyDown}
             placeholder="Search everything…"
-            className="flex-1 bg-transparent text-[14px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none"
+            className="flex-1 bg-transparent text-[14px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
           />
-          {isSearching && <span className="h-3.5 w-3.5 rounded-full border-2 border-zinc-700 border-t-purple-400 animate-spin" aria-hidden="true" />}
-          <kbd className="text-[10.5px] text-zinc-600 border border-zinc-800 rounded px-1.5 py-0.5">Esc</kbd>
+          {isSearching && <span className="h-3.5 w-3.5 rounded-full border-2 border-border border-t-primary animate-spin" aria-hidden="true" />}
+          <kbd className="text-[10.5px] text-muted-foreground/70 border border-border rounded px-1.5 py-0.5">Esc</kbd>
         </div>
         <div className="max-h-96 overflow-y-auto py-1.5">
           {results.length === 0 && (
-            <p className="px-4 py-6 text-center text-[13px] text-zinc-600">
+            <p className="px-4 py-6 text-center text-[13px] text-muted-foreground/70">
               {query.trim().length >= 2 && isSearching ? "Searching…" : "No matches."}
             </p>
           )}
           {grouped.map((group) => (
             <div key={group.category}>
-              <p className="px-4 pt-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-zinc-600">
+              <p className="px-4 pt-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground/70">
                 {group.category}
               </p>
               <ul>
@@ -142,7 +142,7 @@ export function CommandPalette({ items, onClose }: Props) {
                         onMouseEnter={() => setActiveIndex(i)}
                         onClick={() => go(row.href)}
                         className={`w-full flex items-center gap-2.5 px-4 py-2 text-[13.5px] font-medium text-left transition-colors truncate ${
-                          i === safeActiveIndex ? "bg-purple-500/10 text-purple-300" : "text-zinc-300"
+                          i === safeActiveIndex ? "bg-primary/10 text-primary" : "text-foreground/70"
                         }`}
                       >
                         {row.label}
@@ -161,7 +161,7 @@ export function CommandPalette({ items, onClose }: Props) {
 
 function SearchIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="text-zinc-500 shrink-0">
+    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="text-muted-foreground shrink-0">
       <circle cx="9" cy="9" r="5.5" stroke="currentColor" strokeWidth="1.5" />
       <path d="M13.5 13.5 17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>

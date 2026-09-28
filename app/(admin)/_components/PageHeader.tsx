@@ -15,14 +15,14 @@ export function PageHeader({ title, subtitle, actionHref, actionLabel, secondary
   return (
     <div className="flex items-center justify-between mb-8">
       <div>
-        <h1 className="text-[22px] font-semibold text-zinc-100">{title}</h1>
-        {subtitle && <p className="text-[13px] text-zinc-500 mt-1">{subtitle}</p>}
+        <h1 className="text-[22px] font-semibold text-foreground">{title}</h1>
+        {subtitle && <p className="text-[13px] text-muted-foreground mt-1">{subtitle}</p>}
       </div>
       <div className="flex items-center gap-3">
         {secondaryHref && secondaryLabel && (
           <Link
             href={secondaryHref}
-            className="rounded-lg border border-zinc-800 text-zinc-300 text-[13px] font-medium px-3.5 py-2 hover:bg-zinc-900 transition-colors"
+            className="rounded-lg border border-border text-foreground/70 text-[13px] font-medium px-3.5 py-2 hover:bg-card transition-colors"
           >
             {secondaryLabel}
           </Link>
@@ -30,7 +30,7 @@ export function PageHeader({ title, subtitle, actionHref, actionLabel, secondary
         {actionHref && actionLabel && (
           <Link
             href={actionHref}
-            className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
+            className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
           >
             {actionLabel}
           </Link>

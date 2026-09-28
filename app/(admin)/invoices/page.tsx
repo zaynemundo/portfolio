@@ -17,10 +17,10 @@ function computeTotal(items: unknown): number {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  DRAFT: "bg-zinc-800 text-zinc-400",
+  DRAFT: "bg-secondary text-muted-foreground",
   SENT: "bg-blue-500/15 text-blue-400",
-  PAID: "bg-emerald-500/15 text-emerald-400",
-  OVERDUE: "bg-red-500/15 text-red-400",
+  PAID: "bg-success/15 text-success",
+  OVERDUE: "bg-destructive/15 text-destructive",
 };
 
 export default async function InvoicesPage() {
@@ -41,28 +41,28 @@ export default async function InvoicesPage() {
       {invoices.length === 0 ? (
         <EmptyState message="No invoices yet." />
       ) : (
-        <div className="border border-zinc-800 rounded-xl overflow-hidden">
+        <div className="border border-border rounded-xl overflow-hidden">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-900/50">
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Number</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Client</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Issued</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Status</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 text-right">Total</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 text-right">Actions</th>
+              <tr className="border-b border-border bg-card/50">
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Number</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Issued</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Total</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {invoices.map((inv) => (
-                <tr key={inv.id} className="border-b border-zinc-800/70 last:border-b-0 hover:bg-zinc-900/40">
+                <tr key={inv.id} className="border-b border-border/70 last:border-b-0 hover:bg-card/40">
                   <td className="px-4 py-3">
-                    <Link href={routes.invoices.item(inv.id)} className="text-[13.5px] font-medium text-zinc-100 hover:text-purple-400 transition-colors">
+                    <Link href={routes.invoices.item(inv.id)} className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors">
                       {inv.invoiceNumber}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-[13px] text-zinc-400">{inv.client?.name ?? "—"}</td>
-                  <td className="px-4 py-3 text-[13px] text-zinc-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{inv.client?.name ?? "—"}</td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">
                     {inv.issueDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                   </td>
                   <td className="px-4 py-3">
@@ -70,12 +70,12 @@ export default async function InvoicesPage() {
                       {inv.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-[13.5px] font-medium text-zinc-200">
+                  <td className="px-4 py-3 text-right text-[13.5px] font-medium text-foreground/90">
                     {computeTotal(inv.items).toLocaleString()} {inv.currency}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">
-                      <Link href={routes.invoices.edit(inv.id)} className="text-[12.5px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors">
+                      <Link href={routes.invoices.edit(inv.id)} className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors">
                         Edit
                       </Link>
                       <DeleteInvoiceButton id={inv.id} number={inv.invoiceNumber} />

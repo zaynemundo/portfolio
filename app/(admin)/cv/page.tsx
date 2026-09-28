@@ -11,8 +11,8 @@ export default async function CvPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-1">CV</h1>
-      <p className="text-[13px] text-zinc-500 mb-6">
+      <h1 className="text-[22px] font-semibold text-foreground mb-1">CV</h1>
+      <p className="text-[13px] text-muted-foreground mb-6">
         What you do, your experience, and your education &amp; skills — this feeds the About section on the homepage.
       </p>
 

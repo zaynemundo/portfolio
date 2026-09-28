@@ -9,8 +9,8 @@ export default async function WorkPageSettingsPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-1">Work Page</h1>
-      <p className="text-[13px] text-zinc-500 mb-8">The header banner and client logo marquee on /work.</p>
+      <h1 className="text-[22px] font-semibold text-foreground mb-1">Work Page</h1>
+      <p className="text-[13px] text-muted-foreground mb-8">The header banner and client logo marquee on /work.</p>
 
       <div className="space-y-8">
         <WorkPageCopyForm initialHeading={settings.workPageHeading} initialIntro={settings.workPageIntro} />

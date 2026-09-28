@@ -6,10 +6,10 @@ const LABELS: Record<string, string> = {
 };
 
 const CLASSES: Record<string, string> = {
-  NOT_STARTED: "bg-zinc-800 text-zinc-400",
-  ACTIVE: "bg-emerald-500/15 text-emerald-400",
+  NOT_STARTED: "bg-secondary text-muted-foreground",
+  ACTIVE: "bg-success/15 text-success",
   ON_HOLD: "bg-amber-500/15 text-amber-400",
-  COMPLETED: "bg-purple-500/15 text-purple-400",
+  COMPLETED: "bg-primary/15 text-primary",
 };
 
 export function StatusBadge({ status }: { status: string }) {

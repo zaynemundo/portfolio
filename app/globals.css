@@ -4,6 +4,110 @@
 
 @theme inline {
   --font-sans: var(--font-inter);
+
+  /* Admin design-system tokens (shadcn-style) — public site does not use these. */
+  --color-background: var(--admin-background);
+  --color-foreground: var(--admin-foreground);
+  --color-card: var(--admin-card);
+  --color-card-foreground: var(--admin-card-foreground);
+  --color-popover: var(--admin-popover);
+  --color-popover-foreground: var(--admin-popover-foreground);
+  --color-primary: var(--admin-primary);
+  --color-primary-foreground: var(--admin-primary-foreground);
+  --color-secondary: var(--admin-secondary);
+  --color-secondary-foreground: var(--admin-secondary-foreground);
+  --color-muted: var(--admin-muted);
+  --color-muted-foreground: var(--admin-muted-foreground);
+  --color-accent: var(--admin-accent);
+  --color-accent-foreground: var(--admin-accent-foreground);
+  --color-success: var(--admin-success);
+  --color-success-foreground: var(--admin-success-foreground);
+  --color-destructive: var(--admin-destructive);
+  --color-destructive-foreground: var(--admin-destructive-foreground);
+  --color-border: var(--admin-border);
+  --color-input: var(--admin-input);
+  --color-ring: var(--admin-ring);
+  --color-sidebar: var(--admin-sidebar);
+  --color-sidebar-foreground: var(--admin-sidebar-foreground);
+  --color-sidebar-primary: var(--admin-sidebar-primary);
+  --color-sidebar-primary-foreground: var(--admin-sidebar-primary-foreground);
+  --color-sidebar-accent: var(--admin-sidebar-accent);
+  --color-sidebar-accent-foreground: var(--admin-sidebar-accent-foreground);
+  --color-sidebar-border: var(--admin-sidebar-border);
+  --color-sidebar-ring: var(--admin-sidebar-ring);
+}
+
+/* ── Admin design tokens — light (default) and dark, scoped under .admin-root ──
+   Prefixed `--admin-*` (rather than the bare `--background`/`--accent` names
+   shadcn normally uses) so nothing here can collide with the public site's
+   own `--accent`/`--ease-out-*` tokens declared below, which are unrelated. */
+.admin-root {
+  --admin-background: #fafafa;
+  --admin-foreground: #18181b;
+  --admin-card: #ffffff;
+  --admin-card-foreground: #18181b;
+  --admin-popover: #ffffff;
+  --admin-popover-foreground: #18181b;
+  --admin-primary: #a855f7;
+  --admin-primary-foreground: #ffffff;
+  --admin-secondary: #f4f4f5;
+  --admin-secondary-foreground: #18181b;
+  --admin-muted: #f4f4f5;
+  --admin-muted-foreground: #71717a;
+  --admin-accent: #f5f0ff;
+  --admin-accent-foreground: #7c3aed;
+  --admin-success: #10b981;
+  --admin-success-foreground: #ffffff;
+  --admin-destructive: #ef4444;
+  --admin-destructive-foreground: #ffffff;
+  --admin-border: #e4e4e7;
+  --admin-input: #e4e4e7;
+  --admin-ring: #a855f7;
+  --admin-sidebar: #ffffff;
+  --admin-sidebar-foreground: #18181b;
+  --admin-sidebar-primary: #a855f7;
+  --admin-sidebar-primary-foreground: #ffffff;
+  --admin-sidebar-accent: #f5f0ff;
+  --admin-sidebar-accent-foreground: #7c3aed;
+  --admin-sidebar-border: #e4e4e7;
+  --admin-sidebar-ring: #a855f7;
+}
+
+.admin-root.dark {
+  --admin-background: #09090b;
+  --admin-foreground: #f4f4f5;
+  --admin-card: #18181b;
+  --admin-card-foreground: #f4f4f5;
+  --admin-popover: #18181b;
+  --admin-popover-foreground: #f4f4f5;
+  --admin-primary: #a855f7;
+  --admin-primary-foreground: #ffffff;
+  --admin-secondary: #27272a;
+  --admin-secondary-foreground: #f4f4f5;
+  --admin-muted: #27272a;
+  --admin-muted-foreground: #a1a1aa;
+  --admin-accent: #2a1f3d;
+  --admin-accent-foreground: #c084fc;
+  --admin-success: #10b981;
+  --admin-success-foreground: #ffffff;
+  --admin-destructive: #ef4444;
+  --admin-destructive-foreground: #ffffff;
+  --admin-border: #27272a;
+  --admin-input: #27272a;
+  --admin-ring: #a855f7;
+  --admin-sidebar: #09090b;
+  --admin-sidebar-foreground: #f4f4f5;
+  --admin-sidebar-primary: #a855f7;
+  --admin-sidebar-primary-foreground: #ffffff;
+  --admin-sidebar-accent: #2a1f3d;
+  --admin-sidebar-accent-foreground: #c084fc;
+  --admin-sidebar-border: #27272a;
+  --admin-sidebar-ring: #a855f7;
+}
+
+.admin-root {
+  background-color: var(--admin-background);
+  color: var(--admin-foreground);
 }
 
 /* ── Base ─────────────────────────────────────────────────────────────────── */

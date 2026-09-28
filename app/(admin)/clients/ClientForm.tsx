@@ -6,7 +6,7 @@ import { createClient, updateClient, deleteClient, type ClientFormData } from "@
 import { Select } from "@/app/(admin)/_components/Select";
 import { routes } from "@/app/(admin)/_routes";
 
-const SELECT_CLASS = "w-full flex items-center justify-between gap-2 rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 hover:bg-zinc-800 transition-colors";
+const SELECT_CLASS = "w-full flex items-center justify-between gap-2 rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 hover:bg-secondary transition-colors";
 
 interface Props {
   clientId?: string;
@@ -62,7 +62,7 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
           placeholder="Client name"
           required
           style={{ outline: "none" }}
-          className="w-full text-[21px] font-semibold text-zinc-100 placeholder:text-zinc-500 bg-transparent"
+          className="w-full text-[21px] font-semibold text-foreground placeholder:text-muted-foreground bg-transparent"
         />
         {clientId && (
           <button
@@ -71,7 +71,7 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
             disabled={isDeleting}
             aria-label="Delete client"
             title="Delete client"
-            className="h-8 w-8 flex items-center justify-center rounded-full bg-zinc-800/60 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50 shrink-0 mt-0.5"
+            className="h-8 w-8 flex items-center justify-center rounded-full bg-secondary/60 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 shrink-0 mt-0.5"
           >
             <TrashIcon />
           </button>
@@ -79,7 +79,7 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
       </div>
 
       <div className="mb-3">
-        <label className="block text-[11px] text-zinc-400 mb-1">Type (optional)</label>
+        <label className="block text-[11px] text-muted-foreground mb-1">Type (optional)</label>
         <Select
           value={type}
           onChange={setType}
@@ -94,46 +94,46 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div>
-          <label className="block text-[11px] text-zinc-400 mb-1">Email (optional)</label>
+          <label className="block text-[11px] text-muted-foreground mb-1">Email (optional)</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             style={{ outline: "none" }}
-            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 placeholder:text-zinc-500"
+            className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 placeholder:text-muted-foreground"
           />
         </div>
         <div>
-          <label className="block text-[11px] text-zinc-400 mb-1">Phone (optional)</label>
+          <label className="block text-[11px] text-muted-foreground mb-1">Phone (optional)</label>
           <input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             style={{ outline: "none" }}
-            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 placeholder:text-zinc-500"
+            className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 placeholder:text-muted-foreground"
           />
         </div>
       </div>
 
       {type === "INDIVIDUAL" && (
         <div className="mb-4">
-          <label className="block text-[11px] text-zinc-400 mb-1">Company (optional)</label>
+          <label className="block text-[11px] text-muted-foreground mb-1">Company (optional)</label>
           <input
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             placeholder="Who they work for"
             style={{ outline: "none" }}
-            className="w-full rounded-lg bg-zinc-800/60 px-3 py-2 text-[13.5px] text-zinc-200 placeholder:text-zinc-500"
+            className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 placeholder:text-muted-foreground"
           />
         </div>
       )}
 
-      {error && <p className="text-[13px] text-red-400 mb-3" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-destructive mb-3" role="alert">{error}</p>}
 
       <div className="flex justify-end">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-5 py-2.5 hover:bg-white transition-colors disabled:opacity-50"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-5 py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {isPending ? "Saving…" : clientId ? "Save changes" : "Add client"}
         </button>

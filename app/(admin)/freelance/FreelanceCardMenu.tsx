@@ -52,17 +52,17 @@ export function FreelanceCardMenu({ id, name, archived }: { id: string; name: st
         disabled={isPending}
         aria-label="More options"
         title="More"
-        className="h-8 w-8 flex items-center justify-center rounded-full bg-zinc-800/60 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors disabled:opacity-50"
+        className="h-8 w-8 flex items-center justify-center rounded-full bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors disabled:opacity-50"
       >
         <DotsIcon />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-9 z-20 w-36 rounded-lg border border-zinc-800 bg-zinc-900 shadow-xl py-1">
+        <div className="absolute right-0 top-9 z-20 w-36 rounded-lg border border-border bg-card shadow-xl py-1">
           <button
             type="button"
             onClick={toggleArchive}
-            className="w-full text-left px-3 py-2 text-[13px] text-zinc-200 hover:bg-zinc-800 flex items-center gap-2 transition-colors"
+            className="w-full text-left px-3 py-2 text-[13px] text-foreground/90 hover:bg-secondary flex items-center gap-2 transition-colors"
           >
             <ArchiveIcon />
             {archived ? "Unarchive" : "Archive"}
@@ -70,7 +70,7 @@ export function FreelanceCardMenu({ id, name, archived }: { id: string; name: st
           <button
             type="button"
             onClick={handleDelete}
-            className="w-full text-left px-3 py-2 text-[13px] text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors"
+            className="w-full text-left px-3 py-2 text-[13px] text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors"
           >
             <TrashIcon />
             Delete

@@ -27,42 +27,42 @@ export default async function InquiriesPage() {
       {inquiries.length === 0 ? (
         <EmptyState message="No inquiries yet — messages from the contact form will show up here." />
       ) : (
-        <div className="border border-zinc-800 rounded-xl overflow-hidden">
+        <div className="border border-border rounded-xl overflow-hidden">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-900/50">
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">From</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Message</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Received</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 text-right">Actions</th>
+              <tr className="border-b border-border bg-card/50">
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">From</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Message</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Received</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {inquiries.map((inquiry) => (
-                <tr key={inquiry.id} className={`border-b border-zinc-800/70 last:border-b-0 hover:bg-zinc-900/40 ${inquiry.read ? "" : "bg-purple-500/[0.03]"}`}>
+                <tr key={inquiry.id} className={`border-b border-border/70 last:border-b-0 hover:bg-card/40 ${inquiry.read ? "" : "bg-primary/[0.03]"}`}>
                   <td className="px-4 py-3">
                     <Link
                       href={routes.inquiries.item(inquiry.id)}
-                      className="text-[13.5px] font-medium text-zinc-100 hover:text-purple-400 transition-colors"
+                      className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors"
                     >
                       {inquiry.name}
                     </Link>
                     {!inquiry.read && (
-                      <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-400 align-middle">
+                      <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary align-middle">
                         New
                       </span>
                     )}
-                    <p className="text-[12px] text-zinc-500">{inquiry.email}</p>
+                    <p className="text-[12px] text-muted-foreground">{inquiry.email}</p>
                   </td>
-                  <td className="px-4 py-3 text-[13px] text-zinc-400 max-w-[360px] truncate">{inquiry.message}</td>
-                  <td className="px-4 py-3 text-[13px] text-zinc-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground max-w-[360px] truncate">{inquiry.message}</td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">
                     {new Date(inquiry.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">
                       <Link
                         href={routes.inquiries.item(inquiry.id)}
-                        className="text-[12.5px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
+                        className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors"
                       >
                         View
                       </Link>

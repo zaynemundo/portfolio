@@ -10,7 +10,7 @@ export function ReadToggle({ id, read }: { id: string; read: boolean }) {
     <button
       onClick={() => startTransition(() => markInquiryRead(id, !read))}
       disabled={isPending}
-      className="text-[12.5px] font-medium text-zinc-400 hover:text-zinc-100 transition-colors disabled:opacity-50"
+      className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
     >
       {isPending ? "Saving…" : read ? "Mark as unread" : "Mark as read"}
     </button>

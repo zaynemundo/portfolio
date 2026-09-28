@@ -49,59 +49,59 @@ export function BlogForm({ mode, postId, initial }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
       <div>
-        <label htmlFor="title" className="block text-xs font-medium text-zinc-400 mb-1.5">Title</label>
+        <label htmlFor="title" className="block text-xs font-medium text-muted-foreground mb-1.5">Title</label>
         <input
           id="title"
           required
           value={title}
           onChange={(e) => handleTitleChange(e.target.value)}
-          className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors"
+          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors"
         />
       </div>
 
       <div>
-        <label htmlFor="slug" className="block text-xs font-medium text-zinc-400 mb-1.5">Slug</label>
+        <label htmlFor="slug" className="block text-xs font-medium text-muted-foreground mb-1.5">Slug</label>
         <input
           id="slug"
           required
           value={slug}
           onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
-          className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[13.5px] font-mono text-zinc-300 focus:outline-none focus:border-zinc-600 transition-colors"
+          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[13.5px] font-mono text-foreground/70 focus:outline-none focus:border-ring transition-colors"
         />
-        <p className="mt-1 text-[11.5px] text-zinc-600">/blog/{slug || "…"}</p>
+        <p className="mt-1 text-[11.5px] text-muted-foreground/70">/blog/{slug || "…"}</p>
       </div>
 
       <div>
-        <label htmlFor="excerpt" className="block text-xs font-medium text-zinc-400 mb-1.5">Excerpt</label>
+        <label htmlFor="excerpt" className="block text-xs font-medium text-muted-foreground mb-1.5">Excerpt</label>
         <textarea
           id="excerpt"
           required
           rows={3}
           value={excerpt}
           onChange={(e) => setExcerpt(e.target.value)}
-          className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors resize-none"
+          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors resize-none"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="category" className="block text-xs font-medium text-zinc-400 mb-1.5">Category</label>
+          <label htmlFor="category" className="block text-xs font-medium text-muted-foreground mb-1.5">Category</label>
           <input
             id="category"
             required
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             placeholder="Development"
-            className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
+            className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-ring transition-colors"
           />
         </div>
         <div>
-          <label htmlFor="readTime" className="block text-xs font-medium text-zinc-400 mb-1.5">Read time</label>
+          <label htmlFor="readTime" className="block text-xs font-medium text-muted-foreground mb-1.5">Read time</label>
           <select
             id="readTime"
             value={readTime}
             onChange={(e) => setReadTime(e.target.value)}
-            className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors"
+            className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors"
           >
             {READ_TIME_OPTIONS.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
           </select>
@@ -109,38 +109,38 @@ export function BlogForm({ mode, postId, initial }: Props) {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Content</label>
+        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Content</label>
         <RichEditor content={contentHtml} onChange={setContentHtml} />
       </div>
 
       <div className="flex items-center gap-6">
-        <label className="flex items-center gap-2 text-[13.5px] text-zinc-300 cursor-pointer">
+        <label className="flex items-center gap-2 text-[13.5px] text-foreground/70 cursor-pointer">
           <input
             type="checkbox"
             checked={featured}
             onChange={(e) => setFeatured(e.target.checked)}
-            className="rounded border-zinc-700 bg-zinc-900"
+            className="rounded border-border bg-card"
           />
           Featured
         </label>
-        <label className="flex items-center gap-2 text-[13.5px] text-zinc-300 cursor-pointer">
+        <label className="flex items-center gap-2 text-[13.5px] text-foreground/70 cursor-pointer">
           <input
             type="checkbox"
             checked={published}
             onChange={(e) => setPublished(e.target.checked)}
-            className="rounded border-zinc-700 bg-zinc-900"
+            className="rounded border-border bg-card"
           />
           Published
         </label>
       </div>
 
-      {error && <p className="text-[13px] text-red-400" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-destructive" role="alert">{error}</p>}
 
       <div className="flex items-center justify-end gap-3 pt-2">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-5 py-2.5 hover:bg-white transition-colors disabled:opacity-50"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-5 py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {isPending ? "Saving…" : mode === "new" ? "Create article" : "Save changes"}
         </button>

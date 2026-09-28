@@ -69,7 +69,7 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
         <Field label="Name" id="name" value={name} onChange={handleNameChange} />
         <div>
           <Field label="Slug" id="slug" value={slug} onChange={(v) => { setSlug(v); setSlugTouched(true); }} mono />
-          <p className="mt-1 text-[11.5px] text-zinc-600">/projects/{slug || "…"}</p>
+          <p className="mt-1 text-[11.5px] text-muted-foreground/70">/projects/{slug || "…"}</p>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
         <Field label="Category" id="category" value={category} onChange={setCategory} />
         <Field label="Year" id="year" value={year} onChange={setYear} placeholder="2024–2025" />
         <div>
-          <label htmlFor="workType" className="block text-xs font-medium text-zinc-400 mb-1.5">Work type</label>
+          <label htmlFor="workType" className="block text-xs font-medium text-muted-foreground mb-1.5">Work type</label>
           <select
             id="workType"
             value={workType}
@@ -119,16 +119,16 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
 
       {mode === "edit" && projectId && (
         <div>
-          <label className="block text-xs font-medium text-zinc-400 mb-2">Screenshots</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-2">Screenshots</label>
           <ImageManager projectId={projectId} images={images} />
         </div>
       )}
 
       <div>
-        <label htmlFor="richContentJson" className="block text-xs font-medium text-zinc-400 mb-1.5">
+        <label htmlFor="richContentJson" className="block text-xs font-medium text-muted-foreground mb-1.5">
           Advanced case-study content (JSON)
         </label>
-        <p className="text-[11.5px] text-zinc-600 mb-2">
+        <p className="text-[11.5px] text-muted-foreground/70 mb-2">
           Optional sections — hero metrics, problem/transformation write-ups, execution disciplines, results, deliverables, performance audit table, etc.
         </p>
         <textarea
@@ -137,28 +137,28 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
           onChange={(e) => setRichContentJson(e.target.value)}
           rows={10}
           spellCheck={false}
-          className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[12.5px] font-mono text-zinc-300 focus:outline-none focus:border-zinc-600 transition-colors resize-y"
+          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[12.5px] font-mono text-foreground/70 focus:outline-none focus:border-ring transition-colors resize-y"
         />
       </div>
 
       <div className="flex items-center gap-6">
-        <label className="flex items-center gap-2 text-[13.5px] text-zinc-300 cursor-pointer">
-          <input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} className="rounded border-zinc-700 bg-zinc-900" />
+        <label className="flex items-center gap-2 text-[13.5px] text-foreground/70 cursor-pointer">
+          <input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} className="rounded border-border bg-card" />
           Featured
         </label>
-        <label className="flex items-center gap-2 text-[13.5px] text-zinc-300 cursor-pointer">
-          <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} className="rounded border-zinc-700 bg-zinc-900" />
+        <label className="flex items-center gap-2 text-[13.5px] text-foreground/70 cursor-pointer">
+          <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} className="rounded border-border bg-card" />
           Published
         </label>
       </div>
 
-      {error && <p className="text-[13px] text-red-400" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-destructive" role="alert">{error}</p>}
 
       <div className="flex items-center justify-end gap-3 pt-2">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-5 py-2.5 hover:bg-white transition-colors disabled:opacity-50"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-5 py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {isPending ? "Saving…" : mode === "new" ? "Create case study" : "Save changes"}
         </button>
@@ -167,7 +167,7 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   );
 }
 
-const inputClass = "w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors";
+const inputClass = "w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors";
 const selectClass = inputClass;
 
 function Field({
@@ -177,7 +177,7 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-xs font-medium text-zinc-400 mb-1.5">{label}</label>
+      <label htmlFor={id} className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
       <input
         id={id}
         value={value}
@@ -196,7 +196,7 @@ function TextArea({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-xs font-medium text-zinc-400 mb-1.5">{label}</label>
+      <label htmlFor={id} className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
       <textarea
         id={id}
         value={value}

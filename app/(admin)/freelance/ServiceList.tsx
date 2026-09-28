@@ -24,13 +24,13 @@ export function ServiceList({ projectId, services }: { projectId: string; servic
 
   return (
     <div>
-      <h2 className="text-[13.5px] font-semibold text-zinc-100 mb-3">Services</h2>
+      <h2 className="text-[13.5px] font-semibold text-foreground mb-3">Services</h2>
 
       <div className="space-y-2 mb-3">
         {services.map((service) => (
           <ServiceRow key={service.id} projectId={projectId} service={service} />
         ))}
-        {services.length === 0 && <p className="text-[13px] text-zinc-600 py-2">No services added yet.</p>}
+        {services.length === 0 && <p className="text-[13px] text-muted-foreground/70 py-2">No services added yet.</p>}
       </div>
 
       <form onSubmit={handleAdd} className="flex gap-2">
@@ -39,12 +39,12 @@ export function ServiceList({ projectId, services }: { projectId: string; servic
           onChange={(e) => setName(e.target.value)}
           placeholder="Add a service…"
           style={{ outline: "none" }}
-          className="flex-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2 text-[13.5px] text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-600 transition-colors"
+          className="flex-1 rounded-lg bg-card border border-border px-3 py-2 text-[13.5px] text-foreground placeholder:text-muted-foreground/70 focus:border-ring transition-colors"
         />
         <button
           type="submit"
           disabled={isPending || !name.trim()}
-          className="rounded-lg border border-zinc-700 text-zinc-300 text-[12.5px] font-medium px-3.5 hover:bg-zinc-800 transition-colors disabled:opacity-50"
+          className="rounded-lg border border-border text-foreground/70 text-[12.5px] font-medium px-3.5 hover:bg-secondary transition-colors disabled:opacity-50"
         >
           Add
         </button>
@@ -63,14 +63,14 @@ function ServiceRow({ projectId, service }: { projectId: string; service: Servic
   }
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2.5 group">
+    <div className="rounded-lg border border-border bg-card/40 px-3 py-2.5 group">
       <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-[13.5px] text-zinc-200">{service.name}</span>
+        <span className="text-[13.5px] text-foreground/90">{service.name}</span>
         <button
           type="button"
           onClick={() => startTransition(() => deleteService(service.id, projectId))}
           disabled={isPending}
-          className="text-zinc-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 text-[13px] disabled:opacity-30"
+          className="text-muted-foreground/70 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 text-[13px] disabled:opacity-30"
           aria-label="Delete service"
         >
           ×
@@ -83,7 +83,7 @@ function ServiceRow({ projectId, service }: { projectId: string; service: Servic
           onChange={(e) => setStartDate(e.target.value)}
           onBlur={() => save(startDate, endDate)}
           style={{ outline: "none" }}
-          className="rounded-md bg-zinc-800/60 px-2 py-1 text-[12px] text-zinc-300"
+          className="rounded-md bg-secondary/60 px-2 py-1 text-[12px] text-foreground/70"
         />
         <input
           type="date"
@@ -91,7 +91,7 @@ function ServiceRow({ projectId, service }: { projectId: string; service: Servic
           onChange={(e) => setEndDate(e.target.value)}
           onBlur={() => save(startDate, endDate)}
           style={{ outline: "none" }}
-          className="rounded-md bg-zinc-800/60 px-2 py-1 text-[12px] text-zinc-300"
+          className="rounded-md bg-secondary/60 px-2 py-1 text-[12px] text-foreground/70"
         />
       </div>
     </div>

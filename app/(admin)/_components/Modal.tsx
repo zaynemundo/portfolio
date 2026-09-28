@@ -28,14 +28,14 @@ export function Modal({ open, onClose, title, children, maxWidthClassName = "max
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[6vh] px-4 pb-8 overflow-y-auto">
       <div className="fixed inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
-      <div className={`relative w-full ${maxWidthClassName} rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl`}>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-          <h2 className="text-[15px] font-semibold text-zinc-100">{title}</h2>
+      <div className={`relative w-full ${maxWidthClassName} rounded-xl border border-border bg-card shadow-2xl`}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h2 className="text-[15px] font-semibold text-foreground">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
+            className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground/90 transition-colors"
           >
             <CloseIcon />
           </button>

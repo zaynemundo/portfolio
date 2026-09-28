@@ -64,7 +64,7 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
     <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="type" className="block text-xs font-medium text-zinc-400 mb-1.5">Type</label>
+          <label htmlFor="type" className="block text-xs font-medium text-muted-foreground mb-1.5">Type</label>
           <Select
             value={type}
             onChange={setType}
@@ -76,34 +76,34 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
           />
         </div>
         <div>
-          <label htmlFor="date" className="block text-xs font-medium text-zinc-400 mb-1.5">Date</label>
+          <label htmlFor="date" className="block text-xs font-medium text-muted-foreground mb-1.5">Date</label>
           <input id="date" type="date" required value={date} onChange={(e) => setDate(e.target.value)} className={inputClass} />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="amount" className="block text-xs font-medium text-zinc-400 mb-1.5">Amount</label>
+          <label htmlFor="amount" className="block text-xs font-medium text-muted-foreground mb-1.5">Amount</label>
           <input id="amount" type="number" min="0" step="0.01" required value={amount} onChange={(e) => setAmount(e.target.value)} className={inputClass} />
         </div>
         <div>
-          <label htmlFor="currency" className="block text-xs font-medium text-zinc-400 mb-1.5">Currency</label>
+          <label htmlFor="currency" className="block text-xs font-medium text-muted-foreground mb-1.5">Currency</label>
           <input id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="AED" className={inputClass} />
         </div>
       </div>
 
       <div>
-        <label htmlFor="category" className="block text-xs font-medium text-zinc-400 mb-1.5">Category (optional)</label>
+        <label htmlFor="category" className="block text-xs font-medium text-muted-foreground mb-1.5">Category (optional)</label>
         <input id="category" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Design work, Software, Travel" className={inputClass} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="clientId" className="block text-xs font-medium text-zinc-400 mb-1.5">Client (optional)</label>
+          <label htmlFor="clientId" className="block text-xs font-medium text-muted-foreground mb-1.5">Client (optional)</label>
           <ClientSelect value={clientId} onChange={setClientId} clients={clients} onClientCreated={onClientCreated} className={selectClass} />
         </div>
         <div>
-          <label htmlFor="projectId" className="block text-xs font-medium text-zinc-400 mb-1.5">Project (optional)</label>
+          <label htmlFor="projectId" className="block text-xs font-medium text-muted-foreground mb-1.5">Project (optional)</label>
           <Select
             value={projectId}
             onChange={setProjectId}
@@ -114,7 +114,7 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-xs font-medium text-zinc-400 mb-1.5">Description (optional)</label>
+        <label htmlFor="description" className="block text-xs font-medium text-muted-foreground mb-1.5">Description (optional)</label>
         <textarea id="description" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} className={`${inputClass} resize-none`} />
       </div>
 
@@ -131,13 +131,13 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
         }}
       />
 
-      {error && <p className="text-[13px] text-red-400" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-destructive" role="alert">{error}</p>}
 
       <div className="flex justify-end">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-5 py-2.5 hover:bg-white transition-colors disabled:opacity-50"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-5 py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {isPending ? "Saving…" : mode === "new" ? "Add transaction" : "Save changes"}
         </button>
@@ -146,5 +146,5 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
   );
 }
 
-const inputClass = "w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors";
+const inputClass = "w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors";
 const selectClass = `${inputClass} flex items-center justify-between gap-2`;

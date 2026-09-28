@@ -30,11 +30,11 @@ export function ImageManager({ projectId, images }: { projectId: string; images:
         {images.map((url) => (
           <div key={url} className="relative group">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt="" className="w-full aspect-[4/3] object-cover rounded-lg border border-zinc-800" />
+            <img src={url} alt="" className="w-full aspect-[4/3] object-cover rounded-lg border border-border" />
             <button
               type="button"
               onClick={() => startTransition(() => removeProjectImage(projectId, url))}
-              className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-zinc-950/80 text-zinc-300 text-[13px] opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/80 hover:text-white"
+              className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-background/80 text-foreground/70 text-[13px] opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/80 hover:text-white"
               aria-label="Remove image"
             >
               ×
@@ -54,11 +54,11 @@ export function ImageManager({ projectId, images }: { projectId: string; images:
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isPending}
-        className="rounded-lg border border-zinc-700 text-zinc-300 text-[12.5px] font-medium px-3 py-1.5 hover:bg-zinc-800 transition-colors disabled:opacity-50"
+        className="rounded-lg border border-border text-foreground/70 text-[12.5px] font-medium px-3 py-1.5 hover:bg-secondary transition-colors disabled:opacity-50"
       >
         {isPending ? "Working…" : "+ Add image"}
       </button>
-      {error && <p className="mt-2 text-[12px] text-red-400">{error}</p>}
+      {error && <p className="mt-2 text-[12px] text-destructive">{error}</p>}
     </div>
   );
 }

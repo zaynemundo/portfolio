@@ -37,23 +37,23 @@ export function UploadCard({ title, description, currentUrl, accept, kind, uploa
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-      <h3 className="text-[13.5px] font-semibold text-zinc-100 mb-0.5">{title}</h3>
-      <p className="text-[12px] text-zinc-500 mb-4">{description}</p>
+    <div className="rounded-xl border border-border bg-card/40 p-5">
+      <h3 className="text-[13.5px] font-semibold text-foreground mb-0.5">{title}</h3>
+      <p className="text-[12px] text-muted-foreground mb-4">{description}</p>
 
       {kind === "image" && url && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={url} alt="" className="w-full h-32 object-cover rounded-lg mb-3 border border-zinc-800" />
+        <img src={url} alt="" className="w-full h-32 object-cover rounded-lg mb-3 border border-border" />
       )}
       {kind === "video" && url && (
-        <video src={url} controls muted className="w-full h-32 object-cover rounded-lg mb-3 border border-zinc-800" />
+        <video src={url} controls muted className="w-full h-32 object-cover rounded-lg mb-3 border border-border" />
       )}
       {kind === "file" && url && (
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="block text-[12.5px] text-purple-400 hover:text-purple-300 truncate mb-3"
+          className="block text-[12.5px] text-primary hover:text-primary truncate mb-3"
         >
           View current file →
         </a>
@@ -70,12 +70,12 @@ export function UploadCard({ title, description, currentUrl, accept, kind, uploa
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isPending}
-        className="w-full rounded-lg border border-zinc-700 text-zinc-300 text-[12.5px] font-medium py-2 hover:bg-zinc-800 transition-colors disabled:opacity-50"
+        className="w-full rounded-lg border border-border text-foreground/70 text-[12.5px] font-medium py-2 hover:bg-secondary transition-colors disabled:opacity-50"
       >
         {isPending ? "Uploading…" : "Upload new file"}
       </button>
 
-      {error && <p className="mt-2 text-[12px] text-red-400">{error}</p>}
+      {error && <p className="mt-2 text-[12px] text-destructive">{error}</p>}
     </div>
   );
 }

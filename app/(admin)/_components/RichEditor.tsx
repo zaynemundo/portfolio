@@ -26,19 +26,19 @@ export function RichEditor({ content, onChange, bordered = true }: Props) {
       attributes: {
         style: "outline: none;",
         class:
-          "max-w-none min-h-[320px] px-4 py-3 text-[14.5px] text-zinc-200 focus:outline-none " +
+          "max-w-none min-h-[320px] px-4 py-3 text-[14.5px] text-foreground/90 focus:outline-none " +
           "[&_p]:leading-relaxed [&_p]:mb-3 " +
-          "[&_h2]:text-[19px] [&_h2]:font-semibold [&_h2]:text-zinc-100 [&_h2]:mt-6 [&_h2]:mb-2 " +
-          "[&_h3]:text-[16px] [&_h3]:font-semibold [&_h3]:text-zinc-100 [&_h3]:mt-5 [&_h3]:mb-2 " +
+          "[&_h2]:text-[19px] [&_h2]:font-semibold [&_h2]:text-foreground [&_h2]:mt-6 [&_h2]:mb-2 " +
+          "[&_h3]:text-[16px] [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mt-5 [&_h3]:mb-2 " +
           "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 " +
-          "[&_blockquote]:border-l-2 [&_blockquote]:border-zinc-700 [&_blockquote]:pl-3 [&_blockquote]:text-zinc-400 [&_blockquote]:italic " +
-          "[&_code]:bg-zinc-800 [&_code]:rounded [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[13px] " +
-          "[&_a]:text-purple-400 [&_a]:underline " +
+          "[&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground [&_blockquote]:italic " +
+          "[&_code]:bg-secondary [&_code]:rounded [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[13px] " +
+          "[&_a]:text-primary [&_a]:underline " +
           "[&_table]:w-full [&_table]:my-3 [&_table]:border-collapse " +
-          "[&_th]:border [&_th]:border-zinc-700 [&_th]:bg-zinc-800 [&_th]:px-2.5 [&_th]:py-1.5 [&_th]:text-left [&_th]:font-semibold [&_th]:align-middle " +
-          "[&_td]:border [&_td]:border-zinc-700 [&_td]:px-2.5 [&_td]:py-1.5 [&_td]:align-middle " +
+          "[&_th]:border [&_th]:border-border [&_th]:bg-secondary [&_th]:px-2.5 [&_th]:py-1.5 [&_th]:text-left [&_th]:font-semibold [&_th]:align-middle " +
+          "[&_td]:border [&_td]:border-border [&_td]:px-2.5 [&_td]:py-1.5 [&_td]:align-middle " +
           "[&_th_p]:mb-0 [&_td_p]:mb-0 " +
-          "[&_.selectedCell]:bg-zinc-700/40",
+          "[&_.selectedCell]:bg-secondary/40",
       },
     },
   });
@@ -46,7 +46,7 @@ export function RichEditor({ content, onChange, bordered = true }: Props) {
   if (!editor) return null;
 
   return (
-    <div className={bordered ? "rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden" : ""}>
+    <div className={bordered ? "rounded-lg border border-border bg-card overflow-hidden" : ""}>
       <Toolbar bordered={bordered} editor={editor} />
       <EditorContent editor={editor} />
     </div>
@@ -81,7 +81,7 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
   return (
     <div
       className={`flex flex-wrap items-center gap-0.5 ${
-        bordered ? "px-2 py-1.5 border-b border-zinc-800 bg-zinc-950" : "inline-flex px-1.5 py-1 rounded-full bg-zinc-800/60 mb-4"
+        bordered ? "px-2 py-1.5 border-b border-border bg-background" : "inline-flex px-1.5 py-1 rounded-full bg-secondary/60 mb-4"
       }`}
     >
       <button
@@ -90,7 +90,7 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
         disabled={!editor.can().undo()}
         aria-label="Undo"
         title="Undo"
-        className="h-7 w-7 flex items-center justify-center rounded text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none"
+        className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none"
       >
         <UndoIcon />
       </button>
@@ -100,12 +100,12 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
         disabled={!editor.can().redo()}
         aria-label="Redo"
         title="Redo"
-        className="h-7 w-7 flex items-center justify-center rounded text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none"
+        className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none"
       >
         <RedoIcon />
       </button>
 
-      <div className="w-px self-stretch bg-zinc-700 mx-1" />
+      <div className="w-px self-stretch bg-secondary mx-1" />
 
       {items.map((item) => (
         <button
@@ -115,7 +115,7 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
           aria-label={item.label}
           title={item.label}
           className={`h-7 w-7 flex items-center justify-center rounded transition-colors ${
-            item.active ? "bg-zinc-100 text-zinc-900" : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+            item.active ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-secondary hover:text-white"
           }`}
         >
           {item.icon}
@@ -127,13 +127,13 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
         aria-label="Link"
         title="Link"
         className={`h-7 w-7 flex items-center justify-center rounded transition-colors ${
-          editor.isActive("link") ? "bg-zinc-100 text-zinc-900" : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+          editor.isActive("link") ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-secondary hover:text-white"
         }`}
       >
         <LinkIcon />
       </button>
 
-      <div className="w-px self-stretch bg-zinc-700 mx-1" />
+      <div className="w-px self-stretch bg-secondary mx-1" />
 
       {!inTable ? (
         <button
@@ -141,25 +141,25 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
           onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
           aria-label="Insert table"
           title="Insert table"
-          className="h-7 w-7 flex items-center justify-center rounded text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+          className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors"
         >
           <TableIcon />
         </button>
       ) : (
         <>
-          <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} aria-label="Add column" title="Add column" className="h-7 w-7 flex items-center justify-center rounded text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors">
+          <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} aria-label="Add column" title="Add column" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors">
             <AddColumnIcon />
           </button>
-          <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} aria-label="Add row" title="Add row" className="h-7 w-7 flex items-center justify-center rounded text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors">
+          <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} aria-label="Add row" title="Add row" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors">
             <AddRowIcon />
           </button>
-          <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} aria-label="Delete column" title="Delete column" className="h-7 w-7 flex items-center justify-center rounded text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors">
+          <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} aria-label="Delete column" title="Delete column" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors">
             <RemoveColumnIcon />
           </button>
-          <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} aria-label="Delete row" title="Delete row" className="h-7 w-7 flex items-center justify-center rounded text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors">
+          <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} aria-label="Delete row" title="Delete row" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors">
             <RemoveRowIcon />
           </button>
-          <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} aria-label="Delete table" title="Delete table" className="h-7 w-7 flex items-center justify-center rounded text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors">
+          <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} aria-label="Delete table" title="Delete table" className="h-7 w-7 flex items-center justify-center rounded text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors">
             <TrashIcon />
           </button>
         </>

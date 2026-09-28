@@ -23,7 +23,7 @@ export default async function InquiryDetailPage({ params }: Props) {
       <div className="flex items-center justify-between mb-8">
         <div>
           <BackLink href={routes.inquiries.list} label="Inquiries" />
-          <h1 className="text-[22px] font-semibold text-zinc-100 mt-1">{inquiry.name}</h1>
+          <h1 className="text-[22px] font-semibold text-foreground mt-1">{inquiry.name}</h1>
         </div>
         <div className="flex items-center gap-4">
           <ReadToggle id={inquiry.id} read={true} />
@@ -31,9 +31,9 @@ export default async function InquiryDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-4">
-        <div className="flex items-center justify-between text-[13px] text-zinc-500">
-          <a href={`mailto:${inquiry.email}`} className="text-purple-400 hover:text-purple-300 transition-colors">
+      <div className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
+        <div className="flex items-center justify-between text-[13px] text-muted-foreground">
+          <a href={`mailto:${inquiry.email}`} className="text-primary hover:text-primary transition-colors">
             {inquiry.email}
           </a>
           <span>
@@ -42,12 +42,12 @@ export default async function InquiryDetailPage({ params }: Props) {
             })}
           </span>
         </div>
-        <p className="text-[14.5px] text-zinc-200 leading-relaxed whitespace-pre-wrap">{inquiry.message}</p>
+        <p className="text-[14.5px] text-foreground/90 leading-relaxed whitespace-pre-wrap">{inquiry.message}</p>
       </div>
 
       <a
         href={`mailto:${inquiry.email}?subject=${encodeURIComponent(`Re: your inquiry`)}`}
-        className="inline-block mt-6 rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
+        className="inline-block mt-6 rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
       >
         Reply by email
       </a>

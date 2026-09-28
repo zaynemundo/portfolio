@@ -3,7 +3,31 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  Home,
+  IdCard,
+  Newspaper,
+  Layers,
+  Mail,
+  Settings,
+  FolderKanban,
+  Users,
+  Contact,
+  FileText,
+  Wallet,
+  Briefcase,
+  Search,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ChevronRight,
+  Menu,
+  X,
+  Sun,
+  Moon,
+} from "lucide-react";
 import { LogoutButton } from "@/app/(admin)/_components/LogoutButton";
+import { Switch } from "@/app/(admin)/_components/ui/Switch";
 import { routes } from "@/app/(admin)/_routes";
 import { CommandPalette } from "./CommandPalette";
 
@@ -14,25 +38,28 @@ interface NavItem {
   badge?: number;
 }
 
-const DASHBOARD_ITEM: NavItem = { href: routes.home, label: "Dashboard", icon: <OverviewIcon /> };
+const ICON_PROPS = { size: 16, strokeWidth: 1.75 };
+const THEME_STORAGE_KEY = "zm-admin-theme";
+
+const DASHBOARD_ITEM: NavItem = { href: routes.home, label: "Dashboard", icon: <LayoutDashboard {...ICON_PROPS} /> };
 
 function buildContentItems(unreadInquiries: number): NavItem[] {
   return [
-    { href: routes.homepage, label: "Homepage", icon: <HomeIcon /> },
-    { href: routes.cv, label: "CV", icon: <CvIcon /> },
-    { href: routes.blog.list, label: "Blog", icon: <BlogIcon /> },
-    { href: routes.caseStudies.list, label: "Case Studies", icon: <CaseStudyIcon /> },
-    { href: routes.inquiries.list, label: "Inquiries", icon: <InquiriesIcon />, badge: unreadInquiries },
-    { href: routes.settings, label: "Site Settings", icon: <SettingsIcon /> },
+    { href: routes.homepage, label: "Homepage", icon: <Home {...ICON_PROPS} /> },
+    { href: routes.cv, label: "CV", icon: <IdCard {...ICON_PROPS} /> },
+    { href: routes.blog.list, label: "Blog", icon: <Newspaper {...ICON_PROPS} /> },
+    { href: routes.caseStudies.list, label: "Case Studies", icon: <Layers {...ICON_PROPS} /> },
+    { href: routes.inquiries.list, label: "Inquiries", icon: <Mail {...ICON_PROPS} />, badge: unreadInquiries },
+    { href: routes.settings, label: "Site Settings", icon: <Settings {...ICON_PROPS} /> },
   ];
 }
 
 const FREELANCE_DROPDOWN_ITEMS: NavItem[] = [
-  { href: routes.clients.list, label: "Clients", icon: <ClientsIcon /> },
-  { href: routes.projects.list, label: "Projects", icon: <ProjectsIcon /> },
-  { href: routes.finance.list, label: "Finance", icon: <FinanceIcon /> },
-  { href: routes.contacts.list, label: "Contacts", icon: <ContactsIcon /> },
-  { href: routes.documents.list, label: "Documents", icon: <DocumentsIcon /> },
+  { href: routes.clients.list, label: "Clients", icon: <Users {...ICON_PROPS} /> },
+  { href: routes.projects.list, label: "Projects", icon: <FolderKanban {...ICON_PROPS} /> },
+  { href: routes.finance.list, label: "Finance", icon: <Wallet {...ICON_PROPS} /> },
+  { href: routes.contacts.list, label: "Contacts", icon: <Contact {...ICON_PROPS} /> },
+  { href: routes.documents.list, label: "Documents", icon: <FileText {...ICON_PROPS} /> },
 ];
 
 export function ConsoleShell({
@@ -45,13 +72,45 @@ export function ConsoleShell({
   const pathname = usePathname();
   const contentItems = buildContentItems(unreadInquiries);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  // Closes the mobile nav on navigation — adjusted during render (React's
+  // documented pattern for resetting state on a prop change) rather than a
+  // useEffect, which would trip react-hooks/set-state-in-effect.
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setMobileOpen(false);
+  }
 
   const allNavItems: NavItem[] = [
     DASHBOARD_ITEM,
     ...contentItems,
     ...FREELANCE_DROPDOWN_ITEMS,
   ];
+
+  useEffect(() => {
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from localStorage on mount; can't be derived during render without a server/client hydration mismatch.
+      setIsDark(localStorage.getItem(THEME_STORAGE_KEY) === "dark");
+    } catch {
+      // localStorage unavailable — stay on the light default.
+    }
+  }, []);
+
+  function toggleTheme() {
+    setIsDark((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, next ? "dark" : "light");
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  }
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -65,65 +124,41 @@ export function ConsoleShell({
   }, []);
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex print:bg-white">
+    <div className={`admin-root ${isDark ? "dark" : ""} min-h-screen bg-background flex print:bg-white`}>
+      {/* Mobile hamburger — fixed top-left, hidden once the slide-in nav is open */}
+      {!mobileOpen && (
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Open menu"
+          className="md:hidden fixed top-3 left-3 z-40 h-9 w-9 rounded-lg bg-card border border-border shadow-sm flex items-center justify-center text-foreground"
+        >
+          <Menu size={18} />
+        </button>
+      )}
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 bg-black/40 z-40" onClick={() => setMobileOpen(false)} aria-hidden="true" />
+      )}
+
+      {/* Mobile sidebar — slides in, always full nav regardless of desktop collapse state */}
+      <aside
+        className={`md:hidden fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[300px] bg-sidebar border-r border-sidebar-border flex flex-col transform transition-transform duration-300 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <SidebarHeader onSearch={() => setSearchOpen(true)} onCollapse={() => setMobileOpen(false)} collapseIcon={<X size={18} />} collapseLabel="Close menu" />
+        <SidebarNav contentItems={contentItems} pathname={pathname} />
+        <SidebarFooter email={email} isDark={isDark} onToggleTheme={toggleTheme} />
+      </aside>
+
+      {/* Desktop sidebar */}
       {sidebarOpen ? (
-        <aside className="w-60 shrink-0 border-r border-zinc-800 flex flex-col h-screen sticky top-0 print:hidden">
-          <div className="h-14 flex items-center justify-between px-4 border-b border-zinc-800">
-            <Link href={routes.home} aria-label="Dashboard" className="text-[13px] font-extrabold tracking-tight text-white">
-              ZM
-            </Link>
-            <div className="flex items-center gap-0.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setSearchOpen(true)}
-                aria-label="Search"
-                className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
-              >
-                <TopBarSearchIcon />
-              </button>
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(false)}
-                aria-label="Collapse sidebar"
-                className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
-              >
-                <SidebarToggleIcon />
-              </button>
-            </div>
-          </div>
-
-          <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
-            <DashboardLink item={DASHBOARD_ITEM} pathname={pathname} />
-            <NavGroup label="Content" accent="purple" items={contentItems} pathname={pathname} />
-            <div>
-              <p className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-zinc-600 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
-                Hub
-              </p>
-              <ul className="space-y-0.5">
-                <li>
-                  <FreelanceDropdown items={FREELANCE_DROPDOWN_ITEMS} pathname={pathname} />
-                </li>
-              </ul>
-            </div>
-          </nav>
-
-          <div className="p-3 border-t border-zinc-800">
-            <div className="flex items-center gap-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 p-2.5">
-              <div className="h-8 w-8 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center text-[12px] font-semibold shrink-0">
-                {email.charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[12px] text-zinc-300 font-medium truncate">{email}</p>
-                <div className="flex items-center gap-3 mt-0.5">
-                  <Link href={routes.account} className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors">
-                    Change password
-                  </Link>
-                  <LogoutButton />
-                </div>
-              </div>
-            </div>
-          </div>
+        <aside className="hidden md:flex w-60 shrink-0 border-r border-sidebar-border bg-sidebar flex-col h-screen sticky top-0 print:hidden">
+          <SidebarHeader onSearch={() => setSearchOpen(true)} onCollapse={() => setSidebarOpen(false)} collapseIcon={<PanelLeftClose size={16} />} collapseLabel="Collapse sidebar" />
+          <SidebarNav contentItems={contentItems} pathname={pathname} />
+          <SidebarFooter email={email} isDark={isDark} onToggleTheme={toggleTheme} />
         </aside>
       ) : (
         <CollapsedRail
@@ -146,6 +181,95 @@ export function ConsoleShell({
   );
 }
 
+function SidebarHeader({
+  onSearch, onCollapse, collapseIcon, collapseLabel,
+}: {
+  onSearch: () => void;
+  onCollapse: () => void;
+  collapseIcon: React.ReactNode;
+  collapseLabel: string;
+}) {
+  return (
+    <div className="h-14 flex items-center justify-between px-4 border-b border-sidebar-border shrink-0">
+      <Link href={routes.home} aria-label="Dashboard" className="text-[13px] font-extrabold tracking-tight text-sidebar-foreground">
+        ZM
+      </Link>
+      <div className="flex items-center gap-0.5 shrink-0">
+        <button
+          type="button"
+          onClick={onSearch}
+          aria-label="Search"
+          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        >
+          <Search size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={onCollapse}
+          aria-label={collapseLabel}
+          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        >
+          {collapseIcon}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SidebarNav({ contentItems, pathname }: { contentItems: NavItem[]; pathname: string }) {
+  return (
+    <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
+      <DashboardLink item={DASHBOARD_ITEM} pathname={pathname} />
+      <NavGroup label="Content" accent="primary" items={contentItems} pathname={pathname} />
+      <div>
+        <p className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
+          Hub
+        </p>
+        <ul className="space-y-0.5">
+          <li>
+            <FreelanceDropdown items={FREELANCE_DROPDOWN_ITEMS} pathname={pathname} />
+          </li>
+        </ul>
+      </div>
+    </nav>
+  );
+}
+
+function SidebarFooter({
+  email, isDark, onToggleTheme,
+}: {
+  email: string;
+  isDark: boolean;
+  onToggleTheme: () => void;
+}) {
+  return (
+    <div className="p-3 border-t border-sidebar-border shrink-0">
+      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-card p-2.5 mb-2">
+        <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-[12px] font-semibold shrink-0">
+          {email.charAt(0).toUpperCase()}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[12px] text-foreground font-medium truncate">{email}</p>
+          <div className="flex items-center gap-3 mt-0.5">
+            <Link href={routes.account} className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">
+              Change password
+            </Link>
+            <LogoutButton />
+          </div>
+        </div>
+      </div>
+      <div className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[12px] font-medium text-muted-foreground">
+        <span className="flex items-center gap-2">
+          {isDark ? <Moon size={14} /> : <Sun size={14} />}
+          {isDark ? "Dark mode" : "Light mode"}
+        </span>
+        <Switch checked={isDark} onCheckedChange={onToggleTheme} aria-label="Toggle dark mode" />
+      </div>
+    </div>
+  );
+}
+
 /** Collapsed state of the sidebar — a narrow icon-only rail (like ChatGPT's
  *  collapsed sidebar), not a fully hidden nav. Every top-level destination
  *  stays one click away, just without labels; hover/aria-label carries the name. */
@@ -159,25 +283,25 @@ function CollapsedRail({
   onSearch: () => void;
 }) {
   return (
-    <aside className="w-14 shrink-0 border-r border-zinc-800 flex flex-col items-center h-screen sticky top-0 print:hidden py-3 gap-1">
+    <aside className="hidden md:flex w-14 shrink-0 border-r border-sidebar-border bg-sidebar flex-col items-center h-screen sticky top-0 print:hidden py-3 gap-1">
       <button
         type="button"
         onClick={onExpand}
         aria-label="Expand sidebar"
-        className="h-9 w-9 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+        className="h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
       >
-        <SidebarToggleIcon />
+        <PanelLeftOpen size={16} />
       </button>
       <button
         type="button"
         onClick={onSearch}
         aria-label="Search"
-        className="h-9 w-9 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+        className="h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
       >
-        <TopBarSearchIcon />
+        <Search size={16} />
       </button>
 
-      <div className="w-6 h-px bg-zinc-800 my-1.5" aria-hidden="true" />
+      <div className="w-6 h-px bg-border my-1.5" aria-hidden="true" />
 
       <nav className="flex-1 flex flex-col items-center gap-1 overflow-y-auto">
         {items.map((item) => {
@@ -189,12 +313,12 @@ function CollapsedRail({
               title={item.label}
               aria-label={item.label}
               className={`relative h-9 w-9 rounded-lg flex items-center justify-center transition-colors ${
-                isActive ? "bg-purple-500/10 text-purple-300" : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+                isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
               {item.icon}
               {!!item.badge && (
-                <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
+                <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-destructive" aria-hidden="true" />
               )}
             </Link>
           );
@@ -205,7 +329,7 @@ function CollapsedRail({
         href={routes.account}
         title={email}
         aria-label="Account"
-        className="h-8 w-8 rounded-full bg-purple-500/15 text-purple-300 flex items-center justify-center text-[12px] font-semibold shrink-0 mb-1"
+        className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-[12px] font-semibold shrink-0 mb-1"
       >
         {email.charAt(0).toUpperCase()}
       </Link>
@@ -223,13 +347,13 @@ function NavLink({ item, pathname, activeClasses }: { item: NavItem; pathname: s
     <Link
       href={item.href}
       className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-        isActive ? activeClasses : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+        isActive ? activeClasses : "text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
       {item.icon}
       <span className="flex-1">{item.label}</span>
       {!!item.badge && (
-        <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10.5px] font-semibold flex items-center justify-center">
+        <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-white text-[10.5px] font-semibold flex items-center justify-center">
           {item.badge}
         </span>
       )}
@@ -241,14 +365,15 @@ function NavLink({ item, pathname, activeClasses }: { item: NavItem; pathname: s
 function DashboardLink({ item, pathname }: { item: NavItem; pathname: string }) {
   return (
     <div className="pb-2">
-      <NavLink item={item} pathname={pathname} activeClasses="bg-zinc-100/10 text-zinc-100" />
+      <NavLink item={item} pathname={pathname} activeClasses="bg-foreground/10 text-foreground" />
     </div>
   );
 }
 
-/** Groups Clients/Projects/Finance/Contacts under one collapsible "Freelance"
- *  item — these all revolve around the same freelance work, so they don't need
- *  four separate top-level Hub entries. Auto-expands when any sub-page is active. */
+/** Groups Clients/Projects/Finance/Contacts/Documents under one collapsible
+ *  "Freelance" item — these all revolve around the same freelance work, so
+ *  they don't need five separate top-level Hub entries. Auto-expands when
+ *  any sub-page is active. */
 function FreelanceDropdown({ items, pathname }: { items: NavItem[]; pathname: string }) {
   const hasActiveChild = items.some((item) => isNavActive(pathname, item.href));
   const [manualOpen, setManualOpen] = useState<boolean | null>(null);
@@ -260,23 +385,18 @@ function FreelanceDropdown({ items, pathname }: { items: NavItem[]; pathname: st
         type="button"
         onClick={() => setManualOpen(!open)}
         className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-          hasActiveChild ? "bg-emerald-500/10 text-emerald-300" : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+          hasActiveChild ? "bg-success/10 text-success" : "text-muted-foreground hover:bg-muted hover:text-foreground"
         }`}
       >
-        <FreelanceIcon />
+        <Briefcase {...ICON_PROPS} />
         <span className="flex-1 text-left">Freelance</span>
-        <svg
-          width="12" height="12" viewBox="0 0 20 20" fill="none" aria-hidden="true"
-          className={`transition-transform ${open ? "rotate-90" : ""}`}
-        >
-          <path d="M7 4.5 12.5 10 7 15.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <ChevronRight size={12} className={`transition-transform ${open ? "rotate-90" : ""}`} />
       </button>
       {open && (
         <ul className="mt-0.5 ml-2 pl-3 space-y-0.5">
           {items.map((item) => (
             <li key={item.href}>
-              <NavLink item={item} pathname={pathname} activeClasses="bg-emerald-500/10 text-emerald-300" />
+              <NavLink item={item} pathname={pathname} activeClasses="bg-success/10 text-success" />
             </li>
           ))}
         </ul>
@@ -289,18 +409,16 @@ function NavGroup({
   label, accent, items, pathname,
 }: {
   label: string;
-  accent: "purple" | "emerald";
+  accent: "primary" | "success";
   items: NavItem[];
   pathname: string;
 }) {
-  const activeClasses = accent === "purple"
-    ? "bg-purple-500/10 text-purple-300"
-    : "bg-emerald-500/10 text-emerald-300";
-  const dotClasses = accent === "purple" ? "bg-purple-400" : "bg-emerald-400";
+  const activeClasses = accent === "primary" ? "bg-primary/10 text-primary" : "bg-success/10 text-success";
+  const dotClasses = accent === "primary" ? "bg-primary" : "bg-success";
 
   return (
     <div>
-      <p className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-zinc-600 flex items-center gap-1.5">
+      <p className="px-2.5 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground flex items-center gap-1.5">
         <span className={`h-1.5 w-1.5 rounded-full ${dotClasses}`} aria-hidden="true" />
         {label}
       </p>
@@ -312,140 +430,5 @@ function NavGroup({
         ))}
       </ul>
     </div>
-  );
-}
-
-function TopBarSearchIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <circle cx="9" cy="9" r="5.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M13.5 13.5 17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-function SidebarToggleIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <rect x="2.5" y="3.5" width="15" height="13" rx="1.75" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M8 3.5v13" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function iconProps() {
-  return { width: 15, height: 15, viewBox: "0 0 20 20", fill: "none" as const, "aria-hidden": true };
-}
-
-function OverviewIcon() {
-  return (
-    <svg {...iconProps()}>
-      <rect x="2.5" y="2.5" width="6.5" height="6.5" rx="1.3" stroke="currentColor" strokeWidth="1.4" />
-      <rect x="11" y="2.5" width="6.5" height="6.5" rx="1.3" stroke="currentColor" strokeWidth="1.4" />
-      <rect x="2.5" y="11" width="6.5" height="6.5" rx="1.3" stroke="currentColor" strokeWidth="1.4" />
-      <rect x="11" y="11" width="6.5" height="6.5" rx="1.3" stroke="currentColor" strokeWidth="1.4" />
-    </svg>
-  );
-}
-function HomeIcon() {
-  return (
-    <svg {...iconProps()}>
-      <path d="M3 9.5 10 3l7 6.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M5 8v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function CvIcon() {
-  return (
-    <svg {...iconProps()}>
-      <rect x="4" y="2.5" width="12" height="15" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
-      <circle cx="10" cy="7.5" r="1.75" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M6.5 13c0-1.5 1.5-2.5 3.5-2.5s3.5 1 3.5 2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
-function BlogIcon() {
-  return (
-    <svg {...iconProps()}>
-      <path d="M4 3.5h9l3 3v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M7 8.5h6M7 11.5h6M7 14.5h3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
-function CaseStudyIcon() {
-  return (
-    <svg {...iconProps()}>
-      <rect x="2.5" y="5.5" width="15" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M7 5.5V4a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 13 4v1.5" stroke="currentColor" strokeWidth="1.4" />
-    </svg>
-  );
-}
-function InquiriesIcon() {
-  return (
-    <svg {...iconProps()}>
-      <path d="M3 5.5h14v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M3 5.5 10 11l7-5.5" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function SettingsIcon() {
-  return (
-    <svg {...iconProps()}>
-      <circle cx="10" cy="10" r="2.75" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.36 4.64l-1.41 1.41M6.05 13.95l-1.41 1.41M15.36 15.36l-1.41-1.41M6.05 6.05 4.64 4.64" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
-function ProjectsIcon() {
-  return (
-    <svg {...iconProps()}>
-      <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h3l1.5 2h6.5A1.5 1.5 0 0 1 17 8.5v6A1.5 1.5 0 0 1 15.5 16h-11A1.5 1.5 0 0 1 3 14.5v-8Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function ClientsIcon() {
-  return (
-    <svg {...iconProps()}>
-      <circle cx="7" cy="7" r="2.25" stroke="currentColor" strokeWidth="1.4" />
-      <circle cx="13.5" cy="8" r="1.75" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M2.5 16c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M12 12.3c1.9.2 3 1.4 3 3.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
-function ContactsIcon() {
-  return (
-    <svg {...iconProps()}>
-      <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4" />
-      <circle cx="8" cy="8.5" r="1.75" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M5 13.5c0-1.7 1.3-2.8 3-2.8s3 1.1 3 2.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M12.5 7.5h2M12.5 10h2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
-function DocumentsIcon() {
-  return (
-    <svg {...iconProps()}>
-      <path d="M5.5 3h6l3 3v11a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M11.5 3v3h3" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M7 11h6M7 14h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
-function FinanceIcon() {
-  return (
-    <svg {...iconProps()}>
-      <path d="M3 15V8l4-3 3 2 3-2 4 3v7" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M10 7v9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M2.5 15.5h15" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
-function FreelanceIcon() {
-  return (
-    <svg {...iconProps()}>
-      <rect x="2.5" y="5.5" width="15" height="10.5" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M7 5.5V4a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 13 4v1.5" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M2.5 10h15" stroke="currentColor" strokeWidth="1.4" />
-    </svg>
   );
 }

@@ -19,38 +19,38 @@ export function WorkPageCopyForm({ initialHeading, initialIntro }: { initialHead
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
       <div>
-        <h2 className="text-[15px] font-semibold text-zinc-100 mb-1">Page header</h2>
-        <p className="text-[12.5px] text-zinc-500">The dark banner heading and intro at the top of /work.</p>
+        <h2 className="text-[15px] font-semibold text-foreground mb-1">Page header</h2>
+        <p className="text-[12.5px] text-muted-foreground">The dark banner heading and intro at the top of /work.</p>
       </div>
       <div>
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Heading</label>
+        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Heading</label>
         <input
           type="text"
           value={heading}
           onChange={(e) => setHeading(e.target.value)}
-          className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors"
+          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors"
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Intro text</label>
+        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Intro text</label>
         <textarea
           value={intro}
           onChange={(e) => setIntro(e.target.value)}
           rows={3}
-          className="w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[13.5px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors resize-y"
+          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:border-ring transition-colors resize-y"
         />
       </div>
       <div className="flex items-center justify-end gap-3">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors disabled:opacity-50"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {isPending ? "Saving…" : "Save"}
         </button>
-        {saved && <span className="text-[12.5px] text-emerald-400">Saved</span>}
+        {saved && <span className="text-[12.5px] text-success">Saved</span>}
       </div>
     </form>
   );

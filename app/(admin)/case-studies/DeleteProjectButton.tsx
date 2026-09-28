@@ -15,7 +15,7 @@ export function DeleteProjectButton({ id, name }: { id: string; name: string }) 
     <button
       onClick={handleClick}
       disabled={isPending}
-      className="text-[12.5px] font-medium text-red-400/80 hover:text-red-400 transition-colors disabled:opacity-50"
+      className="text-[12.5px] font-medium text-destructive/80 hover:text-destructive transition-colors disabled:opacity-50"
     >
       Delete
     </button>

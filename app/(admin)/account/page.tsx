@@ -6,8 +6,8 @@ export default async function AccountPage() {
 
   return (
     <div>
-      <h1 className="text-[22px] font-semibold text-zinc-100 mb-1">Account</h1>
-      <p className="text-[13px] text-zinc-500 mb-8">Signed in as {session.user.email}.</p>
+      <h1 className="text-[22px] font-semibold text-foreground mb-1">Account</h1>
+      <p className="text-[13px] text-muted-foreground mb-8">Signed in as {session.user.email}.</p>
 
       <ChangePasswordForm />
     </div>

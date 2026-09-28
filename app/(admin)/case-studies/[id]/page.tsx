@@ -27,7 +27,7 @@ export default async function EditCaseStudyPage({ params }: Props) {
   return (
     <div>
       <BackLink href={routes.caseStudies.list} label="Case Studies" />
-      <h1 className="text-[22px] font-semibold text-zinc-100 mt-1 mb-8">Edit case study</h1>
+      <h1 className="text-[22px] font-semibold text-foreground mt-1 mb-8">Edit case study</h1>
       <ProjectForm
         mode="edit"
         projectId={project.id}

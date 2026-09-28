@@ -76,11 +76,11 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
     <form onSubmit={handleSubmit} className="space-y-5 max-w-2xl">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium text-zinc-400 mb-1.5">Client (optional)</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Client (optional)</label>
           <ClientSelect value={clientId} onChange={setClientId} clients={clients} onClientCreated={onClientCreated} className={selectClass} />
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-400 mb-1.5">Project (optional)</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Project (optional)</label>
           <Select
             value={projectId}
             onChange={setProjectId}
@@ -92,7 +92,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
 
       <div className="grid grid-cols-4 gap-4">
         <div>
-          <label className="block text-xs font-medium text-zinc-400 mb-1.5">Status</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Status</label>
           <Select
             value={status}
             onChange={setStatus}
@@ -106,21 +106,21 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-400 mb-1.5">Issue date</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Issue date</label>
           <input type="date" required value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={inputClass} />
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-400 mb-1.5">Due date</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Due date</label>
           <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={inputClass} />
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-400 mb-1.5">Currency</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Currency</label>
           <input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="AED" className={inputClass} />
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Line items</label>
+        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Line items</label>
         <div className="space-y-2">
           {items.map((item, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
                 onClick={() => setItems((prev) => prev.filter((_, idx) => idx !== i))}
                 disabled={items.length === 1}
                 aria-label="Remove item"
-                className="shrink-0 h-9 w-9 rounded-lg border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-500/40 transition-colors disabled:opacity-30 flex items-center justify-center text-[15px]"
+                className="shrink-0 h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors disabled:opacity-30 flex items-center justify-center text-[15px]"
               >
                 −
               </button>
@@ -164,29 +164,29 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
         <button
           type="button"
           onClick={() => setItems((prev) => [...prev, emptyItem()])}
-          className="mt-2 w-full rounded-lg border border-dashed border-zinc-700 text-zinc-400 text-[12.5px] font-medium py-2 hover:bg-zinc-900 hover:text-zinc-200 transition-colors"
+          className="mt-2 w-full rounded-lg border border-dashed border-border text-muted-foreground text-[12.5px] font-medium py-2 hover:bg-card hover:text-foreground/90 transition-colors"
         >
           + Add line item
         </button>
 
-        <div className="flex justify-end mt-3 text-[14px] text-zinc-200">
-          <span className="text-zinc-500 mr-2">Total:</span>
+        <div className="flex justify-end mt-3 text-[14px] text-foreground/90">
+          <span className="text-muted-foreground mr-2">Total:</span>
           <span className="font-semibold">{total.toLocaleString()} {currency}</span>
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">Notes (optional)</label>
+        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Notes (optional)</label>
         <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} className={`${inputClass} resize-none`} />
       </div>
 
-      {error && <p className="text-[13px] text-red-400" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-destructive" role="alert">{error}</p>}
 
       <div className="flex justify-end">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-5 py-2.5 hover:bg-white transition-colors disabled:opacity-50"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-5 py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {isPending ? "Saving…" : mode === "new" ? "Create invoice" : "Save changes"}
         </button>
@@ -195,5 +195,5 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
   );
 }
 
-const inputClass = "w-full rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-[14px] text-zinc-100 focus:outline-none focus:border-zinc-600 transition-colors";
+const inputClass = "w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors";
 const selectClass = `${inputClass} flex items-center justify-between gap-2`;

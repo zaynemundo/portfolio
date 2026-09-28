@@ -24,7 +24,7 @@ export default async function EditBlogPostPage({ params }: Props) {
   return (
     <div>
       <BackLink href={routes.blog.list} label="Blog" />
-      <h1 className="text-[22px] font-semibold text-zinc-100 mt-1 mb-8">Edit article</h1>
+      <h1 className="text-[22px] font-semibold text-foreground mt-1 mb-8">Edit article</h1>
       <BlogForm
         mode="edit"
         postId={post.id}

@@ -23,12 +23,12 @@ export default async function ClientsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[22px] font-semibold text-zinc-100">Clients</h1>
-          <p className="text-[13px] text-zinc-500 mt-1">{clients.length} client{clients.length === 1 ? "" : "s"}</p>
+          <h1 className="text-[22px] font-semibold text-foreground">Clients</h1>
+          <p className="text-[13px] text-muted-foreground mt-1">{clients.length} client{clients.length === 1 ? "" : "s"}</p>
         </div>
         <Link
           href={routes.clients.new}
-          className="rounded-lg bg-zinc-100 text-zinc-900 text-[13.5px] font-semibold px-4 py-2 hover:bg-white transition-colors"
+          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
         >
           + New client
         </Link>
@@ -41,15 +41,15 @@ export default async function ClientsPage() {
           {clients.map((client) => (
             <div
               key={client.id}
-              className="group relative rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 hover:border-zinc-700 transition-colors"
+              className="group relative rounded-xl border border-border bg-card/40 p-5 hover:border-border transition-colors"
             >
               <Link href={routes.clients.item(client.id)} className="absolute inset-0 z-0" aria-label={`Open ${client.name}`} />
 
               <div className="flex items-start justify-between mb-2 gap-2">
                 <div className="flex items-center gap-2 pointer-events-none">
-                  <h3 className="text-[14.5px] font-semibold text-zinc-100 group-hover:text-emerald-400 transition-colors">{client.name}</h3>
+                  <h3 className="text-[14.5px] font-semibold text-foreground group-hover:text-success transition-colors">{client.name}</h3>
                   {client.type && (
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
                       {client.type === "COMPANY" ? "Company" : "Individual"}
                     </span>
                   )}
@@ -59,9 +59,9 @@ export default async function ClientsPage() {
                 </div>
               </div>
 
-              {client.company && <p className="text-[12.5px] text-zinc-500 mb-3 pointer-events-none">{client.company}</p>}
+              {client.company && <p className="text-[12.5px] text-muted-foreground mb-3 pointer-events-none">{client.company}</p>}
 
-              <div className="flex items-center gap-4 text-[12px] text-zinc-500 pointer-events-none">
+              <div className="flex items-center gap-4 text-[12px] text-muted-foreground pointer-events-none">
                 <span>{client._count.projects} project{client._count.projects === 1 ? "" : "s"}</span>
                 <span>{client._count.transactions} transaction{client._count.transactions === 1 ? "" : "s"}</span>
               </div>

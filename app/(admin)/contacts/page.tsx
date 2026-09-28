@@ -29,29 +29,29 @@ export default async function ContactsPage() {
       {contacts.length === 0 ? (
         <EmptyState message="No contacts yet — add one from a client's page." />
       ) : (
-        <div className="border border-zinc-800 rounded-xl overflow-hidden">
+        <div className="border border-border rounded-xl overflow-hidden">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-900/50">
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Name</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Role</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Client</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Email</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500">Phone</th>
+              <tr className="border-b border-border bg-card/50">
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Role</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Email</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Phone</th>
               </tr>
             </thead>
             <tbody>
               {contacts.map((contact) => (
-                <tr key={contact.id} className="border-b border-zinc-800/70 last:border-b-0 hover:bg-zinc-900/40">
-                  <td className="px-4 py-3 text-[13.5px] font-medium text-zinc-100">{contact.name}</td>
-                  <td className="px-4 py-3 text-[13px] text-zinc-400">{contact.role ?? "—"}</td>
+                <tr key={contact.id} className="border-b border-border/70 last:border-b-0 hover:bg-card/40">
+                  <td className="px-4 py-3 text-[13.5px] font-medium text-foreground">{contact.name}</td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{contact.role ?? "—"}</td>
                   <td className="px-4 py-3">
-                    <Link href={routes.clients.item(contact.client.id)} className="text-[13px] text-purple-400 hover:text-purple-300 transition-colors">
+                    <Link href={routes.clients.item(contact.client.id)} className="text-[13px] text-primary hover:text-primary transition-colors">
                       {contact.client.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-[13px] text-zinc-400">{contact.email ?? "—"}</td>
-                  <td className="px-4 py-3 text-[13px] text-zinc-400">{contact.phone ?? "—"}</td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{contact.email ?? "—"}</td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{contact.phone ?? "—"}</td>
                 </tr>
               ))}
             </tbody>
