@@ -91,24 +91,24 @@ function ContactRow({ clientId, contact }: { clientId: string; contact: Contact 
         onBlur={save}
         placeholder="Role (optional)"
         style={{ outline: "none" }}
-        className="w-full text-[12px] text-zinc-500 placeholder:text-zinc-700 bg-transparent mb-1"
+        className="w-full text-[12px] text-zinc-500 placeholder:text-zinc-500 bg-transparent mb-1"
       />
       <div className="grid grid-cols-2 gap-2">
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           onBlur={save}
-          placeholder="Email"
+          placeholder="Email (optional)"
           style={{ outline: "none" }}
-          className="rounded-md bg-zinc-800/60 px-2 py-1 text-[11.5px] text-zinc-300 placeholder:text-zinc-600"
+          className="rounded-md bg-zinc-800/60 px-2 py-1 text-[11.5px] text-zinc-300 placeholder:text-zinc-500"
         />
         <input
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           onBlur={save}
-          placeholder="Phone"
+          placeholder="Phone (optional)"
           style={{ outline: "none" }}
-          className="rounded-md bg-zinc-800/60 px-2 py-1 text-[11.5px] text-zinc-300 placeholder:text-zinc-600"
+          className="rounded-md bg-zinc-800/60 px-2 py-1 text-[11.5px] text-zinc-300 placeholder:text-zinc-500"
         />
       </div>
     </div>
