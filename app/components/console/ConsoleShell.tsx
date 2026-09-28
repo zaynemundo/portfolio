@@ -32,6 +32,7 @@ const FREELANCE_DROPDOWN_ITEMS: NavItem[] = [
   { href: routes.projects.list, label: "Projects", icon: <ProjectsIcon /> },
   { href: routes.finance.list, label: "Finance", icon: <FinanceIcon /> },
   { href: routes.contacts.list, label: "Contacts", icon: <ContactsIcon /> },
+  { href: routes.documents.list, label: "Documents", icon: <DocumentsIcon /> },
 ];
 
 export function ConsoleShell({
@@ -418,6 +419,15 @@ function ContactsIcon() {
       <circle cx="8" cy="8.5" r="1.75" stroke="currentColor" strokeWidth="1.4" />
       <path d="M5 13.5c0-1.7 1.3-2.8 3-2.8s3 1.1 3 2.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
       <path d="M12.5 7.5h2M12.5 10h2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+function DocumentsIcon() {
+  return (
+    <svg {...iconProps()}>
+      <path d="M5.5 3h6l3 3v11a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M11.5 3v3h3" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M7 11h6M7 14h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }

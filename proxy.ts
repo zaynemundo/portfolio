@@ -52,6 +52,7 @@ export const config = {
     "/freelance/:path*",
     "/clients/:path*",
     "/contacts/:path*",
+    "/documents/:path*",
     "/finance/:path*",
     "/invoices/:path*",
   ],
