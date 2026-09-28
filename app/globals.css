@@ -42,7 +42,7 @@
    shadcn normally uses) so nothing here can collide with the public site's
    own `--accent`/`--ease-out-*` tokens declared below, which are unrelated. */
 .admin-root {
-  --admin-background: #fafafa;
+  --admin-background: #f4f4f5;
   --admin-foreground: #18181b;
   --admin-card: #ffffff;
   --admin-card-foreground: #18181b;
@@ -50,18 +50,21 @@
   --admin-popover-foreground: #18181b;
   --admin-primary: #a855f7;
   --admin-primary-foreground: #ffffff;
-  --admin-secondary: #f4f4f5;
+  --admin-secondary: #ececee;
   --admin-secondary-foreground: #18181b;
-  --admin-muted: #f4f4f5;
-  --admin-muted-foreground: #71717a;
+  --admin-muted: #ececee;
+  --admin-muted-foreground: #65656b;
   --admin-accent: #f5f0ff;
   --admin-accent-foreground: #7c3aed;
   --admin-success: #10b981;
   --admin-success-foreground: #ffffff;
   --admin-destructive: #ef4444;
   --admin-destructive-foreground: #ffffff;
-  --admin-border: #e4e4e7;
-  --admin-input: #e4e4e7;
+  /* rgba, not a flat pastel hex — matches fides-creativo's `ring-foreground/10`
+     approach so borders actually read against a white card, not just a
+     barely-there gray-on-gray hairline. */
+  --admin-border: rgba(24, 24, 27, 0.14);
+  --admin-input: rgba(24, 24, 27, 0.16);
   --admin-ring: #a855f7;
   --admin-sidebar: #ffffff;
   --admin-sidebar-foreground: #18181b;
@@ -69,7 +72,7 @@
   --admin-sidebar-primary-foreground: #ffffff;
   --admin-sidebar-accent: #f5f0ff;
   --admin-sidebar-accent-foreground: #7c3aed;
-  --admin-sidebar-border: #e4e4e7;
+  --admin-sidebar-border: rgba(24, 24, 27, 0.14);
   --admin-sidebar-ring: #a855f7;
 }
 
