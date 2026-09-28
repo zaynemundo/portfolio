@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/app/lib/prisma";
 import { ClientForm } from "../ClientForm";
 import { DeleteClientButton } from "../DeleteClientButton";
+import { ContactList } from "../ContactList";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
 
@@ -17,6 +18,7 @@ export default async function ClientDetailPage({ params }: Props) {
     include: {
       projects: { orderBy: { updatedAt: "desc" } },
       transactions: { orderBy: { date: "desc" } },
+      contacts: { orderBy: { sortOrder: "asc" } },
     },
   });
   if (!client) notFound();
@@ -49,6 +51,17 @@ export default async function ClientDetailPage({ params }: Props) {
         />
 
         <div className="space-y-5">
+          <ContactList
+            clientId={client.id}
+            contacts={client.contacts.map((c) => ({
+              id: c.id,
+              name: c.name,
+              role: c.role ?? "",
+              email: c.email ?? "",
+              phone: c.phone ?? "",
+            }))}
+          />
+
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
             <h2 className="text-[13px] font-semibold text-zinc-100 mb-3">Lifetime totals</h2>
             <div className="space-y-1.5 text-[13px]">

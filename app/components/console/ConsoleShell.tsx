@@ -35,6 +35,7 @@ const FREELANCE_DROPDOWN_ITEMS: NavItem[] = [
   { href: routes.projects.list, label: "Projects", icon: <ProjectsIcon /> },
   { href: routes.finance.list, label: "Finance", icon: <FinanceIcon /> },
   { href: routes.clients.list, label: "Customers", icon: <ClientsIcon /> },
+  { href: routes.contacts.list, label: "Contacts", icon: <ContactsIcon /> },
 ];
 
 export function ConsoleShell({
@@ -254,7 +255,7 @@ function DashboardLink({ item, pathname }: { item: NavItem; pathname: string }) 
   );
 }
 
-/** Groups Projects/Finance/Customers/Invoices under one collapsible "Freelance"
+/** Groups Projects/Finance/Customers/Contacts under one collapsible "Freelance"
  *  item — these all revolve around the same freelance work, so they don't need
  *  four separate top-level Hub entries. Auto-expands when any sub-page is active. */
 function FreelanceDropdown({ items, pathname }: { items: NavItem[]; pathname: string }) {
@@ -425,6 +426,16 @@ function ClientsIcon() {
       <circle cx="13.5" cy="8" r="1.75" stroke="currentColor" strokeWidth="1.4" />
       <path d="M2.5 16c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
       <path d="M12 12.3c1.9.2 3 1.4 3 3.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+function ContactsIcon() {
+  return (
+    <svg {...iconProps()}>
+      <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4" />
+      <circle cx="8" cy="8.5" r="1.75" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M5 13.5c0-1.7 1.3-2.8 3-2.8s3 1.1 3 2.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M12.5 7.5h2M12.5 10h2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   );
 }

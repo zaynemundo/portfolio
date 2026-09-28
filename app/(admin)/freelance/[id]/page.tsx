@@ -5,11 +5,23 @@ import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { ProjectForm } from "../ProjectForm";
 import { TaskList } from "../TaskList";
 import { ServiceList } from "../ServiceList";
+import { InvoiceList } from "../InvoiceList";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+interface InvoiceItem {
+  description: string;
+  quantity: number;
+  rate: number;
+}
+
+function computeInvoiceTotal(items: unknown): number {
+  if (!Array.isArray(items)) return 0;
+  return (items as InvoiceItem[]).reduce((sum, i) => sum + (i.quantity || 0) * (i.rate || 0), 0);
 }
 
 const getProjectDetail = unstable_cache(
@@ -20,12 +32,13 @@ const getProjectDetail = unstable_cache(
         include: {
           tasks: { orderBy: { sortOrder: "asc" } },
           services: { orderBy: { sortOrder: "asc" } },
+          invoices: { orderBy: { issueDate: "desc" } },
         },
       }),
       prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
     ]),
   ["freelance-project-detail"],
-  { tags: [CACHE_TAGS.freelance, CACHE_TAGS.clients], revalidate: 60 }
+  { tags: [CACHE_TAGS.freelance, CACHE_TAGS.clients, CACHE_TAGS.invoices], revalidate: 60 }
 );
 
 export default async function FreelanceProjectDetailPage({ params }: Props) {
@@ -77,6 +90,17 @@ export default async function FreelanceProjectDetailPage({ params }: Props) {
               })}
             />
           </div>
+
+          <InvoiceList
+            projectId={project.id}
+            invoices={project.invoices.map((inv) => ({
+              id: inv.id,
+              invoiceNumber: inv.invoiceNumber,
+              status: inv.status,
+              currency: inv.currency,
+              total: computeInvoiceTotal(inv.items),
+            }))}
+          />
         </div>
 
         <TaskList projectId={project.id} tasks={project.tasks} />

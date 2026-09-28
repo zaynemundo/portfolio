@@ -185,8 +185,24 @@ model Client {
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
   projects     FreelanceProject[]
+  contacts     Contact[]
   transactions Transaction[]
   invoices     Invoice[]
+}
+
+/// A person at a Client — a Client (company or individual) can have several
+/// points of contact, shared across all of that client's Freelance projects.
+model Contact {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name      String
+  role      String?
+  email     String?
+  phone     String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 /// Freelance work tracker — separate from the public portfolio Project model.

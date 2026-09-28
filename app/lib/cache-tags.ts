@@ -5,6 +5,7 @@ export const CACHE_TAGS = {
   notes: "notes",
   freelance: "freelance",
   clients: "clients",
+  contacts: "contacts",
   transactions: "transactions",
   invoices: "invoices",
   settings: "settings",
