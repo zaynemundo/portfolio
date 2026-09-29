@@ -42,70 +42,70 @@
    shadcn normally uses) so nothing here can collide with the public site's
    own `--accent`/`--ease-out-*` tokens declared below, which are unrelated. */
 .admin-root {
-  --admin-background: #f4f4f5;
-  --admin-foreground: #18181b;
+  --admin-background: #f7f4ef;
+  --admin-foreground: #211d18;
   --admin-card: #ffffff;
-  --admin-card-foreground: #18181b;
+  --admin-card-foreground: #211d18;
   --admin-popover: #ffffff;
-  --admin-popover-foreground: #18181b;
-  --admin-primary: #a855f7;
+  --admin-popover-foreground: #211d18;
+  --admin-primary: #c2542d;
   --admin-primary-foreground: #ffffff;
-  --admin-secondary: #ececee;
-  --admin-secondary-foreground: #18181b;
-  --admin-muted: #ececee;
-  --admin-muted-foreground: #65656b;
-  --admin-accent: #f5f0ff;
-  --admin-accent-foreground: #7c3aed;
+  --admin-secondary: #efeae2;
+  --admin-secondary-foreground: #211d18;
+  --admin-muted: #efeae2;
+  --admin-muted-foreground: #79726a;
+  --admin-accent: #f7e4d8;
+  --admin-accent-foreground: #9a3412;
   --admin-success: #10b981;
   --admin-success-foreground: #ffffff;
   --admin-destructive: #ef4444;
   --admin-destructive-foreground: #ffffff;
   /* rgba, not a flat pastel hex — matches fides-creativo's `ring-foreground/10`
      approach so borders actually read against a white card, not just a
-     barely-there gray-on-gray hairline. */
-  --admin-border: rgba(24, 24, 27, 0.14);
-  --admin-input: rgba(24, 24, 27, 0.16);
-  --admin-ring: #a855f7;
+     barely-there gray-on-gray hairline. Warm-toned to match the paper bg. */
+  --admin-border: rgba(33, 29, 24, 0.14);
+  --admin-input: rgba(33, 29, 24, 0.18);
+  --admin-ring: #c2542d;
   --admin-sidebar: #ffffff;
-  --admin-sidebar-foreground: #18181b;
-  --admin-sidebar-primary: #a855f7;
+  --admin-sidebar-foreground: #211d18;
+  --admin-sidebar-primary: #c2542d;
   --admin-sidebar-primary-foreground: #ffffff;
-  --admin-sidebar-accent: #f5f0ff;
-  --admin-sidebar-accent-foreground: #7c3aed;
-  --admin-sidebar-border: rgba(24, 24, 27, 0.14);
-  --admin-sidebar-ring: #a855f7;
+  --admin-sidebar-accent: #f7e4d8;
+  --admin-sidebar-accent-foreground: #9a3412;
+  --admin-sidebar-border: rgba(33, 29, 24, 0.14);
+  --admin-sidebar-ring: #c2542d;
 }
 
 .admin-root.dark {
-  --admin-background: #09090b;
-  --admin-foreground: #f4f4f5;
-  --admin-card: #18181b;
-  --admin-card-foreground: #f4f4f5;
-  --admin-popover: #18181b;
-  --admin-popover-foreground: #f4f4f5;
-  --admin-primary: #a855f7;
+  --admin-background: #17140f;
+  --admin-foreground: #f3efe8;
+  --admin-card: #211d18;
+  --admin-card-foreground: #f3efe8;
+  --admin-popover: #211d18;
+  --admin-popover-foreground: #f3efe8;
+  --admin-primary: #d9744a;
   --admin-primary-foreground: #ffffff;
-  --admin-secondary: #27272a;
-  --admin-secondary-foreground: #f4f4f5;
-  --admin-muted: #27272a;
-  --admin-muted-foreground: #a1a1aa;
-  --admin-accent: #2a1f3d;
-  --admin-accent-foreground: #c084fc;
+  --admin-secondary: #2e2820;
+  --admin-secondary-foreground: #f3efe8;
+  --admin-muted: #2e2820;
+  --admin-muted-foreground: #a79c8d;
+  --admin-accent: #3a2417;
+  --admin-accent-foreground: #f0a47a;
   --admin-success: #10b981;
   --admin-success-foreground: #ffffff;
   --admin-destructive: #ef4444;
   --admin-destructive-foreground: #ffffff;
-  --admin-border: #27272a;
-  --admin-input: #27272a;
-  --admin-ring: #a855f7;
-  --admin-sidebar: #09090b;
-  --admin-sidebar-foreground: #f4f4f5;
-  --admin-sidebar-primary: #a855f7;
+  --admin-border: #2e2820;
+  --admin-input: #362f26;
+  --admin-ring: #d9744a;
+  --admin-sidebar: #17140f;
+  --admin-sidebar-foreground: #f3efe8;
+  --admin-sidebar-primary: #d9744a;
   --admin-sidebar-primary-foreground: #ffffff;
-  --admin-sidebar-accent: #2a1f3d;
-  --admin-sidebar-accent-foreground: #c084fc;
-  --admin-sidebar-border: #27272a;
-  --admin-sidebar-ring: #a855f7;
+  --admin-sidebar-accent: #3a2417;
+  --admin-sidebar-accent-foreground: #f0a47a;
+  --admin-sidebar-border: #2e2820;
+  --admin-sidebar-ring: #d9744a;
 }
 
 .admin-root {

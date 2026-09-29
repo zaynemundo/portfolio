@@ -126,7 +126,7 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
           type="button"
           onClick={() => setTab("transactions")}
           className={`px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-            tab === "transactions" ? "border-success text-foreground" : "border-transparent text-muted-foreground hover:text-foreground/70"
+            tab === "transactions" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground/70"
           }`}
         >
           Transactions
@@ -135,7 +135,7 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
           type="button"
           onClick={() => setTab("invoices")}
           className={`px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-            tab === "invoices" ? "border-success text-foreground" : "border-transparent text-muted-foreground hover:text-foreground/70"
+            tab === "invoices" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground/70"
           }`}
         >
           Invoices

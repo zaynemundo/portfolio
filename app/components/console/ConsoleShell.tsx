@@ -225,11 +225,11 @@ function SidebarNav({ contentItems, pathname }: { contentItems: NavItem[]; pathn
     <nav className="flex-1 overflow-y-auto px-3 py-5">
       <ul className="space-y-0.5">
         <li>
-          <NavLink item={DASHBOARD_ITEM} pathname={pathname} activeClasses="bg-primary/10 text-primary" />
+          <NavLink item={DASHBOARD_ITEM} pathname={pathname} />
         </li>
         {contentItems.map((item) => (
           <li key={item.href}>
-            <NavLink item={item} pathname={pathname} activeClasses="bg-primary/10 text-primary" />
+            <NavLink item={item} pathname={pathname} />
           </li>
         ))}
         <li>
@@ -345,13 +345,18 @@ function isNavActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-function NavLink({ item, pathname, activeClasses }: { item: NavItem; pathname: string; activeClasses: string }) {
+/** Editorial left-accent-bar active state instead of a filled pill — a
+ *  transparent 2px left border reserves the space so nothing shifts when a
+ *  route becomes active. */
+function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
   const isActive = isNavActive(pathname, item.href);
   return (
     <Link
       href={item.href}
-      className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-        isActive ? activeClasses : "text-muted-foreground hover:bg-muted hover:text-foreground"
+      className={`flex items-center gap-2.5 pl-2.5 pr-2.5 py-2 -ml-px border-l-2 rounded-r-md text-[13px] font-medium transition-colors ${
+        isActive
+          ? "border-primary bg-primary/5 text-primary"
+          : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
       {item.icon}
@@ -379,8 +384,10 @@ function FreelanceDropdown({ items, pathname }: { items: NavItem[]; pathname: st
       <button
         type="button"
         onClick={() => setManualOpen(!open)}
-        className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-          hasActiveChild ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+        className={`w-full flex items-center gap-2.5 pl-2.5 pr-2.5 py-2 -ml-px border-l-2 rounded-r-md text-[13px] font-medium transition-colors ${
+          hasActiveChild
+            ? "border-primary bg-primary/5 text-primary"
+            : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
         }`}
       >
         <Briefcase {...ICON_PROPS} />
@@ -391,7 +398,7 @@ function FreelanceDropdown({ items, pathname }: { items: NavItem[]; pathname: st
         <ul className="mt-0.5 ml-2 pl-3 space-y-0.5">
           {items.map((item) => (
             <li key={item.href}>
-              <NavLink item={item} pathname={pathname} activeClasses="bg-primary/10 text-primary" />
+              <NavLink item={item} pathname={pathname} />
             </li>
           ))}
         </ul>

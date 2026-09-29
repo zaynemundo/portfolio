@@ -13,16 +13,16 @@ interface Props {
 /** Title + count/subtitle on the left, primary "+ New" action (and an optional secondary link) on the right. */
 export function PageHeader({ title, subtitle, actionHref, actionLabel, secondaryHref, secondaryLabel }: Props) {
   return (
-    <div className="flex items-center justify-between mb-8">
+    <div className="flex items-end justify-between mb-10">
       <div>
-        <h1 className="text-[22px] font-semibold text-foreground">{title}</h1>
-        {subtitle && <p className="text-[13px] text-muted-foreground mt-1">{subtitle}</p>}
+        <h1 className="text-[30px] font-bold tracking-tight text-foreground leading-none">{title}</h1>
+        {subtitle && <p className="text-[13.5px] text-muted-foreground mt-2.5">{subtitle}</p>}
       </div>
       <div className="flex items-center gap-3">
         {secondaryHref && secondaryLabel && (
           <Link
             href={secondaryHref}
-            className="rounded-lg border border-border text-foreground/70 text-[13px] font-medium px-3.5 py-2 hover:bg-card transition-colors"
+            className="rounded-md border border-border text-foreground/70 text-[13px] font-medium px-3.5 py-2 hover:bg-card transition-colors"
           >
             {secondaryLabel}
           </Link>
@@ -30,7 +30,7 @@ export function PageHeader({ title, subtitle, actionHref, actionLabel, secondary
         {actionHref && actionLabel && (
           <Link
             href={actionHref}
-            className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
+            className="rounded-md bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
           >
             {actionLabel}
           </Link>
