@@ -129,19 +129,30 @@ export default async function ClientDetailPage({ params }: Props) {
         {client.transactions.length === 0 ? (
           <p className="text-[13px] text-muted-foreground/70">No transactions yet.</p>
         ) : (
-          <div className="rounded-xl border border-border overflow-hidden">
-            {client.transactions.slice(0, 8).map((t) => (
-              <Link
-                key={t.id}
-                href={routes.finance.item(t.id)}
-                className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border last:border-b-0 hover:bg-card/40 transition-colors"
-              >
-                <span className="text-[13px] text-foreground/80 truncate">{t.description ?? t.category ?? "—"}</span>
-                <span className={`text-[13px] font-medium shrink-0 ${t.type === "INCOME" ? "text-success" : "text-destructive"}`}>
-                  {t.type === "INCOME" ? "+" : "-"}{t.amount.toLocaleString()}
-                </span>
-              </Link>
-            ))}
+          <div className="border border-border rounded-xl overflow-hidden">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-border bg-card/40">
+                  <th className="px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Date</th>
+                  <th className="px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Description</th>
+                  <th className="px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {client.transactions.slice(0, 8).map((t) => (
+                  <tr key={t.id} className="group relative border-b border-border last:border-b-0 hover:bg-card/40 transition-colors">
+                    <td className="px-4 py-3 text-[12.5px] text-muted-foreground whitespace-nowrap">
+                      <Link href={routes.finance.item(t.id)} className="absolute inset-0 z-0" aria-label="Open transaction" />
+                      <span className="relative pointer-events-none">{new Date(t.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
+                    </td>
+                    <td className="px-4 py-3 text-[13px] text-foreground/80 truncate pointer-events-none">{t.description ?? t.category ?? "—"}</td>
+                    <td className={`px-4 py-3 text-[13px] font-medium text-right pointer-events-none ${t.type === "INCOME" ? "text-success" : "text-destructive"}`}>
+                      {t.type === "INCOME" ? "+" : "-"}{t.amount.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

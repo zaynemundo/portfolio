@@ -31,20 +31,30 @@ export function InvoiceList({ projectId, invoices }: { projectId: string; invoic
       {invoices.length === 0 ? (
         <p className="text-[13px] text-muted-foreground/70">No invoices for this project yet.</p>
       ) : (
-        <div className="space-y-2">
-          {invoices.map((inv) => (
-            <Link
-              key={inv.id}
-              href={routes.invoices.item(inv.id)}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card/40 px-3 py-2.5 hover:border-border transition-colors"
-            >
-              <span className="text-[13.5px] font-medium text-foreground/90">{inv.invoiceNumber}</span>
-              <div className="flex items-center gap-3">
-                <span className={`text-[11px] font-semibold px-2 py-1 rounded ${STATUS_STYLES[inv.status]}`}>{inv.status}</span>
-                <span className="text-[13px] text-foreground/70">{inv.total.toLocaleString()} {inv.currency}</span>
-              </div>
-            </Link>
-          ))}
+        <div className="border border-border rounded-xl overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-border bg-card/50">
+                <th className="px-4 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Invoice #</th>
+                <th className="px-4 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+                <th className="px-4 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoices.map((inv) => (
+                <tr key={inv.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-card/40">
+                  <td className="px-4 py-2.5 text-[13.5px] font-medium text-foreground/90">
+                    <Link href={routes.invoices.item(inv.id)} className="absolute inset-0 z-0" aria-label={`Open ${inv.invoiceNumber}`} />
+                    <span className="relative pointer-events-none">{inv.invoiceNumber}</span>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <span className={`text-[11px] font-semibold px-2 py-1 rounded pointer-events-none ${STATUS_STYLES[inv.status]}`}>{inv.status}</span>
+                  </td>
+                  <td className="px-4 py-2.5 text-[13px] text-foreground/70">{inv.total.toLocaleString()} {inv.currency}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

@@ -42,70 +42,69 @@
    shadcn normally uses) so nothing here can collide with the public site's
    own `--accent`/`--ease-out-*` tokens declared below, which are unrelated. */
 .admin-root {
-  --admin-background: #f7f4ef;
-  --admin-foreground: #211d18;
+  --admin-background: #fafafa;
+  --admin-foreground: #18181b;
   --admin-card: #ffffff;
-  --admin-card-foreground: #211d18;
+  --admin-card-foreground: #18181b;
   --admin-popover: #ffffff;
-  --admin-popover-foreground: #211d18;
-  --admin-primary: #c2542d;
+  --admin-popover-foreground: #18181b;
+  --admin-primary: #7c3aed;
   --admin-primary-foreground: #ffffff;
-  --admin-secondary: #efeae2;
-  --admin-secondary-foreground: #211d18;
-  --admin-muted: #efeae2;
-  --admin-muted-foreground: #79726a;
-  --admin-accent: #f7e4d8;
-  --admin-accent-foreground: #9a3412;
+  --admin-secondary: #f4f4f5;
+  --admin-secondary-foreground: #18181b;
+  --admin-muted: #f4f4f5;
+  --admin-muted-foreground: #71717a;
+  --admin-accent: #ede9fe;
+  --admin-accent-foreground: #6d28d9;
   --admin-success: #10b981;
   --admin-success-foreground: #ffffff;
   --admin-destructive: #ef4444;
   --admin-destructive-foreground: #ffffff;
-  /* rgba, not a flat pastel hex — matches fides-creativo's `ring-foreground/10`
-     approach so borders actually read against a white card, not just a
-     barely-there gray-on-gray hairline. Warm-toned to match the paper bg. */
-  --admin-border: rgba(33, 29, 24, 0.14);
-  --admin-input: rgba(33, 29, 24, 0.18);
-  --admin-ring: #c2542d;
-  --admin-sidebar: #ffffff;
-  --admin-sidebar-foreground: #211d18;
-  --admin-sidebar-primary: #c2542d;
+  --admin-border: rgba(24, 24, 27, 0.1);
+  --admin-input: rgba(24, 24, 27, 0.14);
+  --admin-ring: #7c3aed;
+  /* Sidebar shares the page background (not a separate white surface) so the
+     rail and content read as one continuous surface, not two stacked cards. */
+  --admin-sidebar: #fafafa;
+  --admin-sidebar-foreground: #18181b;
+  --admin-sidebar-primary: #7c3aed;
   --admin-sidebar-primary-foreground: #ffffff;
-  --admin-sidebar-accent: #f7e4d8;
-  --admin-sidebar-accent-foreground: #9a3412;
-  --admin-sidebar-border: rgba(33, 29, 24, 0.14);
-  --admin-sidebar-ring: #c2542d;
+  --admin-sidebar-accent: #ede9fe;
+  --admin-sidebar-accent-foreground: #6d28d9;
+  --admin-sidebar-border: rgba(24, 24, 27, 0.1);
+  --admin-sidebar-ring: #7c3aed;
 }
 
 .admin-root.dark {
-  --admin-background: #17140f;
-  --admin-foreground: #f3efe8;
-  --admin-card: #211d18;
-  --admin-card-foreground: #f3efe8;
-  --admin-popover: #211d18;
-  --admin-popover-foreground: #f3efe8;
-  --admin-primary: #d9744a;
+  --admin-background: #0e0e11;
+  --admin-foreground: #f4f4f5;
+  --admin-card: #17171c;
+  --admin-card-foreground: #f4f4f5;
+  --admin-popover: #17171c;
+  --admin-popover-foreground: #f4f4f5;
+  --admin-primary: #8b5cf6;
   --admin-primary-foreground: #ffffff;
-  --admin-secondary: #2e2820;
-  --admin-secondary-foreground: #f3efe8;
-  --admin-muted: #2e2820;
-  --admin-muted-foreground: #a79c8d;
-  --admin-accent: #3a2417;
-  --admin-accent-foreground: #f0a47a;
+  --admin-secondary: #1f1f26;
+  --admin-secondary-foreground: #f4f4f5;
+  --admin-muted: #1f1f26;
+  --admin-muted-foreground: #9797a3;
+  --admin-accent: #2a2140;
+  --admin-accent-foreground: #c4b5fd;
   --admin-success: #10b981;
   --admin-success-foreground: #ffffff;
   --admin-destructive: #ef4444;
   --admin-destructive-foreground: #ffffff;
-  --admin-border: #2e2820;
-  --admin-input: #362f26;
-  --admin-ring: #d9744a;
-  --admin-sidebar: #17140f;
-  --admin-sidebar-foreground: #f3efe8;
-  --admin-sidebar-primary: #d9744a;
+  --admin-border: rgba(255, 255, 255, 0.08);
+  --admin-input: rgba(255, 255, 255, 0.12);
+  --admin-ring: #8b5cf6;
+  --admin-sidebar: #0e0e11;
+  --admin-sidebar-foreground: #f4f4f5;
+  --admin-sidebar-primary: #8b5cf6;
   --admin-sidebar-primary-foreground: #ffffff;
-  --admin-sidebar-accent: #3a2417;
-  --admin-sidebar-accent-foreground: #f0a47a;
-  --admin-sidebar-border: #2e2820;
-  --admin-sidebar-ring: #d9744a;
+  --admin-sidebar-accent: #2a2140;
+  --admin-sidebar-accent-foreground: #c4b5fd;
+  --admin-sidebar-border: rgba(255, 255, 255, 0.08);
+  --admin-sidebar-ring: #8b5cf6;
 }
 
 .admin-root {

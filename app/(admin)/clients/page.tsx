@@ -32,36 +32,38 @@ export default async function ClientsPage() {
       {clients.length === 0 ? (
         <EmptyState message="No clients yet." />
       ) : (
-        <div className="grid grid-cols-2 gap-4">
-          {clients.map((client) => (
-            <div
-              key={client.id}
-              className="group relative rounded-xl border border-border bg-card/40 p-5 hover:border-border transition-colors"
-            >
-              <Link href={routes.clients.item(client.id)} className="absolute inset-0 z-0" aria-label={`Open ${client.name}`} />
-
-              <div className="flex items-start justify-between mb-2 gap-2">
-                <div className="flex items-center gap-2 pointer-events-none">
-                  <h3 className="text-[14.5px] font-semibold text-foreground group-hover:text-primary transition-colors">{client.name}</h3>
-                  {client.type && (
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
-                      {client.type === "COMPANY" ? "Company" : "Individual"}
-                    </span>
-                  )}
-                </div>
-                <div className="relative z-10 shrink-0">
-                  <ClientCardMenu id={client.id} name={client.name} />
-                </div>
-              </div>
-
-              {client.company && <p className="text-[12.5px] text-muted-foreground mb-3 pointer-events-none">{client.company}</p>}
-
-              <div className="flex items-center gap-4 text-[12px] text-muted-foreground pointer-events-none">
-                <span>{client._count.projects} project{client._count.projects === 1 ? "" : "s"}</span>
-                <span>{client._count.transactions} transaction{client._count.transactions === 1 ? "" : "s"}</span>
-              </div>
-            </div>
-          ))}
+        <div className="border border-border rounded-xl overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-border bg-card/50">
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Type</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Company</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Projects</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Transactions</th>
+                <th className="px-4 py-3 w-12" />
+              </tr>
+            </thead>
+            <tbody>
+              {clients.map((client) => (
+                <tr key={client.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-card/40">
+                  <td className="px-4 py-3 text-[13.5px] font-medium text-foreground group-hover:text-primary transition-colors">
+                    <Link href={routes.clients.item(client.id)} className="absolute inset-0 z-0" aria-label={`Open ${client.name}`} />
+                    <span className="relative pointer-events-none">{client.name}</span>
+                  </td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">
+                    {client.type ? (client.type === "COMPANY" ? "Company" : "Individual") : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{client.company ?? "—"}</td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{client._count.projects}</td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{client._count.transactions}</td>
+                  <td className="px-4 py-3 relative z-10">
+                    <ClientCardMenu id={client.id} name={client.name} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

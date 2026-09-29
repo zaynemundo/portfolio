@@ -59,44 +59,56 @@ export default async function FreelanceProjectsPage() {
       {projects.length === 0 ? (
         <EmptyState message="No freelance projects yet." />
       ) : (
-        <div className="grid grid-cols-2 gap-4">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className="group relative rounded-xl border border-border bg-card/40 p-5 hover:border-border transition-colors"
-            >
-              <Link href={routes.projects.item(project.id)} className="absolute inset-0 z-0" aria-label={`Open ${project.name}`} />
-
-              <div className="flex items-start justify-between mb-2 gap-2">
-                <h3 className="text-[14.5px] font-semibold text-foreground group-hover:text-primary transition-colors pointer-events-none">{project.name}</h3>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="pointer-events-none">
-                    <StatusBadge status={project.status} />
-                  </span>
-                  <div className="relative z-10">
+        <div className="border border-border rounded-xl overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-border bg-card/50">
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Progress</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Due date</th>
+                <th className="px-4 py-3 w-12" />
+              </tr>
+            </thead>
+            <tbody>
+              {projects.map((project) => (
+                <tr key={project.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-card/40">
+                  <td className="px-4 py-3 text-[13.5px] font-medium text-foreground group-hover:text-primary transition-colors">
+                    <Link href={routes.projects.item(project.id)} className="absolute inset-0 z-0" aria-label={`Open ${project.name}`} />
+                    <span className="relative pointer-events-none">{project.name}</span>
+                  </td>
+                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{project.clientName ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    <span className="pointer-events-none"><StatusBadge status={project.status} /></span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
+                      <span className="whitespace-nowrap">{project.totalCount > 0 ? `${project.doneCount}/${project.totalCount}` : "No tasks"}</span>
+                      {project.totalCount > 0 && (
+                        <div className="w-16 h-1 rounded-full bg-secondary overflow-hidden">
+                          <div className="h-full bg-success rounded-full" style={{ width: `${(project.doneCount / project.totalCount) * 100}%` }} />
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-[13px]">
+                    {project.displayEndDate ? (
+                      <span className={project.isOverdue ? "text-destructive font-medium" : "text-muted-foreground"}>
+                        {project.isOverdue ? "Overdue: " : ""}
+                        {project.displayEndDate}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 relative z-10">
                     <FreelanceCardMenu id={project.id} name={project.name} archived={project.archived} />
-                  </div>
-                </div>
-              </div>
-              {project.clientName && <p className="text-[12.5px] text-muted-foreground mb-3 pointer-events-none">{project.clientName}</p>}
-
-              <div className="flex items-center justify-between text-[12px] text-muted-foreground pointer-events-none">
-                <span>{project.totalCount > 0 ? `${project.doneCount}/${project.totalCount} tasks done` : "No tasks yet"}</span>
-                {project.displayEndDate && (
-                  <span className={project.isOverdue ? "text-destructive font-medium" : ""}>
-                    {project.isOverdue ? "Overdue: " : "Due "}
-                    {project.displayEndDate}
-                  </span>
-                )}
-              </div>
-
-              {project.totalCount > 0 && (
-                <div className="mt-2.5 h-1 rounded-full bg-secondary overflow-hidden pointer-events-none">
-                  <div className="h-full bg-success rounded-full" style={{ width: `${(project.doneCount / project.totalCount) * 100}%` }} />
-                </div>
-              )}
-            </div>
-          ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

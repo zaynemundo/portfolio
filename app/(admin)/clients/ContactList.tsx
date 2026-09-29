@@ -27,12 +27,26 @@ export function ContactList({ clientId, contacts }: { clientId: string; contacts
     <div className="rounded-xl border border-border bg-card/40 p-5">
       <h2 className="text-[13px] font-semibold text-foreground mb-3">Contacts</h2>
 
-      <div className="space-y-2 mb-3">
-        {contacts.map((contact) => (
-          <ContactRow key={contact.id} clientId={clientId} contact={contact} />
-        ))}
-        {contacts.length === 0 && <p className="text-[12.5px] text-muted-foreground/70">No contacts yet.</p>}
-      </div>
+      {contacts.length > 0 ? (
+        <table className="w-full text-left mb-3">
+          <thead>
+            <tr className="border-b border-border">
+              <th className="pb-2 pr-2 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
+              <th className="pb-2 pr-2 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Role</th>
+              <th className="pb-2 pr-2 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Email</th>
+              <th className="pb-2 pr-2 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Phone</th>
+              <th className="pb-2 w-6" />
+            </tr>
+          </thead>
+          <tbody>
+            {contacts.map((contact) => (
+              <ContactRow key={contact.id} clientId={clientId} contact={contact} />
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="text-[12.5px] text-muted-foreground/70 mb-3">No contacts yet.</p>
+      )}
 
       <form onSubmit={handleAdd} className="flex gap-2">
         <input
@@ -65,16 +79,23 @@ function ContactRow({ clientId, contact }: { clientId: string; contact: Contact 
     startTransition(() => updateContact(contact.id, clientId, { name, role, email, phone }));
   }
 
+  const cellInputClass = "w-full bg-transparent text-[12.5px] text-foreground/90 placeholder:text-muted-foreground/70";
+
   return (
-    <div className="rounded-lg border border-border bg-card/40 px-3 py-2.5 group">
-      <div className="flex items-center justify-between gap-2 mb-1.5">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onBlur={save}
-          style={{ outline: "none" }}
-          className="text-[13px] font-medium text-foreground/90 bg-transparent flex-1"
-        />
+    <tr className="group border-b border-border/70 last:border-b-0 hover:bg-card/40">
+      <td className="py-2 pr-2">
+        <input value={name} onChange={(e) => setName(e.target.value)} onBlur={save} style={{ outline: "none" }} className={`${cellInputClass} font-medium`} />
+      </td>
+      <td className="py-2 pr-2">
+        <input value={role} onChange={(e) => setRole(e.target.value)} onBlur={save} placeholder="—" style={{ outline: "none" }} className={cellInputClass} />
+      </td>
+      <td className="py-2 pr-2">
+        <input value={email} onChange={(e) => setEmail(e.target.value)} onBlur={save} placeholder="—" style={{ outline: "none" }} className={cellInputClass} />
+      </td>
+      <td className="py-2 pr-2">
+        <input value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={save} placeholder="—" style={{ outline: "none" }} className={cellInputClass} />
+      </td>
+      <td className="py-2">
         <button
           type="button"
           onClick={() => startTransition(() => deleteContact(contact.id, clientId))}
@@ -84,33 +105,7 @@ function ContactRow({ clientId, contact }: { clientId: string; contact: Contact 
         >
           ×
         </button>
-      </div>
-      <input
-        value={role}
-        onChange={(e) => setRole(e.target.value)}
-        onBlur={save}
-        placeholder="Role (optional)"
-        style={{ outline: "none" }}
-        className="w-full text-[12px] text-muted-foreground placeholder:text-muted-foreground bg-transparent mb-1"
-      />
-      <div className="grid grid-cols-2 gap-2">
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onBlur={save}
-          placeholder="Email (optional)"
-          style={{ outline: "none" }}
-          className="rounded-md bg-secondary/60 px-2 py-1 text-[11.5px] text-foreground/70 placeholder:text-muted-foreground"
-        />
-        <input
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          onBlur={save}
-          placeholder="Phone (optional)"
-          style={{ outline: "none" }}
-          className="rounded-md bg-secondary/60 px-2 py-1 text-[11.5px] text-foreground/70 placeholder:text-muted-foreground"
-        />
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 }
