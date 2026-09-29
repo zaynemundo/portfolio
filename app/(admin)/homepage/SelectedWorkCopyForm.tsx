@@ -19,7 +19,7 @@ export function SelectedWorkCopyForm({ initialHeading, initialIntro }: { initial
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block text-xs font-medium text-muted-foreground mb-1.5">Section heading</label>
         <input

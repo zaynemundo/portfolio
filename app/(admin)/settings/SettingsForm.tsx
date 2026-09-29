@@ -30,7 +30,7 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card/40 p-6 space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <Field label="Name" id="name" value={name} onChange={setName} />
         <Field label="Job title" id="jobTitle" value={jobTitle} onChange={setJobTitle} />

@@ -36,7 +36,7 @@ export function ChangePasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card/40 p-6 space-y-4 max-w-md">
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
       <div>
         <label htmlFor="currentPassword" className="block text-xs font-medium text-muted-foreground mb-1.5">Current password</label>
         <PasswordField id="currentPassword" value={currentPassword} onChange={setCurrentPassword} />

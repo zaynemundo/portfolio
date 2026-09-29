@@ -19,7 +19,7 @@ export function BlogPageCopyForm({ initialHeading, initialIntro }: { initialHead
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <h2 className="text-[15px] font-semibold text-foreground mb-1">Page header</h2>
         <p className="text-[12.5px] text-muted-foreground">The dark banner heading and intro at the top of /insights.</p>

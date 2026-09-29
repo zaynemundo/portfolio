@@ -23,7 +23,7 @@ export function ExperienceForm({ chapter }: { chapter: Chapter }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <p className="text-[12.5px] text-muted-foreground">Roles shown in the Experience chapter, most recent first.</p>
 
       <div className="space-y-3">

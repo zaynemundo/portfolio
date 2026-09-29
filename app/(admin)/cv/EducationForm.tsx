@@ -33,7 +33,7 @@ export function EducationForm({ chapter }: { chapter: Chapter }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card/40 p-6 space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <p className="text-[12.5px] text-muted-foreground">Degree info and grouped skill tags.</p>
 
       <div className="space-y-3">
