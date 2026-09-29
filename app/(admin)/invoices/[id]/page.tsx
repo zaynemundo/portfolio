@@ -30,7 +30,7 @@ export default async function InvoiceViewPage({ params }: Props) {
   const total = items.reduce((sum, i) => sum + (i.quantity || 0) * (i.rate || 0), 0);
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <div className="flex items-center justify-between mb-8 print:hidden">
         <div>
           <BackLink href={routes.invoices.list} label="Invoices" />

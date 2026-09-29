@@ -45,7 +45,7 @@ export function HomepageTabs(props: Props) {
   const [tab, setTab] = useState<Tab>("hero");
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <PageHeader title="Homepage" subtitle="Every section of the public homepage." />
 
       <div className="flex items-center gap-1 mb-8 border-b border-border">

@@ -9,7 +9,7 @@ export default async function WorkPageSettingsPage() {
   const logos = await getClientLogos();
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <PageHeader title="Work Page" subtitle="The header banner and client logo marquee on /work." />
 
       <div className="space-y-8">

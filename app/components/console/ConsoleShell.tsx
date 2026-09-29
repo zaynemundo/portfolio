@@ -172,7 +172,7 @@ export function ConsoleShell({
 
       <div className="flex-1 min-w-0 flex flex-col">
         <main className="flex-1 min-w-0 print:bg-white">
-          <div className="max-w-[1100px] mx-auto px-8 py-10 print:max-w-none print:p-0">{children}</div>
+          <div className="px-8 py-10 print:p-0">{children}</div>
         </main>
       </div>
 

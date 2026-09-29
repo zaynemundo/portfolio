@@ -7,7 +7,7 @@ export default async function SettingsPage() {
   const settings = await getSiteSettings();
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <PageHeader title="Site Settings" subtitle="Name, contact info, and downloadable assets shown across the public site." />
 
       <div className="space-y-8">
