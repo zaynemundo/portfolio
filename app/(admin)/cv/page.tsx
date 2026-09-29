@@ -11,7 +11,7 @@ export default async function CvPage() {
   const { aboutChapters } = await getSiteSettings();
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-4xl">
       <PageHeader title="CV" subtitle="What you do, your experience, and your education & skills — this feeds the About section on the homepage." />
 
       <CvTabs
