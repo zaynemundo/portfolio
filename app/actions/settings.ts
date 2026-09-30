@@ -21,7 +21,7 @@ function isValidEmail(email: string): boolean {
 
 function revalidateHomepage() {
   revalidatePath("/");
-  revalidatePath("/settings");
+  revalidatePath("/about");
   revalidatePath("/homepage/hero");
   revalidatePath("/homepage/selected-work");
   revalidatePath("/homepage/about");
@@ -72,7 +72,7 @@ export async function updateSiteSettings(
   });
 
   revalidatePath("/");
-  revalidatePath("/settings");
+  revalidatePath("/about");
   updateTag(CACHE_TAGS.settings);
   return { ok: true };
 }
@@ -118,7 +118,7 @@ export async function uploadResume(formData: FormData): Promise<UploadResult> {
   });
 
   revalidatePath("/");
-  revalidatePath("/settings");
+  revalidatePath("/about");
   updateTag(CACHE_TAGS.settings);
   return result;
 }
@@ -137,7 +137,7 @@ export async function uploadPortrait(formData: FormData): Promise<UploadResult> 
   });
 
   revalidatePath("/");
-  revalidatePath("/settings");
+  revalidatePath("/about");
   updateTag(CACHE_TAGS.settings);
   return result;
 }

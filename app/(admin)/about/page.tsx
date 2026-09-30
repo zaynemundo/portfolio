@@ -7,14 +7,15 @@ function findChapter(chapters: typeof DEFAULT_CHAPTERS, id: string) {
 }
 
 export default async function AboutPage() {
-  const { aboutChapters } = await getSiteSettings();
+  const settings = await getSiteSettings();
 
   return (
     <AboutTabs
-      profile={findChapter(aboutChapters, "profile")}
-      services={findChapter(aboutChapters, "what-i-do")}
-      experience={findChapter(aboutChapters, "experience")}
-      education={findChapter(aboutChapters, "education-skills")}
+      settings={settings}
+      profile={findChapter(settings.aboutChapters, "profile")}
+      services={findChapter(settings.aboutChapters, "what-i-do")}
+      experience={findChapter(settings.aboutChapters, "experience")}
+      education={findChapter(settings.aboutChapters, "education-skills")}
     />
   );
 }

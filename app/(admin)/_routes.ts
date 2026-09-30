@@ -9,12 +9,12 @@
  */
 export const routes = {
   home: "/dashboard",
-  settings: "/settings",
   account: "/account",
-  /** Profile bio + Experience + Education & Skills + What I Do — merged
-   *  2026-09-30 from separate Homepage-About-tab and CV pages, since both
-   *  fed the same public "About" section and living in two places felt
-   *  disconnected. */
+  /** Identity/contact info + downloadable assets (formerly Site Settings),
+   *  plus Profile bio + Experience + Education & Skills + What I Do
+   *  (formerly Homepage's About tab + a separate CV page) — merged
+   *  2026-09-30 since all of it feeds the same public "About" section and
+   *  living across three separate pages felt disconnected. */
   about: "/about",
   workPage: "/work-settings",
   blogPage: "/insights-settings",
@@ -67,7 +67,6 @@ export const routes = {
 /** Every top-level path segment covered above — used by proxy.ts to build its auth matcher. */
 export const PROTECTED_TOP_LEVEL_PATHS = [
   routes.home,
-  routes.settings,
   routes.account,
   routes.about,
   routes.workPage,

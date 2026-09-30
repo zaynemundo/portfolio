@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import type { Chapter } from "@/app/data/aboutChapters";
+import type { SiteSettingsData } from "@/app/lib/settings-db";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
-import { routes } from "@/app/(admin)/_routes";
+import { SettingsForm } from "./SettingsForm";
+import { FileUploadCard } from "./FileUploadCard";
 import { ProfileForm } from "./ProfileForm";
 import { ServicesForm } from "./ServicesForm";
 import { ExperienceForm } from "./ExperienceForm";
@@ -20,6 +21,7 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 interface Props {
+  settings: SiteSettingsData;
   profile: Chapter;
   services: Chapter;
   experience: Chapter;
@@ -27,18 +29,19 @@ interface Props {
 }
 
 /**
- * Profile bio + Experience + Education & Skills + What I Do, all in one
- * page — this used to be split across Homepage's "About" tab (Profile)
- * and a separate CV page (the other three), even though all four feed the
- * same "About" section on the public site. Merged 2026-09-30 since editing
- * one narrative across two disconnected admin pages felt wrong.
+ * Everything about "who you are" in one page: identity/contact info and
+ * downloadable assets (formerly the standalone Site Settings page), plus
+ * bio, Experience, Education & Skills, and What I Do (formerly Homepage's
+ * "About" tab + a separate CV page). All of it feeds the same "About"
+ * section on the public site, so editing it across three disconnected
+ * admin pages felt wrong — merged 2026-09-30.
  */
-export function AboutTabs({ profile, services, experience, education }: Props) {
+export function AboutTabs({ settings, profile, services, experience, education }: Props) {
   const [tab, setTab] = useState<Tab>("profile");
 
   return (
     <div>
-      <PageHeader title="About" subtitle="Your bio, experience, education & skills, and what you do — all feed the About section on the homepage." />
+      <PageHeader title="About" subtitle="Your identity, contact info, bio, experience, education & skills, and what you do — all feed the About section on the homepage." />
 
       <div className="flex items-center gap-1 mb-8 border-b border-border">
         {TABS.map((t) => (
@@ -59,11 +62,24 @@ export function AboutTabs({ profile, services, experience, education }: Props) {
 
       {tab === "profile" && (
         <div className="space-y-8">
+          <SettingsForm initial={settings} />
+          <div className="grid grid-cols-2 gap-4">
+            <FileUploadCard
+              title="Resume / CV"
+              description="PDF, shown on the Resume download link"
+              currentUrl={settings.resumeUrl}
+              accept="application/pdf"
+              kind="resume"
+            />
+            <FileUploadCard
+              title="Portrait photo"
+              description="JPG, PNG, or WebP, used in the About section"
+              currentUrl={settings.portraitUrl}
+              accept="image/jpeg,image/png,image/webp"
+              kind="portrait"
+            />
+          </div>
           <ProfileForm chapter={profile} />
-          <p className="text-[12.5px] text-muted-foreground rounded-lg border border-dashed border-border px-4 py-3">
-            Your portrait photo and resume PDF are uploaded on{" "}
-            <Link href={routes.settings} className="text-primary hover:text-primary">Site Settings</Link>, not here.
-          </p>
         </div>
       )}
       {tab === "services" && <ServicesForm chapter={services} />}

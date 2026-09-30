@@ -10,7 +10,6 @@ import {
   Newspaper,
   Layers,
   Mail,
-  Settings,
   UserCog,
   FolderKanban,
   Users,
@@ -49,7 +48,6 @@ function buildContentItems(unreadInquiries: number): NavItem[] {
     { href: routes.blog.list, label: "Blog", icon: <Newspaper {...ICON_PROPS} /> },
     { href: routes.caseStudies.list, label: "Case Studies", icon: <Layers {...ICON_PROPS} /> },
     { href: routes.inquiries.list, label: "Inquiries", icon: <Mail {...ICON_PROPS} />, badge: unreadInquiries },
-    { href: routes.settings, label: "Site Settings", icon: <Settings {...ICON_PROPS} /> },
   ];
 }
 
