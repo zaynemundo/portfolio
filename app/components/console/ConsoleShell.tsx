@@ -16,11 +16,10 @@ import {
   Contact,
   FileText,
   Wallet,
-  Briefcase,
+  Receipt,
   Search,
   PanelLeftClose,
   PanelLeftOpen,
-  ChevronRight,
   Menu,
   X,
   Sun,
@@ -54,10 +53,11 @@ function buildContentItems(unreadInquiries: number): NavItem[] {
   ];
 }
 
-const FREELANCE_DROPDOWN_ITEMS: NavItem[] = [
+const FREELANCE_ITEMS: NavItem[] = [
   { href: routes.clients.list, label: "Clients", icon: <Users {...ICON_PROPS} /> },
   { href: routes.projects.list, label: "Projects", icon: <FolderKanban {...ICON_PROPS} /> },
   { href: routes.finance.list, label: "Finance", icon: <Wallet {...ICON_PROPS} /> },
+  { href: routes.invoices.list, label: "Invoices", icon: <Receipt {...ICON_PROPS} /> },
   { href: routes.contacts.list, label: "Contacts", icon: <Contact {...ICON_PROPS} /> },
   { href: routes.documents.list, label: "Documents", icon: <FileText {...ICON_PROPS} /> },
 ];
@@ -88,7 +88,7 @@ export function ConsoleShell({
   const allNavItems: NavItem[] = [
     DASHBOARD_ITEM,
     ...contentItems,
-    ...FREELANCE_DROPDOWN_ITEMS,
+    ...FREELANCE_ITEMS,
   ];
 
   useEffect(() => {
@@ -217,9 +217,11 @@ function SidebarHeader({
 }
 
 /** One merged list — Content and Freelance used to be two visually separate
- *  groups (different accent-dot colors, "Content"/"Hub" labels). User asked
- *  for this to feel like one system, not two: same accent color everywhere,
- *  no section dividers. */
+ *  groups, each under a plain uppercase label for wayfinding — no colored
+ *  dots, no border dividers, same single accent color throughout, so it
+ *  still reads as one system rather than the old two-tone Content/Hub
+ *  split. Freelance renders as a flat list now too (previously a
+ *  collapsible dropdown) — one less click to reach any of its pages. */
 function SidebarNav({ contentItems, pathname }: { contentItems: NavItem[]; pathname: string }) {
   return (
     <nav className="flex-1 overflow-y-auto px-3 py-5">
@@ -227,14 +229,24 @@ function SidebarNav({ contentItems, pathname }: { contentItems: NavItem[]; pathn
         <li>
           <NavLink item={DASHBOARD_ITEM} pathname={pathname} />
         </li>
+      </ul>
+
+      <p className="px-2.5 pt-5 pb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground/60">Content</p>
+      <ul className="space-y-0.5">
         {contentItems.map((item) => (
           <li key={item.href}>
             <NavLink item={item} pathname={pathname} />
           </li>
         ))}
-        <li>
-          <FreelanceDropdown items={FREELANCE_DROPDOWN_ITEMS} pathname={pathname} />
-        </li>
+      </ul>
+
+      <p className="px-2.5 pt-5 pb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground/60">Freelance</p>
+      <ul className="space-y-0.5">
+        {FREELANCE_ITEMS.map((item) => (
+          <li key={item.href}>
+            <NavLink item={item} pathname={pathname} />
+          </li>
+        ))}
       </ul>
     </nav>
   );
@@ -367,43 +379,6 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
         </span>
       )}
     </Link>
-  );
-}
-
-/** Groups Clients/Projects/Finance/Contacts/Documents under one collapsible
- *  "Freelance" item — these all revolve around the same freelance work, so
- *  they don't need five separate top-level Hub entries. Auto-expands when
- *  any sub-page is active. */
-function FreelanceDropdown({ items, pathname }: { items: NavItem[]; pathname: string }) {
-  const hasActiveChild = items.some((item) => isNavActive(pathname, item.href));
-  const [manualOpen, setManualOpen] = useState<boolean | null>(null);
-  const open = manualOpen ?? hasActiveChild;
-
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setManualOpen(!open)}
-        className={`w-full flex items-center gap-2.5 pl-2.5 pr-2.5 py-2 -ml-px border-l-2 rounded-r-md text-[13px] font-medium transition-colors ${
-          hasActiveChild
-            ? "border-primary bg-primary/5 text-primary"
-            : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
-        }`}
-      >
-        <Briefcase {...ICON_PROPS} />
-        <span className="flex-1 text-left">Freelance</span>
-        <ChevronRight size={12} className={`transition-transform ${open ? "rotate-90" : ""}`} />
-      </button>
-      {open && (
-        <ul className="mt-0.5 ml-2 pl-3 space-y-0.5">
-          {items.map((item) => (
-            <li key={item.href}>
-              <NavLink item={item} pathname={pathname} />
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
   );
 }
 

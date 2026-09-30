@@ -102,7 +102,9 @@ export function HomepageTabs(props: Props) {
           <p className="text-[12.5px] text-muted-foreground rounded-lg border border-dashed border-border px-4 py-3">
             What I Do, Experience, and Education &amp; Skills live on the{" "}
             <Link href={routes.cv} className="text-primary hover:text-primary">CV</Link> page instead —
-            they&rsquo;re your resume content, not homepage-specific copy.
+            they&rsquo;re your resume content, not homepage-specific copy. Your portrait photo and resume PDF
+            are uploaded on{" "}
+            <Link href={routes.settings} className="text-primary hover:text-primary">Site Settings</Link>, not here.
           </p>
         </div>
       )}

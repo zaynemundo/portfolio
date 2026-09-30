@@ -8,7 +8,10 @@ export default async function SettingsPage() {
 
   return (
     <div>
-      <PageHeader title="Site Settings" subtitle="Name, contact info, and downloadable assets shown across the public site." />
+      <PageHeader
+        title="Site Settings"
+        subtitle="Name, contact info, and downloadable assets (resume, portrait) shown across the public site. Bio text and work history live on Homepage and CV instead."
+      />
 
       <div className="space-y-8">
         <SettingsForm initial={settings} />
