@@ -4,11 +4,17 @@ import { prisma } from "@/app/lib/prisma";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
-import { StatusBadge } from "./StatusBadge";
+import { StatusGroup } from "@/app/(admin)/_components/StatusGroup";
 import { FreelanceCardMenu } from "./FreelanceCardMenu";
 import { routes } from "@/app/(admin)/_routes";
 
 const STATUS_ORDER = ["ACTIVE", "ON_HOLD", "NOT_STARTED", "COMPLETED"];
+const STATUS_GROUPS: { status: string; label: string; dotClassName: string }[] = [
+  { status: "ACTIVE", label: "Active", dotClassName: "bg-success" },
+  { status: "ON_HOLD", label: "On hold", dotClassName: "bg-amber-500" },
+  { status: "NOT_STARTED", label: "Not started", dotClassName: "bg-muted-foreground/50" },
+  { status: "COMPLETED", label: "Completed", dotClassName: "bg-primary" },
+];
 
 const getFreelanceData = unstable_cache(
   () =>
@@ -59,57 +65,58 @@ export default async function FreelanceProjectsPage() {
       {projects.length === 0 ? (
         <EmptyState message="No freelance projects yet." />
       ) : (
-        <div className="border border-border rounded-xl overflow-hidden">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-border bg-card/50">
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Progress</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Due date</th>
-                <th className="px-4 py-3 w-12" />
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map((project) => (
-                <tr key={project.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-card/40">
-                  <td className="px-4 py-3 text-[13.5px] font-medium text-foreground group-hover:text-primary transition-colors">
-                    <Link href={routes.projects.item(project.id)} className="absolute inset-0 z-0" aria-label={`Open ${project.name}`} />
-                    <span className="relative pointer-events-none">{project.name}</span>
-                  </td>
-                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{project.clientName ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    <span className="pointer-events-none"><StatusBadge status={project.status} /></span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
-                      <span className="whitespace-nowrap">{project.totalCount > 0 ? `${project.doneCount}/${project.totalCount}` : "No tasks"}</span>
-                      {project.totalCount > 0 && (
-                        <div className="w-16 h-1 rounded-full bg-secondary overflow-hidden">
-                          <div className="h-full bg-success rounded-full" style={{ width: `${(project.doneCount / project.totalCount) * 100}%` }} />
+        STATUS_GROUPS.map((group) => {
+          const groupProjects = projects.filter((p) => p.status === group.status);
+          return (
+            <StatusGroup key={group.status} label={group.label} count={groupProjects.length} dotClassName={group.dotClassName}>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-border bg-card/50">
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Progress</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Due date</th>
+                    <th className="px-4 py-3 w-12" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {groupProjects.map((project) => (
+                    <tr key={project.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-card/40">
+                      <td className="px-4 py-3 text-[13.5px] font-medium text-foreground group-hover:text-primary transition-colors">
+                        <Link href={routes.projects.item(project.id)} className="absolute inset-0 z-0" aria-label={`Open ${project.name}`} />
+                        <span className="relative pointer-events-none">{project.name}</span>
+                      </td>
+                      <td className="px-4 py-3 text-[13px] text-muted-foreground">{project.clientName ?? "—"}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
+                          <span className="whitespace-nowrap">{project.totalCount > 0 ? `${project.doneCount}/${project.totalCount}` : "No tasks"}</span>
+                          {project.totalCount > 0 && (
+                            <div className="w-16 h-1 rounded-full bg-secondary overflow-hidden">
+                              <div className="h-full bg-success rounded-full" style={{ width: `${(project.doneCount / project.totalCount) * 100}%` }} />
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-[13px]">
-                    {project.displayEndDate ? (
-                      <span className={project.isOverdue ? "text-destructive font-medium" : "text-muted-foreground"}>
-                        {project.isOverdue ? "Overdue: " : ""}
-                        {project.displayEndDate}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 relative z-10">
-                    <FreelanceCardMenu id={project.id} name={project.name} archived={project.archived} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      </td>
+                      <td className="px-4 py-3 text-[13px]">
+                        {project.displayEndDate ? (
+                          <span className={project.isOverdue ? "text-destructive font-medium" : "text-muted-foreground"}>
+                            {project.isOverdue ? "Overdue: " : ""}
+                            {project.displayEndDate}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 relative z-10">
+                        <FreelanceCardMenu id={project.id} name={project.name} archived={project.archived} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </StatusGroup>
+          );
+        })
       )}
     </div>
   );
