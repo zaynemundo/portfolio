@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ExternalLink } from "lucide-react";
 import { RichEditor } from "@/app/(admin)/_components/RichEditor";
 import { createPost, updatePost, type PostFormData } from "@/app/actions/posts";
 
@@ -61,26 +62,29 @@ export function BlogForm({ mode, postId, initial }: Props) {
           placeholder="Title"
           className={`${borderlessInput} text-[26px] font-bold`}
         />
-        <label htmlFor="slug" className={`${microLabel} mt-3`}>Slug</label>
-        <input
-          id="slug"
-          required
-          value={slug}
-          onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
-          className={`${borderlessInput} flex-1 font-mono text-[12.5px] text-muted-foreground py-0.5`}
-        />
-        {slug ? (
-          <a
-            href={`/blog/${slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-block text-[11.5px] text-primary hover:underline"
-          >
-            /blog/{slug}
-          </a>
-        ) : (
-          <p className="mt-1 text-[11.5px] text-muted-foreground/70">/blog/…</p>
-        )}
+        <label htmlFor="slug" className={`${microLabel} mt-4`}>Slug</label>
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[12.5px] text-muted-foreground/70 shrink-0">/blog/</span>
+          <input
+            id="slug"
+            required
+            value={slug}
+            onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
+            className={`${borderlessInput} flex-1 font-mono text-[12.5px] text-muted-foreground py-0.5`}
+          />
+          {slug && (
+            <a
+              href={`/blog/${slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open live post in a new tab"
+              title="Open live post"
+              className="text-muted-foreground/70 hover:text-primary transition-colors shrink-0"
+            >
+              <ExternalLink size={13} />
+            </a>
+          )}
+        </div>
       </div>
 
       <div>

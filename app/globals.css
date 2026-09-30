@@ -149,6 +149,18 @@ body {
   border-radius: 3px;
 }
 
+/* Admin form fields have their own focus affordance (border/underline color
+   change via `focus:border-ring` etc.) — this global blue browser-style ring
+   was leaking in on top of that and looked like a stray box. Scoped to just
+   form fields (not buttons/links, which still rely on the ring above for
+   keyboard visibility) and off here rather than removed globally, so the
+   public site keeps its WCAG outline everywhere. */
+.admin-root input:focus-visible,
+.admin-root select:focus-visible,
+.admin-root textarea:focus-visible {
+  outline: none;
+}
+
 /* ── Skip link ───────────────────────────────────────────────────────────── */
 
 .skip-link {
