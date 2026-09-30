@@ -245,21 +245,44 @@ function SidebarNav({ contentItems, pathname }: { contentItems: NavItem[]; pathn
 }
 
 /** A labeled, collapsible group of nav items. `manualOpen: boolean | null` —
- *  `null` means "no manual choice yet, follow whether a child route is
- *  active" (`open = manualOpen ?? hasActiveChild`); once the user clicks the
- *  header, their choice sticks regardless of the active route. Deliberately
- *  not a `useEffect`+setState resync, which would trip
- *  `react-hooks/set-state-in-effect`. */
+ *  `null` means "no manual choice persisted yet, follow whether a child
+ *  route is active" (`open = manualOpen ?? hasActiveChild`); once the user
+ *  clicks the header, their choice is written to localStorage (keyed by
+ *  section title) and read back on mount, so it survives a hard refresh or
+ *  a fresh visit — not just useState, which would reset every reload. */
 function NavSection({ title, items, pathname }: { title: string; items: NavItem[]; pathname: string }) {
   const hasActiveChild = items.some((item) => isNavActive(pathname, item.href));
+  const storageKey = `zm-admin-nav-open:${title}`;
   const [manualOpen, setManualOpen] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from localStorage on mount; can't be derived during render without a server/client hydration mismatch.
+      if (stored !== null) setManualOpen(stored === "true");
+    } catch {
+      // localStorage unavailable — fall back to the active-route default.
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- storageKey is derived from the title prop, which never changes for a mounted section.
+  }, []);
+
   const open = manualOpen ?? hasActiveChild;
+
+  function toggle() {
+    const next = !open;
+    setManualOpen(next);
+    try {
+      localStorage.setItem(storageKey, String(next));
+    } catch {
+      // ignore
+    }
+  }
 
   return (
     <div>
       <button
         type="button"
-        onClick={() => setManualOpen(!open)}
+        onClick={toggle}
         className="w-full flex items-center gap-1 px-2.5 pt-5 pb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground/60 hover:text-muted-foreground transition-colors"
       >
         <span className="flex-1 text-left">{title}</span>
