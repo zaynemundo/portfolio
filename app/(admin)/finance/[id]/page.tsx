@@ -22,8 +22,8 @@ export default async function TransactionDetailPage({ params }: Props) {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <BackLink href={routes.finance.list} label="Finance" />
-          <h1 className="text-[22px] font-semibold text-foreground mt-1">Edit transaction</h1>
+          <BackLink href={routes.finance.list} label="Finance" iconOnly />
+          <h1 className="text-[22px] font-semibold text-foreground mt-3">Edit transaction</h1>
         </div>
         <DeleteTransactionButton id={transaction.id} />
       </div>

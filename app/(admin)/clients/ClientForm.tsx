@@ -76,7 +76,7 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
         )}
       </div>
 
-      <div className="mb-3">
+      <div className="mb-3 max-w-md">
         <label className="block text-[11px] text-muted-foreground mb-1">Type (optional)</label>
         <Select
           value={type}
@@ -91,7 +91,7 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
       </div>
 
       {type === "INDIVIDUAL" && (
-        <div className="mb-4">
+        <div className="mb-4 max-w-md">
           <label className="block text-[11px] text-muted-foreground mb-1">Company (optional)</label>
           <input
             value={company}

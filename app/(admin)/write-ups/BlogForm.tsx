@@ -49,7 +49,7 @@ export function BlogForm({ mode, postId, initial }: Props) {
   const borderlessInput = "w-full bg-transparent border-0 border-b border-transparent focus:border-border px-0 py-1.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-colors";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-3xl">
+    <form onSubmit={handleSubmit} className="space-y-8">
       <div>
         <input
           id="title"

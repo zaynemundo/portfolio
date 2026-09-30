@@ -54,7 +54,7 @@ export default async function FreelanceProjectDetailPage({ params }: Props) {
     <div>
       <BackLink href={routes.projects.list} label="Freelance Projects" iconOnly />
 
-      <div className="mt-4 max-w-3xl">
+      <div className="mt-4">
         <ProjectForm
           projectId={project.id}
           clients={clients}
@@ -82,7 +82,7 @@ export default async function FreelanceProjectDetailPage({ params }: Props) {
         />
       </div>
 
-      <div className="mt-10 max-w-3xl">
+      <div className="mt-10">
         <InvoiceList
           projectId={project.id}
           invoices={project.invoices.map((inv) => ({

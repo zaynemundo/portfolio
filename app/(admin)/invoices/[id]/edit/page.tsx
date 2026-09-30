@@ -27,8 +27,8 @@ export default async function EditInvoicePage({ params }: Props) {
 
   return (
     <div>
-      <BackLink href={routes.invoices.item(invoice.id)} label={invoice.invoiceNumber} />
-      <h1 className="text-[22px] font-semibold text-foreground mt-1 mb-8">Edit invoice</h1>
+      <BackLink href={routes.invoices.item(invoice.id)} label={invoice.invoiceNumber} iconOnly />
+      <h1 className="text-[22px] font-semibold text-foreground mt-3 mb-8">Edit invoice</h1>
 
       <InvoiceForm
         mode="edit"

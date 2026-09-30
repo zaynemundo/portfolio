@@ -22,8 +22,8 @@ export default async function InquiryDetailPage({ params }: Props) {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <BackLink href={routes.inquiries.list} label="Inquiries" />
-          <h1 className="text-[22px] font-semibold text-foreground mt-1">{inquiry.name}</h1>
+          <BackLink href={routes.inquiries.list} label="Inquiries" iconOnly />
+          <h1 className="text-[22px] font-semibold text-foreground mt-3">{inquiry.name}</h1>
         </div>
         <div className="flex items-center gap-4">
           <ReadToggle id={inquiry.id} read={true} />

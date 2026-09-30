@@ -32,7 +32,7 @@ export default async function ClientDetailPage({ params }: Props) {
     <div>
       <BackLink href={routes.clients.list} label="Clients" iconOnly />
 
-      <div className="mt-4 max-w-xl">
+      <div className="mt-4">
         <ClientForm
           clientId={client.id}
           initial={{

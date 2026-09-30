@@ -64,7 +64,7 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
         <Field label="Name" id="name" value={name} onChange={handleNameChange} />
         <div>

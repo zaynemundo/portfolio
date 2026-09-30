@@ -33,8 +33,8 @@ export default async function InvoiceViewPage({ params }: Props) {
     <div>
       <div className="flex items-center justify-between mb-8 print:hidden">
         <div>
-          <BackLink href={routes.invoices.list} label="Invoices" />
-          <h1 className="text-[22px] font-semibold text-foreground mt-1">{invoice.invoiceNumber}</h1>
+          <BackLink href={routes.invoices.list} label="Invoices" iconOnly />
+          <h1 className="text-[22px] font-semibold text-foreground mt-3">{invoice.invoiceNumber}</h1>
         </div>
         <div className="flex items-center gap-3">
           <StatusSelect id={invoice.id} status={invoice.status} />
