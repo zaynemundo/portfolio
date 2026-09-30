@@ -112,7 +112,7 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
         disabled={!editor.can().undo()}
         aria-label="Undo"
         title="Undo"
-        className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none"
+        className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors disabled:opacity-30 disabled:pointer-events-none"
       >
         <UndoIcon />
       </button>
@@ -122,7 +122,7 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
         disabled={!editor.can().redo()}
         aria-label="Redo"
         title="Redo"
-        className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none"
+        className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors disabled:opacity-30 disabled:pointer-events-none"
       >
         <RedoIcon />
       </button>
@@ -137,7 +137,7 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
           aria-label={item.label}
           title={item.label}
           className={`h-7 w-7 flex items-center justify-center rounded transition-colors ${
-            item.active ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-secondary hover:text-white"
+            item.active ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-secondary hover:text-foreground"
           }`}
         >
           {item.icon}
@@ -149,7 +149,7 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
         aria-label="Link"
         title="Link"
         className={`h-7 w-7 flex items-center justify-center rounded transition-colors ${
-          editor.isActive("link") ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-secondary hover:text-white"
+          editor.isActive("link") ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-secondary hover:text-foreground"
         }`}
       >
         <LinkIcon />
@@ -159,7 +159,7 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
         onClick={() => fileInputRef.current?.click()}
         aria-label="Insert image"
         title="Insert image"
-        className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors"
+        className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors"
       >
         <ImageIcon />
       </button>
@@ -172,22 +172,22 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
           onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
           aria-label="Insert table"
           title="Insert table"
-          className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors"
+          className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors"
         >
           <TableIcon />
         </button>
       ) : (
         <>
-          <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} aria-label="Add column" title="Add column" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors">
+          <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} aria-label="Add column" title="Add column" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors">
             <AddColumnIcon />
           </button>
-          <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} aria-label="Add row" title="Add row" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors">
+          <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} aria-label="Add row" title="Add row" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors">
             <AddRowIcon />
           </button>
-          <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} aria-label="Delete column" title="Delete column" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors">
+          <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} aria-label="Delete column" title="Delete column" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors">
             <RemoveColumnIcon />
           </button>
-          <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} aria-label="Delete row" title="Delete row" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors">
+          <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} aria-label="Delete row" title="Delete row" className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors">
             <RemoveRowIcon />
           </button>
           <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} aria-label="Delete table" title="Delete table" className="h-7 w-7 flex items-center justify-center rounded text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors">

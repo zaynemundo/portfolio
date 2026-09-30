@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Star } from "lucide-react";
 import { RichEditor } from "@/app/(admin)/_components/RichEditor";
 import { createPost, updatePost, type PostFormData } from "@/app/actions/posts";
 
@@ -54,14 +54,28 @@ export function BlogForm({ mode, postId, initial }: Props) {
     <form onSubmit={handleSubmit} className="space-y-8">
       <div>
         <label htmlFor="title" className={microLabel}>Title</label>
-        <input
-          id="title"
-          required
-          value={title}
-          onChange={(e) => handleTitleChange(e.target.value)}
-          placeholder="Title"
-          className={`${borderlessInput} text-[26px] font-bold`}
-        />
+        <div className="flex items-center gap-2">
+          <input
+            id="title"
+            required
+            value={title}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            placeholder="Title"
+            className={`${borderlessInput} text-[26px] font-bold`}
+          />
+          <button
+            type="button"
+            onClick={() => setFeatured(!featured)}
+            aria-label={featured ? "Remove from Featured" : "Mark as Featured"}
+            aria-pressed={featured}
+            title={featured ? "Featured" : "Mark as Featured"}
+            className={`shrink-0 h-8 w-8 flex items-center justify-center rounded-full transition-colors ${
+              featured ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground/40 hover:text-muted-foreground"
+            }`}
+          >
+            <Star size={20} fill={featured ? "currentColor" : "none"} />
+          </button>
+        </div>
         <label htmlFor="slug" className={`${microLabel} mt-4`}>Slug</label>
         <div className="flex items-center gap-1.5">
           <span className="font-mono text-[12.5px] text-muted-foreground/70 shrink-0">/blog/</span>
@@ -123,29 +137,18 @@ export function BlogForm({ mode, postId, initial }: Props) {
             {READ_TIME_OPTIONS.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
           </select>
         </div>
-      </div>
-
-      <div className="flex items-center gap-6">
-        <label className="flex items-center gap-2 text-[13.5px] text-foreground/70 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={featured}
-            onChange={(e) => setFeatured(e.target.checked)}
-            className="rounded border-border bg-card"
-          />
-          Featured
-        </label>
-        <button
-          type="button"
-          onClick={() => setPublished(!published)}
-          className={`text-[11px] font-semibold px-2 py-1 rounded-full transition-colors ${
-            published
-              ? "bg-success/15 text-success hover:bg-success/25"
-              : "bg-secondary text-muted-foreground hover:bg-secondary"
-          }`}
-        >
-          {published ? "Published" : "Draft"}
-        </button>
+        <div>
+          <label htmlFor="status" className={microLabel}>Status</label>
+          <select
+            id="status"
+            value={published ? "published" : "draft"}
+            onChange={(e) => setPublished(e.target.value === "published")}
+            className={`${borderlessInput} text-[13.5px] w-40 ${published ? "text-success" : "text-muted-foreground"}`}
+          >
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
       </div>
 
       <div>
