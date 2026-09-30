@@ -1,5 +1,6 @@
 import { requireSession } from "@/app/lib/session";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
+import { AccountOverview } from "./AccountOverview";
 import { ChangePasswordForm } from "./ChangePasswordForm";
 
 export default async function AccountPage() {
@@ -7,8 +8,9 @@ export default async function AccountPage() {
 
   return (
     <div>
-      <PageHeader title="Account" subtitle={`Signed in as ${session.user.email}.`} />
+      <PageHeader title="Settings" subtitle={`Signed in as ${session.user.email}.`} />
 
+      <AccountOverview email={session.user.email} />
       <ChangePasswordForm />
     </div>
   );

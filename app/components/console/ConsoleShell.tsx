@@ -11,6 +11,7 @@ import {
   Layers,
   Mail,
   Settings,
+  UserCog,
   FolderKanban,
   Users,
   Contact,
@@ -23,13 +24,10 @@ import {
   ChevronRight,
   Menu,
   X,
-  Sun,
-  Moon,
 } from "lucide-react";
-import { LogoutButton } from "@/app/(admin)/_components/LogoutButton";
-import { Switch } from "@/app/(admin)/_components/ui/Switch";
 import { routes } from "@/app/(admin)/_routes";
 import { CommandPalette } from "./CommandPalette";
+import { ThemeContext } from "./ThemeContext";
 
 interface NavItem {
   href: string;
@@ -42,6 +40,7 @@ const ICON_PROPS = { size: 16, strokeWidth: 1.75 };
 const THEME_STORAGE_KEY = "zm-admin-theme";
 
 const DASHBOARD_ITEM: NavItem = { href: routes.home, label: "Dashboard", icon: <LayoutDashboard {...ICON_PROPS} /> };
+const ACCOUNT_ITEM: NavItem = { href: routes.account, label: "Settings", icon: <UserCog {...ICON_PROPS} /> };
 
 function buildContentItems(unreadInquiries: number): NavItem[] {
   return [
@@ -88,6 +87,7 @@ export function ConsoleShell({
 
   const allNavItems: NavItem[] = [
     DASHBOARD_ITEM,
+    ACCOUNT_ITEM,
     ...contentItems,
     ...FREELANCE_ITEMS,
   ];
@@ -125,6 +125,7 @@ export function ConsoleShell({
   }, []);
 
   return (
+    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
     <div className={`admin-root ${isDark ? "dark" : ""} min-h-screen bg-background flex print:bg-white`}>
       {/* Mobile hamburger — fixed top-left, hidden once the slide-in nav is open */}
       {!mobileOpen && (
@@ -151,7 +152,7 @@ export function ConsoleShell({
       >
         <SidebarHeader onSearch={() => setSearchOpen(true)} onCollapse={() => setMobileOpen(false)} collapseIcon={<X size={18} />} collapseLabel="Close menu" />
         <SidebarNav contentItems={contentItems} pathname={pathname} />
-        <SidebarFooter email={email} isDark={isDark} onToggleTheme={toggleTheme} />
+        <SidebarFooter email={email} />
       </aside>
 
       {/* Desktop sidebar */}
@@ -159,7 +160,7 @@ export function ConsoleShell({
         <aside className="hidden md:flex w-60 shrink-0 border-r border-sidebar-border bg-sidebar flex-col h-screen sticky top-0 print:hidden">
           <SidebarHeader onSearch={() => setSearchOpen(true)} onCollapse={() => setSidebarOpen(false)} collapseIcon={<PanelLeftClose size={16} />} collapseLabel="Collapse sidebar" />
           <SidebarNav contentItems={contentItems} pathname={pathname} />
-          <SidebarFooter email={email} isDark={isDark} onToggleTheme={toggleTheme} />
+          <SidebarFooter email={email} />
         </aside>
       ) : (
         <CollapsedRail
@@ -179,6 +180,7 @@ export function ConsoleShell({
 
       {searchOpen && <CommandPalette items={allNavItems} onClose={() => setSearchOpen(false)} />}
     </div>
+    </ThemeContext.Provider>
   );
 }
 
@@ -231,6 +233,9 @@ function SidebarNav({ contentItems, pathname }: { contentItems: NavItem[]; pathn
         <li>
           <NavLink item={DASHBOARD_ITEM} pathname={pathname} />
         </li>
+        <li>
+          <NavLink item={ACCOUNT_ITEM} pathname={pathname} />
+        </li>
       </ul>
 
       <NavSection title="Content" items={contentItems} pathname={pathname} />
@@ -273,36 +278,18 @@ function NavSection({ title, items, pathname }: { title: string; items: NavItem[
   );
 }
 
-function SidebarFooter({
-  email, isDark, onToggleTheme,
-}: {
-  email: string;
-  isDark: boolean;
-  onToggleTheme: () => void;
-}) {
+/** Just an avatar + email, linking to the Settings page — everything else
+ *  (change password, sign out, theme toggle) moved onto that page itself so
+ *  the sidebar doesn't carry a whole account card at the bottom. */
+function SidebarFooter({ email }: { email: string }) {
   return (
     <div className="p-3 border-t border-sidebar-border shrink-0">
-      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-card p-2.5 mb-2">
+      <Link href={routes.account} className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 hover:bg-muted transition-colors">
         <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-[12px] font-semibold shrink-0">
           {email.charAt(0).toUpperCase()}
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[12px] text-foreground font-medium truncate">{email}</p>
-          <div className="flex items-center gap-3 mt-0.5">
-            <Link href={routes.account} className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">
-              Change password
-            </Link>
-            <LogoutButton />
-          </div>
-        </div>
-      </div>
-      <div className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[12px] font-medium text-muted-foreground">
-        <span className="flex items-center gap-2">
-          {isDark ? <Moon size={14} /> : <Sun size={14} />}
-          {isDark ? "Dark mode" : "Light mode"}
-        </span>
-        <Switch checked={isDark} onCheckedChange={onToggleTheme} aria-label="Toggle dark mode" />
-      </div>
+        <p className="min-w-0 flex-1 text-[12px] text-foreground font-medium truncate">{email}</p>
+      </Link>
     </div>
   );
 }
