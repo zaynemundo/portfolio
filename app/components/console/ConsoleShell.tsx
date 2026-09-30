@@ -20,6 +20,7 @@ import {
   Search,
   PanelLeftClose,
   PanelLeftOpen,
+  ChevronRight,
   Menu,
   X,
   Sun,
@@ -216,12 +217,13 @@ function SidebarHeader({
   );
 }
 
-/** One merged list — Content and Freelance used to be two visually separate
- *  groups, each under a plain uppercase label for wayfinding — no colored
- *  dots, no border dividers, same single accent color throughout, so it
- *  still reads as one system rather than the old two-tone Content/Hub
- *  split. Freelance renders as a flat list now too (previously a
- *  collapsible dropdown) — one less click to reach any of its pages. */
+/** Content and Freelance are visually separate, collapsible sections under a
+ *  plain uppercase label — no colored dots, no border dividers, same single
+ *  accent color throughout, so it still reads as one system rather than the
+ *  old two-tone Content/Hub split. Each section collapses independently
+ *  (e.g. hide Freelance while doing a stretch of pure CMS work) — auto-opens
+ *  when one of its own pages is active, like the old Freelance dropdown did,
+ *  but now both sections behave the same way instead of just one. */
 function SidebarNav({ contentItems, pathname }: { contentItems: NavItem[]; pathname: string }) {
   return (
     <nav className="flex-1 overflow-y-auto px-3 py-5">
@@ -231,24 +233,43 @@ function SidebarNav({ contentItems, pathname }: { contentItems: NavItem[]; pathn
         </li>
       </ul>
 
-      <p className="px-2.5 pt-5 pb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground/60">Content</p>
-      <ul className="space-y-0.5">
-        {contentItems.map((item) => (
-          <li key={item.href}>
-            <NavLink item={item} pathname={pathname} />
-          </li>
-        ))}
-      </ul>
-
-      <p className="px-2.5 pt-5 pb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground/60">Freelance</p>
-      <ul className="space-y-0.5">
-        {FREELANCE_ITEMS.map((item) => (
-          <li key={item.href}>
-            <NavLink item={item} pathname={pathname} />
-          </li>
-        ))}
-      </ul>
+      <NavSection title="Content" items={contentItems} pathname={pathname} />
+      <NavSection title="Freelance" items={FREELANCE_ITEMS} pathname={pathname} />
     </nav>
+  );
+}
+
+/** A labeled, collapsible group of nav items. `manualOpen: boolean | null` —
+ *  `null` means "no manual choice yet, follow whether a child route is
+ *  active" (`open = manualOpen ?? hasActiveChild`); once the user clicks the
+ *  header, their choice sticks regardless of the active route. Deliberately
+ *  not a `useEffect`+setState resync, which would trip
+ *  `react-hooks/set-state-in-effect`. */
+function NavSection({ title, items, pathname }: { title: string; items: NavItem[]; pathname: string }) {
+  const hasActiveChild = items.some((item) => isNavActive(pathname, item.href));
+  const [manualOpen, setManualOpen] = useState<boolean | null>(null);
+  const open = manualOpen ?? hasActiveChild;
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setManualOpen(!open)}
+        className="w-full flex items-center gap-1 px-2.5 pt-5 pb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+      >
+        <span className="flex-1 text-left">{title}</span>
+        <ChevronRight size={11} className={`transition-transform ${open ? "rotate-90" : ""}`} />
+      </button>
+      {open && (
+        <ul className="space-y-0.5">
+          {items.map((item) => (
+            <li key={item.href}>
+              <NavLink item={item} pathname={pathname} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
