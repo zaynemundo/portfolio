@@ -125,11 +125,6 @@ export function BlogForm({ mode, postId, initial }: Props) {
         </div>
       </div>
 
-      <div>
-        <label className={microLabel}>Content</label>
-        <RichEditor content={contentHtml} onChange={setContentHtml} bordered={false} />
-      </div>
-
       <div className="flex items-center gap-6">
         <label className="flex items-center gap-2 text-[13.5px] text-foreground/70 cursor-pointer">
           <input
@@ -140,15 +135,22 @@ export function BlogForm({ mode, postId, initial }: Props) {
           />
           Featured
         </label>
-        <label className="flex items-center gap-2 text-[13.5px] text-foreground/70 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={published}
-            onChange={(e) => setPublished(e.target.checked)}
-            className="rounded border-border bg-card"
-          />
-          Published
-        </label>
+        <button
+          type="button"
+          onClick={() => setPublished(!published)}
+          className={`text-[11px] font-semibold px-2 py-1 rounded-full transition-colors ${
+            published
+              ? "bg-success/15 text-success hover:bg-success/25"
+              : "bg-secondary text-muted-foreground hover:bg-secondary"
+          }`}
+        >
+          {published ? "Published" : "Draft"}
+        </button>
+      </div>
+
+      <div>
+        <label className={microLabel}>Content</label>
+        <RichEditor content={contentHtml} onChange={setContentHtml} bordered={false} />
       </div>
 
       {error && <p className="text-[13px] text-destructive" role="alert">{error}</p>}

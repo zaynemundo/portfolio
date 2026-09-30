@@ -24,21 +24,22 @@ export default async function EditBlogPostPage({ params }: Props) {
   return (
     <div>
       <BackLink href={routes.blog.list} label="Blog" iconOnly />
-      <h1 className="text-[22px] font-semibold text-foreground mt-3 mb-8">Edit article</h1>
-      <BlogForm
-        mode="edit"
-        postId={post.id}
-        initial={{
-          title: post.title,
-          slug: post.slug,
-          excerpt: post.excerpt,
-          category: post.category,
-          readTime: post.readTime,
-          featured: post.featured,
-          published: post.published,
-          contentHtml: post.contentHtml,
-        }}
-      />
+      <div className="mt-6">
+        <BlogForm
+          mode="edit"
+          postId={post.id}
+          initial={{
+            title: post.title,
+            slug: post.slug,
+            excerpt: post.excerpt,
+            category: post.category,
+            readTime: post.readTime,
+            featured: post.featured,
+            published: post.published,
+            contentHtml: post.contentHtml,
+          }}
+        />
+      </div>
     </div>
   );
 }
