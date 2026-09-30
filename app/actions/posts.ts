@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import { put } from "@vercel/blob";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
@@ -123,4 +124,30 @@ export async function togglePublished(id: string, published: boolean): Promise<v
   revalidatePublicPages();
   revalidatePath("/write-ups");
   updateTag(CACHE_TAGS.blog);
+}
+
+export interface ImageUploadResult {
+  ok: boolean;
+  url?: string;
+  error?: string;
+}
+
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+/** Uploads an image dropped/inserted into a post's rich-text content — not tied to a specific post row, just Blob storage. */
+export async function uploadPostImage(formData: FormData): Promise<ImageUploadResult> {
+  await requireSession();
+
+  const file = formData.get("file") as File | null;
+  if (!file) return { ok: false, error: "No file provided." };
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) return { ok: false, error: `Unsupported file type: ${file.type || "unknown"}.` };
+  if (file.size > MAX_IMAGE_BYTES) return { ok: false, error: "File is too large (max 10MB)." };
+
+  const blob = await put(`posts/${Date.now()}-${file.name}`, file, {
+    access: "public",
+    addRandomSuffix: false,
+  });
+
+  return { ok: true, url: blob.url };
 }

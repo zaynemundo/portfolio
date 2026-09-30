@@ -46,72 +46,61 @@ export function BlogForm({ mode, postId, initial }: Props) {
     });
   }
 
+  const borderlessInput = "w-full bg-transparent border-0 border-b border-transparent focus:border-border px-0 py-1.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-colors";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+    <form onSubmit={handleSubmit} className="space-y-8 max-w-3xl">
       <div>
-        <label htmlFor="title" className="block text-xs font-medium text-muted-foreground mb-1.5">Title</label>
         <input
           id="title"
           required
           value={title}
           onChange={(e) => handleTitleChange(e.target.value)}
-          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors"
+          placeholder="Title"
+          className={`${borderlessInput} text-[26px] font-bold`}
         />
-      </div>
-
-      <div>
-        <label htmlFor="slug" className="block text-xs font-medium text-muted-foreground mb-1.5">Slug</label>
-        <input
-          id="slug"
-          required
-          value={slug}
-          onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
-          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[13.5px] font-mono text-foreground/70 focus:outline-none focus:border-ring transition-colors"
-        />
+        <div className="flex items-center gap-1.5 mt-1">
+          <input
+            id="slug"
+            required
+            value={slug}
+            onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
+            className={`${borderlessInput} flex-1 font-mono text-[12.5px] text-muted-foreground py-0.5`}
+          />
+        </div>
         <p className="mt-1 text-[11.5px] text-muted-foreground/70">/blog/{slug || "…"}</p>
       </div>
 
-      <div>
-        <label htmlFor="excerpt" className="block text-xs font-medium text-muted-foreground mb-1.5">Excerpt</label>
-        <textarea
-          id="excerpt"
+      <textarea
+        id="excerpt"
+        required
+        rows={2}
+        value={excerpt}
+        onChange={(e) => setExcerpt(e.target.value)}
+        placeholder="Excerpt — a short summary shown on the Blog list"
+        className={`${borderlessInput} text-[14.5px] resize-none`}
+      />
+
+      <div className="flex items-center gap-6">
+        <input
+          id="category"
           required
-          rows={3}
-          value={excerpt}
-          onChange={(e) => setExcerpt(e.target.value)}
-          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors resize-none"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          placeholder="Category"
+          className={`${borderlessInput} text-[13.5px] w-40`}
         />
+        <select
+          id="readTime"
+          value={readTime}
+          onChange={(e) => setReadTime(e.target.value)}
+          className={`${borderlessInput} text-[13.5px] w-40`}
+        >
+          {READ_TIME_OPTIONS.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="category" className="block text-xs font-medium text-muted-foreground mb-1.5">Category</label>
-          <input
-            id="category"
-            required
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="Development"
-            className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-ring transition-colors"
-          />
-        </div>
-        <div>
-          <label htmlFor="readTime" className="block text-xs font-medium text-muted-foreground mb-1.5">Read time</label>
-          <select
-            id="readTime"
-            value={readTime}
-            onChange={(e) => setReadTime(e.target.value)}
-            className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors"
-          >
-            {READ_TIME_OPTIONS.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Content</label>
-        <RichEditor content={contentHtml} onChange={setContentHtml} />
-      </div>
+      <RichEditor content={contentHtml} onChange={setContentHtml} bordered={false} />
 
       <div className="flex items-center gap-6">
         <label className="flex items-center gap-2 text-[13.5px] text-foreground/70 cursor-pointer">

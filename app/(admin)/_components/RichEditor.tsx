@@ -1,9 +1,12 @@
 "use client";
 
+import { useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
 import { TableKit } from "@tiptap/extension-table";
+import { uploadPostImage } from "@/app/actions/posts";
 
 interface Props {
   content: string;
@@ -18,6 +21,7 @@ export function RichEditor({ content, onChange, bordered = true }: Props) {
     extensions: [
       StarterKit,
       Link.configure({ openOnClick: false, autolink: true }),
+      Image.configure({ HTMLAttributes: { class: "rounded-lg" } }),
       TableKit.configure({ table: { resizable: true } }),
     ],
     content,
@@ -34,6 +38,7 @@ export function RichEditor({ content, onChange, bordered = true }: Props) {
           "[&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground [&_blockquote]:italic " +
           "[&_code]:bg-secondary [&_code]:rounded [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[13px] " +
           "[&_a]:text-primary [&_a]:underline " +
+          "[&_img]:max-w-full [&_img]:h-auto [&_img]:my-3 " +
           "[&_table]:w-full [&_table]:my-3 [&_table]:border-collapse " +
           "[&_th]:border [&_th]:border-border [&_th]:bg-secondary [&_th]:px-2.5 [&_th]:py-1.5 [&_th]:text-left [&_th]:font-semibold [&_th]:align-middle " +
           "[&_td]:border [&_td]:border-border [&_td]:px-2.5 [&_td]:py-1.5 [&_td]:align-middle " +
@@ -54,6 +59,22 @@ export function RichEditor({ content, onChange, bordered = true }: Props) {
 }
 
 function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof useEditor>>; bordered: boolean }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleImageSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.set("file", file);
+    const result = await uploadPostImage(formData);
+    if (result.ok && result.url) {
+      editor.chain().focus().setImage({ src: result.url }).run();
+    } else {
+      window.alert(result.error ?? "Image upload failed.");
+    }
+  }
   const items: { label: string; icon: React.ReactNode; active: boolean; onClick: () => void }[] = [
     { label: "Bold", icon: <BoldIcon />, active: editor.isActive("bold"), onClick: () => editor.chain().focus().toggleBold().run() },
     { label: "Italic", icon: <ItalicIcon />, active: editor.isActive("italic"), onClick: () => editor.chain().focus().toggleItalic().run() },
@@ -84,6 +105,7 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
         bordered ? "px-2 py-1.5 border-b border-border bg-background" : "inline-flex px-1.5 py-1 rounded-full bg-secondary/60 mb-4"
       }`}
     >
+      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageSelected} />
       <button
         type="button"
         onClick={() => editor.chain().focus().undo().run()}
@@ -131,6 +153,15 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
         }`}
       >
         <LinkIcon />
+      </button>
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        aria-label="Insert image"
+        title="Insert image"
+        className="h-7 w-7 flex items-center justify-center rounded text-foreground/70 hover:bg-secondary hover:text-white transition-colors"
+      >
+        <ImageIcon />
       </button>
 
       <div className="w-px self-stretch bg-secondary mx-1" />
@@ -251,6 +282,15 @@ function LinkIcon() {
     <svg {...iconProps()}>
       <path d="M8.5 11.5a3 3 0 0 0 4.24 0l2-2a3 3 0 0 0-4.24-4.24l-1 1" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M11.5 8.5a3 3 0 0 0-4.24 0l-2 2a3 3 0 0 0 4.24 4.24l1-1" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function ImageIcon() {
+  return (
+    <svg {...iconProps()}>
+      <rect x="3.5" y="4" width="13" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="7.2" cy="7.8" r="1.2" fill="currentColor" />
+      <path d="M4.5 13.5 8 10l2.5 2.5L14 9l2 2.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
