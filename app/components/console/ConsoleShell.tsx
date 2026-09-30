@@ -45,7 +45,7 @@ const ACCOUNT_ITEM: NavItem = { href: routes.account, label: "Settings", icon: <
 function buildContentItems(unreadInquiries: number): NavItem[] {
   return [
     { href: routes.homepage, label: "Homepage", icon: <Home {...ICON_PROPS} /> },
-    { href: routes.cv, label: "CV", icon: <IdCard {...ICON_PROPS} /> },
+    { href: routes.about, label: "About", icon: <IdCard {...ICON_PROPS} /> },
     { href: routes.blog.list, label: "Blog", icon: <Newspaper {...ICON_PROPS} /> },
     { href: routes.caseStudies.list, label: "Case Studies", icon: <Layers {...ICON_PROPS} /> },
     { href: routes.inquiries.list, label: "Inquiries", icon: <Mail {...ICON_PROPS} />, badge: unreadInquiries },

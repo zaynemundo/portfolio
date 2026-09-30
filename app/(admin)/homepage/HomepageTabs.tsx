@@ -1,25 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import type { HeroSceneData } from "@/app/lib/settings-db";
-import type { Chapter } from "@/app/data/aboutChapters";
 import { UploadCard } from "@/app/(admin)/_components/UploadCard";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { uploadHeroVideo, uploadHeroPoster } from "@/app/actions/settings";
 import { HeroScenesForm } from "./HeroScenesForm";
 import { SelectedWorkCopyForm } from "./SelectedWorkCopyForm";
 import { FeaturedProjectsPicker, type FeaturedPickerProject } from "./FeaturedProjectsPicker";
-import { ProfileForm } from "./ProfileForm";
 import { InsightsCopyForm } from "./InsightsCopyForm";
-import { routes } from "@/app/(admin)/_routes";
 
-type Tab = "hero" | "selected-work" | "about" | "insights";
+type Tab = "hero" | "selected-work" | "insights";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "hero", label: "Hero Banner" },
   { id: "selected-work", label: "Selected Work" },
-  { id: "about", label: "About" },
   { id: "insights", label: "Insights" },
 ];
 
@@ -30,7 +25,6 @@ interface Props {
   selectedWorkHeading: string;
   selectedWorkIntro: string;
   projects: FeaturedPickerProject[];
-  profile: Chapter;
   insightsHeading: string;
   insightsIntro: string;
 }
@@ -93,19 +87,6 @@ export function HomepageTabs(props: Props) {
         <div className="space-y-8">
           <SelectedWorkCopyForm initialHeading={props.selectedWorkHeading} initialIntro={props.selectedWorkIntro} />
           <FeaturedProjectsPicker initial={props.projects} />
-        </div>
-      )}
-
-      {tab === "about" && (
-        <div className="space-y-8">
-          <ProfileForm chapter={props.profile} />
-          <p className="text-[12.5px] text-muted-foreground rounded-lg border border-dashed border-border px-4 py-3">
-            What I Do, Experience, and Education &amp; Skills live on the{" "}
-            <Link href={routes.cv} className="text-primary hover:text-primary">CV</Link> page instead —
-            they&rsquo;re your resume content, not homepage-specific copy. Your portrait photo and resume PDF
-            are uploaded on{" "}
-            <Link href={routes.settings} className="text-primary hover:text-primary">Site Settings</Link>, not here.
-          </p>
         </div>
       )}
 

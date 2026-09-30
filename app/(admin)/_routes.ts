@@ -11,7 +11,11 @@ export const routes = {
   home: "/dashboard",
   settings: "/settings",
   account: "/account",
-  cv: "/cv",
+  /** Profile bio + Experience + Education & Skills + What I Do — merged
+   *  2026-09-30 from separate Homepage-About-tab and CV pages, since both
+   *  fed the same public "About" section and living in two places felt
+   *  disconnected. */
+  about: "/about",
   workPage: "/work-settings",
   blogPage: "/insights-settings",
   inquiries: {
@@ -65,7 +69,7 @@ export const PROTECTED_TOP_LEVEL_PATHS = [
   routes.home,
   routes.settings,
   routes.account,
-  routes.cv,
+  routes.about,
   routes.workPage,
   routes.blogPage,
   routes.inquiries.list,

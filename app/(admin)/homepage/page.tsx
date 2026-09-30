@@ -1,11 +1,6 @@
 import { prisma } from "@/app/lib/prisma";
 import { getSiteSettings } from "@/app/lib/settings-db";
-import { aboutChapters as DEFAULT_CHAPTERS } from "@/app/data/aboutChapters";
 import { HomepageTabs } from "./HomepageTabs";
-
-function findChapter(chapters: typeof DEFAULT_CHAPTERS, id: string) {
-  return chapters.find((c) => c.id === id) ?? DEFAULT_CHAPTERS.find((c) => c.id === id)!;
-}
 
 export default async function HomepagePage() {
   const [settings, projects] = await Promise.all([
@@ -16,8 +11,6 @@ export default async function HomepagePage() {
       select: { id: true, name: true, featured: true, sortOrder: true, videoMp4: true, poster: true, shortDescription: true },
     }),
   ]);
-
-  const profile = findChapter(settings.aboutChapters, "profile");
 
   return (
     <HomepageTabs
@@ -35,7 +28,6 @@ export default async function HomepagePage() {
         poster: p.poster ?? "",
         shortDescription: p.shortDescription,
       }))}
-      profile={profile}
       insightsHeading={settings.insightsHeading}
       insightsIntro={settings.insightsIntro}
     />
