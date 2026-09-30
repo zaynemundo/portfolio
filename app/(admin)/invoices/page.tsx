@@ -48,7 +48,7 @@ export default async function InvoicesPage() {
             <StatusGroup key={group.status} label={group.label} count={groupInvoices.length} dotClassName={group.dotClassName}>
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-border bg-card/50">
+                  <tr className="border-b border-border">
                     <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Number</th>
                     <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
                     <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Issued</th>

@@ -42,7 +42,7 @@ export default async function DashboardBlogPage() {
             <StatusGroup key={group.label} label={group.label} count={groupPosts.length} dotClassName={group.dotClassName}>
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-border bg-card/50">
+                  <tr className="border-b border-border">
                     <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Title</th>
                     <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Category</th>
                     <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Date</th>
