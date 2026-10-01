@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ChevronDown } from "lucide-react";
 import { updateHeroScenes } from "@/app/actions/settings";
 import type { HeroSceneData } from "@/app/lib/settings-db";
 
@@ -10,6 +11,7 @@ function emptyScene(): HeroSceneData {
 
 export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
   const [scenes, setScenes] = useState<HeroSceneData[]>(initial);
+  const [collapsed, setCollapsed] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -24,6 +26,16 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
 
   function removeScene(i: number) {
     setScenes((prev) => prev.filter((_, idx) => idx !== i));
+    setCollapsed(new Set());
+  }
+
+  function toggleCollapsed(i: number) {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
+      return next;
+    });
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -50,33 +62,50 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
       </div>
 
       <div className="space-y-4">
-        {scenes.map((scene, i) => (
-          <div key={i} className="rounded-xl border border-border bg-card/40 p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Scene {i + 1}</span>
-              <button
-                type="button"
-                onClick={() => removeScene(i)}
-                className="text-[12px] text-destructive hover:text-destructive transition-colors"
-              >
-                Remove
-              </button>
-            </div>
+        {scenes.map((scene, i) => {
+          const isCollapsed = collapsed.has(i);
+          return (
+            <div key={i} className="rounded-xl border border-border bg-card/40 p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => toggleCollapsed(i)}
+                  className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground/80 transition-colors"
+                >
+                  <ChevronDown size={13} className={`transition-transform ${isCollapsed ? "-rotate-90" : ""}`} />
+                  Scene {i + 1}
+                  {isCollapsed && scene.heading && (
+                    <span className="normal-case font-normal text-muted-foreground/70">— {scene.heading}</span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeScene(i)}
+                  className="text-[12px] text-destructive hover:text-destructive transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
 
-            <Field label="Heading" value={scene.heading} onChange={(v) => updateScene(i, { heading: v })} />
-            <TextArea label="Description (optional)" value={scene.description ?? ""} onChange={(v) => updateScene(i, { description: v })} />
+              {!isCollapsed && (
+                <>
+                  <Field label="Heading" value={scene.heading} onChange={(v) => updateScene(i, { heading: v })} />
+                  <TextArea label="Description (optional)" value={scene.description ?? ""} onChange={(v) => updateScene(i, { description: v })} />
 
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="CTA label (optional)" value={scene.ctaLabel ?? ""} onChange={(v) => updateScene(i, { ctaLabel: v })} placeholder="Get in touch" />
-              <Field label="CTA link (optional)" value={scene.ctaHref ?? ""} onChange={(v) => updateScene(i, { ctaHref: v })} placeholder="#contact" />
-            </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="CTA label (optional)" value={scene.ctaLabel ?? ""} onChange={(v) => updateScene(i, { ctaLabel: v })} placeholder="Get in touch" />
+                    <Field label="CTA link (optional)" value={scene.ctaHref ?? ""} onChange={(v) => updateScene(i, { ctaHref: v })} placeholder="#contact" />
+                  </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <NumberField label="Start (0–1)" value={scene.start} onChange={(v) => updateScene(i, { start: v })} />
-              <NumberField label="End (0–1)" value={scene.end} onChange={(v) => updateScene(i, { end: v })} />
+                  <div className="grid grid-cols-2 gap-3">
+                    <NumberField label="Start (0–1)" value={scene.start} onChange={(v) => updateScene(i, { start: v })} />
+                    <NumberField label="End (0–1)" value={scene.end} onChange={(v) => updateScene(i, { end: v })} />
+                  </div>
+                </>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <button
