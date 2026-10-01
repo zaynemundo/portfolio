@@ -67,11 +67,10 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
-            aria-label="Delete client"
-            title="Delete client"
-            className="h-8 w-8 flex items-center justify-center rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors disabled:opacity-50 shrink-0 mt-0.5"
+            className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-destructive/10 text-destructive text-[12.5px] font-medium hover:bg-destructive/20 transition-colors disabled:opacity-50 shrink-0 mt-0.5"
           >
             <TrashIcon />
+            Delete
           </button>
         )}
       </div>
@@ -105,15 +104,13 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
 
       {error && <p className="text-[13px] text-destructive mb-3" role="alert">{error}</p>}
 
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-5 py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50"
-        >
-          {isPending ? "Saving…" : clientId ? "Save changes" : "Add client"}
-        </button>
-      </div>
+      <button
+        type="submit"
+        disabled={isPending}
+        className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-5 py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50"
+      >
+        {isPending ? "Saving…" : clientId ? "Save changes" : "Add client"}
+      </button>
     </form>
   );
 }

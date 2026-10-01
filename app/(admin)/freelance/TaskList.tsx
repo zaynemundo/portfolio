@@ -37,7 +37,7 @@ export function TaskList({ projectId, tasks }: { projectId: string; tasks: Task[
           <tbody>
             {tasks.map((task) => (
               <tr key={task.id} className="border-b border-border last:border-b-0 group">
-                <td className="py-2 w-8">
+                <td className="py-2 pr-3 w-8">
                   <input
                     type="checkbox"
                     checked={task.done}

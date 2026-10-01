@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ExternalLink, Star } from "lucide-react";
 import { createProject, updateProject, type ProjectFormData } from "@/app/actions/projects";
 import { ImageManager } from "./ImageManager";
 
@@ -63,71 +64,266 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
     });
   }
 
+  const borderlessInput = "w-full bg-transparent border-0 border-b border-transparent focus:border-border px-0 py-1.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-colors";
+  const microLabel = "block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="Name" id="name" value={name} onChange={handleNameChange} />
-        <div>
-          <Field label="Slug" id="slug" value={slug} onChange={(v) => { setSlug(v); setSlugTouched(true); }} mono />
-          <p className="mt-1 text-[11.5px] text-muted-foreground/70">/projects/{slug || "…"}</p>
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <div>
+        <label htmlFor="name" className={microLabel}>Name</label>
+        <div className="flex items-center gap-2">
+          <input
+            id="name"
+            required
+            value={name}
+            onChange={(e) => handleNameChange(e.target.value)}
+            placeholder="Name"
+            className={`${borderlessInput} text-[26px] font-bold`}
+          />
+          <button
+            type="button"
+            onClick={() => setFeatured(!featured)}
+            aria-label={featured ? "Remove from Featured" : "Mark as Featured"}
+            aria-pressed={featured}
+            title={featured ? "Featured" : "Mark as Featured"}
+            className={`shrink-0 h-8 w-8 flex items-center justify-center rounded-full transition-colors ${
+              featured ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground/40 hover:text-muted-foreground"
+            }`}
+          >
+            <Star size={20} fill={featured ? "currentColor" : "none"} />
+          </button>
+        </div>
+        <label htmlFor="slug" className={`${microLabel} mt-4`}>Slug</label>
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[12.5px] text-muted-foreground/70 shrink-0">/projects/</span>
+          <input
+            id="slug"
+            required
+            value={slug}
+            onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
+            className={`${borderlessInput} flex-1 font-mono text-[12.5px] text-muted-foreground py-0.5`}
+          />
+          {slug && (
+            <a
+              href={`/projects/${slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open live case study in a new tab"
+              title="Open live case study"
+              className="text-muted-foreground/70 hover:text-primary transition-colors shrink-0"
+            >
+              <ExternalLink size={13} />
+            </a>
+          )}
         </div>
       </div>
 
-      <TextArea label="Tagline" id="tagline" value={tagline} onChange={setTagline} rows={2} />
-      <TextArea label="Short description" id="shortDescription" value={shortDescription} onChange={setShortDescription} rows={3} />
+      <div>
+        <label htmlFor="tagline" className={microLabel}>Tagline</label>
+        <textarea
+          id="tagline"
+          value={tagline}
+          onChange={(e) => setTagline(e.target.value)}
+          rows={2}
+          className={`${borderlessInput} text-[14.5px] resize-none`}
+        />
+      </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <Field label="Category" id="category" value={category} onChange={setCategory} />
-        <Field label="Year" id="year" value={year} onChange={setYear} placeholder="2024–2025" />
+      <div>
+        <label htmlFor="shortDescription" className={microLabel}>Short description</label>
+        <textarea
+          id="shortDescription"
+          value={shortDescription}
+          onChange={(e) => setShortDescription(e.target.value)}
+          rows={3}
+          className={`${borderlessInput} text-[14.5px] resize-none`}
+        />
+      </div>
+
+      <div className="flex items-center gap-6 flex-wrap">
         <div>
-          <label htmlFor="workType" className="block text-xs font-medium text-muted-foreground mb-1.5">Work type</label>
+          <label htmlFor="category" className={microLabel}>Category</label>
+          <input
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={`${borderlessInput} text-[13.5px] w-40`}
+          />
+        </div>
+        <div>
+          <label htmlFor="year" className={microLabel}>Year</label>
+          <input
+            id="year"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            placeholder="2024–2025"
+            className={`${borderlessInput} text-[13.5px] w-40`}
+          />
+        </div>
+        <div>
+          <label htmlFor="workType" className={microLabel}>Work type</label>
           <select
             id="workType"
             value={workType}
             onChange={(e) => setWorkType(e.target.value)}
-            className={selectClass}
+            className={`${borderlessInput} text-[13.5px] w-40`}
           >
             <option>Freelance</option>
             <option>Full-time</option>
             <option>Personal Project</option>
           </select>
         </div>
+        <div>
+          <label htmlFor="status" className={microLabel}>Status</label>
+          <select
+            id="status"
+            value={published ? "published" : "draft"}
+            onChange={(e) => setPublished(e.target.value === "published")}
+            className={`${borderlessInput} text-[13.5px] w-40 ${published ? "text-success" : "text-muted-foreground"}`}
+          >
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="Role" id="role" value={role} onChange={setRole} />
-        <Field label="Client (optional)" id="client" value={client} onChange={setClient} />
+      <div className="flex items-center gap-6">
+        <div className="flex-1">
+          <label htmlFor="role" className={microLabel}>Role</label>
+          <input
+            id="role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className={`${borderlessInput} text-[13.5px]`}
+          />
+        </div>
+        <div className="flex-1">
+          <label htmlFor="client" className={microLabel}>Client (optional)</label>
+          <input
+            id="client"
+            value={client}
+            onChange={(e) => setClient(e.target.value)}
+            className={`${borderlessInput} text-[13.5px]`}
+          />
+        </div>
       </div>
 
-      <Field label="Technologies (comma-separated)" id="technologies" value={technologies} onChange={setTechnologies} placeholder="React, TypeScript, Tailwind" />
-
-      <TextArea label="Challenge" id="challenge" value={challenge} onChange={setChallenge} rows={4} />
-      <TextArea label="Approach" id="approach" value={approach} onChange={setApproach} rows={4} />
-      <TextArea label="Outcome" id="outcome" value={outcome} onChange={setOutcome} rows={3} />
-      <TextArea label="Highlights (one per line)" id="highlights" value={highlights} onChange={setHighlights} rows={4} />
-
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="Live URL (optional)" id="liveUrl" value={liveUrl} onChange={setLiveUrl} />
-        <Field label="Image alt text" id="imageAlt" value={imageAlt} onChange={setImageAlt} />
+      <div>
+        <label htmlFor="technologies" className={microLabel}>Technologies (comma-separated)</label>
+        <input
+          id="technologies"
+          value={technologies}
+          onChange={(e) => setTechnologies(e.target.value)}
+          placeholder="React, TypeScript, Tailwind"
+          className={`${borderlessInput} text-[13.5px]`}
+        />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <Field label="Card background color" id="themeBg" value={themeBg} onChange={setThemeBg} />
-        <Field label="Logo initials" id="logoInitials" value={logoInitials} onChange={setLogoInitials} placeholder="ZM" />
-        <Field label="Logo background color" id="logoBg" value={logoBg} onChange={setLogoBg} />
+      <div>
+        <label htmlFor="challenge" className={microLabel}>Challenge</label>
+        <textarea
+          id="challenge"
+          value={challenge}
+          onChange={(e) => setChallenge(e.target.value)}
+          rows={4}
+          className={`${borderlessInput} text-[14.5px] resize-none`}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="approach" className={microLabel}>Approach</label>
+        <textarea
+          id="approach"
+          value={approach}
+          onChange={(e) => setApproach(e.target.value)}
+          rows={4}
+          className={`${borderlessInput} text-[14.5px] resize-none`}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="outcome" className={microLabel}>Outcome</label>
+        <textarea
+          id="outcome"
+          value={outcome}
+          onChange={(e) => setOutcome(e.target.value)}
+          rows={3}
+          className={`${borderlessInput} text-[14.5px] resize-none`}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="highlights" className={microLabel}>Highlights (one per line)</label>
+        <textarea
+          id="highlights"
+          value={highlights}
+          onChange={(e) => setHighlights(e.target.value)}
+          rows={4}
+          className={`${borderlessInput} text-[14.5px] resize-none`}
+        />
+      </div>
+
+      <div className="flex items-center gap-6">
+        <div className="flex-1">
+          <label htmlFor="liveUrl" className={microLabel}>Live URL (optional)</label>
+          <input
+            id="liveUrl"
+            value={liveUrl}
+            onChange={(e) => setLiveUrl(e.target.value)}
+            className={`${borderlessInput} text-[13.5px]`}
+          />
+        </div>
+        <div className="flex-1">
+          <label htmlFor="imageAlt" className={microLabel}>Image alt text</label>
+          <input
+            id="imageAlt"
+            value={imageAlt}
+            onChange={(e) => setImageAlt(e.target.value)}
+            className={`${borderlessInput} text-[13.5px]`}
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-6">
+        <div>
+          <label htmlFor="themeBg" className={microLabel}>Card background color</label>
+          <input
+            id="themeBg"
+            value={themeBg}
+            onChange={(e) => setThemeBg(e.target.value)}
+            className={`${borderlessInput} text-[13.5px] w-32 font-mono`}
+          />
+        </div>
+        <div>
+          <label htmlFor="logoInitials" className={microLabel}>Logo initials</label>
+          <input
+            id="logoInitials"
+            value={logoInitials}
+            onChange={(e) => setLogoInitials(e.target.value)}
+            placeholder="ZM"
+            className={`${borderlessInput} text-[13.5px] w-32`}
+          />
+        </div>
+        <div>
+          <label htmlFor="logoBg" className={microLabel}>Logo background color</label>
+          <input
+            id="logoBg"
+            value={logoBg}
+            onChange={(e) => setLogoBg(e.target.value)}
+            className={`${borderlessInput} text-[13.5px] w-32 font-mono`}
+          />
+        </div>
       </div>
 
       {mode === "edit" && projectId && (
         <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-2">Screenshots</label>
+          <label className={microLabel}>Screenshots</label>
           <ImageManager projectId={projectId} images={images} />
         </div>
       )}
 
       <div>
-        <label htmlFor="richContentJson" className="block text-xs font-medium text-muted-foreground mb-1.5">
-          Advanced case-study content (JSON)
-        </label>
+        <label htmlFor="richContentJson" className={microLabel}>Advanced case-study content (JSON)</label>
         <p className="text-[11.5px] text-muted-foreground/70 mb-2">
           Optional sections — hero metrics, problem/transformation write-ups, execution disciplines, results, deliverables, performance audit table, etc.
         </p>
@@ -139,17 +335,6 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
           spellCheck={false}
           className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[12.5px] font-mono text-foreground/70 focus:outline-none focus:border-ring transition-colors resize-y"
         />
-      </div>
-
-      <div className="flex items-center gap-6">
-        <label className="flex items-center gap-2 text-[13.5px] text-foreground/70 cursor-pointer">
-          <input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} className="rounded border-border bg-card" />
-          Featured
-        </label>
-        <label className="flex items-center gap-2 text-[13.5px] text-foreground/70 cursor-pointer">
-          <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} className="rounded border-border bg-card" />
-          Published
-        </label>
       </div>
 
       {error && <p className="text-[13px] text-destructive" role="alert">{error}</p>}
@@ -164,46 +349,5 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
         </button>
       </div>
     </form>
-  );
-}
-
-const inputClass = "w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors";
-const selectClass = inputClass;
-
-function Field({
-  label, id, value, onChange, placeholder, mono,
-}: {
-  label: string; id: string; value: string; onChange: (v: string) => void; placeholder?: string; mono?: boolean;
-}) {
-  return (
-    <div>
-      <label htmlFor={id} className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
-      <input
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className={`${inputClass} ${mono ? "font-mono text-[13.5px]" : ""}`}
-      />
-    </div>
-  );
-}
-
-function TextArea({
-  label, id, value, onChange, rows,
-}: {
-  label: string; id: string; value: string; onChange: (v: string) => void; rows: number;
-}) {
-  return (
-    <div>
-      <label htmlFor={id} className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
-      <textarea
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        rows={rows}
-        className={`${inputClass} resize-none`}
-      />
-    </div>
   );
 }
