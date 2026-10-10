@@ -10,7 +10,7 @@ const heroScenes = [
   {
     heading: "Zaira Mundo",
     description:
-      "Digital Designer and Developer building standards-compliant, accessible digital platforms for institutional, commercial, and global audiences — across React, WordPress, Shopify, and custom systems.",
+      "Creative Designer and Front-End Developer designing and shipping websites, e-commerce platforms, and digital campaigns for UAE brands — from Figma to production in React/TypeScript, headless WordPress, and Laravel/Vue.",
     start: 0,
     end: 0.28,
   },
@@ -42,14 +42,14 @@ async function main() {
     where: { id: "singleton" },
     update: {
       name: "Zaira Mundo",
-      jobTitle: "Digital Designer & Developer",
+      jobTitle: "Creative Designer & Front-End Developer",
       heroScenes: heroScenes as Prisma.InputJsonValue,
       aboutChapters: aboutChapters as unknown as Prisma.InputJsonValue,
     },
     create: {
       id: "singleton",
       name: "Zaira Mundo",
-      jobTitle: "Digital Designer & Developer",
+      jobTitle: "Creative Designer & Front-End Developer",
       email: "mzaira.mundo@gmail.com",
       phone: "+971 50 562 8417",
       linkedinUrl: "https://linkedin.com/in/zaira-mundo/",

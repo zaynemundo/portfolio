@@ -10,7 +10,7 @@ import type { SkillItem } from "./ToolsGroups";
 import { ProfessionalDocuments } from "./ProfessionalDocuments";
 
 const PROFILE_PARAGRAPHS = [
-  "I\u2019m a Digital Designer and Developer focused on building accessible, high-performing websites that balance design quality with business objectives.",
+  "I\u2019m a Creative Designer and Front-End Developer focused on building accessible, high-performing websites that balance design quality with business objectives.",
   "With a First Class Honours degree in Creative Computing and over four years of agency experience in the UAE, I translate approved designs into production-ready interfaces \u2014 working across corporate, e-commerce, real estate, and digital agency projects.",
 ];
 
