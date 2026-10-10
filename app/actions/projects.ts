@@ -23,13 +23,20 @@ export interface ProjectFormData {
   approach: string;
   outcome: string;
   highlights: string; // one per line in the form
+  accessibility: string;
+  performance: string;
+  seo: string;
   client: string;
   liveUrl: string;
   imageAlt: string;
+  imageLabels: string; // one per line in the form
   themeBg: string;
+  themeDark: boolean;
   logoInitials: string;
   logoBg: string;
-  richContentJson: string; // raw JSON textarea
+  logoLight: boolean;
+  logoSrc: string;
+  richContentJson: string; // JSON assembled by the form's section editor
   featured: boolean;
   published: boolean;
 }
@@ -87,6 +94,17 @@ function revalidatePublicPages() {
 }
 
 function buildData(data: ProjectFormData, slug: string, richContent: Record<string, unknown>) {
+  const logoInitials = data.logoInitials.trim();
+  const logoSrc = data.logoSrc.trim();
+  const logo = logoInitials || logoSrc
+    ? {
+        ...(logoSrc ? { src: logoSrc } : {}),
+        ...(logoInitials ? { initials: logoInitials } : {}),
+        bg: data.logoBg.trim() || "#e5e5e5",
+        ...(data.logoLight ? { light: true } : {}),
+      }
+    : undefined;
+
   return {
     slug,
     name: data.name.trim(),
@@ -101,11 +119,17 @@ function buildData(data: ProjectFormData, slug: string, richContent: Record<stri
     approach: data.approach.trim(),
     outcome: data.outcome.trim(),
     highlights: splitLines(data.highlights),
+    accessibility: data.accessibility.trim() || null,
+    performance: data.performance.trim() || null,
+    seo: data.seo.trim() || null,
     client: data.client.trim() || null,
     liveUrl: data.liveUrl.trim() || null,
     imageAlt: data.imageAlt.trim(),
-    theme: (data.themeBg.trim() ? { bg: data.themeBg.trim() } : undefined) as Prisma.InputJsonValue | undefined,
-    logo: (data.logoInitials.trim() ? { initials: data.logoInitials.trim(), bg: data.logoBg.trim() || "#e5e5e5" } : undefined) as Prisma.InputJsonValue | undefined,
+    imageLabels: splitLines(data.imageLabels),
+    theme: (data.themeBg.trim()
+      ? { bg: data.themeBg.trim(), ...(data.themeDark ? { dark: true } : {}) }
+      : undefined) as Prisma.InputJsonValue | undefined,
+    logo: logo as Prisma.InputJsonValue | undefined,
     richContent: richContent as Prisma.InputJsonValue,
     featured: data.featured,
     published: data.published,
@@ -131,7 +155,6 @@ export async function createProject(data: ProjectFormData): Promise<ProjectActio
     data: {
       ...buildData(data, slug, richResult.value),
       images: [],
-      imageLabels: [],
       sortOrder: (maxOrder._max.sortOrder ?? -1) + 1,
     },
   });

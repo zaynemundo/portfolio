@@ -8,6 +8,7 @@ import { Resend } from "resend";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
+import { emailButton, emailShell } from "@/app/lib/email-template";
 
 const SESSION_COOKIE = "admin_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
@@ -102,9 +103,23 @@ export async function requestPasswordReset(email: string): Promise<RequestResetR
         from: "Zaira Mundo <onboarding@resend.dev>",
         to: cleanEmail,
         subject: "Reset your admin password",
-        html: `<p>Someone requested a password reset for this account.</p>
-<p><a href="${resetUrl}">Click here to set a new password</a> (link expires in 30 minutes).</p>
-<p>If you didn't request this, you can ignore this email.</p>`,
+        text: `Someone requested a password reset for your Zaira Mundo dashboard account.
+
+Set a new password (link expires in 30 minutes):
+${resetUrl}
+
+If you didn't request this, you can ignore this email — your password stays the same.`,
+        html: emailShell({
+          preheader: "Use this link to set a new password. It expires in 30 minutes.",
+          badge: "Account security",
+          title: "Reset your password",
+          body: `<p style="margin:0 0 24px;font-size:14px;color:#3f3f46;line-height:1.7">Someone requested a password reset for your dashboard account. Use the button below to choose a new password.</p>
+          ${emailButton(resetUrl, "Set a new password →")}
+          <p style="margin:24px 0 0;font-size:13px;color:#71717a;line-height:1.7">This link expires in <strong style="color:#3f3f46">30 minutes</strong> and can only be used once.</p>
+          <p style="margin:20px 0 6px;font-size:10px;font-weight:700;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.08em">Button not working? Copy this link</p>
+          <p style="margin:0;background:#fafafa;border:1px solid #e4e4e7;border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.6;word-break:break-all"><a href="${resetUrl}" style="color:#785EF7;text-decoration:none">${resetUrl}</a></p>`,
+          footer: "If you didn't request this, you can safely ignore this email — your password stays the same.",
+        }),
       }).catch((err) => console.error("[auth] Reset email error:", err));
     } else {
       console.log(`[auth] Password reset link for ${cleanEmail}: ${resetUrl}`);

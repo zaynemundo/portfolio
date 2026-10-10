@@ -85,9 +85,9 @@ export function ConsoleShell({
 
   const allNavItems: NavItem[] = [
     DASHBOARD_ITEM,
-    ACCOUNT_ITEM,
     ...contentItems,
     ...FREELANCE_ITEMS,
+    ACCOUNT_ITEM,
   ];
 
   useEffect(() => {
@@ -231,13 +231,16 @@ function SidebarNav({ contentItems, pathname }: { contentItems: NavItem[]; pathn
         <li>
           <NavLink item={DASHBOARD_ITEM} pathname={pathname} />
         </li>
-        <li>
-          <NavLink item={ACCOUNT_ITEM} pathname={pathname} />
-        </li>
       </ul>
 
       <NavSection title="Content" items={contentItems} pathname={pathname} />
       <NavSection title="Freelance" items={FREELANCE_ITEMS} pathname={pathname} />
+
+      <ul className="space-y-0.5 pt-5">
+        <li>
+          <NavLink item={ACCOUNT_ITEM} pathname={pathname} />
+        </li>
+      </ul>
     </nav>
   );
 }
