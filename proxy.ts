@@ -6,6 +6,10 @@ function isProtected(pathname: string): boolean {
   return PROTECTED_TOP_LEVEL_PATHS.some((base) => pathname === base || pathname.startsWith(base + "/"));
 }
 
+function isPublicAsset(pathname: string): boolean {
+  return /\.(mp4|webm|jpe?g|png|webp|avif|gif|svg)$/i.test(pathname);
+}
+
 /**
  * Cheap cookie-presence gate only — no DB query here. Middleware runs at the
  * edge, geographically close to the visitor but far from the Neon database,
@@ -20,7 +24,10 @@ function isProtected(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (!isProtected(pathname)) return NextResponse.next();
+  // public/case-studies/* (project videos + posters) shares its URL prefix
+  // with the /case-studies admin route — let those static files through, or
+  // logged-out visitors get redirected to /login instead of the media.
+  if (!isProtected(pathname) || isPublicAsset(pathname)) return NextResponse.next();
 
   const sessionId = request.cookies.get("admin_session")?.value;
 
