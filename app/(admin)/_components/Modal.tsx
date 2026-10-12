@@ -10,9 +10,10 @@ interface Props {
   maxWidthClassName?: string;
 }
 
-/** Shared modal shell for Hub-section forms (Clients, Finance, Invoices) — Notes
- *  and Freelance moved to full pages with Apple-Notes-style autosave; Content
- *  pages (Homepage/CV/Blog/Case Studies/Inquiries/Settings) stay full pages too. */
+/** Shared dialog shell. The rule across the admin: short, structured edits
+ *  (a contact, a client's details, a payment, a job's settings) happen in a
+ *  dialog so pages stay readable as views; long-form writing (articles, case
+ *  studies, notes, documents) is edited in the page itself. */
 export function Modal({ open, onClose, title, children, maxWidthClassName = "max-w-lg" }: Props) {
   useEffect(() => {
     if (!open) return;
@@ -20,16 +21,22 @@ export function Modal({ open, onClose, title, children, maxWidthClassName = "max
       if (e.key === "Escape") onClose();
     }
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    // Keep the page behind from scrolling while the dialog is open.
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open, onClose]);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[6vh] px-4 pb-8 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-start justify-center px-4 py-[6vh]">
       <div className="fixed inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
-      <div className={`relative w-full ${maxWidthClassName} rounded-xl border border-border bg-card shadow-2xl`}>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div role="dialog" aria-modal="true" aria-label={title} className={`relative flex max-h-full w-full flex-col ${maxWidthClassName} rounded-xl border border-border bg-card shadow-2xl`}>
+        <div className="flex shrink-0 items-center justify-between px-5 py-4 border-b border-border">
           <h2 className="text-[15px] font-semibold text-foreground">{title}</h2>
           <button
             type="button"
@@ -40,7 +47,8 @@ export function Modal({ open, onClose, title, children, maxWidthClassName = "max
             <CloseIcon />
           </button>
         </div>
-        <div className="p-5">{children}</div>
+        {/* Only the body scrolls, so the title and close button stay in view. */}
+        <div className="min-h-0 overflow-y-auto p-5">{children}</div>
       </div>
     </div>
   );

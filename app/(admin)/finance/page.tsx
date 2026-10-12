@@ -1,22 +1,13 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
+import { invoiceTotals } from "@/app/lib/invoice-math";
 import { FinanceTabs } from "./FinanceTabs";
 
 interface Props {
-  searchParams: Promise<{ month?: string }>;
+  searchParams: Promise<{ month?: string; tab?: string }>;
 }
 
-interface InvoiceItem {
-  description: string;
-  quantity: number;
-  rate: number;
-}
-
-function computeInvoiceTotal(items: unknown): number {
-  if (!Array.isArray(items)) return 0;
-  return (items as InvoiceItem[]).reduce((sum, i) => sum + (i.quantity || 0) * (i.rate || 0), 0);
-}
 
 function currentMonth(): string {
   const now = new Date();
@@ -37,7 +28,7 @@ const getFinanceData = unstable_cache(
       }),
       prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
       prisma.freelanceProject.findMany({ where: { archived: false }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
-      prisma.invoice.findMany({ orderBy: { issueDate: "desc" }, include: { client: true, project: true } }),
+      prisma.invoice.findMany({ orderBy: { issueDate: "desc" }, include: { client: true, project: true, payments: true } }),
     ]);
   },
   ["finance-data"],
@@ -45,7 +36,12 @@ const getFinanceData = unstable_cache(
 );
 
 export default async function FinancePage({ searchParams }: Props) {
-  const { month: monthParam } = await searchParams;
+  const { month: monthParam, tab: tabParam } = await searchParams;
+  // Invoices lead; picking a month only applies to income & expenses, so it opens that tab.
+  const initialTab =
+    tabParam === "quotes" ? "quotes"
+    : tabParam === "transactions" || (tabParam !== "invoices" && monthParam) ? "transactions"
+    : "invoices";
   const month = monthParam ?? currentMonth();
 
   const [transactions, clients, projects, invoices] = await getFinanceData(month);
@@ -55,8 +51,27 @@ export default async function FinancePage({ searchParams }: Props) {
   const net = income - expense;
   const currency = transactions[0]?.currency ?? "AED";
 
+  const documents = invoices.map((inv) => {
+    // unstable_cache round-trips through JSON, so Date fields come back as strings.
+    const issueDate = new Date(inv.issueDate);
+    const totals = invoiceTotals(inv);
+    return {
+      id: inv.id,
+      isQuote: inv.kind === "QUOTE",
+      invoiceNumber: inv.invoiceNumber,
+      status: inv.status,
+      displayIssueDate: issueDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+      currency: inv.currency,
+      total: totals.total,
+      balance: totals.balance,
+      clientName: inv.client?.name ?? null,
+      projectName: inv.project?.name ?? null,
+    };
+  });
+
   return (
     <FinanceTabs
+      initialTab={initialTab}
       month={month}
       income={income}
       expense={expense}
@@ -82,20 +97,8 @@ export default async function FinancePage({ searchParams }: Props) {
           attachmentUrl: t.attachmentUrl ?? "",
         };
       })}
-      invoices={invoices.map((inv) => {
-        // unstable_cache round-trips through JSON, so Date fields come back as strings.
-        const issueDate = new Date(inv.issueDate);
-        return {
-          id: inv.id,
-          invoiceNumber: inv.invoiceNumber,
-          status: inv.status,
-          displayIssueDate: issueDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
-          currency: inv.currency,
-          total: computeInvoiceTotal(inv.items),
-          clientName: inv.client?.name ?? null,
-          projectName: inv.project?.name ?? null,
-        };
-      })}
+      invoices={documents.filter((d) => !d.isQuote)}
+      quotes={documents.filter((d) => d.isQuote)}
     />
   );
 }

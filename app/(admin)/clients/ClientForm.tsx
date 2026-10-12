@@ -36,7 +36,7 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
         setError(result.error ?? "Something went wrong.");
         return;
       }
-      if (!clientId && result.id) router.push(routes.clients.item(result.id));
+      if (!clientId && result.id) router.push(routes.clients.item(result.slug ?? result.id));
       else router.refresh();
     });
   }

@@ -39,8 +39,7 @@ export default async function ClientsPage() {
                 <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
                 <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Type</th>
                 <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Company</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Projects</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Transactions</th>
+                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Jobs</th>
                 <th className="px-4 py-3 w-12" />
               </tr>
             </thead>
@@ -48,7 +47,7 @@ export default async function ClientsPage() {
               {clients.map((client) => (
                 <tr key={client.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-card/40">
                   <td className="px-4 py-3 text-[13.5px] font-medium text-foreground group-hover:text-primary transition-colors">
-                    <Link href={routes.clients.item(client.id)} className="absolute inset-0 z-0" aria-label={`Open ${client.name}`} />
+                    <Link href={routes.clients.item(client.slug ?? client.id)} className="absolute inset-0 z-0" aria-label={`Open ${client.name}`} />
                     <span className="relative pointer-events-none">{client.name}</span>
                   </td>
                   <td className="px-4 py-3 text-[13px] text-muted-foreground">
@@ -56,7 +55,6 @@ export default async function ClientsPage() {
                   </td>
                   <td className="px-4 py-3 text-[13px] text-muted-foreground">{client.company ?? "—"}</td>
                   <td className="px-4 py-3 text-[13px] text-muted-foreground">{client._count.projects}</td>
-                  <td className="px-4 py-3 text-[13px] text-muted-foreground">{client._count.transactions}</td>
                   <td className="px-4 py-3 relative z-10">
                     <ClientCardMenu id={client.id} name={client.name} />
                   </td>

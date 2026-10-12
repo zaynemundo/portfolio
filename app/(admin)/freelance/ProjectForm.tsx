@@ -7,12 +7,11 @@ import {
   updateFreelanceProject,
   deleteFreelanceProject,
   archiveFreelanceProject,
-  uploadFreelanceAttachment,
   type FreelanceProjectFormData,
 } from "@/app/actions/freelance";
-import { UploadCard } from "@/app/(admin)/_components/UploadCard";
 import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/ClientSelect";
 import { Select } from "@/app/(admin)/_components/Select";
+import { Modal } from "@/app/(admin)/_components/Modal";
 import { routes } from "@/app/(admin)/_routes";
 
 const SELECT_CLASS = "w-full flex items-center justify-between gap-2 rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 hover:bg-secondary transition-colors";
@@ -24,21 +23,45 @@ interface Props {
   onClientCreated?: (client: ClientOption) => void;
   /** Called after the project is deleted, so the parent can e.g. navigate away. */
   onDeleted?: () => void;
+  /** True right after a job is created, so its details stay in the page until "Done". */
+  setup?: boolean;
 }
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
+const EDIT_BUTTON =
+  "shrink-0 rounded-lg border border-border text-foreground/80 text-[12.5px] font-medium px-3 py-1.5 hover:bg-card transition-colors";
+
+const HEADER_SELECT_CLASS =
+  "w-full flex items-center justify-between gap-2 rounded-full bg-secondary/60 px-3.5 h-8 text-[12.5px] font-medium text-foreground/90 hover:bg-secondary transition-colors";
+
+const STATUS_OPTIONS = [
+  { value: "NOT_STARTED", label: "Not started" },
+  { value: "ACTIVE", label: "Active" },
+  { value: "ON_HOLD", label: "On hold" },
+  { value: "COMPLETED", label: "Completed" },
+];
+
+const STATUS_LABELS: Record<string, string> = {
+  NOT_STARTED: "Not started",
+  ACTIVE: "Active",
+  ON_HOLD: "On hold",
+  COMPLETED: "Completed",
+};
+
 /** Apple-Notes-style: no separate edit mode, no Save button — every change autosaves. */
-export function ProjectForm({ projectId, initial, clients, onClientCreated, onDeleted }: Props) {
+export function ProjectForm({ projectId, initial, clients, onClientCreated, onDeleted, setup = false }: Props) {
   const router = useRouter();
   const [id, setId] = useState(projectId ?? null);
   const [name, setName] = useState(initial?.name ?? "");
+  const [nextAction, setNextAction] = useState(initial?.nextAction ?? "");
   const [clientId, setClientId] = useState(initial?.clientId ?? "");
   const [status, setStatus] = useState(initial?.status ?? "NOT_STARTED");
   const [rateAmount, setRateAmount] = useState(initial?.rateAmount ?? "");
   const [rateCurrency, setRateCurrency] = useState(initial?.rateCurrency ?? "AED");
   const [rateType, setRateType] = useState(initial?.rateType ?? "");
-  const [attachmentUrl, setAttachmentUrl] = useState(initial?.attachmentUrl ?? "");
+  // Briefs and contracts now live in the job's Documents list; an older single attachment is kept as saved.
+  const attachmentUrl = initial?.attachmentUrl ?? "";
   const [startDate, setStartDate] = useState(initial?.startDate ?? "");
   const [endDate, setEndDate] = useState(initial?.endDate ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
@@ -46,6 +69,9 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
   const [saveStatus, setStatusMsg] = useState<SaveStatus>("idle");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // A job's settings are edited in a dialog; while it's first being set up they sit in the page instead.
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const showInline = !projectId || setup;
   const isFirstRender = useRef(true);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -60,7 +86,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
     saveTimer.current = setTimeout(async () => {
       setStatusMsg("saving");
       const data: FreelanceProjectFormData = {
-        name, clientId, status, description, rateAmount, rateCurrency, rateType, attachmentUrl, startDate, endDate,
+        name, nextAction, clientId, status, description, rateAmount, rateCurrency, rateType, attachmentUrl, startDate, endDate,
       };
       const result = id ? await updateFreelanceProject(id, data) : await createFreelanceProject(data);
       if (!result.ok) {
@@ -69,7 +95,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
       }
       if (!id && result.id) {
         setId(result.id);
-        router.replace(routes.projects.item(result.id));
+        router.replace(`${routes.projects.item(result.id)}?setup=1`);
       }
       setStatusMsg("saved");
       router.refresh();
@@ -79,7 +105,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, clientId, status, rateAmount, rateCurrency, rateType, attachmentUrl, startDate, endDate, description]);
+  }, [name, nextAction, clientId, status, rateAmount, rateCurrency, rateType, attachmentUrl, startDate, endDate, description]);
 
   function toggleArchive() {
     if (!id) return;
@@ -98,43 +124,17 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
     });
   }
 
-  return (
-    <div>
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Project name"
-          style={{ outline: "none" }}
-          className="w-full text-[21px] font-semibold text-foreground placeholder:text-muted-foreground/70 bg-transparent"
-        />
-        {id && (
-          <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-            <button
-              type="button"
-              onClick={toggleArchive}
-              aria-label={archived ? "Unarchive" : "Archive"}
-              title={archived ? "Unarchive" : "Archive"}
-              className={`h-8 w-8 flex items-center justify-center rounded-full bg-secondary/60 transition-colors ${
-                archived ? "text-success" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              }`}
-            >
-              <ArchiveIcon />
-            </button>
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={isDeleting}
-              aria-label="Delete project"
-              title="Delete project"
-              className="h-8 w-8 flex items-center justify-center rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors disabled:opacity-50"
-            >
-              <TrashIcon />
-            </button>
-          </div>
-        )}
-      </div>
+  const summary = [
+    clients.find((c) => c.id === clientId)?.name,
+    STATUS_LABELS[status],
+    rateAmount ? `${rateCurrency} ${Number(rateAmount).toLocaleString()}${rateType ? ` ${rateType.toLowerCase()}` : ""}` : null,
+    startDate || endDate ? `${startDate || "…"} to ${endDate || "…"}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
+  const detailFields = (
+    <>
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div>
           <label className="block text-[11px] text-muted-foreground/70 mb-1">Client</label>
@@ -152,12 +152,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
             value={status}
             onChange={setStatus}
             className={SELECT_CLASS}
-            options={[
-              { value: "NOT_STARTED", label: "Not started" },
-              { value: "ACTIVE", label: "Active" },
-              { value: "ON_HOLD", label: "On hold" },
-              { value: "COMPLETED", label: "Completed" },
-            ]}
+            options={STATUS_OPTIONS}
           />
         </div>
       </div>
@@ -218,27 +213,106 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
           />
         </div>
       </div>
+    </>
+  );
 
+  return (
+    <div>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Job name"
+          aria-label="Job name"
+          style={{ outline: "none" }}
+          className="w-full text-[21px] font-semibold text-foreground placeholder:text-muted-foreground/70 bg-transparent"
+        />
+        {id && (
+          <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+            <div className="w-36">
+              <Select value={status} onChange={setStatus} options={STATUS_OPTIONS} className={HEADER_SELECT_CLASS} />
+            </div>
+            <button
+              type="button"
+              onClick={toggleArchive}
+              aria-label={archived ? "Unarchive" : "Archive"}
+              title={archived ? "Unarchive" : "Archive"}
+              className={`h-8 w-8 flex items-center justify-center rounded-full bg-secondary/60 transition-colors ${
+                archived ? "text-success" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              <ArchiveIcon />
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              aria-label="Delete job"
+              title="Delete job"
+              className="h-8 w-8 flex items-center justify-center rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors disabled:opacity-50"
+            >
+              <TrashIcon />
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="mb-4">
+        <label htmlFor="nextAction" className="block text-[11px] text-muted-foreground/70 mb-1">Next action</label>
+        <input
+          id="nextAction"
+          value={nextAction}
+          onChange={(e) => setNextAction(e.target.value)}
+          placeholder="What happens next? e.g. Waiting for client feedback"
+          style={{ outline: "none" }}
+          className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 placeholder:text-muted-foreground/70"
+        />
+      </div>
+
+      {showInline ? (
+        <div className="rounded-xl border border-border bg-card/40 p-4 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[13px] font-semibold text-foreground">Job details</h2>
+            {id && (
+              <button type="button" onClick={() => router.replace(routes.projects.item(id))} className={EDIT_BUTTON}>
+                Done
+              </button>
+            )}
+          </div>
+          {detailFields}
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-card/40 px-4 py-3 mb-6">
+          <span className="text-[13px] font-semibold text-foreground shrink-0">Job details</span>
+          <span className="min-w-0 flex-1 truncate text-[12.5px] text-muted-foreground">{summary || "Nothing set yet"}</span>
+          <button type="button" onClick={() => setDetailsOpen(true)} className={EDIT_BUTTON}>
+            Edit
+          </button>
+        </div>
+      )}
+
+      <Modal open={detailsOpen} onClose={() => setDetailsOpen(false)} title="Job details">
+        {detailFields}
+        <p className="text-[12px] text-muted-foreground mb-4">Changes save as you make them.</p>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setDetailsOpen(false)}
+            className="rounded-lg bg-primary text-primary-foreground text-[13px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
+          >
+            Done
+          </button>
+        </div>
+      </Modal>
+
+      <label htmlFor="jobNotes" className="block text-[13px] font-semibold text-foreground mb-2">Notes</label>
       <textarea
-        rows={5}
+        id="jobNotes"
+        rows={4}
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder="Notes / description…"
-        style={{ outline: "none" }}
-        className="w-full bg-transparent text-[14.5px] text-foreground/90 placeholder:text-muted-foreground/70 resize-none mb-4"
-      />
-
-      <UploadCard
-        title="Contract / invoice / deliverable"
-        description="PDF, image, or any file up to 15MB"
-        currentUrl={attachmentUrl}
-        accept="*/*"
-        kind="file"
-        uploadAction={async (formData) => {
-          const result = await uploadFreelanceAttachment(formData);
-          if (result.ok && result.url) setAttachmentUrl(result.url);
-          return result;
-        }}
+        placeholder="Brief, scope, anything worth remembering about this job…"
+        className="block w-full rounded-xl bg-card/40 px-4 py-3 text-[14px] leading-relaxed text-foreground/90 placeholder:text-muted-foreground/70 resize-y"
       />
 
       <p className="text-[11.5px] text-muted-foreground/70 mt-3">

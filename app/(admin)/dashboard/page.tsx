@@ -1,275 +1,215 @@
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
-import { getSiteSettings } from "@/app/lib/settings-db";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
+import { invoiceTotals } from "@/app/lib/invoice-math";
 import { routes } from "@/app/(admin)/_routes";
+import { PageHeader } from "@/app/(admin)/_components/PageHeader";
+import { Panel, PanelRow, StatStrip } from "@/app/(admin)/_components/OverviewParts";
 
-const getDashboardData = unstable_cache(
-  async (monthKey: string) => {
-    const [year, month] = monthKey.split("-").map(Number);
-    const monthStart = new Date(year, month, 1);
-    const monthEnd = new Date(year, month + 1, 1);
+/* The Freelance overview answers three questions, in this order: what have
+ * I earned, who owes me, and what needs doing next. Everything on it is a
+ * view onto jobs, invoices and leads — nothing is edited here. */
+
+/** Totals are shown in this currency; anything else is left out and flagged. */
+const DEFAULT_CURRENCY = "AED";
+const DUE_SOON_DAYS = 7;
+
+function money(amount: number): string {
+  return `${DEFAULT_CURRENCY} ${amount.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+}
+
+function shortDate(value: Date | string): string {
+  return new Date(value).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+const getOverviewData = unstable_cache(
+  async (dayKey: string) => {
+    const today = new Date(dayKey);
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const dueSoon = new Date(today);
+    dueSoon.setDate(dueSoon.getDate() + DUE_SOON_DAYS);
 
     return Promise.all([
-      getSiteSettings(),
-      prisma.blogPost.findMany({ orderBy: { date: "desc" }, take: 5 }),
-      prisma.inquiry.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
-      prisma.freelanceProject.findMany({ where: { archived: false }, orderBy: { updatedAt: "desc" }, take: 5 }),
-      prisma.inquiry.count({ where: { read: false } }),
-      prisma.blogPost.count({ where: { published: true } }),
-      prisma.project.count({ where: { published: true } }),
-      prisma.freelanceProject.count({ where: { archived: false } }),
-      prisma.inquiry.count(),
+      prisma.invoice.findMany({
+        where: { kind: "INVOICE", status: { in: ["SENT", "OVERDUE"] } },
+        orderBy: { dueDate: "asc" },
+        include: { client: true, payments: true },
+      }),
       prisma.transaction.findMany({ where: { date: { gte: monthStart, lt: monthEnd } } }),
-      prisma.transaction.findMany({ orderBy: { date: "desc" }, take: 5, include: { client: true } }),
+      prisma.inquiry.findMany({ where: { read: false }, orderBy: { createdAt: "desc" }, take: 5 }),
+      prisma.freelanceTask.findMany({
+        where: { done: false, dueDate: { not: null, lte: dueSoon }, project: { archived: false } },
+        orderBy: { dueDate: "asc" },
+        take: 8,
+        include: { project: { select: { id: true, name: true } } },
+      }),
+      prisma.freelanceProject.findMany({
+        where: { archived: false, status: { not: "COMPLETED" } },
+        orderBy: { updatedAt: "desc" },
+        include: { tasks: { select: { done: true } }, clientRecord: { select: { name: true } } },
+      }),
     ]);
   },
-  ["dashboard-data"],
+  ["freelance-overview"],
   {
-    tags: [
-      CACHE_TAGS.blog, CACHE_TAGS.caseStudies, CACHE_TAGS.inquiries,
-      CACHE_TAGS.freelance, CACHE_TAGS.transactions, CACHE_TAGS.settings,
-    ],
+    tags: [CACHE_TAGS.invoices, CACHE_TAGS.transactions, CACHE_TAGS.inquiries, CACHE_TAGS.freelance, CACHE_TAGS.clients],
     revalidate: 60,
   }
 );
 
-export default async function DashboardPage() {
+export default async function FreelanceOverviewPage() {
   const now = new Date();
-  const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
+  const dayKey = now.toISOString().slice(0, 10);
+  const today = new Date(dayKey);
+  const [openInvoices, monthTransactions, unreadLeads, dueTasks, jobs] = await getOverviewData(dayKey);
 
-  const [
-    settings,
-    posts, inquiries, projects, unreadCount,
-    publishedArticles, publishedCaseStudies, activeProjects, totalInquiries,
-    monthTransactions, recentTransactions,
-  ] = await getDashboardData(monthKey);
+  /* ── Money ── */
+  const inDefault = <T extends { currency: string }>(rows: T[]) => rows.filter((r) => r.currency === DEFAULT_CURRENCY);
+  const invoices = openInvoices.map((inv) => ({
+    ...inv,
+    // What is still owed: the total less any deposits or part-payments.
+    total: invoiceTotals(inv).balance,
+    // A sent invoice past its due date counts as overdue even if nobody changed its status.
+    isOverdue: inv.status === "OVERDUE" || (inv.dueDate !== null && new Date(inv.dueDate) < today),
+  }));
+  const owed = inDefault(invoices).reduce((sum, inv) => sum + inv.total, 0);
+  const overdueInvoices = invoices.filter((inv) => inv.isOverdue);
+  const overdue = inDefault(overdueInvoices).reduce((sum, inv) => sum + inv.total, 0);
+  const monthIncome = inDefault(monthTransactions).filter((t) => t.type === "INCOME").reduce((sum, t) => sum + t.amount, 0);
+  const monthExpense = inDefault(monthTransactions).filter((t) => t.type === "EXPENSE").reduce((sum, t) => sum + t.amount, 0);
+  const otherCurrencies = [...invoices, ...monthTransactions].some((r) => r.currency !== DEFAULT_CURRENCY);
+  const monthName = now.toLocaleDateString("en-GB", { month: "long" });
 
-  const monthIncome = monthTransactions.filter((t) => t.type === "INCOME").reduce((sum, t) => sum + t.amount, 0);
-  const monthExpense = monthTransactions.filter((t) => t.type === "EXPENSE").reduce((sum, t) => sum + t.amount, 0);
-  const monthNet = monthIncome - monthExpense;
-  const currency = monthTransactions[0]?.currency ?? "AED";
-  const firstName = settings.name.split(" ")[0];
-  const todayLabel = now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  /* ── Needs attention ── */
+  const lateJobs = jobs.filter((j) => j.endDate !== null && new Date(j.endDate) < today);
+  const attentionCount = overdueInvoices.length + unreadLeads.length + dueTasks.length + lateJobs.length;
 
   return (
     <div>
-      {/* Greeting banner */}
-      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/20 via-primary/10 to-card/40 px-7 py-8 mb-8">
-        <div className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-primary/20 blur-3xl" aria-hidden="true" />
-        <div className="pointer-events-none absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
-        <div className="relative">
-          <p className="text-[12.5px] text-primary/80 font-medium mb-1.5">{todayLabel}</p>
-          <h1 className="text-[26px] font-bold text-foreground mb-1.5">Hi, {firstName}!</h1>
-          <p className="text-[13.5px] text-muted-foreground">
-            {unreadCount > 0
-              ? `You have ${unreadCount} unread inquir${unreadCount === 1 ? "y" : "ies"} waiting.`
-              : "You're all caught up on inquiries."}
-            {" "}This month&rsquo;s net is {monthNet >= 0 ? "+" : ""}{monthNet.toLocaleString()} {currency}.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Overview"
+        subtitle={now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+        actionHref={routes.projects.new}
+        actionLabel="+ New job"
+        secondaryHref={routes.invoices.new}
+        secondaryLabel="New invoice"
+      />
 
-      {/* Stats */}
-      <div className="grid grid-cols-5 gap-3 mb-8">
-        <StatCard href={routes.blog.list} value={publishedArticles} label="Published articles" icon={<StatBlogIcon />} accent="purple" />
-        <StatCard href={routes.caseStudies.list} value={publishedCaseStudies} label="Case studies" icon={<StatCaseIcon />} accent="purple" />
-        <StatCard href={routes.inquiries.list} value={totalInquiries} label="Inquiries" sublabel={unreadCount > 0 ? `${unreadCount} unread` : undefined} icon={<StatInquiryIcon />} accent="purple" />
-        <StatCard href={routes.projects.list} value={activeProjects} label="Active projects" icon={<StatProjectsIcon />} accent="emerald" />
-        <StatCard
-          href={routes.finance.list}
-          value={`${monthNet >= 0 ? "+" : ""}${monthNet.toLocaleString()}`}
-          label={`This month (${currency})`}
-          icon={<StatFinanceIcon />}
-          accent={monthNet >= 0 ? "emerald" : "red"}
-        />
-      </div>
-
-      {/* Quick actions */}
-      <div className="grid grid-cols-4 gap-3 mb-10">
-        <QuickAction href={routes.blog.new} label="New article" accent="purple" />
-        <QuickAction href={routes.caseStudies.new} label="New case study" accent="purple" />
-        <QuickAction href={routes.projects.new} label="New freelance project" accent="emerald" />
-        <QuickAction href={routes.finance.new} label="New transaction" accent="emerald" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-6">
-        <RecentCard title="Recent articles" emptyLabel="No articles yet.">
-          {posts.map((p) => (
-            <RecentRow key={p.id} href={routes.blog.item(p.id)} primary={p.title} secondary={p.dateFormatted} />
-          ))}
-        </RecentCard>
-
-        <RecentCard
-          title="Recent inquiries"
-          emptyLabel="No inquiries yet."
-          badge={unreadCount > 0 ? unreadCount : undefined}
-        >
-          {inquiries.map((i) => (
-            <RecentRow
-              key={i.id}
-              href={routes.inquiries.item(i.id)}
-              primary={i.name}
-              secondary={i.message.slice(0, 60)}
-              unread={!i.read}
-            />
-          ))}
-        </RecentCard>
-
-        <RecentCard title="Recent freelance projects" emptyLabel="No freelance projects yet.">
-          {projects.map((p) => (
-            <RecentRow key={p.id} href={routes.projects.item(p.id)} primary={p.name} secondary={p.status.replace("_", " ")} />
-          ))}
-        </RecentCard>
-
-        <RecentCard title="Recent transactions" emptyLabel="No transactions yet.">
-          {recentTransactions.map((t) => (
-            <RecentRow
-              key={t.id}
-              href={routes.finance.item(t.id)}
-              primary={t.description || t.category || t.client?.name || "—"}
-              secondary={`${t.type === "INCOME" ? "+" : "-"}${t.amount.toLocaleString()} ${t.currency}`}
-            />
-          ))}
-        </RecentCard>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({
-  href, value, label, sublabel, icon, accent,
-}: {
-  href: string;
-  value: number | string;
-  label: string;
-  sublabel?: string;
-  icon: React.ReactNode;
-  accent: "purple" | "emerald" | "red";
-}) {
-  const accentClasses = accent === "purple"
-    ? "hover:border-primary/50 hover:bg-primary/[0.04]"
-    : accent === "emerald"
-    ? "hover:border-success/50 hover:bg-success/[0.04]"
-    : "hover:border-destructive/50 hover:bg-destructive/[0.04]";
-  const iconBg = accent === "purple" ? "bg-primary/10 text-primary" : accent === "emerald" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive";
-  return (
-    <Link
-      href={href}
-      className={`rounded-2xl border border-border bg-card/40 px-4 py-4 transition-colors ${accentClasses}`}
-    >
-      <div className={`h-8 w-8 rounded-lg flex items-center justify-center mb-3 ${iconBg}`}>
-        {icon}
-      </div>
-      <div className="text-[22px] font-semibold text-foreground leading-none mb-1.5">{value}</div>
-      <div className="text-[12px] text-muted-foreground">{label}</div>
-      {sublabel && <div className="text-[11px] text-destructive font-medium mt-0.5">{sublabel}</div>}
-    </Link>
-  );
-}
-
-function QuickAction({ href, label, accent }: { href: string; label: string; accent: "purple" | "emerald" }) {
-  const accentClasses = accent === "purple"
-    ? "hover:border-primary/50 hover:bg-primary/[0.04]"
-    : "hover:border-success/50 hover:bg-success/[0.04]";
-  return (
-    <Link
-      href={href}
-      className={`rounded-2xl border border-border bg-card/40 px-4 py-3.5 text-[13px] font-medium text-foreground/90 transition-colors ${accentClasses}`}
-    >
-      + {label}
-    </Link>
-  );
-}
-
-function RecentCard({
-  title, emptyLabel, badge, children,
-}: {
-  title: string;
-  emptyLabel: string;
-  badge?: number;
-  children: React.ReactNode;
-}) {
-  const hasChildren = Array.isArray(children) ? children.length > 0 : !!children;
-  return (
-    <div className="rounded-2xl border border-border bg-card/40 p-5">
-      <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-[13.5px] font-semibold text-foreground">{title}</h2>
-        {!!badge && (
-          <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-white text-[10.5px] font-semibold flex items-center justify-center">
-            {badge}
-          </span>
-        )}
-      </div>
-      {hasChildren ? (
-        <div className="space-y-2.5">{children}</div>
-      ) : (
-        <p className="text-[12.5px] text-muted-foreground/70">{emptyLabel}</p>
+      <StatStrip
+        cells={[
+          { label: `Earned in ${monthName}`, value: money(monthIncome), tone: monthIncome > 0 ? "good" : undefined, href: `${routes.finance.list}?tab=transactions` },
+          {
+            label: "Owed to you",
+            value: money(owed),
+            note: invoices.length ? `${invoices.length} unpaid invoice${invoices.length === 1 ? "" : "s"}` : "No unpaid invoices",
+            href: routes.finance.list,
+          },
+          {
+            label: "Overdue",
+            value: money(overdue),
+            note: overdueInvoices.length ? `${overdueInvoices.length} invoice${overdueInvoices.length === 1 ? "" : "s"} past due` : "Nothing overdue",
+            tone: overdue > 0 ? "bad" : undefined,
+            href: routes.finance.list,
+          },
+          { label: `Expenses in ${monthName}`, value: money(monthExpense), href: `${routes.finance.list}?tab=transactions` },
+        ]}
+      />
+      {otherCurrencies && (
+        <p className="text-[11.5px] text-muted-foreground mt-2">
+          Amounts in currencies other than {DEFAULT_CURRENCY} are left out of these totals.
+        </p>
       )}
+
+      <div className="grid lg:grid-cols-2 gap-5 mt-8">
+        <Panel title="Needs attention" empty="Nothing needs your attention right now." isEmpty={attentionCount === 0}>
+          <div>
+            {overdueInvoices.map((inv) => (
+              <PanelRow
+                key={inv.id}
+                href={routes.invoices.item(inv.id)}
+                tag="Overdue"
+                tagTone="bad"
+                primary={`Invoice ${inv.invoiceNumber}`}
+                secondary={inv.client?.name}
+                right={`${inv.currency} ${inv.total.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
+                rightTone="bad"
+              />
+            ))}
+            {unreadLeads.map((lead) => (
+              <PanelRow
+                key={lead.id}
+                href={routes.inquiries.item(lead.id)}
+                tag="New lead"
+                tagTone="brand"
+                primary={lead.name}
+                secondary={lead.message.slice(0, 50)}
+                right={shortDate(lead.createdAt)}
+              />
+            ))}
+            {dueTasks.map((task) => {
+              const late = task.dueDate !== null && new Date(task.dueDate) < today;
+              return (
+                <PanelRow
+                  key={task.id}
+                  href={routes.projects.item(task.project.id)}
+                  tag={late ? "Late task" : "Due soon"}
+                  tagTone={late ? "bad" : "warn"}
+                  primary={task.title}
+                  secondary={task.project.name}
+                  right={task.dueDate ? shortDate(task.dueDate) : undefined}
+                  rightTone={late ? "bad" : undefined}
+                />
+              );
+            })}
+            {lateJobs.map((job) => (
+              <PanelRow
+                key={job.id}
+                href={routes.projects.item(job.id)}
+                tag="Past end date"
+                tagTone="warn"
+                primary={job.name}
+                secondary={job.clientRecord?.name}
+                right={job.endDate ? shortDate(job.endDate) : undefined}
+              />
+            ))}
+          </div>
+        </Panel>
+
+        <Panel
+          title="Active jobs"
+          actionHref={routes.projects.list}
+          actionLabel="All jobs"
+          empty="No active jobs. Start one with “New job”."
+          isEmpty={jobs.length === 0}
+        >
+          <div>
+            {jobs.map((job) => {
+              const done = job.tasks.filter((t) => t.done).length;
+              return (
+                <Link
+                  key={job.id}
+                  href={routes.projects.item(job.id)}
+                  className="block px-5 py-3 border-b border-border/70 last:border-b-0 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="min-w-0 truncate text-[13.5px] font-medium text-foreground">{job.name}</span>
+                    <span className="shrink-0 text-[12px] text-muted-foreground tabular-nums">
+                      {job.tasks.length ? `${done}/${job.tasks.length} tasks` : "No tasks"}
+                      {job.endDate ? ` · due ${shortDate(job.endDate)}` : ""}
+                    </span>
+                  </div>
+                  <p className="text-[12.5px] text-muted-foreground truncate mt-0.5">
+                    {job.clientRecord?.name ? `${job.clientRecord.name} · ` : ""}
+                    {job.nextAction ? <span className="text-foreground/80">Next: {job.nextAction}</span> : "No next action set"}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        </Panel>
+      </div>
     </div>
-  );
-}
-
-function RecentRow({
-  href, primary, secondary, unread,
-}: {
-  href: string;
-  primary: string;
-  secondary: string;
-  unread?: boolean;
-}) {
-  return (
-    <Link href={href} className="flex items-center justify-between gap-3 group">
-      <span className="text-[13px] text-foreground/70 group-hover:text-foreground transition-colors truncate">
-        {unread && <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary mr-1.5 align-middle" aria-hidden="true" />}
-        {primary}
-      </span>
-      <span className="text-[11.5px] text-muted-foreground/70 shrink-0">{secondary}</span>
-    </Link>
-  );
-}
-
-function statIconProps() {
-  return { width: 15, height: 15, viewBox: "0 0 20 20", fill: "none" as const, "aria-hidden": true };
-}
-function StatBlogIcon() {
-  return (
-    <svg {...statIconProps()}>
-      <path d="M4 3.5h9l3 3v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M7 8.5h6M7 11.5h6M7 14.5h3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
-function StatCaseIcon() {
-  return (
-    <svg {...statIconProps()}>
-      <rect x="2.5" y="5.5" width="15" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M7 5.5V4a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 13 4v1.5" stroke="currentColor" strokeWidth="1.4" />
-    </svg>
-  );
-}
-function StatInquiryIcon() {
-  return (
-    <svg {...statIconProps()}>
-      <path d="M3 5.5h14v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M3 5.5 10 11l7-5.5" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function StatProjectsIcon() {
-  return (
-    <svg {...statIconProps()}>
-      <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h3l1.5 2h6.5A1.5 1.5 0 0 1 17 8.5v6A1.5 1.5 0 0 1 15.5 16h-11A1.5 1.5 0 0 1 3 14.5v-8Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function StatFinanceIcon() {
-  return (
-    <svg {...statIconProps()}>
-      <path d="M3 15V8l4-3 3 2 3-2 4 3v7" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M10 7v9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M2.5 15.5h15" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
   );
 }

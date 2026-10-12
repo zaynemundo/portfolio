@@ -87,6 +87,10 @@ model SiteSettings {
   /// insightsHeading/insightsIntro above, which is the homepage teaser.
   blogPageHeading     String?
   blogPageIntro       String?
+  /// Printed on every invoice PDF. Name, email and phone come from the fields above.
+  invoiceAddress      String?
+  invoiceBankDetails  String?
+  invoicePaymentTerms String?
   updatedAt           DateTime @updatedAt
 }
 
@@ -177,6 +181,8 @@ enum ClientType {
 model Client {
   id           String             @id @default(cuid())
   name         String
+  /// Readable address for the client's page, e.g. /clients/davaolease. Made from the name.
+  slug         String?            @unique
   type         ClientType?
   /// Deprecated 2026-09-28 — removed from the UI; per-Contact email under this Client is the source of truth now (fides-creativo-style separation). Column kept, unused.
   email        String?
@@ -219,6 +225,10 @@ model Document {
   client    Client?           @relation(fields: [clientId], references: [id], onDelete: Cascade)
   projectId String?
   project   FreelanceProject? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  /// Set while the document is shared: the secret part of its client-facing link. Null = private.
+  shareToken     String?   @unique
+  /// When the share link stops working. Null = no expiry.
+  shareExpiresAt DateTime?
   createdAt DateTime          @default(now())
 }
 
@@ -238,6 +248,8 @@ model FreelanceProject {
   clientRecord Client?         @relation(fields: [clientId], references: [id])
   status       FreelanceStatus @default(NOT_STARTED)
   description  String?
+  /// One line on what happens next, e.g. "Waiting for client feedback" — shown on the Jobs list.
+  nextAction   String?
   rateAmount    Float?
   rateCurrency  String?        @default("AED")
   rateType      RateType?
@@ -265,6 +277,7 @@ model FreelanceTask {
   project   FreelanceProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
   title     String
   done      Boolean          @default(false)
+  dueDate   DateTime?
   sortOrder Int              @default(0)
   createdAt DateTime         @default(now())
 }
@@ -303,6 +316,9 @@ model Transaction {
   project     FreelanceProject? @relation(fields: [projectId], references: [id])
   /// Receipt or proof of payment — evidence for the transaction, especially expenses.
   attachmentUrl String?
+  /// Set on income entries that are payments of an invoice. Deleting the invoice removes them.
+  invoiceId   String?
+  invoice     Invoice?          @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   createdAt   DateTime          @default(now())
 }
 
@@ -311,6 +327,9 @@ enum InvoiceStatus {
   SENT
   PAID
   OVERDUE
+  /// Quotes only: the client said yes (an invoice was created from it) or no.
+  ACCEPTED
+  DECLINED
 }
 
 /// Client invoices — line items stored as JSON ({description, quantity, rate}[]),
@@ -320,6 +339,15 @@ enum InvoiceStatus {
 model Invoice {
   id            String        @id @default(cuid())
   invoiceNumber String        @unique
+  /// "INVOICE" or "QUOTE". A quote is the same document one step earlier:
+  /// accepting it creates an invoice with the same lines.
+  kind          String        @default("INVOICE")
+  /// Flat amount taken off the subtotal, in the invoice's currency.
+  discount      Float         @default(0)
+  /// On an invoice: the quote it was created from.
+  quoteId       String?       @unique
+  quote         Invoice?      @relation("QuoteToInvoice", fields: [quoteId], references: [id], onDelete: SetNull)
+  createdInvoice Invoice?     @relation("QuoteToInvoice")
   clientId      String?
   client        Client?       @relation(fields: [clientId], references: [id])
   projectId     String?
@@ -330,6 +358,11 @@ model Invoice {
   currency      String        @default("AED")
   items         Json
   notes         String?
+  /// Secret segment of the client-facing link (/invoice/<token>). Null = not shared; clearing it revokes the link.
+  shareToken    String?       @unique
+  /// Income entries recorded against this invoice — one per payment, so
+  /// deposits and part-payments add up to the amount paid.
+  payments      Transaction[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }

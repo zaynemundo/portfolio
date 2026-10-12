@@ -3,6 +3,7 @@
 import { Resend } from "resend";
 import { prisma } from "@/app/lib/prisma";
 import { emailButton, emailShell, escapeHtml } from "@/app/lib/email-template";
+import { emailFrom } from "@/app/lib/email";
 
 export interface ContactPayload {
   name: string;
@@ -34,7 +35,7 @@ async function sendNotificationEmail(name: string, email: string, message: strin
   const replyHref = `mailto:${safeEmail}?subject=${encodeURIComponent("Re: Your inquiry")}&amp;body=${encodeURIComponent(`Hi ${name},\n\n`)}`;
 
   await resend.emails.send({
-    from: "Zaira Mundo <onboarding@resend.dev>",
+    from: emailFrom(),
     to: "mzaira.mundo@gmail.com",
     replyTo: email,
     subject: `New inquiry from ${name}`,

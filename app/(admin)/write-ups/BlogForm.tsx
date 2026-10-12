@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { ExternalLink, Star } from "lucide-react";
 import { RichEditor } from "@/app/(admin)/_components/RichEditor";
 import { createPost, updatePost, type PostFormData } from "@/app/actions/posts";
+import { SaveBar, useSaveState, useUnsavedWarning } from "@/app/(admin)/_components/SaveBar";
 
 interface Props {
   mode: "new" | "edit";
@@ -26,6 +27,10 @@ export function BlogForm({ mode, postId, initial }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const data: PostFormData = { title, slug, excerpt, category, readTime, featured, published, contentHtml };
+  const saveState = useSaveState(data);
+  useUnsavedWarning(saveState.dirty && !isPending);
+
   function handleTitleChange(value: string) {
     setTitle(value);
     if (!slugTouched) {
@@ -37,12 +42,12 @@ export function BlogForm({ mode, postId, initial }: Props) {
     e.preventDefault();
     setError(null);
 
-    const data: PostFormData = { title, slug, excerpt, category, readTime, featured, published, contentHtml };
-
     startTransition(async () => {
       const result = mode === "new" ? await createPost(data) : await updatePost(postId!, data);
       if (result && !result.ok) {
         setError(result.error ?? "Something went wrong.");
+      } else if (result?.ok) {
+        saveState.markSaved(data);
       }
     });
   }
@@ -156,17 +161,14 @@ export function BlogForm({ mode, postId, initial }: Props) {
         <RichEditor content={contentHtml} onChange={setContentHtml} bordered={false} />
       </div>
 
-      {error && <p className="text-[13px] text-destructive" role="alert">{error}</p>}
-
-      <div className="flex items-center justify-end gap-3 pt-2">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-5 py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50"
-        >
-          {isPending ? "Saving…" : mode === "new" ? "Create article" : "Save changes"}
-        </button>
-      </div>
+      <SaveBar
+        dirty={saveState.dirty}
+        pending={isPending}
+        savedAt={saveState.savedAt}
+        error={error}
+        saveLabel={mode === "new" ? "Create article" : "Save changes"}
+        viewHref={mode === "edit" && published && slug ? `/blog/${slug}` : undefined}
+      />
     </form>
   );
 }

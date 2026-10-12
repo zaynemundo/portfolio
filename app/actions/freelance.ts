@@ -11,6 +11,8 @@ import type { UploadResult } from "@/app/actions/settings";
 
 export interface FreelanceProjectFormData {
   name: string;
+  /** One line on what happens next — shown on the Jobs list. */
+  nextAction: string;
   clientId: string;
   status: string;
   description: string;
@@ -37,6 +39,7 @@ function parseDate(value: string): Date | null {
 function buildData(data: FreelanceProjectFormData) {
   return {
     name: data.name.trim(),
+    nextAction: data.nextAction.trim() || null,
     clientId: data.clientId || null,
     status: data.status as FreelanceStatus,
     description: data.description.trim() || null,
@@ -106,7 +109,7 @@ export async function uploadFreelanceAttachment(formData: FormData): Promise<Upl
 
 /* ── Tasks ─────────────────────────────────────────────────────────── */
 
-export async function addTask(projectId: string, title: string): Promise<void> {
+export async function addTask(projectId: string, title: string, dueDate = ""): Promise<void> {
   await requireSession();
   if (!title.trim()) return;
 
@@ -116,7 +119,7 @@ export async function addTask(projectId: string, title: string): Promise<void> {
   });
 
   await prisma.freelanceTask.create({
-    data: { projectId, title: title.trim(), sortOrder: (max._max.sortOrder ?? -1) + 1 },
+    data: { projectId, title: title.trim(), dueDate: parseDate(dueDate), sortOrder: (max._max.sortOrder ?? -1) + 1 },
   });
   revalidatePath(`/freelance/${projectId}`);
   updateTag(CACHE_TAGS.freelance);
@@ -125,6 +128,14 @@ export async function addTask(projectId: string, title: string): Promise<void> {
 export async function toggleTask(taskId: string, projectId: string, done: boolean): Promise<void> {
   await requireSession();
   await prisma.freelanceTask.update({ where: { id: taskId }, data: { done } });
+  revalidatePath(`/freelance/${projectId}`);
+  updateTag(CACHE_TAGS.freelance);
+}
+
+/** Sets or clears (empty string) a task's due date. */
+export async function setTaskDueDate(taskId: string, projectId: string, dueDate: string): Promise<void> {
+  await requireSession();
+  await prisma.freelanceTask.update({ where: { id: taskId }, data: { dueDate: parseDate(dueDate) } });
   revalidatePath(`/freelance/${projectId}`);
   updateTag(CACHE_TAGS.freelance);
 }

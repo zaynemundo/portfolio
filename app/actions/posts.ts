@@ -59,7 +59,7 @@ export async function createPost(data: PostFormData): Promise<PostActionResult> 
   if (existing) return { ok: false, error: `A post with slug "${slug}" already exists.` };
 
   const now = new Date();
-  await prisma.blogPost.create({
+  const post = await prisma.blogPost.create({
     data: {
       slug,
       title: data.title.trim(),
@@ -76,7 +76,7 @@ export async function createPost(data: PostFormData): Promise<PostActionResult> 
 
   revalidatePublicPages();
   updateTag(CACHE_TAGS.blog);
-  redirect("/write-ups");
+  redirect(`/write-ups/${post.id}`);
 }
 
 export async function updatePost(id: string, data: PostFormData): Promise<PostActionResult> {
@@ -107,7 +107,7 @@ export async function updatePost(id: string, data: PostFormData): Promise<PostAc
 
   revalidatePublicPages();
   updateTag(CACHE_TAGS.blog);
-  redirect("/write-ups");
+  return { ok: true };
 }
 
 export async function deletePost(id: string): Promise<void> {

@@ -6,6 +6,7 @@ import { createProject, updateProject, type ProjectFormData } from "@/app/action
 import { ImageManager } from "./ImageManager";
 import { RichContentEditor } from "./RichContentEditor";
 import { STRUCTURED_KEYS, cleanRichContent, isLongForm } from "./rich-schema";
+import { SaveBar, useSaveState, useUnsavedWarning } from "@/app/(admin)/_components/SaveBar";
 
 interface Props {
   mode: "new" | "edit";
@@ -75,6 +76,28 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   const cleanedRich = useMemo(() => cleanRichContent(rich), [rich]);
   const longForm = isLongForm(cleanedRich);
 
+  // "Other data" is free-typed JSON; null means it doesn't parse yet.
+  const other = useMemo<Obj | null>(() => {
+    if (!otherJson.trim()) return {};
+    try {
+      const parsed = JSON.parse(otherJson);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }, [otherJson]);
+
+  const data: ProjectFormData = {
+    slug, name, tagline, shortDescription, role, category, year, workType,
+    technologies, challenge, approach, outcome, highlights, accessibility, performance, seo,
+    client, liveUrl, imageAlt, imageLabels, themeBg, themeDark, logoInitials, logoBg, logoLight, logoSrc,
+    richContentJson: JSON.stringify({ ...(other ?? {}), ...cleanedRich }),
+    featured, published,
+  };
+  // otherJson is tracked too, so half-typed JSON still counts as an unsaved change.
+  const saveState = useSaveState({ data, otherJson });
+  useUnsavedWarning(saveState.dirty && !isPending);
+
   function handleNameChange(value: string) {
     setName(value);
     if (!slugTouched) {
@@ -86,30 +109,17 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
     e.preventDefault();
     setError(null);
 
-    let other: Obj = {};
-    if (otherJson.trim()) {
-      try {
-        const parsed = JSON.parse(otherJson);
-        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error();
-        other = parsed;
-      } catch {
-        setError("“Other data” isn't valid JSON. Fix it or clear the box.");
-        return;
-      }
+    if (other === null) {
+      setError("“Other data” isn't valid JSON. Fix it or clear the box.");
+      return;
     }
-
-    const data: ProjectFormData = {
-      slug, name, tagline, shortDescription, role, category, year, workType,
-      technologies, challenge, approach, outcome, highlights, accessibility, performance, seo,
-      client, liveUrl, imageAlt, imageLabels, themeBg, themeDark, logoInitials, logoBg, logoLight, logoSrc,
-      richContentJson: JSON.stringify({ ...other, ...cleanedRich }),
-      featured, published,
-    };
 
     startTransition(async () => {
       const result = mode === "new" ? await createProject(data) : await updateProject(projectId!, data);
       if (result && !result.ok) {
         setError(result.error ?? "Something went wrong.");
+      } else if (result?.ok) {
+        saveState.markSaved({ data, otherJson });
       }
     });
   }
@@ -504,17 +514,14 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
         )}
       </FormSection>
 
-      {error && <p className="text-[13px] text-destructive" role="alert">{error}</p>}
-
-      <div className="flex items-center justify-end gap-3 pt-2">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-5 py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50"
-        >
-          {isPending ? "Saving…" : mode === "new" ? "Create case study" : "Save changes"}
-        </button>
-      </div>
+      <SaveBar
+        dirty={saveState.dirty}
+        pending={isPending}
+        savedAt={saveState.savedAt}
+        error={error}
+        saveLabel={mode === "new" ? "Create case study" : "Save changes"}
+        viewHref={mode === "edit" && published && slug ? `/projects/${slug}` : undefined}
+      />
     </form>
   );
 }

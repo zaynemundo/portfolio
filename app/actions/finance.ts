@@ -1,5 +1,6 @@
 "use server";
 
+import { settleInvoice } from "@/app/lib/invoice-settle";
 import { revalidatePath } from "next/cache";
 import { updateTag } from "next/cache";
 import { put } from "@vercel/blob";
@@ -66,7 +67,8 @@ export async function updateTransaction(id: string, data: TransactionFormData): 
   const error = validate(data);
   if (error) return { ok: false, error };
 
-  await prisma.transaction.update({ where: { id }, data: buildData(data) });
+  const updated = await prisma.transaction.update({ where: { id }, data: buildData(data) });
+  if (updated.invoiceId) await settleInvoice(updated.invoiceId);
 
   revalidatePath("/finance");
   revalidatePath(`/finance/${id}`);
@@ -76,7 +78,8 @@ export async function updateTransaction(id: string, data: TransactionFormData): 
 
 export async function deleteTransaction(id: string): Promise<void> {
   await requireSession();
-  await prisma.transaction.delete({ where: { id } }).catch(() => {});
+  const deleted = await prisma.transaction.delete({ where: { id } }).catch(() => null);
+  if (deleted?.invoiceId) await settleInvoice(deleted.invoiceId);
   revalidatePath("/finance");
   updateTag(CACHE_TAGS.transactions);
 }

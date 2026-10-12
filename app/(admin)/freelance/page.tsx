@@ -43,6 +43,7 @@ export default async function FreelanceProjectsPage() {
     return {
       id: p.id,
       name: p.name,
+      nextAction: p.nextAction ?? "",
       clientName: p.clientRecord?.name ?? null,
       status: p.status,
       archived: p.archived,
@@ -53,17 +54,26 @@ export default async function FreelanceProjectsPage() {
     };
   });
 
+  const inProgress = projects.filter((p) => p.status !== "COMPLETED").length;
+  const completed = projects.length - inProgress;
+  const subtitle = [
+    `${inProgress} in progress`,
+    completed ? `${completed} completed` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <div>
       <PageHeader
-        title="Freelance Projects"
-        subtitle={`${projects.length} active project${projects.length === 1 ? "" : "s"}`}
+        title="Jobs"
+        subtitle={subtitle}
         actionHref={routes.projects.new}
-        actionLabel="+ New project"
+        actionLabel="+ New job"
       />
 
       {projects.length === 0 ? (
-        <EmptyState message="No freelance projects yet." />
+        <EmptyState message="No jobs yet. Start one with “New job”." />
       ) : (
         STATUS_GROUPS.map((group) => {
           const groupProjects = projects.filter((p) => p.status === group.status);
@@ -74,7 +84,8 @@ export default async function FreelanceProjectsPage() {
                   <tr className="border-b border-border">
                     <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
                     <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Progress</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Next action</th>
+                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Tasks</th>
                     <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Due date</th>
                     <th className="px-4 py-3 w-12" />
                   </tr>
@@ -87,6 +98,7 @@ export default async function FreelanceProjectsPage() {
                         <span className="relative pointer-events-none">{project.name}</span>
                       </td>
                       <td className="px-4 py-3 text-[13px] text-muted-foreground">{project.clientName ?? "—"}</td>
+                      <td className="px-4 py-3 text-[13px] text-foreground/80">{project.nextAction || <span className="text-muted-foreground">—</span>}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
                           <span className="whitespace-nowrap">{project.totalCount > 0 ? `${project.doneCount}/${project.totalCount}` : "No tasks"}</span>

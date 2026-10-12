@@ -20,12 +20,12 @@ export default async function InquiriesPage() {
   return (
     <div>
       <PageHeader
-        title="Inquiries"
+        title="Leads"
         subtitle={`${inquiries.length} total${unreadCount > 0 ? ` · ${unreadCount} unread` : ""}`}
       />
 
       {inquiries.length === 0 ? (
-        <EmptyState message="No inquiries yet — messages from the contact form will show up here." />
+        <EmptyState message="No leads yet. Messages from your website's contact form will show up here." />
       ) : (
         <div className="border border-border rounded-xl overflow-hidden">
           <table className="w-full text-left">

@@ -13,7 +13,7 @@ export default async function NewFreelanceProjectPage({ searchParams }: Props) {
 
   return (
     <div>
-      <BackLink href={routes.projects.list} label="Freelance Projects" iconOnly />
+      <BackLink href={routes.projects.list} label="Jobs" iconOnly />
       <div className="mt-4">
         <ProjectForm clients={clients} initial={clientId ? { clientId } : undefined} />
       </div>

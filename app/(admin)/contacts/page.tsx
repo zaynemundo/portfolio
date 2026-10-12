@@ -10,7 +10,7 @@ const getContacts = unstable_cache(
   () =>
     prisma.contact.findMany({
       orderBy: [{ client: { name: "asc" } }, { sortOrder: "asc" }],
-      include: { client: { select: { id: true, name: true } } },
+      include: { client: { select: { id: true, slug: true, name: true } } },
     }),
   ["contacts-list"],
   { tags: [CACHE_TAGS.contacts, CACHE_TAGS.clients], revalidate: 60 }
@@ -46,7 +46,7 @@ export default async function ContactsPage() {
                   <td className="px-4 py-3 text-[13.5px] font-medium text-foreground">{contact.name}</td>
                   <td className="px-4 py-3 text-[13px] text-muted-foreground">{contact.role ?? "—"}</td>
                   <td className="px-4 py-3">
-                    <Link href={routes.clients.item(contact.client.id)} className="text-[13px] text-primary hover:text-primary transition-colors">
+                    <Link href={routes.clients.item(contact.client.slug ?? contact.client.id)} className="text-[13px] text-primary hover:text-primary transition-colors">
                       {contact.client.name}
                     </Link>
                   </td>

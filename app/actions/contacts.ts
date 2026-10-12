@@ -12,8 +12,8 @@ export interface ContactFormData {
   phone: string;
 }
 
-function invalidate(clientId: string) {
-  revalidatePath(`/clients/${clientId}`);
+function invalidate() {
+  revalidatePath("/clients/[id]", "page");
   revalidatePath("/contacts");
   updateTag(CACHE_TAGS.contacts);
   updateTag(CACHE_TAGS.clients);
@@ -38,7 +38,7 @@ export async function addContact(clientId: string, data: ContactFormData): Promi
       sortOrder: (max._max.sortOrder ?? -1) + 1,
     },
   });
-  invalidate(clientId);
+  invalidate();
 }
 
 export async function updateContact(id: string, clientId: string, data: ContactFormData): Promise<void> {
@@ -54,11 +54,11 @@ export async function updateContact(id: string, clientId: string, data: ContactF
       phone: data.phone.trim() || null,
     },
   });
-  invalidate(clientId);
+  invalidate();
 }
 
-export async function deleteContact(id: string, clientId: string): Promise<void> {
+export async function deleteContact(id: string): Promise<void> {
   await requireSession();
   await prisma.contact.delete({ where: { id } }).catch(() => {});
-  invalidate(clientId);
+  invalidate();
 }

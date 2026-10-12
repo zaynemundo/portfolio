@@ -310,3 +310,24 @@ export async function updateClientLogos(items: ClientLogoInput[]): Promise<Setti
   revalidateWorkPage();
   return { ok: true };
 }
+
+/** Sender details printed on every invoice (Settings → Invoice details). */
+export async function updateInvoiceDetails(
+  data: { address: string; bankDetails: string; paymentTerms: string }
+): Promise<SettingsActionResult> {
+  await requireSession();
+
+  const fields = {
+    invoiceAddress: data.address.trim() || null,
+    invoiceBankDetails: data.bankDetails.trim() || null,
+    invoicePaymentTerms: data.paymentTerms.trim() || null,
+  };
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: fields,
+    create: { id: "singleton", ...fields },
+  });
+
+  revalidatePath("/account");
+  return { ok: true };
+}

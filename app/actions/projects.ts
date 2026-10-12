@@ -151,7 +151,7 @@ export async function createProject(data: ProjectFormData): Promise<ProjectActio
 
   const maxOrder = await prisma.project.aggregate({ _max: { sortOrder: true } });
 
-  await prisma.project.create({
+  const project = await prisma.project.create({
     data: {
       ...buildData(data, slug, richResult.value),
       images: [],
@@ -161,7 +161,7 @@ export async function createProject(data: ProjectFormData): Promise<ProjectActio
 
   revalidatePublicPages();
   updateTag(CACHE_TAGS.caseStudies);
-  redirect("/case-studies");
+  redirect(`/case-studies/${project.id}`);
 }
 
 export async function updateProject(id: string, data: ProjectFormData): Promise<ProjectActionResult> {
@@ -186,7 +186,7 @@ export async function updateProject(id: string, data: ProjectFormData): Promise<
 
   revalidatePublicPages();
   updateTag(CACHE_TAGS.caseStudies);
-  redirect("/case-studies");
+  return { ok: true };
 }
 
 export async function deleteProject(id: string): Promise<void> {

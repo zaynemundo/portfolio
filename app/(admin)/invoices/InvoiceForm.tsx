@@ -28,12 +28,15 @@ function emptyItem(): InvoiceItemInput {
 
 export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated, projects, onSuccess }: Props) {
   const router = useRouter();
+  const kind = initial?.kind === "QUOTE" ? "QUOTE" : "INVOICE";
+  const isQuote = kind === "QUOTE";
   const [clientId, setClientId] = useState(initial?.clientId ?? "");
   const [projectId, setProjectId] = useState(initial?.projectId ?? "");
   const [status, setStatus] = useState(initial?.status ?? "DRAFT");
   const [issueDate, setIssueDate] = useState(initial?.issueDate ?? new Date().toISOString().slice(0, 10));
   const [dueDate, setDueDate] = useState(initial?.dueDate ?? "");
   const [currency, setCurrency] = useState(initial?.currency ?? "AED");
+  const [discount, setDiscount] = useState(initial?.discount ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
   const [items, setItems] = useState<InvoiceItemInput[]>(initial?.items && initial.items.length > 0 ? initial.items : [emptyItem()]);
   const [error, setError] = useState<string | null>(null);
@@ -43,17 +46,19 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
     setItems((prev) => prev.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
   }
 
-  const total = items.reduce((sum, it) => {
+  const subtotal = items.reduce((sum, it) => {
     const q = Number(it.quantity) || 0;
     const r = Number(it.rate) || 0;
     return sum + q * r;
   }, 0);
+  const discountValue = Math.min(Math.max(Number(discount) || 0, 0), subtotal);
+  const total = subtotal - discountValue;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
-    const data: InvoiceFormData = { clientId, projectId, status, issueDate, dueDate, currency, notes, items };
+    const data: InvoiceFormData = { kind, clientId, projectId, status, issueDate, dueDate, currency, discount, notes, items };
 
     startTransition(async () => {
       const result = mode === "new"
@@ -80,7 +85,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
           <ClientSelect value={clientId} onChange={setClientId} clients={clients} onClientCreated={onClientCreated} className={selectClass} />
         </div>
         <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Project (optional)</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Job (optional)</label>
           <Select
             value={projectId}
             onChange={setProjectId}
@@ -97,12 +102,21 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
             value={status}
             onChange={setStatus}
             className={selectClass}
-            options={[
-              { value: "DRAFT", label: "Draft" },
-              { value: "SENT", label: "Sent" },
-              { value: "PAID", label: "Paid" },
-              { value: "OVERDUE", label: "Overdue" },
-            ]}
+            options={
+              isQuote
+                ? [
+                    { value: "DRAFT", label: "Draft" },
+                    { value: "SENT", label: "Sent" },
+                    { value: "ACCEPTED", label: "Accepted" },
+                    { value: "DECLINED", label: "Declined" },
+                  ]
+                : [
+                    { value: "DRAFT", label: "Draft" },
+                    { value: "SENT", label: "Sent" },
+                    { value: "PAID", label: "Paid" },
+                    { value: "OVERDUE", label: "Overdue" },
+                  ]
+            }
           />
         </div>
         <div>
@@ -110,7 +124,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
           <input type="date" required value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={inputClass} />
         </div>
         <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Due date</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">{isQuote ? "Valid until" : "Due date"}</label>
           <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={inputClass} />
         </div>
         <div>
@@ -169,9 +183,32 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
           + Add line item
         </button>
 
-        <div className="flex justify-end mt-3 text-[14px] text-foreground/90">
-          <span className="text-muted-foreground mr-2">Total:</span>
-          <span className="font-semibold">{total.toLocaleString()} {currency}</span>
+        <div className="flex justify-end mt-4">
+          <dl className="w-full max-w-[300px] space-y-2 text-[13.5px] tabular-nums">
+            <div className="flex items-center justify-between">
+              <dt className="text-muted-foreground">Subtotal</dt>
+              <dd className="text-foreground/90">{subtotal.toLocaleString()} {currency}</dd>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <dt><label htmlFor="discount" className="text-muted-foreground">Discount</label></dt>
+              <dd>
+                <input
+                  id="discount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={discount}
+                  onChange={(e) => setDiscount(e.target.value)}
+                  placeholder="0"
+                  className={`${inputClass} w-32 py-1.5 text-right`}
+                />
+              </dd>
+            </div>
+            <div className="flex items-center justify-between border-t border-border pt-2">
+              <dt className="font-semibold text-foreground">Total</dt>
+              <dd className="font-semibold text-foreground">{total.toLocaleString()} {currency}</dd>
+            </div>
+          </dl>
         </div>
       </div>
 
@@ -188,7 +225,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
           disabled={isPending}
           className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-5 py-2.5 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
-          {isPending ? "Saving…" : mode === "new" ? "Create invoice" : "Save changes"}
+          {isPending ? "Saving…" : mode === "new" ? (isQuote ? "Create quote" : "Create invoice") : "Save changes"}
         </button>
       </div>
     </form>

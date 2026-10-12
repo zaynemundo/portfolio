@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -10,17 +10,16 @@ import {
   Newspaper,
   Layers,
   Mail,
-  UserCog,
+  Settings,
   FolderKanban,
-  Users,
-  Contact,
   FileText,
+  Users,
   Wallet,
-  Receipt,
   Search,
   PanelLeftClose,
   PanelLeftOpen,
-  ChevronRight,
+  ChevronsUpDown,
+  Check,
   Menu,
   X,
 } from "lucide-react";
@@ -33,32 +32,91 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   badge?: number;
+  /** Other route prefixes that should light this link up, e.g. invoice pages under Finance. */
+  also?: string[];
+}
+
+type WorkspaceId = "freelance" | "website";
+const WORKSPACE_IDS: WorkspaceId[] = ["freelance", "website"];
+
+/** One side of the admin. The sidebar only ever shows the active
+ *  workspace's links, so the freelance back office and the website editor
+ *  stop competing for the same list. Each workspace opens on its own
+ *  overview — there is deliberately no page that mixes the two. */
+interface Workspace {
+  id: WorkspaceId;
+  label: string;
+  description: string;
+  /** Where the switcher sends you when you pick this workspace. */
+  home: string;
+  /** Things waiting for you in this workspace — shown on the switcher while you're in the other one. */
+  attention: number;
+  items: NavItem[];
+  /** Routes that belong to this workspace but have no sidebar link of their own. */
+  extraPaths: string[];
 }
 
 const ICON_PROPS = { size: 16, strokeWidth: 1.75 };
 const THEME_STORAGE_KEY = "zm-admin-theme";
+const WORKSPACE_STORAGE_KEY = "zm-admin-workspace";
 
-const DASHBOARD_ITEM: NavItem = { href: routes.home, label: "Dashboard", icon: <LayoutDashboard {...ICON_PROPS} /> };
-const ACCOUNT_ITEM: NavItem = { href: routes.account, label: "Settings", icon: <UserCog {...ICON_PROPS} /> };
+const SETTINGS_ITEM: NavItem = { href: routes.account, label: "Settings", icon: <Settings {...ICON_PROPS} /> };
 
-function buildContentItems(unreadInquiries: number): NavItem[] {
+function buildWorkspaces(unreadInquiries: number): Workspace[] {
   return [
-    { href: routes.homepage, label: "Homepage", icon: <Home {...ICON_PROPS} /> },
-    { href: routes.about, label: "About", icon: <IdCard {...ICON_PROPS} /> },
-    { href: routes.blog.list, label: "Blog", icon: <Newspaper {...ICON_PROPS} /> },
-    { href: routes.caseStudies.list, label: "Case Studies", icon: <Layers {...ICON_PROPS} /> },
-    { href: routes.inquiries.list, label: "Inquiries", icon: <Mail {...ICON_PROPS} />, badge: unreadInquiries },
+    {
+      id: "freelance",
+      label: "Freelance",
+      description: "Leads, jobs, clients and invoices",
+      home: routes.home,
+      attention: unreadInquiries,
+      items: [
+        { href: routes.home, label: "Overview", icon: <LayoutDashboard {...ICON_PROPS} /> },
+        { href: routes.inquiries.list, label: "Leads", icon: <Mail {...ICON_PROPS} />, badge: unreadInquiries },
+        { href: routes.projects.list, label: "Jobs", icon: <FolderKanban {...ICON_PROPS} /> },
+        { href: routes.clients.list, label: "Clients", icon: <Users {...ICON_PROPS} /> },
+        { href: routes.documents.list, label: "Documents", icon: <FileText {...ICON_PROPS} /> },
+        // Invoices, income and expenses share one page (tabs), so invoice
+        // routes count as part of Finance.
+        { href: routes.finance.list, label: "Finance", icon: <Wallet {...ICON_PROPS} />, also: [routes.invoices.list] },
+      ],
+      // Contacts are edited on each client's page; their old list page still
+      // exists but has no sidebar link.
+      extraPaths: [routes.contacts.list],
+    },
+    {
+      id: "website",
+      label: "Website",
+      description: "Pages, case studies and blog",
+      home: routes.website,
+      attention: 0,
+      items: [
+        { href: routes.website, label: "Overview", icon: <LayoutDashboard {...ICON_PROPS} /> },
+        { href: routes.homepage, label: "Home", icon: <Home {...ICON_PROPS} /> },
+        { href: routes.about, label: "About", icon: <IdCard {...ICON_PROPS} /> },
+        { href: routes.caseStudies.list, label: "Work", icon: <Layers {...ICON_PROPS} /> },
+        { href: routes.blog.list, label: "Blog", icon: <Newspaper {...ICON_PROPS} /> },
+      ],
+      extraPaths: [routes.workPage, routes.blogPage],
+    },
   ];
 }
 
-const FREELANCE_ITEMS: NavItem[] = [
-  { href: routes.clients.list, label: "Clients", icon: <Users {...ICON_PROPS} /> },
-  { href: routes.projects.list, label: "Projects", icon: <FolderKanban {...ICON_PROPS} /> },
-  { href: routes.finance.list, label: "Finance", icon: <Wallet {...ICON_PROPS} /> },
-  { href: routes.invoices.list, label: "Invoices", icon: <Receipt {...ICON_PROPS} /> },
-  { href: routes.contacts.list, label: "Contacts", icon: <Contact {...ICON_PROPS} /> },
-  { href: routes.documents.list, label: "Documents", icon: <FileText {...ICON_PROPS} /> },
-];
+function matchesPath(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(href + "/");
+}
+
+function isNavActive(pathname: string, item: NavItem): boolean {
+  return [item.href, ...(item.also ?? [])].some((href) => matchesPath(pathname, href));
+}
+
+/** The workspace the current page belongs to, or null for shared pages like Settings. */
+function workspaceForPath(workspaces: Workspace[], pathname: string): WorkspaceId | null {
+  const match = workspaces.find(
+    (ws) => ws.items.some((item) => isNavActive(pathname, item)) || ws.extraPaths.some((href) => matchesPath(pathname, href)),
+  );
+  return match?.id ?? null;
+}
 
 export function ConsoleShell({
   email, children, unreadInquiries = 0,
@@ -68,7 +126,7 @@ export function ConsoleShell({
   unreadInquiries?: number;
 }) {
   const pathname = usePathname();
-  const contentItems = buildContentItems(unreadInquiries);
+  const workspaces = buildWorkspaces(unreadInquiries);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -83,21 +141,38 @@ export function ConsoleShell({
     setMobileOpen(false);
   }
 
-  const allNavItems: NavItem[] = [
-    DASHBOARD_ITEM,
-    ...contentItems,
-    ...FREELANCE_ITEMS,
-    ACCOUNT_ITEM,
-  ];
+  // The page decides the workspace whenever it belongs to one. Shared pages
+  // (Settings) keep showing whichever workspace you were last in, which is
+  // remembered across reloads.
+  const routeWorkspace = workspaceForPath(workspaces, pathname);
+  const [lastWorkspace, setLastWorkspace] = useState<WorkspaceId>("freelance");
+  if (routeWorkspace && routeWorkspace !== lastWorkspace) {
+    setLastWorkspace(routeWorkspace);
+  }
+  const activeWorkspace = workspaces.find((ws) => ws.id === (routeWorkspace ?? lastWorkspace)) ?? workspaces[0];
 
   useEffect(() => {
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from localStorage on mount; can't be derived during render without a server/client hydration mismatch.
       setIsDark(localStorage.getItem(THEME_STORAGE_KEY) === "dark");
+      const stored = localStorage.getItem(WORKSPACE_STORAGE_KEY);
+      if (!routeWorkspace && WORKSPACE_IDS.includes(stored as WorkspaceId)) setLastWorkspace(stored as WorkspaceId);
     } catch {
-      // localStorage unavailable — stay on the light default.
+      // localStorage unavailable — stay on the defaults.
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only read; later route changes are handled during render above.
   }, []);
+
+  useEffect(() => {
+    if (!routeWorkspace) return;
+    try {
+      localStorage.setItem(WORKSPACE_STORAGE_KEY, routeWorkspace);
+    } catch {
+      // ignore
+    }
+  }, [routeWorkspace]);
+
+  const allNavItems: NavItem[] = [...workspaces.flatMap((ws) => ws.items), SETTINGS_ITEM];
 
   function toggleTheme() {
     setIsDark((prev) => {
@@ -148,21 +223,36 @@ export function ConsoleShell({
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <SidebarHeader onSearch={() => setSearchOpen(true)} onCollapse={() => setMobileOpen(false)} collapseIcon={<X size={18} />} collapseLabel="Close menu" />
-        <SidebarNav contentItems={contentItems} pathname={pathname} />
+        <SidebarHeader
+          workspaces={workspaces}
+          active={activeWorkspace}
+          onSearch={() => setSearchOpen(true)}
+          onCollapse={() => setMobileOpen(false)}
+          collapseIcon={<X size={18} />}
+          collapseLabel="Close menu"
+        />
+        <SidebarNav workspace={activeWorkspace} pathname={pathname} />
         <SidebarFooter email={email} />
       </aside>
 
       {/* Desktop sidebar */}
       {sidebarOpen ? (
         <aside className="hidden md:flex w-60 shrink-0 border-r border-sidebar-border bg-sidebar flex-col h-screen sticky top-0 print:hidden">
-          <SidebarHeader onSearch={() => setSearchOpen(true)} onCollapse={() => setSidebarOpen(false)} collapseIcon={<PanelLeftClose size={16} />} collapseLabel="Collapse sidebar" />
-          <SidebarNav contentItems={contentItems} pathname={pathname} />
+          <SidebarHeader
+            workspaces={workspaces}
+            active={activeWorkspace}
+            onSearch={() => setSearchOpen(true)}
+            onCollapse={() => setSidebarOpen(false)}
+            collapseIcon={<PanelLeftClose size={16} />}
+            collapseLabel="Collapse sidebar"
+          />
+          <SidebarNav workspace={activeWorkspace} pathname={pathname} />
           <SidebarFooter email={email} />
         </aside>
       ) : (
         <CollapsedRail
-          items={allNavItems}
+          workspaces={workspaces}
+          active={activeWorkspace}
           pathname={pathname}
           email={email}
           onExpand={() => setSidebarOpen(true)}
@@ -182,19 +272,100 @@ export function ConsoleShell({
   );
 }
 
+function WorkspaceMark({ workspace, size = 22 }: { workspace: Workspace; size?: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="rounded-md bg-primary text-primary-foreground font-bold flex items-center justify-center shrink-0"
+      style={{ width: size, height: size, fontSize: size * 0.5 }}
+    >
+      {workspace.label.charAt(0)}
+    </span>
+  );
+}
+
+/** The workspace switcher doubles as the sidebar's title — picking the other
+ *  workspace takes you to its first page, which is what swaps the sidebar. */
+function WorkspaceSwitcher({ workspaces, active }: { workspaces: Workspace[]; active: Workspace }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  // Something is waiting in a workspace you can't currently see, e.g. a new lead while you're writing.
+  const elsewhere = workspaces.filter((ws) => ws.id !== active.id).reduce((sum, ws) => sum + ws.attention, 0);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative flex-1 min-w-0">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`Workspace: ${active.label}. Switch workspace${elsewhere > 0 ? ` (${elsewhere} new in another workspace)` : ""}`}
+        className="w-full flex items-center gap-2 rounded-lg px-1.5 py-1.5 -ml-1.5 text-left hover:bg-muted transition-colors"
+      >
+        <WorkspaceMark workspace={active} />
+        <span className="flex-1 min-w-0 truncate text-[13.5px] font-semibold text-sidebar-foreground">{active.label}</span>
+        {elsewhere > 0 && <span className="h-2 w-2 rounded-full bg-destructive shrink-0" aria-hidden="true" />}
+        <ChevronsUpDown size={13} className="text-muted-foreground shrink-0" />
+      </button>
+
+      {open && (
+        <div role="menu" className="absolute left-0 top-full mt-1.5 z-50 w-56 rounded-xl border border-border bg-popover shadow-lg p-1">
+          {workspaces.map((ws) => (
+            <Link
+              key={ws.id}
+              href={ws.home}
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 rounded-lg px-2 py-2 hover:bg-muted transition-colors"
+            >
+              <WorkspaceMark workspace={ws} size={26} />
+              <span className="flex-1 min-w-0">
+                <span className="block text-[13px] font-semibold text-foreground">{ws.label}</span>
+                <span className="block text-[11.5px] text-muted-foreground truncate">{ws.description}</span>
+              </span>
+              {ws.id !== active.id && ws.attention > 0 && (
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-white text-[10.5px] font-semibold flex items-center justify-center shrink-0">
+                  {ws.attention}
+                </span>
+              )}
+              {ws.id === active.id && <Check size={14} className="text-primary shrink-0" />}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SidebarHeader({
-  onSearch, onCollapse, collapseIcon, collapseLabel,
+  workspaces, active, onSearch, onCollapse, collapseIcon, collapseLabel,
 }: {
+  workspaces: Workspace[];
+  active: Workspace;
   onSearch: () => void;
   onCollapse: () => void;
   collapseIcon: React.ReactNode;
   collapseLabel: string;
 }) {
   return (
-    <div className="h-14 flex items-center justify-between px-4 border-b border-sidebar-border shrink-0">
-      <Link href={routes.home} aria-label="Dashboard" className="text-[13px] font-extrabold tracking-tight text-sidebar-foreground">
-        ZM
-      </Link>
+    <div className="h-14 flex items-center gap-1 px-4 border-b border-sidebar-border shrink-0">
+      <WorkspaceSwitcher workspaces={workspaces} active={active} />
       <div className="flex items-center gap-0.5 shrink-0">
         <button
           type="button"
@@ -217,88 +388,26 @@ function SidebarHeader({
   );
 }
 
-/** Content and Freelance are visually separate, collapsible sections under a
- *  plain uppercase label — no colored dots, no border dividers, same single
- *  accent color throughout, so it still reads as one system rather than the
- *  old two-tone Content/Hub split. Each section collapses independently
- *  (e.g. hide Freelance while doing a stretch of pure CMS work) — auto-opens
- *  when one of its own pages is active, like the old Freelance dropdown did,
- *  but now both sections behave the same way instead of just one. */
-function SidebarNav({ contentItems, pathname }: { contentItems: NavItem[]; pathname: string }) {
+/** The active workspace's links as one flat list, with Settings pinned to the
+ *  bottom — it belongs to neither workspace, so it sits apart from both. */
+function SidebarNav({ workspace, pathname }: { workspace: Workspace; pathname: string }) {
   return (
-    <nav className="flex-1 overflow-y-auto px-3 py-5">
+    <nav aria-label={`${workspace.label} navigation`} className="flex-1 overflow-y-auto px-3 py-4 flex flex-col">
       <ul className="space-y-0.5">
-        <li>
-          <NavLink item={DASHBOARD_ITEM} pathname={pathname} />
-        </li>
+        {workspace.items.map((item) => (
+          <li key={item.href}>
+            <NavLink item={item} pathname={pathname} />
+          </li>
+        ))}
       </ul>
 
-      <NavSection title="Content" items={contentItems} pathname={pathname} />
-      <NavSection title="Freelance" items={FREELANCE_ITEMS} pathname={pathname} />
 
-      <ul className="space-y-0.5 pt-5">
+      <ul className="mt-auto pt-4">
         <li>
-          <NavLink item={ACCOUNT_ITEM} pathname={pathname} />
+          <NavLink item={SETTINGS_ITEM} pathname={pathname} />
         </li>
       </ul>
     </nav>
-  );
-}
-
-/** A labeled, collapsible group of nav items. `manualOpen: boolean | null` —
- *  `null` means "no manual choice persisted yet, follow whether a child
- *  route is active" (`open = manualOpen ?? hasActiveChild`); once the user
- *  clicks the header, their choice is written to localStorage (keyed by
- *  section title) and read back on mount, so it survives a hard refresh or
- *  a fresh visit — not just useState, which would reset every reload. */
-function NavSection({ title, items, pathname }: { title: string; items: NavItem[]; pathname: string }) {
-  const hasActiveChild = items.some((item) => isNavActive(pathname, item.href));
-  const storageKey = `zm-admin-nav-open:${title}`;
-  const [manualOpen, setManualOpen] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(storageKey);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from localStorage on mount; can't be derived during render without a server/client hydration mismatch.
-      if (stored !== null) setManualOpen(stored === "true");
-    } catch {
-      // localStorage unavailable — fall back to the active-route default.
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- storageKey is derived from the title prop, which never changes for a mounted section.
-  }, []);
-
-  const open = manualOpen ?? hasActiveChild;
-
-  function toggle() {
-    const next = !open;
-    setManualOpen(next);
-    try {
-      localStorage.setItem(storageKey, String(next));
-    } catch {
-      // ignore
-    }
-  }
-
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={toggle}
-        className="w-full flex items-center gap-1 px-2.5 pt-5 pb-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-      >
-        <span className="flex-1 text-left">{title}</span>
-        <ChevronRight size={11} className={`transition-transform ${open ? "rotate-90" : ""}`} />
-      </button>
-      {open && (
-        <ul className="space-y-0.5">
-          {items.map((item) => (
-            <li key={item.href}>
-              <NavLink item={item} pathname={pathname} />
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
   );
 }
 
@@ -319,60 +428,49 @@ function SidebarFooter({ email }: { email: string }) {
 }
 
 /** Collapsed state of the sidebar — a narrow icon-only rail (like ChatGPT's
- *  collapsed sidebar), not a fully hidden nav. Every top-level destination
- *  stays one click away, just without labels; hover/aria-label carries the name. */
+ *  collapsed sidebar), not a fully hidden nav. The active workspace's
+ *  destinations stay one click away, just without labels; hover/aria-label
+ *  carries the name. The mark at the top jumps to the other workspace. */
 function CollapsedRail({
-  items, pathname, email, onExpand, onSearch,
+  workspaces, active, pathname, email, onExpand, onSearch,
 }: {
-  items: NavItem[];
+  workspaces: Workspace[];
+  active: Workspace;
   pathname: string;
   email: string;
   onExpand: () => void;
   onSearch: () => void;
 }) {
+  const other = workspaces.find((ws) => ws.id !== active.id) ?? active;
+  const railButton = "h-9 w-9 rounded-lg flex items-center justify-center transition-colors";
+  const railIdle = "text-muted-foreground hover:bg-muted hover:text-foreground";
+
   return (
     <aside className="hidden md:flex w-14 shrink-0 border-r border-sidebar-border bg-sidebar flex-col items-center h-screen sticky top-0 print:hidden py-3 gap-1">
-      <button
-        type="button"
-        onClick={onExpand}
-        aria-label="Expand sidebar"
-        className="h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+      <Link
+        href={other.home}
+        title={`${active.label} (switch to ${other.label})`}
+        aria-label={`Workspace: ${active.label}. Switch to ${other.label}`}
+        className={`${railButton} hover:bg-muted`}
       >
+        <WorkspaceMark workspace={active} />
+      </Link>
+      <button type="button" onClick={onExpand} aria-label="Expand sidebar" className={`${railButton} ${railIdle}`}>
         <PanelLeftOpen size={16} />
       </button>
-      <button
-        type="button"
-        onClick={onSearch}
-        aria-label="Search"
-        className="h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-      >
+      <button type="button" onClick={onSearch} aria-label="Search" className={`${railButton} ${railIdle}`}>
         <Search size={16} />
       </button>
 
       <div className="w-6 h-px bg-border my-1.5" aria-hidden="true" />
 
-      <nav className="flex-1 flex flex-col items-center gap-1 overflow-y-auto">
-        {items.map((item) => {
-          const isActive = isNavActive(pathname, item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              title={item.label}
-              aria-label={item.label}
-              className={`relative h-9 w-9 rounded-lg flex items-center justify-center transition-colors ${
-                isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              {item.icon}
-              {!!item.badge && (
-                <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-destructive" aria-hidden="true" />
-              )}
-            </Link>
-          );
-        })}
+      <nav aria-label={`${active.label} navigation`} className="flex-1 flex flex-col items-center gap-1 overflow-y-auto">
+        {active.items.map((item) => (
+          <RailLink key={item.href} item={item} pathname={pathname} />
+        ))}
       </nav>
 
+      <RailLink item={SETTINGS_ITEM} pathname={pathname} />
       <Link
         href={routes.account}
         title={email}
@@ -385,15 +483,30 @@ function CollapsedRail({
   );
 }
 
-function isNavActive(pathname: string, href: string): boolean {
-  return pathname === href || pathname.startsWith(href + "/");
+function RailLink({ item, pathname }: { item: NavItem; pathname: string }) {
+  const isActive = isNavActive(pathname, item);
+  return (
+    <Link
+      href={item.href}
+      title={item.label}
+      aria-label={item.label}
+      className={`relative h-9 w-9 shrink-0 rounded-lg flex items-center justify-center transition-colors ${
+        isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+      }`}
+    >
+      {item.icon}
+      {!!item.badge && (
+        <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-destructive" aria-hidden="true" />
+      )}
+    </Link>
+  );
 }
 
 /** Editorial left-accent-bar active state instead of a filled pill — a
  *  transparent 2px left border reserves the space so nothing shifts when a
  *  route becomes active. */
 function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
-  const isActive = isNavActive(pathname, item.href);
+  const isActive = isNavActive(pathname, item);
   return (
     <Link
       href={item.href}
@@ -413,4 +526,3 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
     </Link>
   );
 }
-

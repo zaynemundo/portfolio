@@ -28,7 +28,7 @@ export default async function EditInvoicePage({ params }: Props) {
   return (
     <div>
       <BackLink href={routes.invoices.item(invoice.id)} label={invoice.invoiceNumber} iconOnly />
-      <h1 className="text-[22px] font-semibold text-foreground mt-3 mb-8">Edit invoice</h1>
+      <h1 className="text-[22px] font-semibold text-foreground mt-3 mb-8">{invoice.kind === "QUOTE" ? "Edit quote" : "Edit invoice"}</h1>
 
       <InvoiceForm
         mode="edit"
@@ -36,6 +36,8 @@ export default async function EditInvoicePage({ params }: Props) {
         clients={clients}
         projects={projects}
         initial={{
+          kind: invoice.kind,
+          discount: invoice.discount ? String(invoice.discount) : "",
           clientId: invoice.clientId ?? "",
           projectId: invoice.projectId ?? "",
           status: invoice.status,

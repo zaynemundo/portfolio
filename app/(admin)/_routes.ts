@@ -8,7 +8,10 @@
  * routes (/, /blog, /projects, and their /insights and /work rewrite aliases).
  */
 export const routes = {
+  /** The Freelance overview — also where login lands. */
   home: "/dashboard",
+  /** The Website overview. */
+  website: "/website",
   account: "/account",
   /** Identity/contact info + downloadable assets (formerly Site Settings),
    *  plus Profile bio + Experience + Education & Skills + What I Do
@@ -43,7 +46,8 @@ export const routes = {
   clients: {
     list: "/clients",
     new: "/clients/new",
-    item: (id: string) => `/clients/${id}`,
+    /** Takes the client's slug; an id still works for older links. */
+    item: (slugOrId: string) => `/clients/${slugOrId}`,
   },
   contacts: {
     list: "/contacts",
@@ -67,6 +71,7 @@ export const routes = {
 /** Every top-level path segment covered above — used by proxy.ts to build its auth matcher. */
 export const PROTECTED_TOP_LEVEL_PATHS = [
   routes.home,
+  routes.website,
   routes.account,
   routes.about,
   routes.workPage,

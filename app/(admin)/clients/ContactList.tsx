@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Plus } from "lucide-react";
 import { addContact, updateContact, deleteContact } from "@/app/actions/contacts";
+import { Modal } from "@/app/(admin)/_components/Modal";
+import { DialogActions } from "@/app/(admin)/_components/DialogActions";
 
 interface Contact {
   id: string;
@@ -11,101 +14,139 @@ interface Contact {
   phone: string;
 }
 
+type Draft = Omit<Contact, "id">;
+
+const EMPTY: Draft = { name: "", role: "", email: "", phone: "" };
+const fieldClass =
+  "w-full rounded-lg bg-background border border-border px-3 py-2 text-[13.5px] text-foreground focus:outline-none focus:border-ring transition-colors";
+const labelClass = "block text-[12px] font-medium text-foreground/80 mb-1.5";
+
+/**
+ * A client's contacts as a plain list. Adding and editing happen in a dialog
+ * with all four fields at once, so the page stays readable and it's never
+ * unclear where an email or phone number goes.
+ */
 export function ContactList({ clientId, contacts }: { clientId: string; contacts: Contact[] }) {
-  const [name, setName] = useState("");
+  /** null = closed, "new" = adding, otherwise the contact being edited. */
+  const [editing, setEditing] = useState<Contact | "new" | null>(null);
+  const [draft, setDraft] = useState<Draft>(EMPTY);
   const [isPending, startTransition] = useTransition();
 
-  function handleAdd(e: React.FormEvent) {
+  function open(target: Contact | "new") {
+    setDraft(target === "new" ? EMPTY : { name: target.name, role: target.role, email: target.email, phone: target.phone });
+    setEditing(target);
+  }
+
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) return;
-    const n = name;
-    setName("");
-    startTransition(() => addContact(clientId, { name: n, role: "", email: "", phone: "" }));
+    if (!draft.name.trim() || !editing) return;
+    const target = editing;
+    startTransition(async () => {
+      if (target === "new") await addContact(clientId, draft);
+      else await updateContact(target.id, clientId, draft);
+      setEditing(null);
+    });
+  }
+
+  function remove(contact: Contact) {
+    if (!window.confirm(`Remove ${contact.name} from this client?`)) return;
+    startTransition(() => deleteContact(contact.id));
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card/40 p-5">
-      <h2 className="text-[13px] font-semibold text-foreground mb-3">Contacts</h2>
-
-      {contacts.length > 0 ? (
-        <table className="w-full text-left mb-3">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="pb-2 pr-2 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
-              <th className="pb-2 pr-2 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Role</th>
-              <th className="pb-2 pr-2 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Email</th>
-              <th className="pb-2 pr-2 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Phone</th>
-              <th className="pb-2 w-6" />
-            </tr>
-          </thead>
-          <tbody>
-            {contacts.map((contact) => (
-              <ContactRow key={contact.id} clientId={clientId} contact={contact} />
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p className="text-[12.5px] text-muted-foreground/70 mb-3">No contacts yet.</p>
-      )}
-
-      <form onSubmit={handleAdd} className="flex gap-2">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Add a contact…"
-          style={{ outline: "none" }}
-          className="flex-1 rounded-lg bg-card border border-border px-2.5 py-1.5 text-[12.5px] text-foreground placeholder:text-muted-foreground/70 focus:border-ring transition-colors"
-        />
-        <button
-          type="submit"
-          disabled={isPending || !name.trim()}
-          className="rounded-lg border border-border text-foreground/70 text-[12px] font-medium px-2.5 hover:bg-secondary transition-colors disabled:opacity-50"
-        >
-          Add
-        </button>
-      </form>
-    </div>
-  );
-}
-
-function ContactRow({ clientId, contact }: { clientId: string; contact: Contact }) {
-  const [name, setName] = useState(contact.name);
-  const [role, setRole] = useState(contact.role);
-  const [email, setEmail] = useState(contact.email);
-  const [phone, setPhone] = useState(contact.phone);
-  const [isPending, startTransition] = useTransition();
-
-  function save() {
-    startTransition(() => updateContact(contact.id, clientId, { name, role, email, phone }));
-  }
-
-  const cellInputClass = "w-full bg-transparent text-[12.5px] text-foreground/90 placeholder:text-muted-foreground/70";
-
-  return (
-    <tr className="group border-b border-border/70 last:border-b-0 hover:bg-card/40">
-      <td className="py-2 pr-2">
-        <input value={name} onChange={(e) => setName(e.target.value)} onBlur={save} style={{ outline: "none" }} className={`${cellInputClass} font-medium`} />
-      </td>
-      <td className="py-2 pr-2">
-        <input value={role} onChange={(e) => setRole(e.target.value)} onBlur={save} placeholder="—" style={{ outline: "none" }} className={cellInputClass} />
-      </td>
-      <td className="py-2 pr-2">
-        <input value={email} onChange={(e) => setEmail(e.target.value)} onBlur={save} placeholder="—" style={{ outline: "none" }} className={cellInputClass} />
-      </td>
-      <td className="py-2 pr-2">
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={save} placeholder="—" style={{ outline: "none" }} className={cellInputClass} />
-      </td>
-      <td className="py-2">
+    <section className="rounded-xl border border-border bg-card/40">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
+        <div>
+          <h2 className="text-[13.5px] font-semibold text-foreground">Contacts</h2>
+          <p className="text-[12px] text-muted-foreground mt-0.5">The first contact&rsquo;s email is used when you send an invoice or quote.</p>
+        </div>
         <button
           type="button"
-          onClick={() => startTransition(() => deleteContact(contact.id, clientId))}
-          disabled={isPending}
-          className="text-muted-foreground/70 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 text-[13px] disabled:opacity-30"
-          aria-label="Delete contact"
+          onClick={() => open("new")}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border text-foreground/80 text-[12.5px] font-medium px-3 py-1.5 hover:bg-card transition-colors shrink-0"
         >
-          ×
+          <Plus size={13} />
+          Add contact
         </button>
-      </td>
-    </tr>
+      </div>
+
+      {contacts.length === 0 ? (
+        <p className="px-5 py-4 text-[13px] text-muted-foreground">No contacts yet.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-left">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="px-5 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
+                <th className="px-3 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Email</th>
+                <th className="px-3 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Phone</th>
+                <th className="px-5 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {contacts.map((contact) => (
+                <tr key={contact.id} className="border-b border-border/70 last:border-b-0">
+                  <td className="px-5 py-2.5">
+                    <span className="text-[13.5px] font-medium text-foreground">{contact.name}</span>
+                    {contact.role && <span className="block text-[12px] text-muted-foreground">{contact.role}</span>}
+                  </td>
+                  <td className="px-3 py-2.5 text-[13px]">
+                    {contact.email ? (
+                      <a href={`mailto:${contact.email}`} className="text-foreground/80 hover:text-primary transition-colors">{contact.email}</a>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2.5 text-[13px]">
+                    {contact.phone ? (
+                      <a href={`tel:${contact.phone}`} className="text-foreground/80 hover:text-primary transition-colors">{contact.phone}</a>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="px-5 py-2.5 text-right whitespace-nowrap">
+                    <button type="button" onClick={() => open(contact)} className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors mr-3">
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => remove(contact)}
+                      disabled={isPending}
+                      className="text-[12.5px] font-medium text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <Modal open={editing !== null} onClose={() => setEditing(null)} title={editing === "new" ? "Add contact" : "Edit contact"}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="contactName" className={labelClass}>Name</label>
+              <input id="contactName" required autoFocus value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className={fieldClass} />
+            </div>
+            <div>
+              <label htmlFor="contactRole" className={labelClass}>Role (optional)</label>
+              <input id="contactRole" value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })} placeholder="e.g. Marketing manager" className={fieldClass} />
+            </div>
+            <div>
+              <label htmlFor="contactEmail" className={labelClass}>Email</label>
+              <input id="contactEmail" type="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} className={fieldClass} />
+            </div>
+            <div>
+              <label htmlFor="contactPhone" className={labelClass}>Phone</label>
+              <input id="contactPhone" type="tel" value={draft.phone} onChange={(e) => setDraft({ ...draft, phone: e.target.value })} className={fieldClass} />
+            </div>
+          </div>
+          <DialogActions onCancel={() => setEditing(null)} pending={isPending} submitLabel={editing === "new" ? "Add contact" : "Save"} />
+        </form>
+      </Modal>
+    </section>
   );
 }

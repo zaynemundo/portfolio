@@ -9,6 +9,7 @@ import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { emailButton, emailShell } from "@/app/lib/email-template";
+import { emailFrom } from "@/app/lib/email";
 
 const SESSION_COOKIE = "admin_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
@@ -100,7 +101,7 @@ export async function requestPasswordReset(email: string): Promise<RequestResetR
     if (apiKey && !apiKey.startsWith("re_placeholder")) {
       const resend = new Resend(apiKey);
       await resend.emails.send({
-        from: "Zaira Mundo <onboarding@resend.dev>",
+        from: emailFrom(),
         to: cleanEmail,
         subject: "Reset your admin password",
         text: `Someone requested a password reset for your Zaira Mundo dashboard account.

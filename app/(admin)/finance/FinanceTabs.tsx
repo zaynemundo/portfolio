@@ -13,7 +13,7 @@ import { TransactionForm } from "./TransactionForm";
 import type { TransactionFormData } from "@/app/actions/finance";
 import type { ClientOption } from "@/app/(admin)/_components/ClientSelect";
 
-type Tab = "transactions" | "invoices";
+type Tab = "transactions" | "invoices" | "quotes";
 
 interface Option {
   id: string;
@@ -37,11 +37,14 @@ export interface TransactionRow {
 
 export interface InvoiceRow {
   id: string;
+  isQuote: boolean;
   invoiceNumber: string;
   status: string;
   displayIssueDate: string;
   currency: string;
   total: number;
+  /** What is still owed after payments; equal to the total for quotes. */
+  balance: number;
   clientName: string | null;
   projectName: string | null;
 }
@@ -54,8 +57,10 @@ interface Props {
   net: number;
   currency: string;
   invoices: InvoiceRow[];
+  quotes: InvoiceRow[];
   clients: ClientOption[];
   projects: Option[];
+  initialTab: Tab;
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -63,15 +68,26 @@ const STATUS_STYLES: Record<string, string> = {
   SENT: "bg-blue-500/15 text-blue-400",
   PAID: "bg-success/15 text-success",
   OVERDUE: "bg-destructive/15 text-destructive",
+  ACCEPTED: "bg-success/15 text-success",
+  DECLINED: "bg-secondary text-muted-foreground",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  DRAFT: "Draft",
+  SENT: "Sent",
+  PAID: "Paid",
+  OVERDUE: "Overdue",
+  ACCEPTED: "Accepted",
+  DECLINED: "Declined",
 };
 
 /** Cross-client, cross-project income/expense/invoices view — the deliberately
  *  global finance picture. Invoices also live on each Freelance Project's own
  *  page (since each project has its own invoices), but the full set belongs
  *  here too — this is "our finance". */
-export function FinanceTabs({ month, transactions, income, expense, net, currency, invoices, clients: initialClients, projects }: Props) {
+export function FinanceTabs({ month, transactions, income, expense, net, currency, invoices, quotes, clients: initialClients, projects, initialTab }: Props) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("transactions");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [txModal, setTxModal] = useState<"new" | TransactionRow | null>(null);
   const [clients, setClients] = useState(initialClients);
 
@@ -98,7 +114,7 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-[22px] font-semibold text-foreground mb-1">Finance</h1>
-          <p className="text-[13px] text-muted-foreground">Income, expenses, and invoices across every client and project.</p>
+          <p className="text-[13px] text-muted-foreground">Quotes, invoices, income and expenses across every client and job.</p>
         </div>
         {tab === "transactions" ? (
           <div className="flex items-center gap-3">
@@ -113,33 +129,34 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
           </div>
         ) : (
           <Link
-            href={routes.invoices.new}
+            href={tab === "quotes" ? `${routes.invoices.new}?kind=quote` : routes.invoices.new}
             className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors"
           >
-            + New invoice
+            {tab === "quotes" ? "+ New quote" : "+ New invoice"}
           </Link>
         )}
       </div>
 
       <div className="flex items-center gap-1 mb-6 border-b border-border">
-        <button
-          type="button"
-          onClick={() => setTab("transactions")}
-          className={`px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-            tab === "transactions" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground/70"
-          }`}
-        >
-          Transactions
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("invoices")}
-          className={`px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-            tab === "invoices" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground/70"
-          }`}
-        >
-          Invoices
-        </button>
+        {(
+          [
+            { id: "quotes", label: "Quotes", count: quotes.length },
+            { id: "invoices", label: "Invoices", count: invoices.length },
+            { id: "transactions", label: "Income & expenses", count: null },
+          ] as { id: Tab; label: string; count: number | null }[]
+        ).map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTab(t.id)}
+            className={`px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
+              tab === t.id ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground/70"
+            }`}
+          >
+            {t.label}
+            {t.count !== null && t.count > 0 && <span className="ml-1.5 text-muted-foreground tabular-nums">{t.count}</span>}
+          </button>
+        ))}
       </div>
 
       {tab === "transactions" && (
@@ -210,57 +227,15 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
       )}
 
       {tab === "invoices" && (
-        <div>
-          {invoices.length === 0 ? (
-            <EmptyState message="No invoices yet." />
-          ) : (
-            <div className="border border-border rounded-xl overflow-hidden">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-border bg-card/50">
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Number</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Project</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Issued</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Status</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Total</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoices.map((inv) => (
-                    <tr key={inv.id} className="border-b border-border/70 last:border-b-0 hover:bg-card/40">
-                      <td className="px-4 py-3">
-                        <Link href={routes.invoices.item(inv.id)} className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors">
-                          {inv.invoiceNumber}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3 text-[13px] text-muted-foreground">{inv.clientName ?? "—"}</td>
-                      <td className="px-4 py-3 text-[13px] text-muted-foreground">{inv.projectName ?? "—"}</td>
-                      <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">{inv.displayIssueDate}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-[11px] font-semibold px-2 py-1 rounded ${STATUS_STYLES[inv.status]}`}>
-                          {inv.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right text-[13.5px] font-medium text-foreground/90">
-                        {inv.total.toLocaleString()} {inv.currency}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-3">
-                          <Link href={routes.invoices.edit(inv.id)} className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors">
-                            Edit
-                          </Link>
-                          <DeleteInvoiceButton id={inv.id} number={inv.invoiceNumber} onDeleted={() => router.refresh()} />
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <DocumentTable rows={invoices} empty="No invoices yet." onDeleted={() => router.refresh()} />
+      )}
+
+      {tab === "quotes" && (
+        <DocumentTable
+          rows={quotes}
+          empty="No quotes yet. A quote becomes an invoice in one click once the client accepts it."
+          onDeleted={() => router.refresh()}
+        />
       )}
 
       <Modal open={txModal !== null} onClose={closeTx} title={editingTx ? "Edit transaction" : "New transaction"}>
@@ -303,5 +278,66 @@ function ReceiptIcon() {
       <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" />
       <path d="M9 8h6M9 12h6" />
     </svg>
+  );
+}
+
+/** The list behind the Quotes and Invoices tabs — same columns, same actions. */
+function DocumentTable({ rows, empty, onDeleted }: { rows: InvoiceRow[]; empty: string; onDeleted: () => void }) {
+  if (rows.length === 0) return <EmptyState message={empty} />;
+
+  return (
+    <div className="border border-border rounded-xl overflow-x-auto">
+      <table className="w-full min-w-[720px] text-left">
+        <thead>
+          <tr className="border-b border-border bg-card/50">
+            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Number</th>
+            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
+            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Job</th>
+            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Issued</th>
+            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Status</th>
+            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Total</th>
+            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => {
+            const partPaid = !row.isQuote && row.balance > 0 && row.balance < row.total;
+            return (
+              <tr key={row.id} className="border-b border-border/70 last:border-b-0 hover:bg-card/40">
+                <td className="px-4 py-3">
+                  <Link href={routes.invoices.item(row.id)} className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors">
+                    {row.invoiceNumber}
+                  </Link>
+                </td>
+                <td className="px-4 py-3 text-[13px] text-muted-foreground">{row.clientName ?? "—"}</td>
+                <td className="px-4 py-3 text-[13px] text-muted-foreground">{row.projectName ?? "—"}</td>
+                <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">{row.displayIssueDate}</td>
+                <td className="px-4 py-3">
+                  <span className={`text-[11px] font-semibold px-2 py-1 rounded ${STATUS_STYLES[row.status] ?? STATUS_STYLES.DRAFT}`}>
+                    {STATUS_LABELS[row.status] ?? row.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right tabular-nums">
+                  <span className="text-[13.5px] font-medium text-foreground/90">
+                    {row.total.toLocaleString()} {row.currency}
+                  </span>
+                  {partPaid && (
+                    <span className="block text-[11.5px] text-muted-foreground">{row.balance.toLocaleString()} still owed</span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-3">
+                    <Link href={routes.invoices.edit(row.id)} className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors">
+                      Edit
+                    </Link>
+                    <DeleteInvoiceButton id={row.id} number={row.invoiceNumber} onDeleted={onDeleted} />
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
