@@ -254,7 +254,7 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
         {/* ── Media ────────────────────────────────────────────────────── */}
         {tab === "media" && (
           <SectionStack>
-            <Section title="Screenshots" description="The image slider at the top of the case study. Captions go with the screenshots in order.">
+            <Section title="Screenshots" description="The first screenshot is the thumbnail on the Work page. The rest make up the image slider at the top of the case study. Captions go with the screenshots in order, starting with the thumbnail.">
               {mode === "edit" && projectId ? (
                 <ImageManager projectId={projectId} images={images} />
               ) : (

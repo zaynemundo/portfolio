@@ -23,8 +23,12 @@ const DEFAULT_THEME = { bg: "#f4f4f5", dark: false };
 /* Images only show where one has been uploaded: no placeholder frames, and
    no borrowing a gallery screenshot for an empty slot. */
 function buildSlides(project: Project): SliderImage[] {
-  return (project.images ?? []).map((src, i) => {
-    const label = project.imageLabels?.[i] ?? `Screen ${i + 1}`;
+  const all = (project.images ?? []).map((src, i) => ({ src, caption: project.imageLabels?.[i] }));
+  // The first screenshot is the thumbnail on the Work page, so the gallery
+  // starts from the second — unless the first is the only one there is.
+  const shown = all.length > 1 ? all.slice(1) : all;
+  return shown.map(({ src, caption }, i) => {
+    const label = caption ?? `Screen ${i + 1}`;
     return { src, label, alt: `${project.name} — ${label}` };
   });
 }
@@ -422,7 +426,7 @@ export default async function CaseStudyPage({ params }: Props) {
                                   )}
                                 </div>
                                 {/* Content */}
-                                <div className={isLast ? "pb-0 flex-1" : "pb-14 flex-1"}>
+                                <div data-step-content className={isLast ? "pb-0 flex-1" : "pb-14 flex-1"}>
                                   <h3 className="text-[12px] font-bold tracking-[0.12em] uppercase text-zinc-600 mb-7 pt-0.5">
                                     {ts.title}
                                   </h3>
@@ -473,7 +477,7 @@ export default async function CaseStudyPage({ params }: Props) {
                                   </div>
                                   )}
                                 </div>
-                                <div className={isLast ? "pb-0 flex-1" : "pb-16 flex-1"}>
+                                <div data-step-content className={isLast ? "pb-0 flex-1" : "pb-16 flex-1"}>
                                   <h3 className="text-[12px] font-bold tracking-[0.12em] uppercase text-zinc-600 mb-6 pt-0.5">
                                     {d.name}
                                   </h3>

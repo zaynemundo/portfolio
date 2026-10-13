@@ -18,9 +18,10 @@ import { useEffect, useRef } from "react";
  *   data-step        outer row for each phase
  *   data-step-circle the number circle
  *   data-step-line   the connecting line below (absent on last step)
+ *   data-step-content the step's heading and body, dimmed while not active
  *
  * Respects prefers-reduced-motion (transitions disabled, states still update).
- * No layout shifts — only color/background mutations on existing elements.
+ * No layout shifts — only color/background/opacity mutations on existing elements.
  */
 
 const DASHED =
@@ -35,6 +36,7 @@ function applyActive(
   steps.forEach((step, i) => {
     const circle   = step.querySelector<HTMLElement>("[data-step-circle]");
     const progress = step.querySelector<HTMLElement>("[data-step-progress]");
+    const content  = step.querySelector<HTMLElement>("[data-step-content]");
 
     if (circle) {
       if (!motion) circle.style.transition = "none";
@@ -47,6 +49,12 @@ function applyActive(
         circle.style.borderColor     = "";
         circle.style.color           = "";
       }
+    }
+
+    // The step being read is at full strength; the rest sit back.
+    if (content) {
+      content.style.transition = motion ? "opacity 0.45s ease-in-out" : "none";
+      content.style.opacity    = i === activeIdx ? "1" : "0.35";
     }
 
     if (progress) {
