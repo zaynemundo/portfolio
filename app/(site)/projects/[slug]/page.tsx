@@ -52,10 +52,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: project.name,
     description: project.shortDescription,
+    alternates: { canonical: `/projects/${slug}` },
     openGraph: {
       title: `${project.name} | Zaira Mundo`,
       description: project.shortDescription,
-      images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+      url: `/projects/${slug}`,
     },
   };
 }

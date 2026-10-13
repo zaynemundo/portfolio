@@ -32,6 +32,10 @@ export const routes = {
     list: "/write-ups",
     new: "/write-ups/new",
     item: (id: string) => `/write-ups/${id}`,
+    /** POST endpoint the writing screen saves through. */
+    save: "/write-ups/save",
+    /** Lives with the public pages (so it gets the site's own layout) but only renders for a signed-in admin. */
+    preview: (id: string) => `/blog/preview/${id}`,
   },
   caseStudies: {
     list: "/case-studies",

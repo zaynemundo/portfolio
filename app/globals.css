@@ -24,6 +24,10 @@
   --color-success-foreground: var(--admin-success-foreground);
   --color-destructive: var(--admin-destructive);
   --color-destructive-foreground: var(--admin-destructive-foreground);
+  --color-canvas: var(--admin-canvas);
+  --color-positive: var(--admin-positive);
+  --color-warning: var(--admin-warning);
+  --color-negative: var(--admin-negative);
   --color-border: var(--admin-border);
   --color-input: var(--admin-input);
   --color-ring: var(--admin-ring);
@@ -42,7 +46,17 @@
    shadcn normally uses) so nothing here can collide with the public site's
    own `--accent`/`--ease-out-*` tokens declared below, which are unrelated. */
 .admin-root {
-  --admin-background: #fafafa;
+  /* Three layers, darkest to lightest: the canvas behind everything (and the
+     sidebar on it), the big rounded sheet each page sits on, and the white
+     cards on that sheet. */
+  --admin-canvas: #e9e9ed;
+  --admin-background: #f6f6f8;
+  /* What a colour says about the data, the same on every page: positive
+     (paid, active, published), warning (neutral or waiting: draft, on hold),
+     negative (overdue, declined, expired). Violet is never used for these. */
+  --admin-positive: #15803d;
+  --admin-warning: #b45309;
+  --admin-negative: #b91c1c;
   --admin-foreground: #18181b;
   --admin-card: #ffffff;
   --admin-card-foreground: #18181b;
@@ -50,9 +64,9 @@
   --admin-popover-foreground: #18181b;
   --admin-primary: #7c3aed;
   --admin-primary-foreground: #ffffff;
-  --admin-secondary: #f4f4f5;
+  --admin-secondary: #ebebee;
   --admin-secondary-foreground: #18181b;
-  --admin-muted: #f4f4f5;
+  --admin-muted: #ebebee;
   --admin-muted-foreground: #71717a;
   --admin-accent: #ede9fe;
   --admin-accent-foreground: #6d28d9;
@@ -67,7 +81,7 @@
   --admin-ring: #7c3aed;
   /* Sidebar shares the page background (not a separate white surface) so the
      rail and content read as one continuous surface, not two stacked cards. */
-  --admin-sidebar: #fafafa;
+  --admin-sidebar: #e9e9ed;
   --admin-sidebar-foreground: #18181b;
   --admin-sidebar-primary: #7c3aed;
   --admin-sidebar-primary-foreground: #ffffff;
@@ -78,7 +92,11 @@
 }
 
 .admin-root.dark {
-  --admin-background: #0e0e11;
+  --admin-canvas: #09090b;
+  --admin-background: #111114;
+  --admin-positive: #4ade80;
+  --admin-warning: #fb923c;
+  --admin-negative: #f87171;
   --admin-foreground: #f4f4f5;
   --admin-card: #17171c;
   --admin-card-foreground: #f4f4f5;
@@ -99,7 +117,7 @@
   --admin-border: rgba(255, 255, 255, 0.08);
   --admin-input: rgba(255, 255, 255, 0.34);
   --admin-ring: #8b5cf6;
-  --admin-sidebar: #0e0e11;
+  --admin-sidebar: #09090b;
   --admin-sidebar-foreground: #f4f4f5;
   --admin-sidebar-primary: #8b5cf6;
   --admin-sidebar-primary-foreground: #ffffff;
@@ -110,7 +128,7 @@
 }
 
 .admin-root {
-  background-color: var(--admin-background);
+  background-color: var(--admin-canvas);
   color: var(--admin-foreground);
 }
 

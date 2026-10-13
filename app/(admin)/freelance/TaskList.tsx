@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { DateField } from "@/app/(admin)/_components/ui/DateField";
 import { addTask, toggleTask, deleteTask, setTaskDueDate } from "@/app/actions/freelance";
+import { Card, CardHeader } from "@/app/(admin)/_components/ui/Card";
 
 interface Task {
   id: string;
@@ -32,11 +34,12 @@ export function TaskList({ projectId, tasks, today }: { projectId: string; tasks
   const done = tasks.filter((t) => t.done).length;
 
   return (
-    <div className="rounded-xl border border-border bg-card/40 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-[13px] font-semibold text-foreground">Tasks</h2>
-        <span className="text-[12px] text-muted-foreground">{done}/{tasks.length} done</span>
-      </div>
+    <Card>
+      <CardHeader
+        title="Tasks"
+        action={<span className="font-normal text-muted-foreground">{done}/{tasks.length} done</span>}
+      />
+      <div className="px-5 pb-5">
 
       {tasks.length === 0 ? (
         <p className="text-[12.5px] text-muted-foreground/70 mb-3">No tasks yet.</p>
@@ -60,10 +63,12 @@ export function TaskList({ projectId, tasks, today }: { projectId: string; tasks
                     {task.title}
                   </td>
                   <td className="py-1 whitespace-nowrap">
-                    <input
-                      type="date"
+                    <DateField
+                      compact
+                      fullWidth={false}
+                      placeholder="Due date"
                       value={task.dueDate}
-                      onChange={(e) => startTransition(() => setTaskDueDate(task.id, projectId, e.target.value))}
+                      onChange={(value) => startTransition(() => setTaskDueDate(task.id, projectId, value))}
                       aria-label={`Due date for "${task.title}"`}
                       title={overdue ? "Overdue" : "Due date"}
                       className={`${dateInput} ${overdue ? "text-destructive font-medium" : task.dueDate ? "text-muted-foreground" : "text-muted-foreground/60 opacity-0 group-hover:opacity-100 focus:opacity-100"}`}
@@ -95,13 +100,13 @@ export function TaskList({ projectId, tasks, today }: { projectId: string; tasks
           style={{ outline: "none" }}
           className="flex-1 min-w-0 rounded-lg bg-card border border-border px-2.5 py-1.5 text-[12.5px] text-foreground placeholder:text-muted-foreground/70 focus:border-ring transition-colors"
         />
-        <input
-          type="date"
+        <DateField
+          fullWidth={false}
+          placeholder="Due date"
           value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
+          onChange={setDueDate}
           aria-label="Due date for the new task"
-          style={{ outline: "none" }}
-          className="rounded-lg bg-card border border-border px-2 py-1.5 text-[12px] text-muted-foreground focus:border-ring transition-colors"
+          className="rounded-lg bg-card border border-border px-2 py-1.5 text-[12px] text-muted-foreground focus:outline-none focus:border-ring transition-colors"
         />
         <button
           type="submit"
@@ -111,6 +116,7 @@ export function TaskList({ projectId, tasks, today }: { projectId: string; tasks
           Add
         </button>
       </form>
-    </div>
+      </div>
+    </Card>
   );
 }

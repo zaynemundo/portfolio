@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateSelectedWorkCopy } from "@/app/actions/settings";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
 export function SelectedWorkCopyForm({ initialHeading, initialIntro }: { initialHeading: string; initialIntro: string }) {
   const [heading, setHeading] = useState(initialHeading);
@@ -19,7 +20,7 @@ export function SelectedWorkCopyForm({ initialHeading, initialIntro }: { initial
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className={`${cardClass} p-5 space-y-4`}>
       <div>
         <label className="block text-xs font-medium text-muted-foreground mb-1.5">Section heading</label>
         <input

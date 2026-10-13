@@ -12,8 +12,8 @@ export function ProjectPublishToggle({ id, published }: { id: string; published:
       disabled={isPending}
       className={`text-[11px] font-semibold px-2 py-1 rounded-full transition-colors disabled:opacity-50 ${
         published
-          ? "bg-success/15 text-success hover:bg-success/25"
-          : "bg-secondary text-muted-foreground hover:bg-secondary"
+          ? "bg-positive/12 text-positive hover:bg-positive/20"
+          : "bg-warning/12 text-warning hover:bg-warning/20"
       }`}
     >
       {published ? "Published" : "Draft"}

@@ -7,6 +7,8 @@ export interface Post {
   excerpt: string;
   date: string; // ISO format: YYYY-MM-DD
   dateFormatted: string;
+  /** ISO timestamp of the last save — what search engines are told as "last modified". */
+  updatedAt: string;
   readTime: string;
   category: string;
   featured: boolean;

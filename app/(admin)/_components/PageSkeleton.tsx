@@ -12,7 +12,7 @@ export function PageSkeleton({ rows = 3 }: { rows?: number }) {
       <div className="h-4 w-64 rounded bg-secondary/50 mb-8" />
       <div className="space-y-3">
         {Array.from({ length: rows }).map((_, i) => (
-          <div key={i} className="h-20 rounded-xl border border-border bg-card/40" />
+          <div key={i} className="h-20 rounded-xl border border-border bg-card shadow-xs" />
         ))}
       </div>
     </div>

@@ -6,6 +6,8 @@ import { InsightsList } from "@/app/components/insights/InsightsList";
 
 export const metadata: Metadata = {
   title: "Writing",
+  // The same page also answers at /insights — this is the address search engines should keep.
+  alternates: { canonical: "/blog" },
   description:
     "Insights on front-end development, technical SEO, accessibility, and the craft of building digital products.",
 };

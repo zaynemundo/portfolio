@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { ChevronDown } from "lucide-react";
 import { updateHeroScenes } from "@/app/actions/settings";
 import type { HeroSceneData } from "@/app/lib/settings-db";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
 function emptyScene(): HeroSceneData {
   return { heading: "", description: "", ctaLabel: "", ctaHref: "", start: 0, end: 0 };
@@ -53,7 +54,7 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className={`${cardClass} p-5 space-y-4`}>
       <div>
         <h2 className="text-[15px] font-semibold text-foreground mb-1">Scroll scenes</h2>
         <p className="text-[12.5px] text-muted-foreground">
@@ -65,7 +66,7 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
         {scenes.map((scene, i) => {
           const isCollapsed = collapsed.has(i);
           return (
-            <div key={i} className="rounded-xl border border-border bg-card/40 p-5 space-y-3">
+            <div key={i} className="rounded-xl border border-border bg-card shadow-xs p-5 space-y-3">
               <div className="flex items-center justify-between">
                 <button
                   type="button"

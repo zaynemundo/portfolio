@@ -229,6 +229,10 @@ model Document {
   shareToken     String?   @unique
   /// When the share link stops working. Null = no expiry.
   shareExpiresAt DateTime?
+  /// How many times the share link's page has been opened since it was last switched on.
+  shareOpenCount    Int       @default(0)
+  /// The most recent time the share link's page was opened. Null = not opened yet.
+  shareLastOpenedAt DateTime?
   createdAt DateTime          @default(now())
 }
 

@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { DateField } from "@/app/(admin)/_components/ui/DateField";
 import { useRouter } from "next/navigation";
 import { createTransaction, updateTransaction, uploadTransactionAttachment, type TransactionFormData } from "@/app/actions/finance";
 import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/ClientSelect";
 import { Select } from "@/app/(admin)/_components/Select";
 import { UploadCard } from "@/app/(admin)/_components/UploadCard";
 import { routes } from "@/app/(admin)/_routes";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
 interface Option {
   id: string;
@@ -61,7 +63,7 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className={`${cardClass} p-5 space-y-5`}>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="type" className="block text-xs font-medium text-muted-foreground mb-1.5">Type</label>
@@ -77,7 +79,7 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
         </div>
         <div>
           <label htmlFor="date" className="block text-xs font-medium text-muted-foreground mb-1.5">Date</label>
-          <input id="date" type="date" required value={date} onChange={(e) => setDate(e.target.value)} className={inputClass} />
+          <DateField id="date" required value={date} onChange={setDate} className={inputClass} />
         </div>
       </div>
 

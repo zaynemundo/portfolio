@@ -29,7 +29,7 @@ export function InvoiceDetailsForm({ initial }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-5 mb-8 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card shadow-xs p-5 mb-8 space-y-4">
       <div>
         <h2 className="text-[14px] font-semibold text-foreground">Invoice details</h2>
         <p className="text-[12.5px] text-muted-foreground mt-0.5">

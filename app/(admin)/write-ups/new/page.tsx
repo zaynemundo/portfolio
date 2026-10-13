@@ -1,10 +1,6 @@
 import { BlogForm } from "../BlogForm";
+import { getBlogCategories } from "../categories";
 
-export default function NewBlogPostPage() {
-  return (
-    <div>
-      <h1 className="text-[22px] font-semibold text-foreground mb-8">New article</h1>
-      <BlogForm mode="new" />
-    </div>
-  );
+export default async function NewBlogPostPage() {
+  return <BlogForm categories={await getBlogCategories()} />;
 }

@@ -74,11 +74,11 @@ export function InvoiceShare({ invoiceId, invoiceNumber, noun, senderName, clien
   )}`;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 mb-6 print:hidden">
+    <div className="rounded-xl border border-border bg-card shadow-xs p-4 mb-6 print:hidden">
       <div className="flex items-center gap-2 mb-1">
         <Link2 size={15} className="text-muted-foreground" />
         <h2 className="text-[13.5px] font-semibold text-foreground">Share with client</h2>
-        {token && <span className="rounded-full bg-success/15 text-success text-[10.5px] font-semibold px-2 py-0.5">Link active</span>}
+        {token && <span className="rounded-full bg-positive/12 text-positive text-[10.5px] font-semibold px-2 py-0.5">Link active</span>}
       </div>
 
       {!token ? (

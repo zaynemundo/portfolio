@@ -10,6 +10,7 @@ import { ProfileForm } from "./ProfileForm";
 import { ServicesForm } from "./ServicesForm";
 import { ExperienceForm } from "./ExperienceForm";
 import { EducationForm } from "./EducationForm";
+import { tabBarClass, tabClass } from "@/app/(admin)/_components/ui/Card";
 
 type Tab = "profile" | "services" | "experience" | "education";
 
@@ -43,17 +44,15 @@ export function AboutTabs({ settings, profile, services, experience, education }
     <div>
       <PageHeader title="About" subtitle="Your identity, contact info, bio, experience, education & skills, and what you do — all feed the About section on the homepage." />
 
-      <div className="flex items-center gap-1 mb-8 border-b border-border">
+      <div className={tabBarClass} role="tablist">
         {TABS.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-              tab === t.id
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground/70"
-            }`}
+            role="tab"
+            aria-selected={tab === t.id}
+            className={tabClass(tab === t.id)}
           >
             {t.label}
           </button>

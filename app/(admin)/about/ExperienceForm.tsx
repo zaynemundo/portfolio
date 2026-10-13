@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { updateAboutChapter } from "@/app/actions/settings";
 import type { Chapter, Principle } from "@/app/data/aboutChapters";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
 export function ExperienceForm({ chapter }: { chapter: Chapter }) {
   const [principles, setPrinciples] = useState<Principle[]>(chapter.principles ?? []);
@@ -23,7 +24,7 @@ export function ExperienceForm({ chapter }: { chapter: Chapter }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className={`${cardClass} p-5 space-y-4`}>
       <p className="text-[12.5px] text-muted-foreground">Roles shown in the Experience chapter, most recent first.</p>
 
       <div className="space-y-3">

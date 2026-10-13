@@ -31,7 +31,7 @@ export default async function InquiryDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card/40 p-6 space-y-4">
+      <div className="rounded-xl border border-border bg-card shadow-xs p-6 space-y-4">
         <div className="flex items-center justify-between text-[13px] text-muted-foreground">
           <a href={`mailto:${inquiry.email}`} className="text-primary hover:text-primary transition-colors">
             {inquiry.email}

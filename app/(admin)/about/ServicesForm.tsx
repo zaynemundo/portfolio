@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { updateAboutChapter } from "@/app/actions/settings";
 import type { Chapter } from "@/app/data/aboutChapters";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
 export function ServicesForm({ chapter }: { chapter: Chapter }) {
   const [title, setTitle] = useState(chapter.title);
@@ -34,7 +35,7 @@ export function ServicesForm({ chapter }: { chapter: Chapter }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className={`${cardClass} p-5 space-y-4`}>
       <p className="text-[12.5px] text-muted-foreground">Services headline, intro text, and the list of capabilities.</p>
 
       <div>

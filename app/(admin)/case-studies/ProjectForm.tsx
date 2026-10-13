@@ -7,6 +7,7 @@ import { ImageManager } from "./ImageManager";
 import { RichContentEditor } from "./RichContentEditor";
 import { STRUCTURED_KEYS, cleanRichContent, isLongForm } from "./rich-schema";
 import { SaveBar, useSaveState, useUnsavedWarning } from "@/app/(admin)/_components/SaveBar";
+import { Card, CardHeader, cardClass } from "@/app/(admin)/_components/ui/Card";
 
 interface Props {
   mode: "new" | "edit";
@@ -129,8 +130,8 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   const checkLabel = "flex items-center gap-2 text-[12.5px] text-foreground/80 cursor-pointer select-none";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      <div>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className={`${cardClass} p-5`}>
         <label htmlFor="name" className={microLabel}>Name</label>
         <div className="flex items-center gap-2">
           <input
@@ -392,7 +393,7 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
       </FormSection>
 
       {/* ── Layout indicator ─────────────────────────────────────────── */}
-      <div className="rounded-lg border border-border bg-card px-4 py-3">
+      <div className={`${cardClass} px-5 py-3.5`}>
         <p className="text-[13px] text-foreground">
           <span className="font-semibold">Page layout: {longForm ? "Long-form" : "Simple"}.</span>{" "}
           <span className="text-muted-foreground">
@@ -528,11 +529,10 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
 
 function FormSection({ title, hint, children }: { title: string; hint: string; children: React.ReactNode }) {
   return (
-    <section className="border-t border-border pt-6">
-      <h2 className="text-[14px] font-semibold text-foreground">{title}</h2>
-      <p className="text-[12px] text-muted-foreground mt-0.5 mb-5">{hint}</p>
-      <div className="space-y-6">{children}</div>
-    </section>
+    <Card>
+      <CardHeader title={title} description={hint} />
+      <div className="px-5 pb-5 space-y-6">{children}</div>
+    </Card>
   );
 }
 

@@ -66,6 +66,14 @@ interface Props {
   saveLabel?: string;
   /** Public URL of what's being edited — shown as "View on site" when set. */
   viewHref?: string;
+  /** Wording for the saved state, e.g. "Draft saved" on a page that saves itself. Defaults to "Saved". */
+  savedLabel?: string;
+  /** Wording while there are unsaved changes. Defaults to "Unsaved changes". */
+  dirtyLabel?: string;
+  /** Set on pages that save in the background: the button only locks while this is true, not on every autosave. Defaults to `pending`. */
+  submitting?: boolean;
+  /** Extra buttons, shown before "View on site" and the submit button. */
+  actions?: React.ReactNode;
 }
 
 /**
@@ -74,7 +82,10 @@ interface Props {
  * and it always says where things stand: unsaved, saving, saved, or failed.
  * Place it as the last child of the <form>; its button submits that form.
  */
-export function SaveBar({ dirty, pending, savedAt, error, saveLabel = "Save changes", viewHref }: Props) {
+export function SaveBar({
+  dirty, pending, savedAt, error, saveLabel = "Save changes", viewHref,
+  savedLabel = "Saved", dirtyLabel = "Unsaved changes", submitting = pending, actions,
+}: Props) {
   let status: React.ReactNode;
   if (error) {
     status = <span className="text-destructive font-medium" role="alert">{error}</span>;
@@ -84,13 +95,13 @@ export function SaveBar({ dirty, pending, savedAt, error, saveLabel = "Save chan
     status = (
       <span className="flex items-center gap-2 text-foreground font-medium">
         <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true" />
-        Unsaved changes
+        {dirtyLabel}
       </span>
     );
   } else if (savedAt) {
     status = (
       <span className="text-success font-medium">
-        Saved at {savedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        {savedLabel} at {savedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
       </span>
     );
   } else {
@@ -101,6 +112,7 @@ export function SaveBar({ dirty, pending, savedAt, error, saveLabel = "Save chan
     <div className="sticky bottom-0 z-20 -mx-8 px-8 py-3 border-t border-border bg-background/95 backdrop-blur print:hidden">
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1 text-[13px]" aria-live="polite">{status}</div>
+        {actions}
         {viewHref && (
           <a
             href={viewHref}
@@ -114,10 +126,10 @@ export function SaveBar({ dirty, pending, savedAt, error, saveLabel = "Save chan
         )}
         <button
           type="submit"
-          disabled={pending}
+          disabled={submitting}
           className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-5 py-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
-          {pending ? "Saving…" : saveLabel}
+          {submitting ? "Saving…" : saveLabel}
         </button>
       </div>
     </div>

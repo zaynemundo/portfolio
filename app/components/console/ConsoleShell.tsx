@@ -16,11 +16,12 @@ import {
   Users,
   Wallet,
   Search,
-  PanelLeftClose,
-  PanelLeftOpen,
-  ChevronsUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
   Check,
   Menu,
+  Plus,
   X,
 } from "lucide-react";
 import { routes } from "@/app/(admin)/_routes";
@@ -54,9 +55,13 @@ interface Workspace {
   items: NavItem[];
   /** Routes that belong to this workspace but have no sidebar link of their own. */
   extraPaths: string[];
+  /** What the round "+" in the top bar offers to create while you're in this workspace. */
+  quickAdd: { href: string; label: string }[];
 }
 
 const ICON_PROPS = { size: 16, strokeWidth: 1.75 };
+/** Shown beside the avatar at the top of the sidebar. */
+const BRAND = "Zaira Mundo";
 const THEME_STORAGE_KEY = "zm-admin-theme";
 const WORKSPACE_STORAGE_KEY = "zm-admin-workspace";
 
@@ -83,6 +88,13 @@ function buildWorkspaces(unreadInquiries: number): Workspace[] {
       // Contacts are edited on each client's page; their old list page still
       // exists but has no sidebar link.
       extraPaths: [routes.contacts.list],
+      quickAdd: [
+        { href: routes.projects.new, label: "New job" },
+        { href: routes.clients.new, label: "New client" },
+        { href: `${routes.invoices.new}?kind=quote`, label: "New quote" },
+        { href: routes.invoices.new, label: "New invoice" },
+        { href: routes.finance.new, label: "New income or expense" },
+      ],
     },
     {
       id: "website",
@@ -98,6 +110,10 @@ function buildWorkspaces(unreadInquiries: number): Workspace[] {
         { href: routes.blog.list, label: "Blog", icon: <Newspaper {...ICON_PROPS} /> },
       ],
       extraPaths: [routes.workPage, routes.blogPage],
+      quickAdd: [
+        { href: routes.blog.new, label: "New article" },
+        { href: routes.caseStudies.new, label: "New case study" },
+      ],
     },
   ];
 }
@@ -199,14 +215,15 @@ export function ConsoleShell({
 
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme }}>
-    <div className={`admin-root ${isDark ? "dark" : ""} min-h-screen bg-background flex print:bg-white`}>
+    {/* Three layers: the grey canvas (with the sidebar on it), the big rounded sheet the page sits on, and the white cards on the sheet. */}
+    <div className={`admin-root ${isDark ? "dark" : ""} min-h-screen bg-canvas flex print:bg-white`}>
       {/* Mobile hamburger — fixed top-left, hidden once the slide-in nav is open */}
       {!mobileOpen && (
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
           aria-label="Open menu"
-          className="md:hidden fixed top-3 left-3 z-40 h-9 w-9 rounded-lg bg-card border border-border shadow-sm flex items-center justify-center text-foreground"
+          className="md:hidden fixed top-3 left-3 z-40 h-10 w-10 rounded-full bg-card border border-border flex items-center justify-center text-foreground print:hidden"
         >
           <Menu size={18} />
         </button>
@@ -219,35 +236,33 @@ export function ConsoleShell({
 
       {/* Mobile sidebar — slides in, always full nav regardless of desktop collapse state */}
       <aside
-        className={`md:hidden fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[300px] bg-sidebar border-r border-sidebar-border flex flex-col transform transition-transform duration-300 ${
+        className={`md:hidden fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[300px] bg-canvas flex flex-col p-3 transform transition-transform duration-300 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <SidebarHeader
           workspaces={workspaces}
           active={activeWorkspace}
-          onSearch={() => setSearchOpen(true)}
+          email={email}
           onCollapse={() => setMobileOpen(false)}
-          collapseIcon={<X size={18} />}
+          collapseIcon={<X size={15} />}
           collapseLabel="Close menu"
         />
         <SidebarNav workspace={activeWorkspace} pathname={pathname} />
-        <SidebarFooter email={email} />
       </aside>
 
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar: open by default, with every link's name; it can be shrunk to icons. */}
       {sidebarOpen ? (
-        <aside className="hidden md:flex w-60 shrink-0 border-r border-sidebar-border bg-sidebar flex-col h-screen sticky top-0 print:hidden">
+        <aside className="hidden md:flex w-60 shrink-0 flex-col h-screen sticky top-0 p-3 print:hidden">
           <SidebarHeader
             workspaces={workspaces}
             active={activeWorkspace}
-            onSearch={() => setSearchOpen(true)}
+            email={email}
             onCollapse={() => setSidebarOpen(false)}
-            collapseIcon={<PanelLeftClose size={16} />}
-            collapseLabel="Collapse sidebar"
+            collapseIcon={<ChevronLeft size={15} />}
+            collapseLabel="Collapse sidebar to icons"
           />
           <SidebarNav workspace={activeWorkspace} pathname={pathname} />
-          <SidebarFooter email={email} />
         </aside>
       ) : (
         <CollapsedRail
@@ -256,13 +271,25 @@ export function ConsoleShell({
           pathname={pathname}
           email={email}
           onExpand={() => setSidebarOpen(true)}
-          onSearch={() => setSearchOpen(true)}
         />
       )}
 
-      <div className="flex-1 min-w-0 flex flex-col">
-        <main className="flex-1 min-w-0 print:bg-white">
-          <div className="px-8 py-10 print:p-0">{children}</div>
+      <div className="flex-1 min-w-0 flex flex-col gap-3 p-3 md:pl-0 print:p-0">
+        <div className="flex items-center gap-3 pl-12 md:pl-0 print:hidden">
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            className="flex items-center gap-2.5 h-10 w-full max-w-md rounded-full bg-card px-4 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Search size={15} />
+            <span className="flex-1 text-left truncate">Search pages…</span>
+            <kbd className="hidden sm:inline text-[11px] font-medium text-muted-foreground/70">⌘K</kbd>
+          </button>
+          <QuickAdd workspace={activeWorkspace} />
+        </div>
+
+        <main className="flex-1 min-w-0 rounded-3xl bg-background print:rounded-none print:bg-white">
+          <div className="px-5 md:px-8 py-8 print:p-0">{children}</div>
         </main>
       </div>
 
@@ -272,7 +299,66 @@ export function ConsoleShell({
   );
 }
 
-function WorkspaceMark({ workspace, size = 22 }: { workspace: Workspace; size?: number }) {
+/** Closes a popup when you click outside it or press Escape. */
+function useDismiss(open: boolean, close: () => void) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) close();
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") close();
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `close` is a fresh closure each render; only `open` should re-arm the listeners.
+  }, [open]);
+  return ref;
+}
+
+/** The round "+" at the right of the top bar: the things you can create in the current workspace. */
+function QuickAdd({ workspace }: { workspace: Workspace }) {
+  const [open, setOpen] = useState(false);
+  const ref = useDismiss(open, () => setOpen(false));
+
+  return (
+    <div ref={ref} className="relative ml-auto shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Create something new"
+        title="Create something new"
+        className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
+      >
+        <Plus size={18} className={`transition-transform ${open ? "rotate-45" : ""}`} />
+      </button>
+      {open && (
+        <div role="menu" className="absolute right-0 top-full mt-2 z-50 w-56 rounded-2xl border border-border bg-popover shadow-lg p-1.5">
+          {workspace.quickAdd.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="block rounded-xl px-3 py-2 text-[13px] font-medium text-foreground/90 hover:bg-muted transition-colors"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function WorkspaceMark({ workspace, size = 20 }: { workspace: Workspace; size?: number }) {
   return (
     <span
       aria-hidden="true"
@@ -284,63 +370,72 @@ function WorkspaceMark({ workspace, size = 22 }: { workspace: Workspace; size?: 
   );
 }
 
-/** The workspace switcher doubles as the sidebar's title — picking the other
- *  workspace takes you to its first page, which is what swaps the sidebar. */
-function WorkspaceSwitcher({ workspaces, active }: { workspaces: Workspace[]; active: Workspace }) {
+/**
+ * The workspace dropdown at the top of the sidebar. It shows which workspace
+ * you're in; picking another takes you to its first page, which is what swaps
+ * the links underneath. A dropdown rather than a two-way switch, so a third
+ * workspace is just another line in the list. `compact` is the collapsed
+ * sidebar's version: a round button with the workspace's letter that opens
+ * the same list.
+ */
+function WorkspaceSwitcher({ workspaces, active, compact }: { workspaces: Workspace[]; active: Workspace; compact?: boolean }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useDismiss(open, () => setOpen(false));
   // Something is waiting in a workspace you can't currently see, e.g. a new lead while you're writing.
   const elsewhere = workspaces.filter((ws) => ws.id !== active.id).reduce((sum, ws) => sum + ws.attention, 0);
-
-  useEffect(() => {
-    if (!open) return;
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    document.addEventListener("keydown", handleKey);
-    return () => {
-      document.removeEventListener("mousedown", handleClick);
-      document.removeEventListener("keydown", handleKey);
-    };
-  }, [open]);
+  const label = `Workspace: ${active.label}. Change workspace${elsewhere > 0 ? ` (${elsewhere} new in another workspace)` : ""}`;
 
   return (
-    <div ref={ref} className="relative flex-1 min-w-0">
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-label={`Workspace: ${active.label}. Switch workspace${elsewhere > 0 ? ` (${elsewhere} new in another workspace)` : ""}`}
-        className="w-full flex items-center gap-2 rounded-lg px-1.5 py-1.5 -ml-1.5 text-left hover:bg-muted transition-colors"
-      >
-        <WorkspaceMark workspace={active} />
-        <span className="flex-1 min-w-0 truncate text-[13.5px] font-semibold text-sidebar-foreground">{active.label}</span>
-        {elsewhere > 0 && <span className="h-2 w-2 rounded-full bg-destructive shrink-0" aria-hidden="true" />}
-        <ChevronsUpDown size={13} className="text-muted-foreground shrink-0" />
-      </button>
+    <div ref={ref} className="relative">
+      {compact ? (
+        <button
+          type="button"
+          onClick={() => setOpen((prev) => !prev)}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-label={label}
+          title={`${active.label} — change workspace`}
+          className="relative h-10 w-10 rounded-full bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors"
+        >
+          <WorkspaceMark workspace={active} />
+          {elsewhere > 0 && <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-negative ring-2 ring-canvas" aria-hidden="true" />}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen((prev) => !prev)}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-label={label}
+          className="w-full flex items-center gap-2.5 rounded-xl border border-border bg-card px-2.5 py-2 text-left hover:bg-muted/60 transition-colors"
+        >
+          <WorkspaceMark workspace={active} />
+          <span className="flex-1 min-w-0 truncate text-[13px] font-semibold text-foreground">{active.label}</span>
+          {elsewhere > 0 && <span className="h-2 w-2 rounded-full bg-negative shrink-0" aria-hidden="true" />}
+          <ChevronDown size={14} className={`text-muted-foreground shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+        </button>
+      )}
 
       {open && (
-        <div role="menu" className="absolute left-0 top-full mt-1.5 z-50 w-56 rounded-xl border border-border bg-popover shadow-lg p-1">
+        <div
+          role="menu"
+          className={`absolute z-50 rounded-2xl border border-border bg-popover shadow-lg p-1.5 ${compact ? "left-full top-0 ml-2 w-60" : "left-0 right-0 top-full mt-1.5"}`}
+        >
           {workspaces.map((ws) => (
             <Link
               key={ws.id}
               href={ws.home}
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 rounded-lg px-2 py-2 hover:bg-muted transition-colors"
+              className={`flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors ${ws.id === active.id ? "bg-muted" : "hover:bg-muted"}`}
             >
-              <WorkspaceMark workspace={ws} size={26} />
+              <WorkspaceMark workspace={ws} size={24} />
               <span className="flex-1 min-w-0">
                 <span className="block text-[13px] font-semibold text-foreground">{ws.label}</span>
                 <span className="block text-[11.5px] text-muted-foreground truncate">{ws.description}</span>
               </span>
               {ws.id !== active.id && ws.attention > 0 && (
-                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-white text-[10.5px] font-semibold flex items-center justify-center shrink-0">
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-negative text-white text-[10.5px] font-semibold flex items-center justify-center shrink-0">
                   {ws.attention}
                 </span>
               )}
@@ -353,37 +448,46 @@ function WorkspaceSwitcher({ workspaces, active }: { workspaces: Workspace[]; ac
   );
 }
 
+/** The round black avatar; it opens Settings, where the account lives. */
+function Avatar({ email }: { email: string }) {
+  return (
+    <Link
+      href={routes.account}
+      title={email}
+      aria-label="Your account and settings"
+      className="h-10 w-10 rounded-full bg-foreground text-background flex items-center justify-center text-[13px] font-bold shrink-0 hover:opacity-85 transition-opacity"
+    >
+      {BRAND.charAt(0)}
+    </Link>
+  );
+}
+
 function SidebarHeader({
-  workspaces, active, onSearch, onCollapse, collapseIcon, collapseLabel,
+  workspaces, active, email, onCollapse, collapseIcon, collapseLabel,
 }: {
   workspaces: Workspace[];
   active: Workspace;
-  onSearch: () => void;
+  email: string;
   onCollapse: () => void;
   collapseIcon: React.ReactNode;
   collapseLabel: string;
 }) {
   return (
-    <div className="h-14 flex items-center gap-1 px-4 border-b border-sidebar-border shrink-0">
-      <WorkspaceSwitcher workspaces={workspaces} active={active} />
-      <div className="flex items-center gap-0.5 shrink-0">
-        <button
-          type="button"
-          onClick={onSearch}
-          aria-label="Search"
-          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-        >
-          <Search size={16} />
-        </button>
+    <div className="shrink-0">
+      <div className="flex items-center gap-2.5 mb-3">
+        <Avatar email={email} />
+        <span className="flex-1 min-w-0 truncate text-[13.5px] font-bold text-foreground">{BRAND}</span>
         <button
           type="button"
           onClick={onCollapse}
           aria-label={collapseLabel}
-          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          title={collapseLabel}
+          className="h-7 w-7 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shrink-0"
         >
           {collapseIcon}
         </button>
       </div>
+      <WorkspaceSwitcher workspaces={workspaces} active={active} />
     </div>
   );
 }
@@ -392,15 +496,14 @@ function SidebarHeader({
  *  bottom — it belongs to neither workspace, so it sits apart from both. */
 function SidebarNav({ workspace, pathname }: { workspace: Workspace; pathname: string }) {
   return (
-    <nav aria-label={`${workspace.label} navigation`} className="flex-1 overflow-y-auto px-3 py-4 flex flex-col">
-      <ul className="space-y-0.5">
+    <nav aria-label={`${workspace.label} navigation`} className="flex-1 overflow-y-auto pt-4 flex flex-col">
+      <ul className="space-y-1">
         {workspace.items.map((item) => (
           <li key={item.href}>
             <NavLink item={item} pathname={pathname} />
           </li>
         ))}
       </ul>
-
 
       <ul className="mt-auto pt-4">
         <li>
@@ -411,74 +514,39 @@ function SidebarNav({ workspace, pathname }: { workspace: Workspace; pathname: s
   );
 }
 
-/** Just an avatar + email, linking to the Settings page — everything else
- *  (change password, sign out, theme toggle) moved onto that page itself so
- *  the sidebar doesn't carry a whole account card at the bottom. */
-function SidebarFooter({ email }: { email: string }) {
-  return (
-    <div className="p-3 border-t border-sidebar-border shrink-0">
-      <Link href={routes.account} className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 hover:bg-muted transition-colors">
-        <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-[12px] font-semibold shrink-0">
-          {email.charAt(0).toUpperCase()}
-        </div>
-        <p className="min-w-0 flex-1 text-[12px] text-foreground font-medium truncate">{email}</p>
-      </Link>
-    </div>
-  );
-}
-
-/** Collapsed state of the sidebar — a narrow icon-only rail (like ChatGPT's
- *  collapsed sidebar), not a fully hidden nav. The active workspace's
- *  destinations stay one click away, just without labels; hover/aria-label
- *  carries the name. The mark at the top jumps to the other workspace. */
+/** The sidebar shrunk to icons: round buttons, the current page filled in
+ *  violet, names on hover. The workspace dropdown stays at the top as a round
+ *  button, so you can always change workspace from here too. */
 function CollapsedRail({
-  workspaces, active, pathname, email, onExpand, onSearch,
+  workspaces, active, pathname, email, onExpand,
 }: {
   workspaces: Workspace[];
   active: Workspace;
   pathname: string;
   email: string;
   onExpand: () => void;
-  onSearch: () => void;
 }) {
-  const other = workspaces.find((ws) => ws.id !== active.id) ?? active;
-  const railButton = "h-9 w-9 rounded-lg flex items-center justify-center transition-colors";
-  const railIdle = "text-muted-foreground hover:bg-muted hover:text-foreground";
-
   return (
-    <aside className="hidden md:flex w-14 shrink-0 border-r border-sidebar-border bg-sidebar flex-col items-center h-screen sticky top-0 print:hidden py-3 gap-1">
-      <Link
-        href={other.home}
-        title={`${active.label} (switch to ${other.label})`}
-        aria-label={`Workspace: ${active.label}. Switch to ${other.label}`}
-        className={`${railButton} hover:bg-muted`}
-      >
-        <WorkspaceMark workspace={active} />
-      </Link>
-      <button type="button" onClick={onExpand} aria-label="Expand sidebar" className={`${railButton} ${railIdle}`}>
-        <PanelLeftOpen size={16} />
-      </button>
-      <button type="button" onClick={onSearch} aria-label="Search" className={`${railButton} ${railIdle}`}>
-        <Search size={16} />
-      </button>
+    <aside className="hidden md:flex w-16 shrink-0 flex-col items-center h-screen sticky top-0 py-3 gap-2 print:hidden">
+      <Avatar email={email} />
+      <WorkspaceSwitcher workspaces={workspaces} active={active} compact />
 
-      <div className="w-6 h-px bg-border my-1.5" aria-hidden="true" />
-
-      <nav aria-label={`${active.label} navigation`} className="flex-1 flex flex-col items-center gap-1 overflow-y-auto">
+      <nav aria-label={`${active.label} navigation`} className="flex-1 flex flex-col items-center gap-2 pt-2 overflow-y-auto">
         {active.items.map((item) => (
           <RailLink key={item.href} item={item} pathname={pathname} />
         ))}
       </nav>
 
       <RailLink item={SETTINGS_ITEM} pathname={pathname} />
-      <Link
-        href={routes.account}
-        title={email}
-        aria-label="Account"
-        className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-[12px] font-semibold shrink-0 mb-1"
+      <button
+        type="button"
+        onClick={onExpand}
+        aria-label="Open sidebar"
+        title="Open sidebar"
+        className="h-10 w-10 shrink-0 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
       >
-        {email.charAt(0).toUpperCase()}
-      </Link>
+        <ChevronRight size={16} />
+      </button>
     </aside>
   );
 }
@@ -490,36 +558,35 @@ function RailLink({ item, pathname }: { item: NavItem; pathname: string }) {
       href={item.href}
       title={item.label}
       aria-label={item.label}
-      className={`relative h-9 w-9 shrink-0 rounded-lg flex items-center justify-center transition-colors ${
-        isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+      className={`relative h-10 w-10 shrink-0 rounded-full flex items-center justify-center border transition-colors ${
+        isActive ? "bg-primary border-primary text-primary-foreground" : "bg-card border-border text-muted-foreground hover:text-foreground"
       }`}
     >
       {item.icon}
-      {!!item.badge && (
-        <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-destructive" aria-hidden="true" />
-      )}
+      {!!item.badge && <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-negative ring-2 ring-canvas" aria-hidden="true" />}
     </Link>
   );
 }
 
-/** Editorial left-accent-bar active state instead of a filled pill — a
- *  transparent 2px left border reserves the space so nothing shifts when a
- *  route becomes active. */
+/** A sidebar link: icon and name in a pill, filled violet for the page you're on. */
 function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
   const isActive = isNavActive(pathname, item);
   return (
     <Link
       href={item.href}
-      className={`flex items-center gap-2.5 pl-2.5 pr-2.5 py-2 -ml-px border-l-2 rounded-r-md text-[13px] font-medium transition-colors ${
-        isActive
-          ? "border-primary bg-primary/5 text-primary"
-          : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+      aria-current={isActive ? "page" : undefined}
+      className={`flex items-center gap-2.5 rounded-full px-3.5 py-2 text-[13px] transition-colors ${
+        isActive ? "bg-primary text-primary-foreground font-semibold" : "font-medium text-muted-foreground hover:bg-card hover:text-foreground"
       }`}
     >
       {item.icon}
       <span className="flex-1">{item.label}</span>
       {!!item.badge && (
-        <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-white text-[10.5px] font-semibold flex items-center justify-center">
+        <span
+          className={`min-w-[18px] h-[18px] px-1 rounded-full text-[10.5px] font-semibold flex items-center justify-center ${
+            isActive ? "bg-white/25 text-white" : "bg-primary text-primary-foreground"
+          }`}
+        >
           {item.badge}
         </span>
       )}

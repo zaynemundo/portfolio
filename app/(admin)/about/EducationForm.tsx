@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { updateAboutChapter } from "@/app/actions/settings";
 import type { Chapter, EducationItem, SkillGroup } from "@/app/data/aboutChapters";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
 const EMPTY_EDUCATION: EducationItem = { degree: "", institution: "", honours: "", award: "", period: "" };
 
@@ -33,7 +34,7 @@ export function EducationForm({ chapter }: { chapter: Chapter }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className={`${cardClass} p-5 space-y-5`}>
       <p className="text-[12.5px] text-muted-foreground">Degree info and grouped skill tags.</p>
 
       <div className="space-y-3">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -15,7 +15,72 @@ interface Props {
   bordered?: boolean;
 }
 
+const UPLOADABLE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+/** Uploads go through a Server Action, which caps the request at 1MB — anything bigger is shrunk first. */
+const SHRINK_ABOVE_BYTES = 900 * 1024;
+const MAX_IMAGE_SIDE = 2000;
+
+function imageFilesIn(transfer: DataTransfer | null): File[] {
+  return Array.from(transfer?.files ?? []).filter((file) => file.type.startsWith("image/"));
+}
+
+/** Screenshots and phone photos are far larger than an article needs — scale them down and re-encode before uploading. */
+async function shrinkImage(file: File): Promise<File> {
+  if (UPLOADABLE_TYPES.includes(file.type) && file.size <= SHRINK_ABOVE_BYTES) return file;
+
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.85));
+  // A browser that can't encode WebP hands back a PNG instead, which is still uploadable.
+  if (!blob || !UPLOADABLE_TYPES.includes(blob.type)) return file;
+  const extension = blob.type === "image/webp" ? "webp" : "png";
+  const baseName = file.name.replace(/\.[^.]+$/, "") || "image";
+  return new File([blob], `${baseName}.${extension}`, { type: blob.type });
+}
+
+async function uploadImage(file: File): Promise<{ url?: string; error?: string }> {
+  try {
+    const formData = new FormData();
+    formData.set("file", await shrinkImage(file));
+    const result = await uploadPostImage(formData);
+    return result.ok && result.url ? { url: result.url } : { error: result.error ?? "Image upload failed." };
+  } catch {
+    return { error: "Image upload failed." };
+  }
+}
+
 export function RichEditor({ content, onChange, bordered = true }: Props) {
+  // The paste/drop handlers are created with the editor, so they reach it through a ref.
+  const editorRef = useRef<ReturnType<typeof useEditor>>(null);
+  const [uploading, setUploading] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  /** Uploads each image, then places it at `position` (where it was dropped) or at the cursor. */
+  async function insertImages(files: File[], position?: number) {
+    const target = editorRef.current;
+    if (!target) return;
+    setUploadError(null);
+    setUploading((count) => count + files.length);
+    let insertAt = position;
+    for (const file of files) {
+      const { url, error } = await uploadImage(file);
+      setUploading((count) => count - 1);
+      if (!url) {
+        setUploadError(error ?? "Image upload failed.");
+        continue;
+      }
+      const at = insertAt ?? target.state.selection.to;
+      target.chain().focus().insertContentAt(at, { type: "image", attrs: { src: url } }).run();
+      if (insertAt !== undefined) insertAt += 1;
+    }
+  }
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -27,10 +92,27 @@ export function RichEditor({ content, onChange, bordered = true }: Props) {
     content,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
+      // Pasted screenshots and dropped files become uploaded images. Pastes
+      // that carry text too (from Word, Docs, a web page) are left alone.
+      handlePaste(_view, event) {
+        const files = imageFilesIn(event.clipboardData);
+        if (files.length === 0 || event.clipboardData?.getData("text/plain")) return false;
+        event.preventDefault();
+        void insertImages(files);
+        return true;
+      },
+      handleDrop(view, event, _slice, moved) {
+        const files = moved ? [] : imageFilesIn(event.dataTransfer);
+        if (files.length === 0) return false;
+        event.preventDefault();
+        void insertImages(files, view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos);
+        return true;
+      },
       attributes: {
         style: "outline: none;",
         class:
-          "max-w-none min-h-[320px] px-4 py-3 text-[14.5px] text-foreground/90 focus:outline-none " +
+          (bordered ? "min-h-[320px] px-4 py-3 text-[14.5px] " : "min-h-[55vh] pb-24 text-[16px] ") +
+          "max-w-none text-foreground/90 focus:outline-none " +
           "[&_p]:leading-relaxed [&_p]:mb-3 " +
           "[&_h2]:text-[19px] [&_h2]:font-semibold [&_h2]:text-foreground [&_h2]:mt-6 [&_h2]:mb-2 " +
           "[&_h3]:text-[16px] [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mt-5 [&_h3]:mb-2 " +
@@ -48,32 +130,47 @@ export function RichEditor({ content, onChange, bordered = true }: Props) {
     },
   });
 
+  useEffect(() => {
+    editorRef.current = editor;
+  }, [editor]);
+
   if (!editor) return null;
 
   return (
     <div className={bordered ? "rounded-lg border border-border bg-card overflow-hidden" : ""}>
-      <Toolbar bordered={bordered} editor={editor} />
+      <div className={bordered ? "" : "flex flex-wrap items-center gap-x-3 mb-4"}>
+        <Toolbar bordered={bordered} editor={editor} onImages={insertImages} />
+        {(uploading > 0 || uploadError) && (
+          <span
+            className={`text-[12.5px] ${bordered ? "block px-3 py-1.5 border-b border-border" : ""} ${
+              uploadError && uploading === 0 ? "text-destructive" : "text-muted-foreground"
+            }`}
+            role="status"
+          >
+            {uploading > 0 ? (uploading > 1 ? `Uploading ${uploading} images…` : "Uploading image…") : uploadError}
+          </span>
+        )}
+      </div>
       <EditorContent editor={editor} />
     </div>
   );
 }
 
-function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof useEditor>>; bordered: boolean }) {
+function Toolbar({
+  editor,
+  bordered,
+  onImages,
+}: {
+  editor: NonNullable<ReturnType<typeof useEditor>>;
+  bordered: boolean;
+  onImages: (files: File[]) => void;
+}) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  async function handleImageSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  function handleImageSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
     e.target.value = "";
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.set("file", file);
-    const result = await uploadPostImage(formData);
-    if (result.ok && result.url) {
-      editor.chain().focus().setImage({ src: result.url }).run();
-    } else {
-      window.alert(result.error ?? "Image upload failed.");
-    }
+    if (files.length > 0) onImages(files);
   }
   const items: { label: string; icon: React.ReactNode; active: boolean; onClick: () => void }[] = [
     { label: "Bold", icon: <BoldIcon />, active: editor.isActive("bold"), onClick: () => editor.chain().focus().toggleBold().run() },
@@ -102,10 +199,10 @@ function Toolbar({ editor, bordered }: { editor: NonNullable<ReturnType<typeof u
   return (
     <div
       className={`flex flex-wrap items-center gap-0.5 ${
-        bordered ? "px-2 py-1.5 border-b border-border bg-background" : "inline-flex px-1.5 py-1 rounded-full bg-secondary/60 mb-4"
+        bordered ? "px-2 py-1.5 border-b border-border bg-background" : "inline-flex px-1.5 py-1 rounded-full bg-secondary/60"
       }`}
     >
-      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageSelected} />
+      <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelected} />
       <button
         type="button"
         onClick={() => editor.chain().focus().undo().run()}

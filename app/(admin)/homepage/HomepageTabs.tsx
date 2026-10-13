@@ -9,6 +9,7 @@ import { HeroScenesForm } from "./HeroScenesForm";
 import { SelectedWorkCopyForm } from "./SelectedWorkCopyForm";
 import { FeaturedProjectsPicker, type FeaturedPickerProject } from "./FeaturedProjectsPicker";
 import { InsightsCopyForm } from "./InsightsCopyForm";
+import { tabBarClass, tabClass } from "@/app/(admin)/_components/ui/Card";
 
 type Tab = "hero" | "selected-work" | "insights";
 
@@ -42,17 +43,15 @@ export function HomepageTabs(props: Props) {
     <div>
       <PageHeader title="Homepage" subtitle="Every section of the public homepage." />
 
-      <div className="flex items-center gap-1 mb-8 border-b border-border">
+      <div className={tabBarClass} role="tablist">
         {TABS.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-              tab === t.id
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground/70"
-            }`}
+            role="tab"
+            aria-selected={tab === t.id}
+            className={tabClass(tab === t.id)}
           >
             {t.label}
           </button>

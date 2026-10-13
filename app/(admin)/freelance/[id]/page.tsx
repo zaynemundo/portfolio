@@ -151,6 +151,8 @@ export default async function FreelanceProjectDetailPage({ params, searchParams 
               fileUrl: d.fileUrl,
               shareToken: d.shareToken,
               shareExpiresAt: d.shareExpiresAt ? new Date(d.shareExpiresAt).toISOString() : null,
+              shareOpenCount: d.shareOpenCount,
+              shareLastOpenedAt: d.shareLastOpenedAt ? new Date(d.shareLastOpenedAt).toISOString() : null,
             }))}
             available={(project.clientRecord?.documents ?? [])
               .filter((d) => d.projectId !== project.id)

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Pencil } from "lucide-react";
+import { RowMenu, RowMenuItem } from "@/app/(admin)/_components/ui/RowMenu";
 import { routes } from "@/app/(admin)/_routes";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
 import { Modal } from "@/app/(admin)/_components/Modal";
@@ -12,6 +14,9 @@ import { DeleteInvoiceButton } from "../invoices/DeleteInvoiceButton";
 import { TransactionForm } from "./TransactionForm";
 import type { TransactionFormData } from "@/app/actions/finance";
 import type { ClientOption } from "@/app/(admin)/_components/ClientSelect";
+import { InvoiceStatusPill, INVOICE_STATUS } from "@/app/(admin)/_components/ui/StatusPill";
+import { DataTable } from "@/app/(admin)/_components/ui/DataTable";
+import { cardClass, tabBarClass, tabClass } from "@/app/(admin)/_components/ui/Card";
 
 type Tab = "transactions" | "invoices" | "quotes";
 
@@ -40,6 +45,8 @@ export interface InvoiceRow {
   isQuote: boolean;
   invoiceNumber: string;
   status: string;
+  /** yyyy-mm-dd, for sorting. */
+  issueDate: string;
   displayIssueDate: string;
   currency: string;
   total: number;
@@ -62,24 +69,6 @@ interface Props {
   projects: Option[];
   initialTab: Tab;
 }
-
-const STATUS_STYLES: Record<string, string> = {
-  DRAFT: "bg-secondary text-muted-foreground",
-  SENT: "bg-blue-500/15 text-blue-400",
-  PAID: "bg-success/15 text-success",
-  OVERDUE: "bg-destructive/15 text-destructive",
-  ACCEPTED: "bg-success/15 text-success",
-  DECLINED: "bg-secondary text-muted-foreground",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  DRAFT: "Draft",
-  SENT: "Sent",
-  PAID: "Paid",
-  OVERDUE: "Overdue",
-  ACCEPTED: "Accepted",
-  DECLINED: "Declined",
-};
 
 /** Cross-client, cross-project income/expense/invoices view — the deliberately
  *  global finance picture. Invoices also live on each Freelance Project's own
@@ -137,7 +126,7 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
         )}
       </div>
 
-      <div className="flex items-center gap-1 mb-6 border-b border-border">
+      <div className={tabBarClass} role="tablist">
         {(
           [
             { id: "quotes", label: "Quotes", count: quotes.length },
@@ -149,9 +138,9 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-              tab === t.id ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground/70"
-            }`}
+            role="tab"
+            aria-selected={tab === t.id}
+            className={tabClass(tab === t.id)}
           >
             {t.label}
             {t.count !== null && t.count > 0 && <span className="ml-1.5 text-muted-foreground tabular-nums">{t.count}</span>}
@@ -170,21 +159,21 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
           {transactions.length === 0 ? (
             <EmptyState message="No transactions this month." />
           ) : (
-            <div className="border border-border rounded-xl overflow-hidden">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-border bg-card/50">
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Date</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Description</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Category</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Amount</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions.map((t) => (
-                    <tr key={t.id} className="border-b border-border/70 last:border-b-0 hover:bg-card/40">
+            <div className={`${cardClass} p-5`}>
+            <DataTable
+              inset={false}
+              toolbar="always"
+              searchPlaceholder="Search by description, client or category…"
+              filters={[{ key: "type", label: "Type", options: [{ value: "INCOME", label: "Income" }, { value: "EXPENSE", label: "Expenses" }] }]}
+              columns={[{ label: "Date" }, { label: "Description" }, { label: "Client" }, { label: "Category" }, { label: "Amount", align: "right" }, { className: "w-12" }]}
+              rows={transactions.map((t) => ({
+                id: t.id,
+                onClick: () => setTxModal(t),
+                search: `${t.description} ${t.category} ${t.clientName ?? ""}`,
+                sort: [t.date, t.description || t.category || null, t.clientName, t.category || null, (t.type === "INCOME" ? 1 : -1) * Number(t.amount), undefined],
+                filters: { type: t.type },
+                cells: (
+                  <>
                       <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">{t.displayDate}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
@@ -210,17 +199,17 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
                         {t.type === "INCOME" ? "+" : "-"}{Number(t.amount).toLocaleString()} {t.currency}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-3">
-                          <button type="button" onClick={() => setTxModal(t)} className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors">
+                        <RowMenu>
+                          <RowMenuItem onClick={() => setTxModal(t)} icon={<Pencil size={14} />}>
                             Edit
-                          </button>
-                          <DeleteTransactionButton id={t.id} onDeleted={() => router.refresh()} />
-                        </div>
+                          </RowMenuItem>
+                          <DeleteTransactionButton id={t.id} onDeleted={() => router.refresh()} menu />
+                        </RowMenu>
                       </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </>
+                ),
+              }))}
+            />
             </div>
           )}
         </div>
@@ -263,7 +252,7 @@ function TotalCard({
 }) {
   const colorClass = accent === "emerald" ? "text-success" : "text-destructive";
   return (
-    <div className="rounded-xl border border-border bg-card/40 px-4 py-3.5">
+    <div className="rounded-xl border border-border bg-card shadow-xs px-4 py-3.5">
       <div className={`text-[22px] font-semibold leading-none mb-1.5 ${colorClass}`}>
         {value.toLocaleString()} <span className="text-[13px] font-medium">{currency}</span>
       </div>
@@ -284,26 +273,30 @@ function ReceiptIcon() {
 /** The list behind the Quotes and Invoices tabs — same columns, same actions. */
 function DocumentTable({ rows, empty, onDeleted }: { rows: InvoiceRow[]; empty: string; onDeleted: () => void }) {
   if (rows.length === 0) return <EmptyState message={empty} />;
+  // Only the statuses that actually occur, in their usual order.
+  const statusOptions = Object.keys(INVOICE_STATUS)
+    .filter((status) => rows.some((row) => row.status === status))
+    .map((status) => ({ value: status, label: INVOICE_STATUS[status].label }));
 
   return (
-    <div className="border border-border rounded-xl overflow-x-auto">
-      <table className="w-full min-w-[720px] text-left">
-        <thead>
-          <tr className="border-b border-border bg-card/50">
-            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Number</th>
-            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
-            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Job</th>
-            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Issued</th>
-            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Status</th>
-            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Total</th>
-            <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => {
-            const partPaid = !row.isQuote && row.balance > 0 && row.balance < row.total;
-            return (
-              <tr key={row.id} className="border-b border-border/70 last:border-b-0 hover:bg-card/40">
+    <div className={`${cardClass} p-5`}>
+      <DataTable
+        inset={false}
+        toolbar="always"
+        tableClassName="min-w-[720px]"
+        searchPlaceholder="Search by number, client or job…"
+        filters={[{ key: "status", label: "Status", options: statusOptions }]}
+        columns={[{ label: "Number" }, { label: "Client" }, { label: "Job" }, { label: "Issued" }, { label: "Status" }, { label: "Total", align: "right" }, { className: "w-12" }]}
+        rows={rows.map((row) => {
+          const partPaid = !row.isQuote && row.balance > 0 && row.balance < row.total;
+          return {
+            id: row.id,
+            href: routes.invoices.item(row.id),
+            search: `${row.invoiceNumber} ${row.clientName ?? ""} ${row.projectName ?? ""}`,
+            sort: [row.invoiceNumber, row.clientName, row.projectName, row.issueDate, INVOICE_STATUS[row.status]?.label ?? row.status, row.total, undefined],
+            filters: { status: row.status },
+            cells: (
+              <>
                 <td className="px-4 py-3">
                   <Link href={routes.invoices.item(row.id)} className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors">
                     {row.invoiceNumber}
@@ -313,9 +306,7 @@ function DocumentTable({ rows, empty, onDeleted }: { rows: InvoiceRow[]; empty: 
                 <td className="px-4 py-3 text-[13px] text-muted-foreground">{row.projectName ?? "—"}</td>
                 <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">{row.displayIssueDate}</td>
                 <td className="px-4 py-3">
-                  <span className={`text-[11px] font-semibold px-2 py-1 rounded ${STATUS_STYLES[row.status] ?? STATUS_STYLES.DRAFT}`}>
-                    {STATUS_LABELS[row.status] ?? row.status}
-                  </span>
+                  <InvoiceStatusPill status={row.status} />
                 </td>
                 <td className="px-4 py-3 text-right tabular-nums">
                   <span className="text-[13.5px] font-medium text-foreground/90">
@@ -326,18 +317,18 @@ function DocumentTable({ rows, empty, onDeleted }: { rows: InvoiceRow[]; empty: 
                   )}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <div className="flex items-center justify-end gap-3">
-                    <Link href={routes.invoices.edit(row.id)} className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  <RowMenu>
+                    <RowMenuItem href={routes.invoices.edit(row.id)} icon={<Pencil size={14} />}>
                       Edit
-                    </Link>
-                    <DeleteInvoiceButton id={row.id} number={row.invoiceNumber} onDeleted={onDeleted} />
-                  </div>
+                    </RowMenuItem>
+                    <DeleteInvoiceButton id={row.id} number={row.invoiceNumber} onDeleted={onDeleted} menu />
+                  </RowMenu>
                 </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+              </>
+            ),
+          };
+        })}
+      />
     </div>
   );
 }

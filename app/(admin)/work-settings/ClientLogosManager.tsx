@@ -36,7 +36,7 @@ export function ClientLogosManager({ initial }: { initial: ClientLogoData[] }) {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card/40 p-6 space-y-5">
+    <div className="rounded-xl border border-border bg-card shadow-xs p-6 space-y-5">
       <div>
         <h2 className="text-[15px] font-semibold text-foreground mb-1">Client logos</h2>
         <p className="text-[12.5px] text-muted-foreground">

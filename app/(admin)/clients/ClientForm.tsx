@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient, updateClient, deleteClient, type ClientFormData } from "@/app/actions/clients";
 import { Select } from "@/app/(admin)/_components/Select";
 import { routes } from "@/app/(admin)/_routes";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
 const SELECT_CLASS = "w-full flex items-center justify-between gap-2 rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 hover:bg-secondary transition-colors";
 
@@ -52,7 +53,7 @@ export function ClientForm({ clientId, initial, onDeleted }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className={`${cardClass} p-5`}>
       <div className="flex items-start justify-between gap-3 mb-4">
         <input
           value={name}

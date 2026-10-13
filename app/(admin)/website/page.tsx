@@ -92,7 +92,7 @@ export default async function WebsiteOverviewPage() {
         <h2 className="text-[13.5px] font-semibold text-foreground mb-3">Pages</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {PAGES.map((page) => (
-            <div key={page.name} className="rounded-xl border border-border bg-card/40 p-4">
+            <div key={page.name} className="rounded-xl border border-border bg-card shadow-xs p-4">
               <p className="text-[14px] font-semibold text-foreground">{page.name}</p>
               <p className="text-[12.5px] text-muted-foreground mt-0.5 mb-3">{page.detail}</p>
               <div className="flex items-center gap-3 text-[12.5px] font-medium">

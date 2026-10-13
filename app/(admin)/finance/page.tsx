@@ -60,6 +60,7 @@ export default async function FinancePage({ searchParams }: Props) {
       isQuote: inv.kind === "QUOTE",
       invoiceNumber: inv.invoiceNumber,
       status: inv.status,
+      issueDate: issueDate.toISOString().slice(0, 10),
       displayIssueDate: issueDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
       currency: inv.currency,
       total: totals.total,

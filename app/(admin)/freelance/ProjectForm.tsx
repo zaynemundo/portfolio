@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { DateField } from "@/app/(admin)/_components/ui/DateField";
 import { useRouter } from "next/navigation";
 import {
   createFreelanceProject,
@@ -13,6 +14,7 @@ import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/Clien
 import { Select } from "@/app/(admin)/_components/Select";
 import { Modal } from "@/app/(admin)/_components/Modal";
 import { routes } from "@/app/(admin)/_routes";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
 const SELECT_CLASS = "w-full flex items-center justify-between gap-2 rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 hover:bg-secondary transition-colors";
 
@@ -194,23 +196,11 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div>
           <label className="block text-[11px] text-muted-foreground/70 mb-1">Start date (optional)</label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            style={{ outline: "none" }}
-            className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90"
-          />
+          <DateField value={startDate} onChange={setStartDate} className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 focus:outline-none" />
         </div>
         <div>
           <label className="block text-[11px] text-muted-foreground/70 mb-1">End date (optional)</label>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            style={{ outline: "none" }}
-            className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90"
-          />
+          <DateField value={endDate} onChange={setEndDate} className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 focus:outline-none" />
         </div>
       </div>
     </>
@@ -218,6 +208,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
 
   return (
     <div>
+      <div className={`${cardClass} p-5 mb-5`}>
       <div className="flex items-start justify-between gap-3 mb-4">
         <input
           value={name}
@@ -257,7 +248,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
         )}
       </div>
 
-      <div className="mb-4">
+      <div>
         <label htmlFor="nextAction" className="block text-[11px] text-muted-foreground/70 mb-1">Next action</label>
         <input
           id="nextAction"
@@ -268,9 +259,10 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
           className="w-full rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 placeholder:text-muted-foreground/70"
         />
       </div>
+      </div>
 
       {showInline ? (
-        <div className="rounded-xl border border-border bg-card/40 p-4 mb-6">
+        <div className="rounded-xl border border-border bg-card shadow-xs p-4 mb-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-[13px] font-semibold text-foreground">Job details</h2>
             {id && (
@@ -282,7 +274,7 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
           {detailFields}
         </div>
       ) : (
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-card/40 px-4 py-3 mb-6">
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-card shadow-xs px-4 py-3 mb-6">
           <span className="text-[13px] font-semibold text-foreground shrink-0">Job details</span>
           <span className="min-w-0 flex-1 truncate text-[12.5px] text-muted-foreground">{summary || "Nothing set yet"}</span>
           <button type="button" onClick={() => setDetailsOpen(true)} className={EDIT_BUTTON}>

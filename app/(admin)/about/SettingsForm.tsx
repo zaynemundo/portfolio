@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { updateSiteSettings } from "@/app/actions/settings";
 import type { SiteSettingsData } from "@/app/lib/settings-db";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
 export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
   const [name, setName] = useState(initial.name);
@@ -30,7 +31,7 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className={`${cardClass} p-5 space-y-5`}>
       <div className="grid grid-cols-2 gap-4">
         <Field label="Name" id="name" value={name} onChange={setName} />
         <Field label="Job title" id="jobTitle" value={jobTitle} onChange={setJobTitle} />

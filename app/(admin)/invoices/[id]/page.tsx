@@ -43,8 +43,8 @@ export default async function InvoiceViewPage({ params }: Props) {
           <BackLink href={`${routes.finance.list}?tab=${isQuote ? "quotes" : "invoices"}`} label="Finance" iconOnly />
           <div className="flex items-center gap-3 mt-3">
             <h1 className="text-[22px] font-semibold text-foreground">{invoice.number}</h1>
-            {isPaid && <span className={`${pill} bg-success/15 text-success`}>Paid</span>}
-            {invoice.status === "ACCEPTED" && <span className={`${pill} bg-success/15 text-success`}>Accepted</span>}
+            {isPaid && <span className={`${pill} bg-positive/12 text-positive`}>Paid</span>}
+            {invoice.status === "ACCEPTED" && <span className={`${pill} bg-positive/12 text-positive`}>Accepted</span>}
           </div>
           <p className="text-[12.5px] text-muted-foreground mt-1">
             {isQuote ? "Quote" : "Invoice"}

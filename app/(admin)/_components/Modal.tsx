@@ -14,7 +14,7 @@ interface Props {
  *  (a contact, a client's details, a payment, a job's settings) happen in a
  *  dialog so pages stay readable as views; long-form writing (articles, case
  *  studies, notes, documents) is edited in the page itself. */
-export function Modal({ open, onClose, title, children, maxWidthClassName = "max-w-lg" }: Props) {
+export function Modal({ open, onClose, title, children, maxWidthClassName = "max-w-xl" }: Props) {
   useEffect(() => {
     if (!open) return;
     function handleKeyDown(e: KeyboardEvent) {
@@ -33,7 +33,7 @@ export function Modal({ open, onClose, title, children, maxWidthClassName = "max
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center px-4 py-[6vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-[6vh]">
       <div className="fixed inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
       <div role="dialog" aria-modal="true" aria-label={title} className={`relative flex max-h-full w-full flex-col ${maxWidthClassName} rounded-xl border border-border bg-card shadow-2xl`}>
         <div className="flex shrink-0 items-center justify-between px-5 py-4 border-b border-border">

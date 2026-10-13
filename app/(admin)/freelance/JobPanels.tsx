@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { routes } from "@/app/(admin)/_routes";
+import { Card, CardFrame, CardHeader, cardActionClass } from "@/app/(admin)/_components/ui/Card";
+import { PagedBody } from "@/app/(admin)/_components/ui/Paged";
 
 /* Read-only panels on the job page. Each one is a window onto something
  * that's edited elsewhere (invoices, transactions, the client), so the job
@@ -81,22 +83,20 @@ export interface JobTransaction {
 export function JobTransactions({ projectId, clientId, transactions }: { projectId: string; clientId: string | null; transactions: JobTransaction[] }) {
   const newHref = `${routes.finance.new}?projectId=${projectId}${clientId ? `&clientId=${clientId}` : ""}`;
   return (
-    <section className="rounded-xl border border-border bg-card/40">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
-        <h2 className="text-[13px] font-semibold text-foreground">Payments &amp; expenses</h2>
-        <Link href={newHref} className="text-[12.5px] font-medium text-primary hover:text-primary/80 transition-colors">
-          + Add
-        </Link>
-      </div>
+    <Card>
+      <CardHeader
+        title={<>Payments &amp; expenses</>}
+        action={<Link href={newHref} className={cardActionClass}>+ Add</Link>}
+      />
 
       {transactions.length === 0 ? (
-        <p className="px-5 py-4 text-[13px] text-muted-foreground">Nothing recorded for this job yet.</p>
+        <p className="px-5 pb-5 text-[13px] text-muted-foreground">Nothing recorded for this job yet.</p>
       ) : (
-        <div>
+        <CardFrame>
           <table className="w-full text-left">
-            <tbody>
+            <PagedBody>
               {transactions.map((t) => (
-                <tr key={t.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-muted/50 transition-colors">
+                <tr key={t.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-primary/[0.06] transition-colors">
                   <td className="px-5 py-2.5 text-[12.5px] text-muted-foreground whitespace-nowrap">
                     <Link href={routes.finance.item(t.id)} className="absolute inset-0 z-0" aria-label={`Open ${t.label}`} />
                     <span className="relative pointer-events-none">{t.displayDate}</span>
@@ -108,11 +108,11 @@ export function JobTransactions({ projectId, clientId, transactions }: { project
                   </td>
                 </tr>
               ))}
-            </tbody>
+            </PagedBody>
           </table>
-        </div>
+        </CardFrame>
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -127,7 +127,7 @@ export interface JobClient {
 /** Who the job is for, and who to talk to — contacts are edited on the client's own page. */
 export function JobClientPanel({ client }: { client: JobClient | null }) {
   return (
-    <div className="rounded-xl border border-border bg-card/40 p-5">
+    <div className="rounded-xl border border-border bg-card shadow-xs p-5">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-[13px] font-semibold text-foreground">Client</h2>
         {client && (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { DateField } from "@/app/(admin)/_components/ui/DateField";
 import { deleteInvoicePayment, recordInvoicePayment } from "@/app/actions/invoices";
 import { Modal } from "@/app/(admin)/_components/Modal";
 import { DialogActions } from "@/app/(admin)/_components/DialogActions";
@@ -56,7 +57,7 @@ export function PaymentsPanel({ invoiceId, currency, total, paid, balance, payme
   }
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4 mb-6 print:hidden">
+    <section className="rounded-xl border border-border bg-card shadow-xs p-4 mb-6 print:hidden">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 mb-3">
         <h2 className="text-[13.5px] font-semibold text-foreground">Payments</h2>
         <p className="text-[12.5px] text-muted-foreground tabular-nums">
@@ -121,7 +122,7 @@ export function PaymentsPanel({ invoiceId, currency, total, paid, balance, payme
 
       {error && !dialogOpen && <p className="text-[12.5px] text-destructive mt-2" role="alert">{error}</p>}
 
-      <Modal open={dialogOpen} onClose={() => setDialogOpen(false)} title="Record a payment" maxWidthClassName="max-w-sm">
+      <Modal open={dialogOpen} onClose={() => setDialogOpen(false)} title="Record a payment" maxWidthClassName="max-w-md">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -149,13 +150,7 @@ export function PaymentsPanel({ invoiceId, currency, total, paid, balance, payme
           </div>
           <div>
             <label htmlFor="paymentDate" className="block text-[12px] font-medium text-foreground/80 mb-1.5">Received on</label>
-            <input
-              id="paymentDate"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-lg bg-background border border-border px-3 py-2 text-[13.5px] text-foreground focus:outline-none focus:border-ring"
-            />
+            <DateField id="paymentDate" value={date} onChange={setDate} />
           </div>
           {error && <p className="text-[12.5px] text-destructive" role="alert">{error}</p>}
           <DialogActions onCancel={() => setDialogOpen(false)} pending={isPending} submitLabel="Record payment" />

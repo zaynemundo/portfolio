@@ -10,11 +10,13 @@ import type { HeroScene } from "@/app/components/motion/ScrollVideoHero";
 import { FeaturedWork } from "@/app/components/work/FeaturedWork";
 import { AboutStorySection } from "@/app/components/about/AboutStorySection";
 import { InsightsSection } from "@/app/components/insights/InsightsSection";
+import { SITE_URL } from "@/app/lib/site-url";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { name, jobTitle } = await getSiteSettings();
   return {
     title: `${name} | ${jobTitle}`,
+    alternates: { canonical: "/" },
     description:
       "Creative Designer and Front-End Developer building accessible, responsive, and high-performing websites — from interface design through to production code — across React, Next.js, WordPress, and modern web technologies.",
   };
@@ -67,7 +69,7 @@ export default async function Home() {
             name,
             jobTitle,
             email,
-            url: "https://zairamundo.com",
+            url: SITE_URL,
             sameAs: [linkedinUrl, githubUrl],
             address: {
               "@type": "PostalAddress",

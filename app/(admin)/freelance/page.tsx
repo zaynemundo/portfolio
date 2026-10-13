@@ -4,18 +4,14 @@ import { prisma } from "@/app/lib/prisma";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
-import { StatusGroup } from "@/app/(admin)/_components/StatusGroup";
+import { StatusBadge } from "./StatusBadge";
+import { JOB_STATUS } from "@/app/(admin)/_components/ui/StatusPill";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 import { FreelanceCardMenu } from "./FreelanceCardMenu";
+import { DataTable } from "@/app/(admin)/_components/ui/DataTable";
 import { routes } from "@/app/(admin)/_routes";
 
 const STATUS_ORDER = ["ACTIVE", "ON_HOLD", "NOT_STARTED", "COMPLETED"];
-const STATUS_GROUPS: { status: string; label: string; dotClassName: string }[] = [
-  { status: "ACTIVE", label: "Active", dotClassName: "bg-success" },
-  { status: "ON_HOLD", label: "On hold", dotClassName: "bg-amber-500" },
-  { status: "NOT_STARTED", label: "Not started", dotClassName: "bg-muted-foreground/50" },
-  { status: "COMPLETED", label: "Completed", dotClassName: "bg-primary" },
-];
-
 const getFreelanceData = unstable_cache(
   () =>
     prisma.freelanceProject.findMany({
@@ -47,6 +43,7 @@ export default async function FreelanceProjectsPage() {
       clientName: p.clientRecord?.name ?? null,
       status: p.status,
       archived: p.archived,
+      endTime: endDate ? endDate.getTime() : null,
       displayEndDate: endDate ? endDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "",
       isOverdue: !!(endDate && endDate < now && p.status !== "COMPLETED"),
       doneCount,
@@ -75,60 +72,66 @@ export default async function FreelanceProjectsPage() {
       {projects.length === 0 ? (
         <EmptyState message="No jobs yet. Start one with “New job”." />
       ) : (
-        STATUS_GROUPS.map((group) => {
-          const groupProjects = projects.filter((p) => p.status === group.status);
-          return (
-            <StatusGroup key={group.status} label={group.label} count={groupProjects.length} dotClassName={group.dotClassName}>
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Client</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Next action</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Tasks</th>
-                    <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Due date</th>
-                    <th className="px-4 py-3 w-12" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {groupProjects.map((project) => (
-                    <tr key={project.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-card/40">
-                      <td className="px-4 py-3 text-[13.5px] font-medium text-foreground group-hover:text-primary transition-colors">
-                        <Link href={routes.projects.item(project.id)} className="absolute inset-0 z-0" aria-label={`Open ${project.name}`} />
-                        <span className="relative pointer-events-none">{project.name}</span>
-                      </td>
-                      <td className="px-4 py-3 text-[13px] text-muted-foreground">{project.clientName ?? "—"}</td>
-                      <td className="px-4 py-3 text-[13px] text-foreground/80">{project.nextAction || <span className="text-muted-foreground">—</span>}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
-                          <span className="whitespace-nowrap">{project.totalCount > 0 ? `${project.doneCount}/${project.totalCount}` : "No tasks"}</span>
-                          {project.totalCount > 0 && (
-                            <div className="w-16 h-1 rounded-full bg-secondary overflow-hidden">
-                              <div className="h-full bg-success rounded-full" style={{ width: `${(project.doneCount / project.totalCount) * 100}%` }} />
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-[13px]">
-                        {project.displayEndDate ? (
-                          <span className={project.isOverdue ? "text-destructive font-medium" : "text-muted-foreground"}>
-                            {project.isOverdue ? "Overdue: " : ""}
-                            {project.displayEndDate}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 relative z-10">
-                        <FreelanceCardMenu id={project.id} name={project.name} archived={project.archived} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </StatusGroup>
-          );
-        })
+        <div className={`${cardClass} p-5`}>
+          <DataTable
+            inset={false}
+            toolbar="always"
+            searchPlaceholder="Search by name, client or next action…"
+            filters={[{ key: "status", label: "Status", options: STATUS_ORDER.map((status) => ({ value: status, label: JOB_STATUS[status].label })) }]}
+            columns={[{ label: "Name" }, { label: "Client" }, { label: "Status" }, { label: "Next action" }, { label: "Tasks" }, { label: "Due date" }, { className: "w-12" }]}
+            rows={projects.map((project) => ({
+              id: project.id,
+              className: "group relative",
+              search: `${project.name} ${project.clientName ?? ""} ${project.nextAction}`,
+              sort: [
+                project.name,
+                project.clientName,
+                STATUS_ORDER.indexOf(project.status),
+                project.nextAction || null,
+                project.totalCount > 0 ? project.doneCount / project.totalCount : null,
+                project.endTime,
+                undefined,
+              ],
+              filters: { status: project.status },
+              cells: (
+                <>
+                <td className="px-4 py-3 text-[13.5px] font-medium text-foreground group-hover:text-primary transition-colors">
+                  <Link href={routes.projects.item(project.id)} className="absolute inset-0 z-0" aria-label={`Open ${project.name}`} />
+                  <span className="relative pointer-events-none">{project.name}</span>
+                </td>
+                <td className="px-4 py-3 text-[13px] text-muted-foreground">{project.clientName ?? "—"}</td>
+                <td className="px-4 py-3 pointer-events-none">
+                  <StatusBadge status={project.status} />
+                </td>
+                <td className="px-4 py-3 text-[13px] text-foreground/80">{project.nextAction || <span className="text-muted-foreground">—</span>}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
+                    <span className="whitespace-nowrap">{project.totalCount > 0 ? `${project.doneCount}/${project.totalCount}` : "No tasks"}</span>
+                    {project.totalCount > 0 && (
+                      <div className="w-16 h-1 rounded-full bg-secondary overflow-hidden">
+                        <div className="h-full bg-success rounded-full" style={{ width: `${(project.doneCount / project.totalCount) * 100}%` }} />
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-[13px]">
+                  {project.displayEndDate ? (
+                    <span className={project.isOverdue ? "text-destructive font-medium" : "text-muted-foreground"}>
+                      {project.isOverdue ? "Overdue: " : ""}
+                      {project.displayEndDate}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-3 relative z-10">
+                  <FreelanceCardMenu id={project.id} name={project.name} archived={project.archived} />
+                </td>
+                </>
+              ),
+            }))}
+          />
+        </div>
       )}
     </div>
   );

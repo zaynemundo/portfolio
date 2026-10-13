@@ -32,7 +32,7 @@ export default async function AccountPage() {
             paymentTerms: settings?.invoicePaymentTerms ?? "",
           }}
         />
-        <section className="rounded-xl border border-border bg-card p-5">
+        <section className="rounded-xl border border-border bg-card shadow-xs p-5">
           <h2 className="text-[14px] font-semibold text-foreground">
             Password
           </h2>

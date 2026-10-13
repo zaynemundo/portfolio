@@ -4,7 +4,7 @@ import type { Post, PostSummary } from "@/app/lib/posts";
 function toPost(row: {
   id: string; slug: string; title: string; excerpt: string; contentHtml: string;
   category: string; readTime: string; featured: boolean; published: boolean;
-  date: Date; dateFormatted: string;
+  date: Date; dateFormatted: string; updatedAt: Date;
 }): Post {
   return {
     id: row.id,
@@ -18,6 +18,7 @@ function toPost(row: {
     published: row.published,
     date: row.date.toISOString().slice(0, 10),
     dateFormatted: row.dateFormatted,
+    updatedAt: row.updatedAt.toISOString(),
   };
 }
 
@@ -28,7 +29,7 @@ export async function getPublishedPosts(): Promise<PostSummary[]> {
     orderBy: { date: "desc" },
     select: {
       id: true, slug: true, title: true, excerpt: true, category: true,
-      readTime: true, featured: true, published: true, date: true, dateFormatted: true,
+      readTime: true, featured: true, published: true, date: true, dateFormatted: true, updatedAt: true,
     },
   });
   return rows.map((r) => ({
@@ -42,6 +43,7 @@ export async function getPublishedPosts(): Promise<PostSummary[]> {
     published: r.published,
     date: r.date.toISOString().slice(0, 10),
     dateFormatted: r.dateFormatted,
+    updatedAt: r.updatedAt.toISOString(),
   }));
 }
 

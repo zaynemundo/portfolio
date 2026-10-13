@@ -37,7 +37,7 @@ export function UploadCard({ title, description, currentUrl, accept, kind, uploa
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card/40 p-5">
+    <div className="rounded-xl border border-border bg-card shadow-xs p-5">
       <h3 className="text-[13.5px] font-semibold text-foreground mb-0.5">{title}</h3>
       <p className="text-[12px] text-muted-foreground mb-4">{description}</p>
 

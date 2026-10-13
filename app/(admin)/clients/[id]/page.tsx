@@ -9,6 +9,7 @@ import { Panel, StatStrip } from "@/app/(admin)/_components/OverviewParts";
 import { StatusBadge } from "../../freelance/StatusBadge";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
+import { DataTable } from "@/app/(admin)/_components/ui/DataTable";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -21,7 +22,6 @@ function money(amount: number): string {
   return `${DEFAULT_CURRENCY} ${amount.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 }
 
-const TH = "px-5 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground";
 
 /* The client page is an overview: where the money stands, who to talk to,
  * and everything filed or done for this client. */
@@ -100,18 +100,18 @@ export default async function ClientDetailPage({ params }: Props) {
           actionLabel="+ New job"
           empty="No jobs for this client yet."
           isEmpty={client.projects.length === 0}
+          framed={false}
         >
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-border">
-                <th className={TH}>Name</th>
-                <th className={TH}>Status</th>
-                <th className={`${TH} text-right`}>Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {client.projects.map((p) => (
-                <tr key={p.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-muted/50 transition-colors">
+          <DataTable
+            searchPlaceholder="Search jobs…"
+            columns={[{ label: "Name", className: "px-5" }, { label: "Status", className: "px-5" }, { label: "Updated", className: "px-5", align: "right" }]}
+            rows={client.projects.map((p) => ({
+              id: p.id,
+              className: "group relative transition-colors",
+              search: p.name,
+              sort: [p.name, p.status, new Date(p.updatedAt).getTime()],
+              cells: (
+                <>
                   <td className="px-5 py-2.5 text-[13.5px] font-medium text-foreground group-hover:text-primary transition-colors">
                     <Link href={routes.projects.item(p.id)} className="absolute inset-0 z-0" aria-label={`Open ${p.name}`} />
                     <span className="relative pointer-events-none">{p.name}</span>
@@ -122,10 +122,10 @@ export default async function ClientDetailPage({ params }: Props) {
                   <td className="px-5 py-2.5 text-[12.5px] text-muted-foreground text-right whitespace-nowrap pointer-events-none">
                     {new Date(p.updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                   </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                </>
+              ),
+            }))}
+          />
         </Panel>
 
         <ContactList
@@ -150,6 +150,9 @@ export default async function ClientDetailPage({ params }: Props) {
             projectId: d.projectId,
             shareToken: d.shareToken,
             shareExpiresAt: d.shareExpiresAt ? new Date(d.shareExpiresAt).toISOString() : null,
+            shareOpenCount: d.shareOpenCount,
+            shareLastOpenedAt: d.shareLastOpenedAt ? new Date(d.shareLastOpenedAt).toISOString() : null,
+            addedAt: new Date(d.createdAt).toISOString(),
             added: new Date(d.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
           }))}
         />
@@ -164,7 +167,7 @@ export default async function ClientDetailPage({ params }: Props) {
           <table className="w-full text-left">
             <tbody>
               {client.transactions.slice(0, 8).map((t) => (
-                <tr key={t.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-muted/50 transition-colors">
+                <tr key={t.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-primary/[0.06] transition-colors">
                   <td className="px-5 py-2.5 text-[12.5px] text-muted-foreground whitespace-nowrap">
                     <Link href={routes.finance.item(t.id)} className="absolute inset-0 z-0" aria-label="Open transaction" />
                     <span className="relative pointer-events-none">{new Date(t.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>

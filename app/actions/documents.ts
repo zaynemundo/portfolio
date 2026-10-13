@@ -92,6 +92,18 @@ export async function setDocumentJob(id: string, projectId: string | null): Prom
   return { ok: true, id };
 }
 
+export async function renameDocument(id: string, name: string): Promise<DocumentActionResult> {
+  await requireSession();
+  if (!name.trim()) return { ok: false, error: "Name is required." };
+  const doc = await prisma.document.findUnique({ where: { id } });
+  if (!doc) return { ok: false, error: "Document not found." };
+
+  await prisma.document.update({ where: { id }, data: { name: name.trim() } });
+
+  invalidate({ clientId: doc.clientId, projectId: doc.projectId });
+  return { ok: true, id };
+}
+
 export async function deleteDocument(id: string): Promise<void> {
   await requireSession();
   const doc = await prisma.document.findUnique({ where: { id } });
@@ -122,9 +134,11 @@ export async function shareDocument(id: string, expiresInDays: number | null): P
   if (!doc) return { ok: false, error: "Document not found." };
 
   const token = doc.shareToken ?? randomBytes(24).toString("base64url");
+  // A fresh link starts a fresh log; changing the expiry of a link already out there keeps it.
+  const freshLog = doc.shareToken ? {} : { shareOpenCount: 0, shareLastOpenedAt: null };
   const shareExpiresAt =
     expiresInDays && expiresInDays > 0 ? new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000) : null;
-  await prisma.document.update({ where: { id }, data: { shareToken: token, shareExpiresAt } });
+  await prisma.document.update({ where: { id }, data: { shareToken: token, shareExpiresAt, ...freshLog } });
 
   invalidate({ clientId: doc.clientId, projectId: doc.projectId });
   return { ok: true, token, expiresAt: shareExpiresAt?.toISOString() ?? null };

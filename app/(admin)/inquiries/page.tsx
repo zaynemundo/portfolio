@@ -1,11 +1,15 @@
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
 import { DeleteInquiryButton } from "./DeleteInquiryButton";
+import { RowMenu, RowMenuItem } from "@/app/(admin)/_components/ui/RowMenu";
 import { routes } from "@/app/(admin)/_routes";
+import { DataTable } from "@/app/(admin)/_components/ui/DataTable";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
 const getInquiries = unstable_cache(
   () => prisma.inquiry.findMany({ orderBy: { createdAt: "desc" } }),
@@ -27,19 +31,22 @@ export default async function InquiriesPage() {
       {inquiries.length === 0 ? (
         <EmptyState message="No leads yet. Messages from your website's contact form will show up here." />
       ) : (
-        <div className="border border-border rounded-xl overflow-hidden">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-border bg-card/50">
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">From</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Message</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Received</th>
-                <th className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {inquiries.map((inquiry) => (
-                <tr key={inquiry.id} className={`border-b border-border/70 last:border-b-0 hover:bg-card/40 ${inquiry.read ? "" : "bg-primary/[0.03]"}`}>
+        <div className={`${cardClass} p-5`}>
+          <DataTable
+            inset={false}
+            toolbar="always"
+            searchPlaceholder="Search by name, email or message…"
+            filters={[{ key: "read", label: "Read", options: [{ value: "unread", label: "Unread" }, { value: "read", label: "Read" }] }]}
+            columns={[{ label: "From" }, { label: "Message" }, { label: "Received" }, { className: "w-12" }]}
+            rows={inquiries.map((inquiry) => ({
+              id: inquiry.id,
+              href: routes.inquiries.item(inquiry.id),
+              className: inquiry.read ? "" : "bg-primary/[0.03]",
+              search: `${inquiry.name} ${inquiry.email} ${inquiry.message}`,
+              sort: [inquiry.name, undefined, new Date(inquiry.createdAt).getTime(), undefined],
+              filters: { read: inquiry.read ? "read" : "unread" },
+              cells: (
+                <>
                   <td className="px-4 py-3">
                     <Link
                       href={routes.inquiries.item(inquiry.id)}
@@ -59,20 +66,17 @@ export default async function InquiriesPage() {
                     {new Date(inquiry.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                      <Link
-                        href={routes.inquiries.item(inquiry.id)}
-                        className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        View
-                      </Link>
-                      <DeleteInquiryButton id={inquiry.id} name={inquiry.name} />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  <RowMenu>
+                    <RowMenuItem href={routes.inquiries.item(inquiry.id)} icon={<Eye size={14} />}>
+                      View
+                    </RowMenuItem>
+                    <DeleteInquiryButton id={inquiry.id} name={inquiry.name} menu />
+                  </RowMenu>
+                </td>
+                </>
+              ),
+            }))}
+          />
         </div>
       )}
     </div>

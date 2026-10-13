@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Card, CardFrame, CardHeader, cardActionClass } from "@/app/(admin)/_components/ui/Card";
 
 /* Building blocks shared by the two workspace overviews (Freelance and Website). */
 
@@ -10,30 +11,28 @@ export interface StatCell {
   href?: string;
 }
 
-/** A single bordered strip of headline numbers. */
+/** The headline numbers, one card each. A number that needs attention (tone "bad") gets the black card. */
 export function StatStrip({ cells }: { cells: StatCell[] }) {
   return (
-    <dl className={`grid grid-cols-2 ${cells.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-px rounded-xl border border-border bg-border overflow-hidden`}>
+    <dl className={`grid grid-cols-2 ${cells.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-3`}>
       {cells.map((cell) => {
+        const alert = cell.tone === "bad";
+        const surface = alert ? "bg-foreground text-background border-foreground" : "bg-card border-border/60";
         const body = (
           <>
-            <dt className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground/70">{cell.label}</dt>
-            <dd
-              className={`text-[20px] font-semibold tabular-nums leading-tight mt-1 ${
-                cell.tone === "bad" ? "text-destructive" : cell.tone === "good" ? "text-success" : "text-foreground"
-              }`}
-            >
+            <dt className={`text-[12px] font-medium ${alert ? "text-background/60" : "text-muted-foreground"}`}>{cell.label}</dt>
+            <dd className={`text-[22px] font-bold tracking-tight tabular-nums leading-tight mt-1 ${cell.tone === "good" ? "text-positive" : ""}`}>
               {cell.value}
             </dd>
-            {cell.note && <dd className="text-[11.5px] text-muted-foreground mt-0.5">{cell.note}</dd>}
+            {cell.note && <dd className={`text-[11.5px] mt-0.5 ${alert ? "text-background/60" : "text-muted-foreground"}`}>{cell.note}</dd>}
           </>
         );
         return cell.href ? (
-          <Link key={cell.label} href={cell.href} className="block px-4 py-3.5 bg-card hover:bg-muted/60 transition-colors">
+          <Link key={cell.label} href={cell.href} className={`block rounded-2xl border px-4 py-3.5 transition-opacity hover:opacity-85 ${surface}`}>
             {body}
           </Link>
         ) : (
-          <div key={cell.label} className="px-4 py-3.5 bg-card">
+          <div key={cell.label} className={`rounded-2xl border px-4 py-3.5 ${surface}`}>
             {body}
           </div>
         );
@@ -44,27 +43,25 @@ export function StatStrip({ cells }: { cells: StatCell[] }) {
 
 /** A titled card with an optional link on the right and a fallback line when it has nothing to show. */
 export function Panel({
-  title, actionHref, actionLabel, empty, isEmpty, children,
+  title, actionHref, actionLabel, empty, isEmpty, framed = true, children,
 }: {
   title: string;
   actionHref?: string;
   actionLabel?: string;
   empty: string;
   isEmpty: boolean;
+  /** Off when the content brings its own frame, as a DataTable does. */
+  framed?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-border bg-card/40">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
-        <h2 className="text-[13.5px] font-semibold text-foreground">{title}</h2>
-        {actionHref && actionLabel && (
-          <Link href={actionHref} className="text-[12.5px] font-medium text-primary hover:text-primary/80 transition-colors">
-            {actionLabel}
-          </Link>
-        )}
-      </div>
-      {isEmpty ? <p className="px-5 py-4 text-[13px] text-muted-foreground">{empty}</p> : children}
-    </section>
+    <Card>
+      <CardHeader
+        title={title}
+        action={actionHref && actionLabel && <Link href={actionHref} className={cardActionClass}>{actionLabel}</Link>}
+      />
+      {isEmpty ? <p className="px-5 pb-5 text-[13px] text-muted-foreground">{empty}</p> : framed ? <CardFrame>{children}</CardFrame> : children}
+    </Card>
   );
 }
 
@@ -81,15 +78,15 @@ export function PanelRow({
   rightTone?: "bad";
 }) {
   const tagClass = {
-    neutral: "bg-secondary text-muted-foreground",
-    bad: "bg-destructive/15 text-destructive",
-    warn: "bg-amber-500/15 text-amber-600",
+    neutral: "bg-warning/15 text-warning",
+    bad: "bg-negative/12 text-negative",
+    warn: "bg-warning/15 text-warning",
     brand: "bg-primary/15 text-primary",
-    good: "bg-success/15 text-success",
+    good: "bg-positive/12 text-positive",
   }[tagTone];
 
   return (
-    <Link href={href} className="flex items-center gap-3 px-5 py-2.5 border-b border-border/70 last:border-b-0 hover:bg-muted/50 transition-colors">
+    <Link href={href} className="flex items-center gap-3 px-5 py-2.5 border-b border-border/70 last:border-b-0 hover:bg-primary/[0.06] transition-colors">
       {tag && <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${tagClass}`}>{tag}</span>}
       <span className="min-w-0 flex-1 truncate text-[13px] text-foreground/90">
         {primary}

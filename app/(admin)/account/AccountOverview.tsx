@@ -10,7 +10,7 @@ export function AccountOverview({ email }: { email: string }) {
 
   return (
     <div className="space-y-4 mb-8">
-      <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+      <div className="flex items-center gap-3 rounded-xl border border-border bg-card shadow-xs p-4">
         <div className="h-11 w-11 rounded-full bg-primary/15 text-primary flex items-center justify-center text-[15px] font-semibold shrink-0">
           {email.charAt(0).toUpperCase()}
         </div>
@@ -20,7 +20,7 @@ export function AccountOverview({ email }: { email: string }) {
         <LogoutButton />
       </div>
 
-      <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3">
+      <div className="flex items-center justify-between rounded-xl border border-border bg-card shadow-xs px-4 py-3">
         <span className="flex items-center gap-2 text-[13.5px] font-medium text-foreground/80">
           {isDark ? <Moon size={16} /> : <Sun size={16} />}
           {isDark ? "Dark mode" : "Light mode"}

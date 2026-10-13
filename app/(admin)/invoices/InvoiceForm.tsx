@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { DateField } from "@/app/(admin)/_components/ui/DateField";
 import { useRouter } from "next/navigation";
 import { createInvoice, updateInvoice, type InvoiceFormData, type InvoiceItemInput } from "@/app/actions/invoices";
 import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/ClientSelect";
 import { Select } from "@/app/(admin)/_components/Select";
 import { routes } from "@/app/(admin)/_routes";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
 interface Option {
   id: string;
@@ -78,7 +80,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className={`${cardClass} p-5 space-y-5`}>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">Client (optional)</label>
@@ -121,11 +123,11 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
         </div>
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">Issue date</label>
-          <input type="date" required value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={inputClass} />
+          <DateField required value={issueDate} onChange={setIssueDate} className={inputClass} />
         </div>
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">{isQuote ? "Valid until" : "Due date"}</label>
-          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={inputClass} />
+          <DateField value={dueDate} onChange={setDueDate} className={inputClass} />
         </div>
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">Currency</label>

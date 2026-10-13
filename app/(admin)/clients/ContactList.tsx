@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { RowMenu, RowMenuItem } from "@/app/(admin)/_components/ui/RowMenu";
 import { addContact, updateContact, deleteContact } from "@/app/actions/contacts";
 import { Modal } from "@/app/(admin)/_components/Modal";
 import { DialogActions } from "@/app/(admin)/_components/DialogActions";
+import { Card, CardHeader } from "@/app/(admin)/_components/ui/Card";
+import { DataTable } from "@/app/(admin)/_components/ui/DataTable";
 
 interface Contact {
   id: string;
@@ -54,38 +57,36 @@ export function ContactList({ clientId, contacts }: { clientId: string; contacts
   }
 
   return (
-    <section className="rounded-xl border border-border bg-card/40">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
-        <div>
-          <h2 className="text-[13.5px] font-semibold text-foreground">Contacts</h2>
-          <p className="text-[12px] text-muted-foreground mt-0.5">The first contact&rsquo;s email is used when you send an invoice or quote.</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => open("new")}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border text-foreground/80 text-[12.5px] font-medium px-3 py-1.5 hover:bg-card transition-colors shrink-0"
-        >
-          <Plus size={13} />
-          Add contact
-        </button>
-      </div>
+    <Card>
+      <CardHeader
+        title="Contacts"
+        description={<>The first contact&rsquo;s email is used when you send an invoice or quote.</>}
+        action={
+          <button
+            type="button"
+            onClick={() => open("new")}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border text-foreground/80 text-[12.5px] font-medium px-3 py-1.5 hover:bg-card transition-colors shrink-0"
+          >
+            <Plus size={13} />
+            Add contact
+          </button>
+        }
+      />
 
       {contacts.length === 0 ? (
-        <p className="px-5 py-4 text-[13px] text-muted-foreground">No contacts yet.</p>
+        <p className="px-5 pb-5 text-[13px] text-muted-foreground">No contacts yet.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-left">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="px-5 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Name</th>
-                <th className="px-3 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Email</th>
-                <th className="px-3 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">Phone</th>
-                <th className="px-5 py-2.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {contacts.map((contact) => (
-                <tr key={contact.id} className="border-b border-border/70 last:border-b-0">
+        <DataTable
+          tableClassName="min-w-[560px]"
+          searchPlaceholder="Search contacts…"
+          columns={[{ label: "Name", className: "px-5" }, { label: "Email", className: "px-3" }, { label: "Phone", className: "px-3" }, { className: "w-12" }]}
+          rows={contacts.map((contact) => ({
+            id: contact.id,
+            onClick: () => open(contact),
+            search: `${contact.name} ${contact.role} ${contact.email} ${contact.phone}`,
+            sort: [contact.name, contact.email || null, contact.phone || null, undefined],
+            cells: (
+              <>
                   <td className="px-5 py-2.5">
                     <span className="text-[13.5px] font-medium text-foreground">{contact.name}</span>
                     {contact.role && <span className="block text-[12px] text-muted-foreground">{contact.role}</span>}
@@ -105,23 +106,19 @@ export function ContactList({ clientId, contacts }: { clientId: string; contacts
                     )}
                   </td>
                   <td className="px-5 py-2.5 text-right whitespace-nowrap">
-                    <button type="button" onClick={() => open(contact)} className="text-[12.5px] font-medium text-muted-foreground hover:text-foreground transition-colors mr-3">
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => remove(contact)}
-                      disabled={isPending}
-                      className="text-[12.5px] font-medium text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
-                    >
-                      Remove
-                    </button>
+                    <RowMenu disabled={isPending}>
+                      <RowMenuItem onClick={() => open(contact)} icon={<Pencil size={14} />}>
+                        Edit
+                      </RowMenuItem>
+                      <RowMenuItem onClick={() => remove(contact)} danger icon={<Trash2 size={14} />}>
+                        Remove
+                      </RowMenuItem>
+                    </RowMenu>
                   </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </>
+            ),
+          }))}
+        />
       )}
 
       <Modal open={editing !== null} onClose={() => setEditing(null)} title={editing === "new" ? "Add contact" : "Edit contact"}>
@@ -147,6 +144,6 @@ export function ContactList({ clientId, contacts }: { clientId: string; contacts
           <DialogActions onCancel={() => setEditing(null)} pending={isPending} submitLabel={editing === "new" ? "Add contact" : "Save"} />
         </form>
       </Modal>
-    </section>
+    </Card>
   );
 }
