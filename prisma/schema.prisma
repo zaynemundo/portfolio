@@ -113,7 +113,22 @@ model Inquiry {
   email     String
   message   String
   read      Boolean  @default(false)
+  /// Where the lead is in the pipeline (2026-10-13). A message from the site's contact form starts as NEW.
+  stage     LeadStage @default(NEW)
+  /// One line on where things stand, e.g. "Call booked Tue" — shown on the lead's card.
+  note      String?
+  /// The job this lead became, once "Create job" has been used.
+  projectId String?
+  project   FreelanceProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
+}
+
+enum LeadStage {
+  NEW
+  CONTACTED
+  QUOTED
+  WON
+  LOST
 }
 
 /// Portfolio case study. Core fields are plain columns; the long tail of
@@ -270,6 +285,7 @@ model FreelanceProject {
   updatedAt     DateTime        @updatedAt
   tasks         FreelanceTask[]
   services      FreelanceServiceItem[]
+  leads         Inquiry[]
   transactions  Transaction[]
   invoices      Invoice[]
   documents     Document[]
