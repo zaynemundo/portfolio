@@ -9,13 +9,14 @@ import { HeroScenesForm } from "./HeroScenesForm";
 import { SelectedWorkCopyForm } from "./SelectedWorkCopyForm";
 import { FeaturedProjectsPicker, type FeaturedPickerProject } from "./FeaturedProjectsPicker";
 import { InsightsCopyForm } from "./InsightsCopyForm";
+import { Section, SectionStack } from "@/app/(admin)/_components/Section";
 import { tabBarClass, tabClass } from "@/app/(admin)/_components/ui/Card";
 
 type Tab = "hero" | "selected-work" | "insights";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "hero", label: "Hero Banner" },
-  { id: "selected-work", label: "Selected Work" },
+  { id: "hero", label: "Hero banner" },
+  { id: "selected-work", label: "Selected work" },
   { id: "insights", label: "Insights" },
 ];
 
@@ -41,7 +42,7 @@ export function HomepageTabs(props: Props) {
 
   return (
     <div>
-      <PageHeader title="Homepage" subtitle="Every section of the public homepage." />
+      <PageHeader title="Home" subtitle="The public homepage, one section at a time." secondaryHref="/" secondaryLabel="View homepage" secondaryNewTab />
 
       <div className={tabBarClass} role="tablist">
         {TABS.map((t) => (
@@ -59,43 +60,42 @@ export function HomepageTabs(props: Props) {
       </div>
 
       {tab === "hero" && (
-        <div className="space-y-8">
-          <div className="grid grid-cols-2 gap-4">
-            <UploadCard
-              title="Banner video"
-              description="MP4 or WebM, scrubbed as the visitor scrolls through the hero"
-              currentUrl={props.heroVideoUrl}
-              accept="video/mp4,video/webm"
-              kind="video"
-              uploadAction={uploadHeroVideo}
-            />
-            <UploadCard
-              title="Poster frame"
-              description="JPG, PNG, or WebP, shown before the video loads"
-              currentUrl={props.heroPosterUrl}
-              accept="image/jpeg,image/png,image/webp"
-              kind="image"
-              uploadAction={uploadHeroPoster}
-            />
-          </div>
+        <SectionStack>
+          <Section title="Banner media" description="The video that plays as a visitor scrolls through the top of the homepage, and the still image shown while it loads. Each uploads as soon as you choose a file." card={false}>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <UploadCard
+                title="Banner video"
+                description="MP4 or WebM"
+                currentUrl={props.heroVideoUrl}
+                accept="video/mp4,video/webm"
+                kind="video"
+                uploadAction={uploadHeroVideo}
+              />
+              <UploadCard
+                title="Poster frame"
+                description="JPG, PNG or WebP"
+                currentUrl={props.heroPosterUrl}
+                accept="image/jpeg,image/png,image/webp"
+                kind="image"
+                uploadAction={uploadHeroPoster}
+              />
+            </div>
+          </Section>
           <HeroScenesForm initial={props.heroScenes} />
-        </div>
+        </SectionStack>
       )}
 
       {tab === "selected-work" && (
-        <div className="space-y-8">
+        <SectionStack>
           <SelectedWorkCopyForm initialHeading={props.selectedWorkHeading} initialIntro={props.selectedWorkIntro} />
           <FeaturedProjectsPicker initial={props.projects} />
-        </div>
+        </SectionStack>
       )}
 
       {tab === "insights" && (
-        <div className="space-y-6">
-          <p className="text-[12.5px] text-muted-foreground rounded-lg border border-dashed border-border px-4 py-3">
-            The 3 articles shown here are always the latest published posts from the Blog — nothing to configure, just publish an article and it appears automatically.
-          </p>
+        <SectionStack>
           <InsightsCopyForm initialHeading={props.insightsHeading} initialIntro={props.insightsIntro} />
-        </div>
+        </SectionStack>
       )}
     </div>
   );

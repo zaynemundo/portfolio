@@ -44,3 +44,6 @@ next-env.d.ts
 
 # Claude Code local settings (personal, not shared)
 .claude/settings.local.json
+
+# written by prisma/scripts/import-case-studies.ts
+/case-studies-backup.json

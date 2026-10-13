@@ -7,6 +7,8 @@
 
 export type Field =
   | { kind: "text" | "textarea"; key: string; label: string; placeholder?: string; required?: boolean; half?: boolean }
+  /** An image: stored as its URL, picked with an upload button. */
+  | { kind: "image"; key: string; label: string; half?: boolean }
   | { kind: "number"; key: string; label: string; placeholder?: string; half?: boolean }
   | { kind: "lines"; key: string; label: string; placeholder?: string; required?: boolean }
   | { kind: "list"; key: string; label: string; itemLabel: string; fields: Field[]; required?: boolean }
@@ -18,6 +20,10 @@ export interface RichSectionDef {
   /** Where this shows up on the public case study page. */
   hint: string;
   fields: Field[];
+  /** Not part of the usual write-up: left out of the editor until it has content or is added by hand. */
+  optional?: boolean;
+  /** Edited somewhere other than the Story tab (the sidebar rows sit with the other details). */
+  elsewhere?: boolean;
 }
 
 const METRIC_FIELDS: Field[] = [
@@ -50,6 +56,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "sidebar",
+    elsewhere: true,
     title: "Sidebar details",
     hint: "Extra rows in the Details sidebar, next to Role, Category and Year.",
     fields: [
@@ -64,12 +71,13 @@ export const RICH_SECTIONS: RichSectionDef[] = [
     fields: [
       { kind: "textarea", key: "problemIntro", label: "Intro paragraph" },
       { kind: "list", key: "problemSections", label: "Problem write-ups", itemLabel: "Write-up", fields: WRITE_UP_FIELDS },
-      { kind: "text", key: "resultsImage", label: "Image URL (defaults to the last screenshot)", half: true },
+      { kind: "image", key: "resultsImage", label: "Image (hidden on the page if left empty)", half: true },
       { kind: "text", key: "resultsImageCaption", label: "Image caption", half: true },
     ],
   },
   {
     id: "competitive",
+    optional: true,
     title: "Competitive analysis",
     hint: "Benchmark of existing products, shown after The Problem.",
     fields: [
@@ -93,6 +101,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "research",
+    optional: true,
     title: "User research",
     hint: "Ratings, pain points and review quotes.",
     fields: [
@@ -125,6 +134,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "wireframes",
+    optional: true,
     title: "Wireframes & sketches",
     hint: "Early sketches and iterations.",
     fields: [
@@ -137,7 +147,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
             kind: "list", key: "sketches", label: "Sketches", itemLabel: "Sketch",
             fields: [
               { kind: "text", key: "title", label: "Title", required: true, half: true },
-              { kind: "text", key: "image", label: "Image URL", half: true },
+              { kind: "image", key: "image", label: "Image", half: true },
               { kind: "textarea", key: "note", label: "Note" },
             ],
           },
@@ -147,6 +157,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "flow",
+    optional: true,
     title: "User flow",
     hint: "Step-by-step user journey.",
     fields: [
@@ -186,7 +197,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
         fields: [
           { kind: "text", key: "name", label: "Name", placeholder: "Frontend Engineering", required: true },
           { kind: "lines", key: "items", label: "Tags (one per line)", required: true },
-          { kind: "text", key: "image", label: "Image URL (defaults to a screenshot)", half: true },
+          { kind: "image", key: "image", label: "Image (hidden on the page if left empty)", half: true },
           { kind: "text", key: "visual", label: "Image caption", half: true },
         ],
       },
@@ -201,12 +212,12 @@ export const RICH_SECTIONS: RichSectionDef[] = [
       { kind: "list", key: "resultGroups", label: "Result groups", itemLabel: "Group", fields: METRIC_GROUP_FIELDS },
       { kind: "textarea", key: "resultsNote", label: "Closing note" },
       {
-        kind: "group", key: "compare", label: "Before / after slider",
+        kind: "group", key: "compare", label: "Before / after slider (shown once both images are uploaded)",
         fields: [
           { kind: "text", key: "beforeLabel", label: "Before label", placeholder: "2024 — migration", required: true, half: true },
           { kind: "text", key: "afterLabel", label: "After label", placeholder: "2026 — redesign", required: true, half: true },
-          { kind: "text", key: "beforeImage", label: "Before image URL", half: true },
-          { kind: "text", key: "afterImage", label: "After image URL", half: true },
+          { kind: "image", key: "beforeImage", label: "Before image", half: true },
+          { kind: "image", key: "afterImage", label: "After image", half: true },
           { kind: "text", key: "caption", label: "Caption" },
         ],
       },
@@ -214,6 +225,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "deliverables",
+    optional: true,
     title: "What was built",
     hint: "Lists of what was delivered, grouped under labels.",
     fields: [
@@ -274,6 +286,7 @@ function cleanValue(field: Field, value: unknown): unknown {
   switch (field.kind) {
     case "text":
     case "textarea":
+    case "image":
       return typeof value === "string" && value.trim() ? value.trim() : undefined;
     case "number": {
       if (value === "" || value === null || value === undefined) return undefined;

@@ -12,7 +12,7 @@ interface Props {
   alt?: string;
   bg?: string;
   dark?: boolean;
-  /** Tailwind aspect ratio class, e.g. "aspect-[16/10]" */
+  /** Tailwind aspect ratio class, e.g. "aspect-[1000/544]" */
   aspect?: string;
 }
 
@@ -23,7 +23,7 @@ export function CaseStudyImage({
   alt,
   bg = "#f4f4f5",
   dark = false,
-  aspect = "aspect-[16/10]",
+  aspect = "aspect-[1000/544]",
 }: Props) {
   return (
     <figure className="m-0">

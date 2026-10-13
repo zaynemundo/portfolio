@@ -18,24 +18,14 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-const DEFAULT_SLIDE_LABELS = ["Homepage", "Interior Page", "Detail", "Mobile"];
 const DEFAULT_THEME = { bg: "#f4f4f5", dark: false };
 
-function imageAt(images: string[], i: number): string | undefined {
-  return images.length ? images[i % images.length] : undefined;
-}
-
+/* Images only show where one has been uploaded: no placeholder frames, and
+   no borrowing a gallery screenshot for an empty slot. */
 function buildSlides(project: Project): SliderImage[] {
-  const images = project.images ?? [];
-  const labels = project.imageLabels?.length
-    ? project.imageLabels
-    : images.length
-      ? []
-      : DEFAULT_SLIDE_LABELS;
-  const count = Math.max(images.length, labels.length);
-  return Array.from({ length: count }, (_, i) => {
-    const label = labels[i] ?? `Screen ${i + 1}`;
-    return { src: imageAt(images, i), label, alt: `${project.name} — ${label}` };
+  return (project.images ?? []).map((src, i) => {
+    const label = project.imageLabels?.[i] ?? `Screen ${i + 1}`;
+    return { src, label, alt: `${project.name} — ${label}` };
   });
 }
 
@@ -76,7 +66,6 @@ export default async function CaseStudyPage({ params }: Props) {
 
   const theme = { ...DEFAULT_THEME, ...(project.theme ?? {}) };
   const images = buildSlides(project);
-  const shots = project.images ?? [];
 
   const isRich = Boolean(
     project.heroMetrics ||
@@ -156,15 +145,17 @@ export default async function CaseStudyPage({ params }: Props) {
       </div>
 
       {/* ── Screenshot gallery ───────────────────────────────────────────────── */}
-      <div>
-        <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-12">
-          <CaseStudyImageSlider
-            images={images}
-            placeholderBg={theme.bg}
-            placeholderDark={theme.dark}
-          />
+      {images.length > 0 && (
+        <div>
+          <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-12">
+            <CaseStudyImageSlider
+              images={images}
+              placeholderBg={theme.bg}
+              placeholderDark={theme.dark}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Body ─────────────────────────────────────────────────────────────── */}
       <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-20 md:py-28">
@@ -243,16 +234,16 @@ export default async function CaseStudyPage({ params }: Props) {
                           </Reveal>
                         ))}
                       </div>
-                      {(project.resultsImage || shots.length > 0) && (
+                      {project.resultsImage && (
                         <div className="mt-12">
                           <CaseStudyImage
                             label="Overview"
                             caption={project.resultsImageCaption ?? "Analytics dashboard — traffic, events, and acquisition channels"}
-                            src={project.resultsImage ?? imageAt(shots, shots.length - 1)}
+                            src={project.resultsImage}
                             alt={`${project.name} — overview`}
                             bg={theme.bg}
                             dark={theme.dark}
-                            aspect="aspect-[16/7]"
+                            aspect="aspect-[1000/544]"
                           />
                         </div>
                       )}
@@ -495,15 +486,17 @@ export default async function CaseStudyPage({ params }: Props) {
                                       </Reveal>
                                     ))}
                                   </ul>
-                                  <CaseStudyImage
-                                    label={d.name}
-                                    caption={d.visual}
-                                    src={d.image ?? imageAt(shots, i)}
-                                    alt={`${project.name} — ${d.name}`}
-                                    bg={theme.bg}
-                                    dark={theme.dark}
-                                    aspect="aspect-[16/9]"
-                                  />
+                                  {d.image && (
+                                    <CaseStudyImage
+                                      label={d.name}
+                                      caption={d.visual}
+                                      src={d.image}
+                                      alt={`${project.name} — ${d.name}`}
+                                      bg={theme.bg}
+                                      dark={theme.dark}
+                                      aspect="aspect-[1000/544]"
+                                    />
+                                  )}
                                 </div>
                               </div>
                             </Reveal>
@@ -564,7 +557,7 @@ export default async function CaseStudyPage({ params }: Props) {
                           {project.resultsNote}
                         </p>
                       )}
-                      {project.compare && (
+                      {project.compare?.beforeImage && project.compare.afterImage && (
                         <div className="mt-12">
                           <BeforeAfterSlider
                             beforeImage={project.compare.beforeImage}

@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { Upload } from "lucide-react";
+import { Section, ItemCard, AddItemButton, fieldClass } from "@/app/(admin)/_components/Section";
 import { updateClientLogos, uploadClientLogoImage } from "@/app/actions/settings";
 import type { ClientLogoData } from "@/app/lib/client-logos";
 
@@ -36,48 +38,27 @@ export function ClientLogosManager({ initial }: { initial: ClientLogoData[] }) {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-xs p-6 space-y-5">
-      <div>
-        <h2 className="text-[15px] font-semibold text-foreground mb-1">Client logos</h2>
-        <p className="text-[12.5px] text-muted-foreground">
-          The scrolling brand marquee at the bottom of the /work page — the company name shows on hover. Doesn&rsquo;t need a matching case study.
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        {logos.map((logo, i) => (
-          <LogoRow
-            key={logo.id}
-            logo={logo}
-            index={i}
-            total={logos.length}
-            onChange={(patch) => update(i, patch)}
-            onMove={(dir) => move(i, dir)}
-            onRemove={() => setLogos((prev) => prev.filter((_, idx) => idx !== i))}
-          />
-        ))}
-      </div>
-
-      <button
-        type="button"
-        onClick={() => setLogos((prev) => [...prev, emptyLogo()])}
-        className="w-full rounded-lg border border-dashed border-border text-muted-foreground text-[12.5px] font-medium py-2 hover:bg-card hover:text-foreground/90 transition-colors"
-      >
-        + Add logo
-      </button>
-
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={isPending}
-          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
-        >
-          {isPending ? "Saving…" : "Save logos"}
-        </button>
-        {saved && <span className="text-[12.5px] text-success">Saved</span>}
-      </div>
-    </div>
+    <Section
+      title="Client logos"
+      description="The scrolling row of brands at the bottom of /work. The name shows when a visitor hovers a logo. A logo doesn't need a matching case study."
+      save={{ onSave: handleSave, pending: isPending, saved, label: "Save logos" }}
+    >
+      {logos.length === 0 && (
+        <p className="rounded-xl border border-dashed border-border py-6 text-center text-[13px] text-muted-foreground">No logos yet.</p>
+      )}
+      {logos.map((logo, i) => (
+        <LogoRow
+          key={logo.id}
+          logo={logo}
+          index={i}
+          total={logos.length}
+          onChange={(patch) => update(i, patch)}
+          onMove={(dir) => move(i, dir)}
+          onRemove={() => setLogos((prev) => prev.filter((_, idx) => idx !== i))}
+        />
+      ))}
+      <AddItemButton onClick={() => setLogos((prev) => [...prev, emptyLogo()])}>Add logo</AddItemButton>
+    </Section>
   );
 }
 
@@ -112,34 +93,23 @@ function LogoRow({
   }
 
   return (
-    <div className="rounded-lg border border-border bg-background/50 p-4 space-y-2.5">
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Logo {index + 1}</span>
-        <div className="flex items-center gap-3">
-          <button type="button" onClick={() => onMove(-1)} disabled={index === 0} className="text-[12px] text-muted-foreground hover:text-foreground/90 disabled:opacity-30 transition-colors">↑</button>
-          <button type="button" onClick={() => onMove(1)} disabled={index === total - 1} className="text-[12px] text-muted-foreground hover:text-foreground/90 disabled:opacity-30 transition-colors">↓</button>
-          <button type="button" onClick={onRemove} className="text-[12px] text-destructive hover:text-destructive transition-colors">Remove</button>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="h-14 w-14 shrink-0 rounded-lg border border-border bg-white flex items-center justify-center overflow-hidden">
+    <ItemCard
+      label={`Logo ${index + 1}`}
+      summary={logo.name}
+      onRemove={onRemove}
+      move={{ up: index > 0 ? () => onMove(-1) : undefined, down: index < total - 1 ? () => onMove(1) : undefined }}
+    >
+      <div className="flex items-center gap-4">
+        <div className="h-16 w-24 shrink-0 rounded-lg border border-border bg-white flex items-center justify-center overflow-hidden">
           {logo.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logo.logoUrl} alt="" className="h-full w-full object-contain p-1.5" />
+            <img src={logo.logoUrl} alt="" className="h-full w-full object-contain p-2" />
           ) : (
-            <span className="text-[10.5px] text-muted-foreground">No logo</span>
+            <span className="text-[11px] text-zinc-400">No logo</span>
           )}
         </div>
-
-        <div className="flex-1 space-y-2">
-          <input
-            type="text"
-            value={logo.name}
-            onChange={(e) => onChange({ name: e.target.value })}
-            placeholder="Brand name"
-            className="w-full rounded-lg bg-card border border-border px-3 py-2 text-[13px] text-foreground focus:outline-none focus:border-ring transition-colors"
-          />
+        <div className="min-w-0 flex-1 space-y-2">
+          <input type="text" value={logo.name} onChange={(e) => onChange({ name: e.target.value })} placeholder="Brand name" aria-label="Brand name" className={fieldClass} />
           <input
             ref={inputRef}
             type="file"
@@ -151,14 +121,14 @@ function LogoRow({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="w-full rounded-lg border border-border text-foreground/70 text-[12px] font-medium py-1.5 hover:bg-secondary transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-[12.5px] font-semibold text-foreground hover:bg-muted transition-colors disabled:opacity-50"
           >
-            {uploading ? "Uploading…" : logo.logoUrl ? "Replace logo image" : "Upload logo image"}
+            <Upload size={13} />
+            {uploading ? "Uploading…" : logo.logoUrl ? "Replace image" : "Upload image"}
           </button>
         </div>
       </div>
-
-      {error && <p className="text-[11.5px] text-destructive">{error}</p>}
-    </div>
+      {error && <p className="text-[12px] text-negative" role="alert">{error}</p>}
+    </ItemCard>
   );
 }

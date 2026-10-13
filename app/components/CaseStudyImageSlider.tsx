@@ -178,7 +178,7 @@ export function CaseStudyImageSlider({
 
               {/* Image */}
               <div
-                className="aspect-[16/10] rounded-xl overflow-hidden border flex items-center justify-center"
+                className="aspect-[1000/544] rounded-xl overflow-hidden border flex items-center justify-center"
                 style={{
                   backgroundColor: placeholderBg,
                   borderColor: placeholderDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
@@ -332,7 +332,7 @@ export function CaseStudyImageSlider({
                 draggable={false}
               />
             ) : (
-              <div className="w-[70vw] aspect-[16/10] rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-500 text-sm">
+              <div className="w-[70vw] aspect-[1000/544] rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-500 text-sm">
                 No image
               </div>
             )}

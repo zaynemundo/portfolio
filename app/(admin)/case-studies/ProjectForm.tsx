@@ -1,13 +1,15 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { ExternalLink, Star } from "lucide-react";
 import { createProject, updateProject, type ProjectFormData } from "@/app/actions/projects";
 import { ImageManager } from "./ImageManager";
-import { RichContentEditor } from "./RichContentEditor";
-import { STRUCTURED_KEYS, cleanRichContent, isLongForm } from "./rich-schema";
+import { RichContentEditor, FieldsEditor } from "./RichContentEditor";
+import { RICH_SECTIONS, STRUCTURED_KEYS, cleanRichContent, isLongForm } from "./rich-schema";
 import { SaveBar, useSaveState, useUnsavedWarning } from "@/app/(admin)/_components/SaveBar";
-import { Card, CardHeader, cardClass } from "@/app/(admin)/_components/ui/Card";
+import { cardClass, tabBarClass, tabClass } from "@/app/(admin)/_components/ui/Card";
+import { Switch } from "@/app/(admin)/_components/ui/Switch";
+import { Select } from "@/app/(admin)/_components/Select";
+import { Section, SectionStack, Field, fieldClass, areaClass, labelClass } from "@/app/(admin)/_components/Section";
 
 interface Props {
   mode: "new" | "edit";
@@ -17,6 +19,21 @@ interface Props {
 }
 
 type Obj = Record<string, unknown>;
+
+type Tab = "basics" | "media" | "story";
+const TABS: { id: Tab; label: string }[] = [
+  { id: "basics", label: "Basics" },
+  { id: "media", label: "Media" },
+  { id: "story", label: "Story" },
+];
+
+type Story = "detailed" | "simple";
+const STORIES: { id: Story; label: string }[] = [
+  { id: "detailed", label: "Detailed" },
+  { id: "simple", label: "Simple" },
+];
+
+const WORK_TYPES = ["Freelance", "Full-time", "Personal Project"];
 
 /** Splits saved richContent into the part the structured editor owns and whatever else is stored alongside it. */
 function splitRichContent(json: string | undefined): { structured: Obj; other: Obj } {
@@ -77,6 +94,12 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   const cleanedRich = useMemo(() => cleanRichContent(rich), [rich]);
   const longForm = isLongForm(cleanedRich);
 
+  const [tab, setTab] = useState<Tab>("basics");
+  // Opens on whichever write-up the public page is using; a new case study starts on the detailed one.
+  const [story, setStory] = useState<Story>(() =>
+    isLongForm(cleanRichContent(initialRich.structured)) || !(initial?.challenge || initial?.approach || initial?.outcome) ? "detailed" : "simple",
+  );
+
   // "Other data" is free-typed JSON; null means it doesn't parse yet.
   const other = useMemo<Obj | null>(() => {
     if (!otherJson.trim()) return {};
@@ -126,394 +149,220 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   }
 
   const borderlessInput = "w-full bg-transparent border-0 border-b border-transparent focus:border-border px-0 py-1.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-colors";
-  const microLabel = "block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1";
-  const checkLabel = "flex items-center gap-2 text-[12.5px] text-foreground/80 cursor-pointer select-none";
+  const selectClass = `${fieldClass} flex items-center justify-between gap-2 text-left`;
+  const sidebarFields = RICH_SECTIONS.find((section) => section.id === "sidebar")?.fields ?? [];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div className={`${cardClass} p-5`}>
-        <label htmlFor="name" className={microLabel}>Name</label>
-        <div className="flex items-center gap-2">
-          <input
-            id="name"
-            required
-            value={name}
-            onChange={(e) => handleNameChange(e.target.value)}
-            placeholder="Name"
-            className={`${borderlessInput} text-[26px] font-bold`}
-          />
-          <button
-            type="button"
-            onClick={() => setFeatured(!featured)}
-            aria-label={featured ? "Remove from Featured" : "Mark as Featured"}
-            aria-pressed={featured}
-            title={featured ? "Featured" : "Mark as Featured"}
-            className={`shrink-0 h-8 w-8 flex items-center justify-center rounded-full transition-colors ${
-              featured ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground/40 hover:text-muted-foreground"
-            }`}
-          >
-            <Star size={20} fill={featured ? "currentColor" : "none"} />
-          </button>
-        </div>
-        <label htmlFor="slug" className={`${microLabel} mt-4`}>Slug</label>
-        <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[12.5px] text-muted-foreground/70 shrink-0">/projects/</span>
+    <form onSubmit={handleSubmit}>
+      <div className={`${cardClass} p-5 mb-5`}>
+        <label htmlFor="name" className={labelClass}>Name</label>
+        <input
+          id="name"
+          required
+          value={name}
+          onChange={(e) => handleNameChange(e.target.value)}
+          placeholder="Name"
+          className={`${borderlessInput} text-[26px] font-bold`}
+        />
+        <div className="mt-2 flex items-center gap-1.5">
+          <label htmlFor="slug" className="font-mono text-[12.5px] text-muted-foreground/70 shrink-0">/projects/</label>
           <input
             id="slug"
             required
             value={slug}
             onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
+            aria-label="Address"
             className={`${borderlessInput} flex-1 font-mono text-[12.5px] text-muted-foreground py-0.5`}
           />
-          {slug && (
-            <a
-              href={`/projects/${slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Open live case study in a new tab"
-              title="Open live case study"
-              className="text-muted-foreground/70 hover:text-primary transition-colors shrink-0"
-            >
-              <ExternalLink size={13} />
-            </a>
-          )}
         </div>
       </div>
 
-      {/* ── Hero & cards ─────────────────────────────────────────────── */}
-      <FormSection title="Hero & cards" hint="Shown at the top of the case study and on project cards across the site.">
-        <div>
-          <label htmlFor="tagline" className={microLabel}>Tagline</label>
-          <textarea
-            id="tagline"
-            value={tagline}
-            onChange={(e) => setTagline(e.target.value)}
-            rows={2}
-            className={`${borderlessInput} text-[14.5px] resize-none`}
-          />
-        </div>
+      <div className={tabBarClass} role="tablist">
+        {TABS.map((t) => (
+          <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)} className={tabClass(tab === t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
 
-        <div>
-          <label htmlFor="shortDescription" className={microLabel}>Short description</label>
-          <textarea
-            id="shortDescription"
-            value={shortDescription}
-            onChange={(e) => setShortDescription(e.target.value)}
-            rows={3}
-            className={`${borderlessInput} text-[14.5px] resize-none`}
-          />
-        </div>
-      </FormSection>
+      <div className="mb-8">
+        {/* ── Basics ───────────────────────────────────────────────────── */}
+        {tab === "basics" && (
+          <SectionStack>
+            <Section title="Summary" description="The line under the title at the top of the case study, and the short text on project cards across the site.">
+              <Field label="Tagline" htmlFor="tagline">
+                <textarea id="tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} rows={2} className={areaClass} />
+              </Field>
+              <Field label="Short description" htmlFor="shortDescription">
+                <textarea id="shortDescription" value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} rows={3} className={areaClass} />
+              </Field>
+            </Section>
 
-      {/* ── Details ──────────────────────────────────────────────────── */}
-      <FormSection title="Details" hint="The Details sidebar on the case study, and the labels on project cards.">
-        <div className="flex items-center gap-6 flex-wrap">
-          <div>
-            <label htmlFor="category" className={microLabel}>Category</label>
-            <input
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className={`${borderlessInput} text-[13.5px] w-40`}
-            />
-          </div>
-          <div>
-            <label htmlFor="year" className={microLabel}>Year</label>
-            <input
-              id="year"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              placeholder="2024–2025"
-              className={`${borderlessInput} text-[13.5px] w-40`}
-            />
-          </div>
-          <div>
-            <label htmlFor="workType" className={microLabel}>Work type</label>
-            <select
-              id="workType"
-              value={workType}
-              onChange={(e) => setWorkType(e.target.value)}
-              className={`${borderlessInput} text-[13.5px] w-40`}
-            >
-              <option>Freelance</option>
-              <option>Full-time</option>
-              <option>Personal Project</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="status" className={microLabel}>Status</label>
-            <select
-              id="status"
-              value={published ? "published" : "draft"}
-              onChange={(e) => setPublished(e.target.value === "published")}
-              className={`${borderlessInput} text-[13.5px] w-40 ${published ? "text-success" : "text-muted-foreground"}`}
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-          </div>
-        </div>
+            <Section title="Visibility" description="A draft is only visible to you. Featured case studies can be picked for Selected Work on the homepage.">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <span className={labelClass}>Status</span>
+                  <Select
+                    value={published ? "published" : "draft"}
+                    onChange={(value) => setPublished(value === "published")}
+                    options={[{ value: "published", label: "Published" }, { value: "draft", label: "Draft" }]}
+                    className={selectClass}
+                  />
+                </div>
+                <div>
+                  <span className={labelClass}>Featured</span>
+                  <div className={`${fieldClass} flex items-center justify-between gap-3`}>
+                    {featured ? "Featured" : "Not featured"}
+                    <Switch checked={featured} onCheckedChange={setFeatured} aria-label="Featured" />
+                  </div>
+                </div>
+              </div>
+            </Section>
 
-        <div className="flex items-center gap-6">
-          <div className="flex-1">
-            <label htmlFor="role" className={microLabel}>Role</label>
-            <input
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className={`${borderlessInput} text-[13.5px]`}
-            />
-          </div>
-          <div className="flex-1">
-            <label htmlFor="client" className={microLabel}>Client (optional)</label>
-            <input
-              id="client"
-              value={client}
-              onChange={(e) => setClient(e.target.value)}
-              className={`${borderlessInput} text-[13.5px]`}
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-6">
-          <div className="flex-1">
-            <label htmlFor="technologies" className={microLabel}>Technologies (comma-separated)</label>
-            <input
-              id="technologies"
-              value={technologies}
-              onChange={(e) => setTechnologies(e.target.value)}
-              placeholder="React, TypeScript, Tailwind"
-              className={`${borderlessInput} text-[13.5px]`}
-            />
-          </div>
-          <div className="flex-1">
-            <label htmlFor="liveUrl" className={microLabel}>Live URL (optional)</label>
-            <input
-              id="liveUrl"
-              value={liveUrl}
-              onChange={(e) => setLiveUrl(e.target.value)}
-              placeholder="https://"
-              className={`${borderlessInput} text-[13.5px]`}
-            />
-          </div>
-        </div>
-      </FormSection>
-
-      {/* ── Screenshots & branding ───────────────────────────────────── */}
-      <FormSection title="Screenshots & branding" hint="The image slider at the top of the case study, plus the card tint and client logo tile.">
-        {mode === "edit" && projectId ? (
-          <div>
-            <label className={microLabel}>Screenshots</label>
-            <ImageManager projectId={projectId} images={images} />
-          </div>
-        ) : (
-          <p className="text-[12.5px] text-muted-foreground">Screenshots can be uploaded once the case study has been created.</p>
+            <Section title="Details" description="The Details sidebar on the case study, and the labels on project cards.">
+              <div className="grid sm:grid-cols-3 gap-4">
+                <Field label="Category" htmlFor="category">
+                  <input id="category" value={category} onChange={(e) => setCategory(e.target.value)} className={fieldClass} />
+                </Field>
+                <Field label="Year" htmlFor="year">
+                  <input id="year" value={year} onChange={(e) => setYear(e.target.value)} placeholder="2024–2025" className={fieldClass} />
+                </Field>
+                <div>
+                  <span className={labelClass}>Work type</span>
+                  <Select value={workType} onChange={setWorkType} options={WORK_TYPES.map((type) => ({ value: type, label: type }))} className={selectClass} />
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Role" htmlFor="role">
+                  <input id="role" value={role} onChange={(e) => setRole(e.target.value)} className={fieldClass} />
+                </Field>
+                <Field label="Client (optional)" htmlFor="client">
+                  <input id="client" value={client} onChange={(e) => setClient(e.target.value)} className={fieldClass} />
+                </Field>
+                <Field label="Technologies, separated by commas" htmlFor="technologies">
+                  <input id="technologies" value={technologies} onChange={(e) => setTechnologies(e.target.value)} placeholder="React, TypeScript, Tailwind" className={fieldClass} />
+                </Field>
+                <Field label="Live link (optional)" htmlFor="liveUrl">
+                  <input id="liveUrl" value={liveUrl} onChange={(e) => setLiveUrl(e.target.value)} placeholder="https://" className={fieldClass} />
+                </Field>
+              </div>
+              <FieldsEditor fields={sidebarFields} value={rich} onChange={setRich} path="sidebar" />
+            </Section>
+          </SectionStack>
         )}
 
-        <div className="flex items-start gap-6">
-          <div className="flex-1">
-            <label htmlFor="imageLabels" className={microLabel}>Screenshot captions (one per line, in order)</label>
-            <textarea
-              id="imageLabels"
-              value={imageLabels}
-              onChange={(e) => setImageLabels(e.target.value)}
-              rows={4}
-              placeholder={"Homepage\nProduct Listing\nProduct Detail"}
-              className={`${borderlessInput} text-[13.5px] resize-none`}
-            />
-          </div>
-          <div className="flex-1">
-            <label htmlFor="imageAlt" className={microLabel}>Image alt text</label>
-            <input
-              id="imageAlt"
-              value={imageAlt}
-              onChange={(e) => setImageAlt(e.target.value)}
-              className={`${borderlessInput} text-[13.5px]`}
-            />
-          </div>
-        </div>
+        {/* ── Media ────────────────────────────────────────────────────── */}
+        {tab === "media" && (
+          <SectionStack>
+            <Section title="Screenshots" description="The image slider at the top of the case study. Captions go with the screenshots in order.">
+              {mode === "edit" && projectId ? (
+                <ImageManager projectId={projectId} images={images} />
+              ) : (
+                <p className="text-[12.5px] text-muted-foreground">Screenshots can be uploaded once the case study has been created.</p>
+              )}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Captions, one per line" htmlFor="imageLabels">
+                  <textarea id="imageLabels" value={imageLabels} onChange={(e) => setImageLabels(e.target.value)} rows={4} placeholder={"Homepage\nProduct Listing\nProduct Detail"} className={areaClass} />
+                </Field>
+                <Field label="Image description" htmlFor="imageAlt" hint="Read out by screen readers and shown if an image fails to load.">
+                  <input id="imageAlt" value={imageAlt} onChange={(e) => setImageAlt(e.target.value)} className={fieldClass} />
+                </Field>
+              </div>
+            </Section>
 
-        <div className="flex items-end gap-6 flex-wrap">
+            <Section title="Card and logo" description="The tint behind this project's card, and the small client logo tile shown with it.">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <ColorField label="Card background" id="themeBg" value={themeBg} onChange={setThemeBg} />
+                <ToggleField label="Text on the card" on={themeDark} onChange={setThemeDark} onText="Light text, for a dark background" offText="Dark text, for a light background" />
+                <ColorField label="Logo tile background" id="logoBg" value={logoBg} onChange={setLogoBg} />
+                <ToggleField label="Initials on the tile" on={logoLight} onChange={setLogoLight} onText="Light initials, for a dark tile" offText="Dark initials, for a light tile" />
+                <Field label="Logo initials" htmlFor="logoInitials">
+                  <input id="logoInitials" value={logoInitials} onChange={(e) => setLogoInitials(e.target.value)} placeholder="ZM" className={fieldClass} />
+                </Field>
+                <Field label="Logo image link (optional)" htmlFor="logoSrc" hint="Used instead of the initials.">
+                  <input id="logoSrc" value={logoSrc} onChange={(e) => setLogoSrc(e.target.value)} className={fieldClass} />
+                </Field>
+              </div>
+            </Section>
+          </SectionStack>
+        )}
+
+        {/* ── Story ────────────────────────────────────────────────────── */}
+        {tab === "story" && (
           <div>
-            <label htmlFor="themeBg" className={microLabel}>Card background color</label>
-            <div className="flex items-center gap-2">
-              <Swatch color={themeBg} />
-              <input
-                id="themeBg"
-                value={themeBg}
-                onChange={(e) => setThemeBg(e.target.value)}
-                className={`${borderlessInput} text-[13.5px] w-24 font-mono`}
-              />
-            </div>
-          </div>
-          <label className={`${checkLabel} pb-2`}>
-            <input type="checkbox" checked={themeDark} onChange={(e) => setThemeDark(e.target.checked)} className="accent-primary" />
-            Dark background (use light text on it)
-          </label>
-        </div>
-
-        <div className="flex items-end gap-6 flex-wrap">
-          <div>
-            <label htmlFor="logoInitials" className={microLabel}>Logo initials</label>
-            <input
-              id="logoInitials"
-              value={logoInitials}
-              onChange={(e) => setLogoInitials(e.target.value)}
-              placeholder="ZM"
-              className={`${borderlessInput} text-[13.5px] w-24`}
-            />
-          </div>
-          <div>
-            <label htmlFor="logoBg" className={microLabel}>Logo background color</label>
-            <div className="flex items-center gap-2">
-              <Swatch color={logoBg} />
-              <input
-                id="logoBg"
-                value={logoBg}
-                onChange={(e) => setLogoBg(e.target.value)}
-                className={`${borderlessInput} text-[13.5px] w-24 font-mono`}
-              />
-            </div>
-          </div>
-          <label className={`${checkLabel} pb-2`}>
-            <input type="checkbox" checked={logoLight} onChange={(e) => setLogoLight(e.target.checked)} className="accent-primary" />
-            Light initials (for a dark logo tile)
-          </label>
-        </div>
-
-        <div>
-          <label htmlFor="logoSrc" className={microLabel}>Logo image URL (optional — replaces the initials)</label>
-          <input
-            id="logoSrc"
-            value={logoSrc}
-            onChange={(e) => setLogoSrc(e.target.value)}
-            className={`${borderlessInput} text-[13.5px]`}
-          />
-        </div>
-      </FormSection>
-
-      {/* ── Layout indicator ─────────────────────────────────────────── */}
-      <div className={`${cardClass} px-5 py-3.5`}>
-        <p className="text-[13px] text-foreground">
-          <span className="font-semibold">Page layout: {longForm ? "Long-form" : "Simple"}.</span>{" "}
-          <span className="text-muted-foreground">
-            {longForm
-              ? "This case study has long-form sections, so the public page shows those. The simple write-up below is kept but not displayed."
-              : "The public page shows the simple write-up below. Fill in any long-form section to switch to the long-form layout instead."}
-          </span>
-        </p>
-      </div>
-
-      {/* ── Simple write-up ──────────────────────────────────────────── */}
-      <FormSection
-        title="Simple write-up"
-        hint="Overview, Challenge, Approach, Key Contributions and Outcome on the simple layout. Challenge, Approach and Outcome are always required."
-      >
-        <div>
-          <label htmlFor="challenge" className={microLabel}>Challenge</label>
-          <textarea
-            id="challenge"
-            value={challenge}
-            onChange={(e) => setChallenge(e.target.value)}
-            rows={4}
-            className={`${borderlessInput} text-[14.5px] resize-none`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="approach" className={microLabel}>Approach</label>
-          <textarea
-            id="approach"
-            value={approach}
-            onChange={(e) => setApproach(e.target.value)}
-            rows={4}
-            className={`${borderlessInput} text-[14.5px] resize-none`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="highlights" className={microLabel}>Key contributions (one per line)</label>
-          <textarea
-            id="highlights"
-            value={highlights}
-            onChange={(e) => setHighlights(e.target.value)}
-            rows={4}
-            className={`${borderlessInput} text-[14.5px] resize-none`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="outcome" className={microLabel}>Outcome</label>
-          <textarea
-            id="outcome"
-            value={outcome}
-            onChange={(e) => setOutcome(e.target.value)}
-            rows={3}
-            className={`${borderlessInput} text-[14.5px] resize-none`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="accessibility" className={microLabel}>Accessibility (optional)</label>
-          <textarea
-            id="accessibility"
-            value={accessibility}
-            onChange={(e) => setAccessibility(e.target.value)}
-            rows={2}
-            className={`${borderlessInput} text-[14.5px] resize-none`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="performance" className={microLabel}>Performance (optional)</label>
-          <textarea
-            id="performance"
-            value={performance}
-            onChange={(e) => setPerformance(e.target.value)}
-            rows={2}
-            className={`${borderlessInput} text-[14.5px] resize-none`}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="seo" className={microLabel}>SEO (optional)</label>
-          <textarea
-            id="seo"
-            value={seo}
-            onChange={(e) => setSeo(e.target.value)}
-            rows={2}
-            className={`${borderlessInput} text-[14.5px] resize-none`}
-          />
-        </div>
-      </FormSection>
-
-      {/* ── Long-form sections ───────────────────────────────────────── */}
-      <FormSection
-        title="Long-form sections"
-        hint="Optional. Listed in the order they appear on the public page — empty sections are simply left out."
-      >
-        <RichContentEditor value={rich} onChange={setRich} />
-
-        {otherJson.trim() !== "" && (
-          <details className="rounded-lg border border-border bg-card">
-            <summary className="px-4 py-3 cursor-pointer text-[13px] font-semibold text-foreground">Other data (JSON)</summary>
-            <div className="px-4 pb-4">
-              <p className="text-[12px] text-muted-foreground mb-2">
-                Stored with this case study but not shown on the public page. Leave as is unless you know you need it.
+            <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <div className="inline-flex items-center gap-0.5 rounded-xl border border-border bg-card p-1" role="tablist" aria-label="Write-up">
+                {STORIES.map((option) => (
+                  <button key={option.id} type="button" role="tab" aria-selected={story === option.id} onClick={() => setStory(option.id)} className={tabClass(story === option.id)}>
+                    {option.label}
+                    {(option.id === "detailed") === longForm && <span className="ml-1.5 font-medium opacity-60">· on the site</span>}
+                  </button>
+                ))}
+              </div>
+              <p className="min-w-0 flex-1 text-[12.5px] text-muted-foreground">
+                {longForm
+                  ? "The public page shows the detailed write-up. The simple one is kept but not displayed."
+                  : "The public page shows the simple write-up. It switches to the detailed one as soon as a detailed chapter has content."}
               </p>
-              <textarea
-                id="otherJson"
-                aria-label="Other data (JSON)"
-                value={otherJson}
-                onChange={(e) => setOtherJson(e.target.value)}
-                rows={8}
-                spellCheck={false}
-                className="w-full rounded-lg bg-background border border-border px-3.5 py-2.5 text-[12.5px] font-mono text-foreground/70 focus:outline-none focus:border-ring transition-colors resize-y"
-              />
             </div>
-          </details>
+
+            {story === "detailed" ? (
+              <div className="space-y-3">
+                <RichContentEditor value={rich} onChange={setRich} />
+
+                {otherJson.trim() !== "" && (
+                  <details className={cardClass}>
+                    <summary className="px-5 py-3.5 cursor-pointer text-[13px] font-semibold text-muted-foreground">Advanced: other stored data</summary>
+                    <div className="px-5 pb-5">
+                      <p className="text-[12px] text-muted-foreground mb-2">
+                        Stored with this case study but not shown on the public page. Leave as is unless you know you need it.
+                      </p>
+                      <textarea
+                        id="otherJson"
+                        aria-label="Other data (JSON)"
+                        value={otherJson}
+                        onChange={(e) => setOtherJson(e.target.value)}
+                        rows={8}
+                        spellCheck={false}
+                        className={`${areaClass} font-mono text-[12.5px]`}
+                      />
+                    </div>
+                  </details>
+                )}
+              </div>
+            ) : (
+              <SectionStack>
+                <Section title="The write-up" description="Challenge, Approach and Outcome are needed on every case study, even one that uses the detailed write-up.">
+                  <Field label="Challenge" htmlFor="challenge">
+                    <textarea id="challenge" value={challenge} onChange={(e) => setChallenge(e.target.value)} rows={4} className={areaClass} />
+                  </Field>
+                  <Field label="Approach" htmlFor="approach">
+                    <textarea id="approach" value={approach} onChange={(e) => setApproach(e.target.value)} rows={4} className={areaClass} />
+                  </Field>
+                  <Field label="Key contributions, one per line" htmlFor="highlights">
+                    <textarea id="highlights" value={highlights} onChange={(e) => setHighlights(e.target.value)} rows={4} className={areaClass} />
+                  </Field>
+                  <Field label="Outcome" htmlFor="outcome">
+                    <textarea id="outcome" value={outcome} onChange={(e) => setOutcome(e.target.value)} rows={3} className={areaClass} />
+                  </Field>
+                </Section>
+
+                <Section title="Optional notes" description="Short extra paragraphs. Leave any of them empty to leave it off the page.">
+                  <Field label="Accessibility" htmlFor="accessibility">
+                    <textarea id="accessibility" value={accessibility} onChange={(e) => setAccessibility(e.target.value)} rows={2} className={areaClass} />
+                  </Field>
+                  <Field label="Performance" htmlFor="performance">
+                    <textarea id="performance" value={performance} onChange={(e) => setPerformance(e.target.value)} rows={2} className={areaClass} />
+                  </Field>
+                  <Field label="SEO" htmlFor="seo">
+                    <textarea id="seo" value={seo} onChange={(e) => setSeo(e.target.value)} rows={2} className={areaClass} />
+                  </Field>
+                </Section>
+              </SectionStack>
+            )}
+          </div>
         )}
-      </FormSection>
+      </div>
 
       <SaveBar
         dirty={saveState.dirty}
@@ -527,15 +376,35 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   );
 }
 
-function FormSection({ title, hint, children }: { title: string; hint: string; children: React.ReactNode }) {
+/** A colour as a swatch that opens the colour picker, with its code beside it for pasting an exact value. */
+function ColorField({ label, id, value, onChange }: { label: string; id: string; value: string; onChange: (value: string) => void }) {
+  // The picker only understands six-digit codes; anything else still shows in the text box.
+  const pickable = /^#[0-9a-f]{6}$/i.test(value) ? value : "#ffffff";
   return (
-    <Card>
-      <CardHeader title={title} description={hint} />
-      <div className="px-5 pb-5 space-y-6">{children}</div>
-    </Card>
+    <Field label={label} htmlFor={id}>
+      <div className={`${fieldClass} flex items-center gap-2.5`}>
+        <input
+          type="color"
+          value={pickable}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label={`${label}: pick a colour`}
+          className="h-6 w-6 shrink-0 cursor-pointer rounded-md border-0 bg-transparent p-0"
+        />
+        <input id={id} value={value} onChange={(e) => onChange(e.target.value)} className="min-w-0 flex-1 border-0 bg-transparent p-0 font-mono text-[13px] text-foreground focus:outline-none" />
+      </div>
+    </Field>
   );
 }
 
-function Swatch({ color }: { color: string }) {
-  return <span aria-hidden="true" className="h-5 w-5 rounded-md border border-border shrink-0" style={{ background: color }} />;
+/** An on/off choice shown as a field: what it is currently set to on the left, the switch on the right. */
+function ToggleField({ label, on, onChange, onText, offText }: { label: string; on: boolean; onChange: (on: boolean) => void; onText: string; offText: string }) {
+  return (
+    <div>
+      <span className={labelClass}>{label}</span>
+      <div className={`${fieldClass} flex items-center justify-between gap-3`}>
+        <span className="min-w-0 truncate">{on ? onText : offText}</span>
+        <Switch checked={on} onCheckedChange={onChange} aria-label={label} />
+      </div>
+    </div>
+  );
 }

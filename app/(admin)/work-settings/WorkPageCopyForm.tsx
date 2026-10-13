@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateWorkPageCopy } from "@/app/actions/settings";
-import { cardClass } from "@/app/(admin)/_components/ui/Card";
+import { Section, Field, fieldClass, areaClass } from "@/app/(admin)/_components/Section";
 
 export function WorkPageCopyForm({ initialHeading, initialIntro }: { initialHeading: string; initialIntro: string }) {
   const [heading, setHeading] = useState(initialHeading);
@@ -10,8 +10,7 @@ export function WorkPageCopyForm({ initialHeading, initialIntro }: { initialHead
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function save() {
     setSaved(false);
     startTransition(async () => {
       await updateWorkPageCopy({ heading, intro });
@@ -20,39 +19,13 @@ export function WorkPageCopyForm({ initialHeading, initialIntro }: { initialHead
   }
 
   return (
-    <form onSubmit={handleSubmit} className={`${cardClass} p-5 space-y-4`}>
-      <div>
-        <h2 className="text-[15px] font-semibold text-foreground mb-1">Page header</h2>
-        <p className="text-[12.5px] text-muted-foreground">The dark banner heading and intro at the top of /work.</p>
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Heading</label>
-        <input
-          type="text"
-          value={heading}
-          onChange={(e) => setHeading(e.target.value)}
-          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors"
-        />
-      </div>
-      <div>
-        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Intro text</label>
-        <textarea
-          value={intro}
-          onChange={(e) => setIntro(e.target.value)}
-          rows={3}
-          className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:border-ring transition-colors resize-y"
-        />
-      </div>
-      <div className="flex items-center justify-end gap-3">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
-        >
-          {isPending ? "Saving…" : "Save"}
-        </button>
-        {saved && <span className="text-[12.5px] text-success">Saved</span>}
-      </div>
-    </form>
+    <Section title="Page header" description="The dark banner heading and intro at the top of /work." save={{ onSave: save, pending: isPending, saved }}>
+      <Field label="Heading" htmlFor="workHeading">
+        <input id="workHeading" type="text" value={heading} onChange={(e) => setHeading(e.target.value)} className={fieldClass} />
+      </Field>
+      <Field label="Intro text" htmlFor="workIntro">
+        <textarea id="workIntro" value={intro} onChange={(e) => setIntro(e.target.value)} rows={3} className={areaClass} />
+      </Field>
+    </Section>
   );
 }

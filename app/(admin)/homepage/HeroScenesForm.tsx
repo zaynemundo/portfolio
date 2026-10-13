@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ChevronDown } from "lucide-react";
 import { updateHeroScenes } from "@/app/actions/settings";
 import type { HeroSceneData } from "@/app/lib/settings-db";
-import { cardClass } from "@/app/(admin)/_components/ui/Card";
+import { Section, Field, ItemCard, AddItemButton, fieldClass, areaClass } from "@/app/(admin)/_components/Section";
 
 function emptyScene(): HeroSceneData {
   return { heading: "", description: "", ctaLabel: "", ctaHref: "", start: 0, end: 0 };
@@ -21,10 +20,6 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
     setScenes((prev) => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
   }
 
-  function addScene() {
-    setScenes((prev) => [...prev, emptyScene()]);
-  }
-
   function removeScene(i: number) {
     setScenes((prev) => prev.filter((_, idx) => idx !== i));
     setCollapsed(new Set());
@@ -39,8 +34,7 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
     });
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function save() {
     setError(null);
     setSaved(false);
     startTransition(async () => {
@@ -54,146 +48,45 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className={`${cardClass} p-5 space-y-4`}>
-      <div>
-        <h2 className="text-[15px] font-semibold text-foreground mb-1">Scroll scenes</h2>
-        <p className="text-[12.5px] text-muted-foreground">
-          Each scene&rsquo;s heading/description appears as the visitor scrolls through the hero video. Start/end are the scroll-progress fractions (0–1) where the scene is visible — leave them evenly spaced across the video&rsquo;s scroll range.
-        </p>
-      </div>
-
-      <div className="space-y-4">
-        {scenes.map((scene, i) => {
-          const isCollapsed = collapsed.has(i);
-          return (
-            <div key={i} className="rounded-xl border border-border bg-card shadow-xs p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => toggleCollapsed(i)}
-                  className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground/80 transition-colors"
-                >
-                  <ChevronDown size={13} className={`transition-transform ${isCollapsed ? "-rotate-90" : ""}`} />
-                  Scene {i + 1}
-                  {isCollapsed && scene.heading && (
-                    <span className="normal-case font-normal text-muted-foreground/70">— {scene.heading}</span>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => removeScene(i)}
-                  className="text-[12px] text-destructive hover:text-destructive transition-colors"
-                >
-                  Remove
-                </button>
-              </div>
-
-              {!isCollapsed && (
-                <>
-                  <Field label="Heading" value={scene.heading} onChange={(v) => updateScene(i, { heading: v })} />
-                  <TextArea label="Description (optional)" value={scene.description ?? ""} onChange={(v) => updateScene(i, { description: v })} />
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="CTA label (optional)" value={scene.ctaLabel ?? ""} onChange={(v) => updateScene(i, { ctaLabel: v })} placeholder="Get in touch" />
-                    <Field label="CTA link (optional)" value={scene.ctaHref ?? ""} onChange={(v) => updateScene(i, { ctaHref: v })} placeholder="#contact" />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <NumberField label="Start (0–1)" value={scene.start} onChange={(v) => updateScene(i, { start: v })} />
-                    <NumberField label="End (0–1)" value={scene.end} onChange={(v) => updateScene(i, { end: v })} />
-                  </div>
-                </>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <button
-        type="button"
-        onClick={addScene}
-        className="w-full rounded-lg border border-dashed border-border text-muted-foreground text-[13px] font-medium py-2.5 hover:bg-card hover:text-foreground/90 transition-colors"
-      >
-        + Add scene
-      </button>
-
-      {error && <p className="text-[13px] text-destructive" role="alert">{error}</p>}
-
-      <div className="flex items-center justify-end gap-3">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-primary text-primary-foreground text-[13.5px] font-semibold px-4 py-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
+    <Section
+      title="Scroll scenes"
+      description="The headings that appear one after another as a visitor scrolls through the hero video. Start and end say how far through the scroll each one shows, from 0 (top) to 1 (end)."
+      save={{ onSave: save, pending: isPending, saved, error, label: "Save scenes" }}
+    >
+      {scenes.map((scene, i) => (
+        <ItemCard
+          key={i}
+          label={`Scene ${i + 1}`}
+          summary={scene.heading}
+          collapsed={collapsed.has(i)}
+          onToggle={() => toggleCollapsed(i)}
+          onRemove={() => removeScene(i)}
         >
-          {isPending ? "Saving…" : "Save scenes"}
-        </button>
-        {saved && <span className="text-[12.5px] text-success">Saved</span>}
-      </div>
-    </form>
-  );
-}
-
-function Field({
-  label, value, onChange, placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-}) {
-  return (
-    <div>
-      <label className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
-      <input
-        type="text"
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors"
-      />
-    </div>
-  );
-}
-
-function TextArea({
-  label, value, onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div>
-      <label className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        rows={2}
-        className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:border-ring transition-colors resize-y"
-      />
-    </div>
-  );
-}
-
-function NumberField({
-  label, value, onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div>
-      <label className="block text-xs font-medium text-muted-foreground mb-1.5">{label}</label>
-      <input
-        type="number"
-        step="0.01"
-        min="0"
-        max="1"
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors"
-      />
-    </div>
+          <Field label="Heading">
+            <input type="text" value={scene.heading} onChange={(e) => updateScene(i, { heading: e.target.value })} className={fieldClass} />
+          </Field>
+          <Field label="Description (optional)">
+            <textarea value={scene.description ?? ""} onChange={(e) => updateScene(i, { description: e.target.value })} rows={2} className={areaClass} />
+          </Field>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Field label="Button label (optional)">
+              <input type="text" value={scene.ctaLabel ?? ""} placeholder="Get in touch" onChange={(e) => updateScene(i, { ctaLabel: e.target.value })} className={fieldClass} />
+            </Field>
+            <Field label="Button link (optional)">
+              <input type="text" value={scene.ctaHref ?? ""} placeholder="#contact" onChange={(e) => updateScene(i, { ctaHref: e.target.value })} className={fieldClass} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Start (0–1)">
+              <input type="number" step="0.01" min="0" max="1" value={scene.start} onChange={(e) => updateScene(i, { start: Number(e.target.value) })} className={fieldClass} />
+            </Field>
+            <Field label="End (0–1)">
+              <input type="number" step="0.01" min="0" max="1" value={scene.end} onChange={(e) => updateScene(i, { end: Number(e.target.value) })} className={fieldClass} />
+            </Field>
+          </div>
+        </ItemCard>
+      ))}
+      <AddItemButton onClick={() => setScenes((prev) => [...prev, emptyScene()])}>Add scene</AddItemButton>
+    </Section>
   );
 }

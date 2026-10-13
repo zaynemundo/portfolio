@@ -7,7 +7,7 @@ export default async function BlogPageSettingsPage() {
 
   return (
     <div>
-      <PageHeader title="Insights Page" subtitle="The header banner on /insights. Articles are managed on the Blog page." />
+      <PageHeader title="Insights page" subtitle="The banner on /insights. Articles are managed in the Blog list." secondaryHref="/insights" secondaryLabel="View on site" secondaryNewTab />
 
       <BlogPageCopyForm initialHeading={settings.blogPageHeading} initialIntro={settings.blogPageIntro} />
     </div>

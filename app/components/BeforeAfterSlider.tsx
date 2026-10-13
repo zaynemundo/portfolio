@@ -20,7 +20,7 @@ export function BeforeAfterSlider({
   afterLabel = "After",
   caption,
   bg = "#f4f4f5",
-  aspect = "aspect-[16/10]",
+  aspect = "aspect-[1000/544]",
 }: Props) {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -70,6 +70,20 @@ export function BeforeAfterSlider({
     };
   }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove]);
 
+  // Each side sharpens as the divider uncovers more of it and softens as it is
+  // covered, so the eye follows the one being revealed. Level at the start,
+  // the "after" side is fully sharp and the "before" side is part-way there.
+  const MAX_BLUR = 8;
+  const amount = (n: number) => Math.max(0, Math.min(1, n));
+  const beforeBlur = MAX_BLUR * amount((70 - sliderPosition) / 40); // clears from 30% to 70%
+  const afterBlur = MAX_BLUR * amount((sliderPosition - 50) / 40);  // softens from 50% to 90%
+  const softened = (blur: number): React.CSSProperties => ({
+    filter: `blur(${blur.toFixed(2)}px)`,
+    // Scaled up a touch while blurred so the soft edge never shows the frame behind.
+    transform: `scale(${(1 + blur * 0.005).toFixed(4)})`,
+    transition: "filter 0.12s linear, transform 0.12s linear",
+  });
+
   return (
     <div className="w-full">
       <div
@@ -89,7 +103,7 @@ export function BeforeAfterSlider({
         <div className="absolute inset-0 w-full h-full">
           {beforeImage ? (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={beforeImage} alt={beforeLabel} className="w-full h-full object-cover object-top" />
+            <img src={beforeImage} alt={beforeLabel} className="w-full h-full object-cover object-top" style={softened(beforeBlur)} />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-200/80 p-6 text-center">
               <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 font-bold">
@@ -112,7 +126,7 @@ export function BeforeAfterSlider({
         >
           {afterImage ? (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={afterImage} alt={afterLabel} className="w-full h-full object-cover object-top" />
+            <img src={afterImage} alt={afterLabel} className="w-full h-full object-cover object-top" style={softened(afterBlur)} />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-900 text-white p-6 text-center">
               <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-bold">

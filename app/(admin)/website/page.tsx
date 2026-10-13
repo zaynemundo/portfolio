@@ -2,7 +2,9 @@ import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
+import { ExternalLink, Home, IdCard, Layers, Newspaper } from "lucide-react";
 import { routes } from "@/app/(admin)/_routes";
+import { cardClass } from "@/app/(admin)/_components/ui/Card";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { Panel, PanelRow, StatStrip } from "@/app/(admin)/_components/OverviewParts";
 
@@ -20,10 +22,10 @@ const getWebsiteOverview = unstable_cache(
 );
 
 const PAGES = [
-  { href: routes.homepage, name: "Home", detail: "Hero, selected work and insights copy", live: "/" },
-  { href: routes.about, name: "About", detail: "Profile, experience, skills and CV", live: "/#about" },
-  { href: routes.caseStudies.list, name: "Work", detail: "Case studies and the Work page", live: "/work" },
-  { href: routes.blog.list, name: "Blog", detail: "Articles and the Insights page", live: "/insights" },
+  { href: routes.homepage, name: "Home", detail: "Hero banner, selected work and insights", live: "/", icon: <Home size={16} /> },
+  { href: routes.about, name: "About", detail: "Identity, bio, experience and skills", live: "/#about", icon: <IdCard size={16} /> },
+  { href: routes.caseStudies.list, name: "Work", detail: "Case studies and the Work page", live: "/work", icon: <Layers size={16} /> },
+  { href: routes.blog.list, name: "Blog", detail: "Articles and the Insights page", live: "/insights", icon: <Newspaper size={16} /> },
 ];
 
 export default async function WebsiteOverviewPage() {
@@ -89,18 +91,25 @@ export default async function WebsiteOverviewPage() {
       </div>
 
       <section className="mt-8">
-        <h2 className="text-[13.5px] font-semibold text-foreground mb-3">Pages</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <h2 className="text-[14.5px] font-semibold tracking-tight text-foreground mb-3">Pages</h2>
+        <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
           {PAGES.map((page) => (
-            <div key={page.name} className="rounded-xl border border-border bg-card shadow-xs p-4">
-              <p className="text-[14px] font-semibold text-foreground">{page.name}</p>
-              <p className="text-[12.5px] text-muted-foreground mt-0.5 mb-3">{page.detail}</p>
-              <div className="flex items-center gap-3 text-[12.5px] font-medium">
-                <Link href={page.href} className="text-primary hover:text-primary/80 transition-colors">Edit</Link>
-                <a href={page.live} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                  View live
-                </a>
-              </div>
+            <div key={page.name} className={`${cardClass} group relative p-4 hover:border-primary/40 transition-colors`}>
+              <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-accent text-accent-foreground">{page.icon}</span>
+              {/* Covers the card, so a click anywhere on it opens the editor. */}
+              <Link href={page.href} className="text-[14px] font-semibold text-foreground group-hover:text-primary transition-colors after:absolute after:inset-0">
+                {page.name}
+              </Link>
+              <p className="text-[12.5px] text-muted-foreground mt-0.5">{page.detail}</p>
+              <a
+                href={page.live}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative z-10 mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >
+                View live
+                <ExternalLink size={12} />
+              </a>
             </div>
           ))}
         </div>

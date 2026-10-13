@@ -10,15 +10,16 @@ import { ProfileForm } from "./ProfileForm";
 import { ServicesForm } from "./ServicesForm";
 import { ExperienceForm } from "./ExperienceForm";
 import { EducationForm } from "./EducationForm";
+import { Section, SectionStack } from "@/app/(admin)/_components/Section";
 import { tabBarClass, tabClass } from "@/app/(admin)/_components/ui/Card";
 
 type Tab = "profile" | "services" | "experience" | "education";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "profile", label: "Profile" },
-  { id: "services", label: "What I Do" },
+  { id: "services", label: "What I do" },
   { id: "experience", label: "Experience" },
-  { id: "education", label: "Education & Skills" },
+  { id: "education", label: "Education & skills" },
 ];
 
 interface Props {
@@ -42,7 +43,7 @@ export function AboutTabs({ settings, profile, services, experience, education }
 
   return (
     <div>
-      <PageHeader title="About" subtitle="Your identity, contact info, bio, experience, education & skills, and what you do — all feed the About section on the homepage." />
+      <PageHeader title="About" subtitle="Who you are: everything that feeds the About section of the homepage." secondaryHref="/#about" secondaryLabel="View on site" secondaryNewTab />
 
       <div className={tabBarClass} role="tablist">
         {TABS.map((t) => (
@@ -60,26 +61,16 @@ export function AboutTabs({ settings, profile, services, experience, education }
       </div>
 
       {tab === "profile" && (
-        <div className="space-y-8">
+        <SectionStack>
           <SettingsForm initial={settings} />
-          <div className="grid grid-cols-2 gap-4">
-            <FileUploadCard
-              title="Resume / CV"
-              description="PDF, shown on the Resume download link"
-              currentUrl={settings.resumeUrl}
-              accept="application/pdf"
-              kind="resume"
-            />
-            <FileUploadCard
-              title="Portrait photo"
-              description="JPG, PNG, or WebP, used in the About section"
-              currentUrl={settings.portraitUrl}
-              accept="image/jpeg,image/png,image/webp"
-              kind="portrait"
-            />
-          </div>
+          <Section title="CV and portrait" description="The PDF behind the Resume download link, and the photo in the About section. Each uploads as soon as you choose a file." card={false}>
+            <div className="grid sm:grid-cols-2 gap-4 items-start">
+              <FileUploadCard title="Portrait photo" description="JPG, PNG or WebP" currentUrl={settings.portraitUrl} accept="image/jpeg,image/png,image/webp" kind="portrait" />
+              <FileUploadCard title="Resume / CV" description="PDF" currentUrl={settings.resumeUrl} accept="application/pdf" kind="resume" />
+            </div>
+          </Section>
           <ProfileForm chapter={profile} />
-        </div>
+        </SectionStack>
       )}
       {tab === "services" && <ServicesForm chapter={services} />}
       {tab === "experience" && <ExperienceForm chapter={experience} />}

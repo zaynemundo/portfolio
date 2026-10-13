@@ -3,6 +3,9 @@ import { getClientLogos } from "@/app/lib/client-logos-db";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { WorkPageCopyForm } from "./WorkPageCopyForm";
 import { ClientLogosManager } from "./ClientLogosManager";
+import { SectionStack } from "@/app/(admin)/_components/Section";
+import { BackLink } from "@/app/(admin)/_components/BackLink";
+import { routes } from "@/app/(admin)/_routes";
 
 export default async function WorkPageSettingsPage() {
   const settings = await getSiteSettings();
@@ -10,12 +13,15 @@ export default async function WorkPageSettingsPage() {
 
   return (
     <div>
-      <PageHeader title="Work Page" subtitle="The header banner and client logo marquee on /work." />
+      <BackLink href={routes.caseStudies.list} label="Work" />
+      <div className="mt-4">
+        <PageHeader title="Work page" subtitle="The banner and the client logos on /work. Case studies are managed in the Work list." secondaryHref="/work" secondaryLabel="View on site" secondaryNewTab />
+      </div>
 
-      <div className="space-y-8">
+      <SectionStack>
         <WorkPageCopyForm initialHeading={settings.workPageHeading} initialIntro={settings.workPageIntro} />
         <ClientLogosManager initial={logos} />
-      </div>
+      </SectionStack>
     </div>
   );
 }
