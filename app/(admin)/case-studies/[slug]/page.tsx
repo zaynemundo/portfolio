@@ -1,25 +1,26 @@
-import { notFound } from "next/navigation";
-import { unstable_cache } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
-import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { ProjectForm } from "../ProjectForm";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
 
 interface Props {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
-const getCaseStudy = unstable_cache(
-  (id: string) => prisma.project.findUnique({ where: { id } }),
-  ["case-study-detail"],
-  { tags: [CACHE_TAGS.caseStudies], revalidate: 60 }
-);
+// Read fresh every time: an editing form must never open on an old copy,
+// or saving it would put the old content back.
+export const dynamic = "force-dynamic";
 
 export default async function EditCaseStudyPage({ params }: Props) {
-  const { id } = await params;
-  const project = await getCaseStudy(id);
-  if (!project) notFound();
+  const { slug } = await params;
+  const project = await prisma.project.findUnique({ where: { slug } });
+  if (!project) {
+    // Links saved before the address used the case study's name pointed at its id.
+    const byId = await prisma.project.findUnique({ where: { id: slug }, select: { slug: true } });
+    if (byId) redirect(routes.caseStudies.item(byId.slug));
+    notFound();
+  }
 
   const theme = (project.theme ?? {}) as { bg?: string; dark?: boolean };
   const logo = (project.logo ?? {}) as { src?: string; initials?: string; bg?: string; light?: boolean };
