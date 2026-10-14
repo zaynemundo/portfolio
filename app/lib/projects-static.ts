@@ -40,7 +40,7 @@ export const staticProjects: ProjectCard[] = [
     poster: "/case-studies/monili.jpg",
   },
   {
-    slug: "po-marinas",
+    slug: "pno-marinas",
     name: "P&O Marinas",
     tagline:
       "A DP World marina that buried its core service. Rebuilt around berth rental with a custom interactive map.",

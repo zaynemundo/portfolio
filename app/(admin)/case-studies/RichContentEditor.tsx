@@ -26,7 +26,7 @@ export function RichContentEditor({ value, onChange }: { value: Obj; onChange: (
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [added, setAdded] = useState<Set<string>>(new Set());
 
-  const sections = RICH_SECTIONS.filter((section) => !section.elsewhere);
+  const sections = RICH_SECTIONS.filter((section) => !section.elsewhere && !section.retired);
   const shown = sections.filter((section) => !section.optional || added.has(section.id) || sectionHasContent(section, value));
   const addable = sections.filter((section) => !shown.includes(section));
 

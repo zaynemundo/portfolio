@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, ChevronLeft, Search, X } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, GripVertical, Search, X } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 import { Table, THead, Th, SortTh, type SortDirection } from "./Table";
 import { PagedBody, PAGE_SIZE } from "./Paged";
@@ -17,6 +17,9 @@ import { CardFrame } from "./Card";
      - column names that sort when clicked
      - a click anywhere on a row to open it
      - ten rows at a time, with page buttons
+     - optionally, a handle at the start of each row to drag it into a new
+       order: the row follows the pointer, the others slide aside, a dashed
+       slot marks where it will land, and the order saves on drop
 
    The page still writes each row's cells as ordinary <td>s; alongside them it
    says what text the row is found by, what each column sorts on, and which
@@ -64,7 +67,24 @@ interface Props {
   /** Off when the table sits in a container with its own padding. */
   inset?: boolean;
   tableClassName?: string;
+  /** Turns on dragging rows into a new order. Called with every row's id, in the new order, after each move; a server action can be passed straight in. */
+  onReorder?: (ids: string[]) => Promise<{ ok: boolean }>;
 }
+
+/** A row being dragged: where it started, the slot it's over, and the rows' places when the drag began. */
+interface Drag {
+  id: string;
+  from: number;
+  to: number;
+  startY: number;
+  dy: number;
+  slots: { top: number; height: number }[];
+  /** Released, and gliding into place. */
+  dropping: boolean;
+}
+
+/** How long a dropped row takes to glide into its slot. */
+const DROP_MS = 160;
 
 const DEFAULT_ROW = "border-b border-border/70 last:border-b-0 hover:bg-primary/[0.06]";
 
@@ -219,11 +239,26 @@ function compareValues(a: string | number, b: string | number): number {
   return String(a).localeCompare(String(b), undefined, { sensitivity: "base", numeric: true });
 }
 
-export function DataTable({ columns, rows, filters = [], searchPlaceholder = "Search…", toolbar = "auto", defaultSort, inset = true, tableClassName }: Props) {
+export function DataTable({ columns, rows: givenRows, filters = [], searchPlaceholder = "Search…", toolbar = "auto", defaultSort, inset = true, tableClassName, onReorder }: Props) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [chosen, setChosen] = useState<Record<string, string[]>>({});
   const [sort, setSort] = useState(defaultSort ?? null);
+
+  // Reordering. `order` holds the ids as last dragged, so a move shows at once
+  // rather than after the save; rows added or removed since fall in at the end
+  // or drop out.
+  const [order, setOrder] = useState<string[] | null>(null);
+  const [drag, setDrag] = useState<Drag | null>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [saveState, setSaveState] = useState<"saved" | "failed" | null>(null);
+  const [saving, startSaving] = useTransition();
+  const rows = useMemo(() => {
+    if (!order) return givenRows;
+    const byId = new Map(givenRows.map((r) => [r.id, r]));
+    const kept = order.flatMap((id) => byId.get(id) ?? []);
+    return [...kept, ...givenRows.filter((r) => !order.includes(r.id))];
+  }, [givenRows, order]);
 
   const sortable = useMemo(() => columns.map((_, i) => rows.some((r) => r.sort?.[i] !== undefined)), [columns, rows]);
   const searchable = rows.some((r) => r.search !== undefined);
@@ -277,6 +312,94 @@ export function DataTable({ columns, rows, filters = [], searchPlaceholder = "Se
   const active = filters.filter((f) => chosen[f.key]?.length);
   const narrowed = query.trim() !== "" || active.length > 0;
   const nothingMatches = visible.length === 0;
+  // Dragging only makes sense on the whole list in its saved order.
+  const canReorder = !!onReorder && !sort && !narrowed;
+
+  function move(fromId: string, toId: string) {
+    const ids = rows.map((r) => r.id);
+    const from = ids.indexOf(fromId);
+    const to = ids.indexOf(toId);
+    if (from < 0 || to < 0 || from === to || !onReorder) return;
+    const before = order;
+    const next = [...ids];
+    next.splice(from, 1);
+    next.splice(to, 0, fromId);
+    setOrder(next);
+    setSaveState(null);
+    startSaving(async () => {
+      const result = await onReorder(next).catch(() => ({ ok: false }));
+      if (!result.ok) {
+        setOrder(before);
+        setSaveState("failed");
+        return;
+      }
+      setSaveState("saved");
+      router.refresh();
+    });
+  }
+
+  /** Pointer down on a row's handle: measure the rows on show, then follow the pointer. */
+  function startDrag(e: React.PointerEvent<HTMLButtonElement>, index: number) {
+    if (!canReorder || e.button !== 0 || drag) return;
+    const frame = frameRef.current;
+    if (!frame) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const frameTop = frame.getBoundingClientRect().top;
+    const slots = Array.from(frame.querySelectorAll<HTMLTableRowElement>("tbody > tr[data-row]")).map((tr) => {
+      const rect = tr.getBoundingClientRect();
+      return { top: rect.top - frameTop, height: rect.height };
+    });
+    setDrag({ id: visible[index].id, from: index, to: index, startY: e.clientY, dy: 0, slots, dropping: false });
+  }
+
+  function followPointer(e: React.PointerEvent) {
+    if (!drag || drag.dropping) return;
+    const { slots, from } = drag;
+    const first = slots[0].top;
+    const last = slots[slots.length - 1];
+    // Kept inside the table, so the row can't be dragged off the end.
+    const dy = Math.max(first - slots[from].top, Math.min(last.top + last.height - slots[from].height - slots[from].top, e.clientY - drag.startY));
+    const middle = slots[from].top + slots[from].height / 2 + dy;
+    let to = from;
+    slots.forEach((slot, i) => {
+      const slotMiddle = slot.top + slot.height / 2;
+      if (i > from && middle > slotMiddle) to = i;
+      if (i < from && middle < slotMiddle && to >= from) to = i;
+    });
+    setDrag({ ...drag, dy, to });
+  }
+
+  /** Where the dragged row will land, measured from the top of the table. */
+  function slotTop(d: Drag) {
+    const { slots, from, to } = d;
+    return to > from ? slots[to].top + slots[to].height - slots[from].height : slots[to].top;
+  }
+
+  function endDrag(cancel = false) {
+    if (!drag || drag.dropping) return;
+    if (cancel || drag.to === drag.from) {
+      setDrag({ ...drag, to: drag.from, dy: 0, dropping: true });
+      window.setTimeout(() => setDrag(null), DROP_MS);
+      return;
+    }
+    // Glide into the slot, then put the row there for real.
+    const landed = drag;
+    setDrag({ ...drag, dy: slotTop(drag) - drag.slots[drag.from].top, dropping: true });
+    window.setTimeout(() => {
+      move(landed.id, visible[landed.to].id);
+      setDrag(null);
+    }, DROP_MS);
+  }
+
+  /** How far a row that isn't being dragged moves aside to open the slot. */
+  function shiftFor(index: number): number {
+    if (!drag) return 0;
+    const { from, to, slots } = drag;
+    if (from < to && index > from && index <= to) return -slots[from].height;
+    if (to < from && index >= to && index < from) return slots[from].height;
+    return 0;
+  }
 
   function clear() {
     setQuery("");
@@ -288,11 +411,27 @@ export function DataTable({ columns, rows, filters = [], searchPlaceholder = "Se
       {showToolbar && (searchable || filters.length > 0) && (
         <div className={cn("flex flex-col gap-2 mb-4", inset && "mx-5")}>
           <div className="flex flex-wrap items-center justify-end gap-2.5">
-            {narrowed && (
+            {narrowed ? (
               <p className="mr-auto text-[12.5px] text-muted-foreground tabular-nums">
                 {visible.length} of {rows.length}
               </p>
-            )}
+            ) : onReorder ? (
+              <p className="mr-auto text-[12.5px] text-muted-foreground" aria-live="polite">
+                {saving ? (
+                  "Saving the order…"
+                ) : saveState === "failed" ? (
+                  <span className="font-medium text-negative" role="alert">The order couldn&apos;t be saved. Try again.</span>
+                ) : saveState === "saved" ? (
+                  <span className="inline-flex items-center gap-1 font-medium text-positive"><Check size={13} />Order saved</span>
+                ) : drag ? (
+                  `Drop to move it to position ${drag.to + 1}.`
+                ) : sort ? (
+                  <>Sorted by a column. <button type="button" onClick={() => setSort(null)} className="font-medium text-primary hover:underline">Back to your order</button> to drag rows.</>
+                ) : (
+                  "Drag a row by its handle to change the order."
+                )}
+              </p>
+            ) : null}
             {searchable && <SearchBox value={query} onChange={setQuery} placeholder={searchPlaceholder} className="w-72 max-w-full" />}
             {filters.length > 0 && <FilterMenu filters={filters} chosen={chosen} onApply={(key, values) => setChosen({ ...chosen, [key]: values })} />}
           </div>
@@ -323,9 +462,18 @@ export function DataTable({ columns, rows, filters = [], searchPlaceholder = "Se
         </div>
       )}
 
-      <CardFrame inset={inset}>
+      <CardFrame inset={inset} ref={frameRef} className="relative">
+        {/* The slot the dragged row will land in. */}
+        {drag && drag.to !== drag.from && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-2 rounded-lg border-2 border-dashed border-primary/50 bg-primary/[0.06] transition-[top] duration-200 ease-out"
+            style={{ top: slotTop(drag) + 3, height: drag.slots[drag.from].height - 6 }}
+          />
+        )}
         <Table className={tableClassName}>
           <THead>
+            {onReorder && <Th className="w-8 pl-3 pr-0"><span className="sr-only">Order</span></Th>}
             {columns.map((column, i) =>
               sortable[i] ? (
                 <SortTh
@@ -349,7 +497,7 @@ export function DataTable({ columns, rows, filters = [], searchPlaceholder = "Se
           <PagedBody key={`${query}|${JSON.stringify(chosen)}|${sort?.column}|${sort?.direction}`}>
             {nothingMatches ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-8 text-center text-[13px] text-muted-foreground">
+                <td colSpan={columns.length + (onReorder ? 1 : 0)} className="px-4 py-8 text-center text-[13px] text-muted-foreground">
                   Nothing here matches.
                   {narrowed && (
                     <>
@@ -362,15 +510,65 @@ export function DataTable({ columns, rows, filters = [], searchPlaceholder = "Se
                 </td>
               </tr>
             ) : (
-              visible.map((row) => (
-                <tr
-                  key={row.id}
-                  onClick={row.href || row.onClick ? (e) => openRow(row, e) : undefined}
-                  className={cn(DEFAULT_ROW, (row.href || row.onClick) && "cursor-pointer", row.className)}
-                >
-                  {row.cells}
-                </tr>
-              ))
+              visible.map((row, i) => {
+                const lifted = drag?.id === row.id;
+                const style: React.CSSProperties | undefined = drag
+                  ? lifted
+                    ? {
+                        transform: `translateY(${drag.dy}px)`,
+                        transition: drag.dropping ? `transform ${DROP_MS}ms ease-out` : "none",
+                        position: "relative",
+                        zIndex: 10,
+                      }
+                    : { transform: `translateY(${shiftFor(i)}px)`, transition: "transform 200ms ease-out", position: "relative" }
+                  : undefined;
+                return (
+                  <tr
+                    key={row.id}
+                    data-row
+                    style={style}
+                    onClick={row.href || row.onClick ? (e) => openRow(row, e) : undefined}
+                    className={cn(
+                      DEFAULT_ROW,
+                      (row.href || row.onClick) && "cursor-pointer",
+                      // Table rows can't take a box-shadow, so the lift is a drop-shadow filter on the row and a hairline drawn inside its cells (a border would widen the columns).
+                      lifted && "[filter:drop-shadow(0_10px_18px_rgba(0,0,0,0.16))] [&>td]:bg-card [&>td]:shadow-[inset_0_1px_0_var(--color-border),inset_0_-1px_0_var(--color-border)]",
+                      drag && "hover:bg-transparent",
+                      row.className
+                    )}
+                  >
+                    {onReorder && (
+                      <td className="w-8 pl-3 pr-0">
+                        <button
+                          type="button"
+                          disabled={!canReorder}
+                          onPointerDown={(e) => startDrag(e, i)}
+                          onPointerMove={followPointer}
+                          onPointerUp={() => endDrag()}
+                          onPointerCancel={() => endDrag(true)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape" && drag) return endDrag(true);
+                            const step = e.key === "ArrowUp" ? -1 : e.key === "ArrowDown" ? 1 : 0;
+                            const neighbour = visible[i + step];
+                            if (!step || !neighbour || drag) return;
+                            e.preventDefault();
+                            move(row.id, neighbour.id);
+                          }}
+                          aria-label="Drag to reorder, or use the up and down arrow keys"
+                          title={canReorder ? "Drag to reorder" : "Clear the sort and search to reorder"}
+                          className={cn(
+                            "flex h-7 w-6 touch-none items-center justify-center rounded-md text-muted-foreground/60 hover:bg-muted hover:text-foreground transition-colors disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent",
+                            lifted ? "cursor-grabbing bg-muted text-foreground" : "cursor-grab"
+                          )}
+                        >
+                          <GripVertical size={15} />
+                        </button>
+                      </td>
+                    )}
+                    {row.cells}
+                  </tr>
+                );
+              })
             )}
           </PagedBody>
         </Table>

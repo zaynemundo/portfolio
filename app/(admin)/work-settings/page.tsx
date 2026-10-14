@@ -13,7 +13,7 @@ export default async function WorkPageSettingsPage() {
 
   return (
     <div>
-      <BackLink href={routes.caseStudies.list} label="Work" />
+      <BackLink href={routes.caseStudies.list} label="Case Studies" iconOnly />
       <div className="mt-4">
         <PageHeader title="Work page" subtitle="The banner and the client logos on /work. Case studies are managed in the Work list." secondaryHref="/work" secondaryLabel="View on site" secondaryNewTab />
       </div>

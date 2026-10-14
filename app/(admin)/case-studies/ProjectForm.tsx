@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { createProject, updateProject, type ProjectFormData } from "@/app/actions/projects";
+import { useMemo, useRef, useState, useTransition } from "react";
+import { Upload } from "lucide-react";
+import { createProject, updateProject, uploadProjectLogo, type ProjectFormData } from "@/app/actions/projects";
 import { ImageManager } from "./ImageManager";
 import { RichContentEditor, FieldsEditor } from "./RichContentEditor";
-import { RICH_SECTIONS, STRUCTURED_KEYS, cleanRichContent, isLongForm } from "./rich-schema";
+import { RICH_SECTIONS, STRUCTURED_KEYS, cleanRichContent } from "./rich-schema";
 import { SaveBar, useSaveState, useUnsavedWarning } from "@/app/(admin)/_components/SaveBar";
 import { cardClass, tabBarClass, tabClass } from "@/app/(admin)/_components/ui/Card";
 import { Switch } from "@/app/(admin)/_components/ui/Switch";
@@ -25,12 +26,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "basics", label: "Basics" },
   { id: "media", label: "Media" },
   { id: "story", label: "Story" },
-];
-
-type Story = "detailed" | "simple";
-const STORIES: { id: Story; label: string }[] = [
-  { id: "detailed", label: "Detailed" },
-  { id: "simple", label: "Simple" },
 ];
 
 const WORK_TYPES = ["Freelance", "Full-time", "Personal Project"];
@@ -65,22 +60,24 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   const [year, setYear] = useState(initial?.year ?? "");
   const [workType, setWorkType] = useState(initial?.workType ?? "Freelance");
   const [technologies, setTechnologies] = useState(initial?.technologies ?? "");
-  const [challenge, setChallenge] = useState(initial?.challenge ?? "");
-  const [approach, setApproach] = useState(initial?.approach ?? "");
-  const [outcome, setOutcome] = useState(initial?.outcome ?? "");
-  const [highlights, setHighlights] = useState(initial?.highlights ?? "");
-  const [accessibility, setAccessibility] = useState(initial?.accessibility ?? "");
-  const [performance, setPerformance] = useState(initial?.performance ?? "");
-  const [seo, setSeo] = useState(initial?.seo ?? "");
+  // The old short write-up. No longer edited here; the values are carried through unchanged on save.
+  const [challenge] = useState(initial?.challenge ?? "");
+  const [approach] = useState(initial?.approach ?? "");
+  const [outcome] = useState(initial?.outcome ?? "");
+  const [highlights] = useState(initial?.highlights ?? "");
+  const [accessibility] = useState(initial?.accessibility ?? "");
+  const [performance] = useState(initial?.performance ?? "");
+  const [seo] = useState(initial?.seo ?? "");
   const [client, setClient] = useState(initial?.client ?? "");
   const [liveUrl, setLiveUrl] = useState(initial?.liveUrl ?? "");
   const [imageAlt, setImageAlt] = useState(initial?.imageAlt ?? "");
   const [imageLabels, setImageLabels] = useState(initial?.imageLabels ?? "");
-  const [themeBg, setThemeBg] = useState(initial?.themeBg ?? "#f4f4f5");
-  const [themeDark, setThemeDark] = useState(initial?.themeDark ?? false);
-  const [logoInitials, setLogoInitials] = useState(initial?.logoInitials ?? "");
-  const [logoBg, setLogoBg] = useState(initial?.logoBg ?? "#e5e5e5");
-  const [logoLight, setLogoLight] = useState(initial?.logoLight ?? false);
+  // The card tint and the old initials tile no longer have controls; their saved values are carried through unchanged.
+  const [themeBg] = useState(initial?.themeBg ?? "#f4f4f5");
+  const [themeDark] = useState(initial?.themeDark ?? false);
+  const [logoInitials] = useState(initial?.logoInitials ?? "");
+  const [logoBg] = useState(initial?.logoBg ?? "#e5e5e5");
+  const [logoLight] = useState(initial?.logoLight ?? false);
   const [logoSrc, setLogoSrc] = useState(initial?.logoSrc ?? "");
   const [rich, setRich] = useState<Obj>(initialRich.structured);
   const [otherJson, setOtherJson] = useState(
@@ -92,14 +89,8 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const cleanedRich = useMemo(() => cleanRichContent(rich), [rich]);
-  const longForm = isLongForm(cleanedRich);
 
   const [tab, setTab] = useState<Tab>("basics");
-  // Opens on whichever write-up the public page is using; a new case study starts on the detailed one.
-  const [story, setStory] = useState<Story>(() =>
-    isLongForm(cleanRichContent(initialRich.structured)) || !(initial?.challenge || initial?.approach || initial?.outcome) ? "detailed" : "simple",
-  );
-
   // "Other data" is free-typed JSON; null means it doesn't parse yet.
   const other = useMemo<Obj | null>(() => {
     if (!otherJson.trim()) return {};
@@ -270,19 +261,8 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
               </div>
             </Section>
 
-            <Section title="Card and logo" description="The tint behind this project's card, and the small client logo tile shown with it.">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <ColorField label="Card background" id="themeBg" value={themeBg} onChange={setThemeBg} />
-                <ToggleField label="Text on the card" on={themeDark} onChange={setThemeDark} onText="Light text, for a dark background" offText="Dark text, for a light background" />
-                <ColorField label="Logo tile background" id="logoBg" value={logoBg} onChange={setLogoBg} />
-                <ToggleField label="Initials on the tile" on={logoLight} onChange={setLogoLight} onText="Light initials, for a dark tile" offText="Dark initials, for a light tile" />
-                <Field label="Logo initials" htmlFor="logoInitials">
-                  <input id="logoInitials" value={logoInitials} onChange={(e) => setLogoInitials(e.target.value)} placeholder="ZM" className={fieldClass} />
-                </Field>
-                <Field label="Logo image link (optional)" htmlFor="logoSrc" hint="Used instead of the initials.">
-                  <input id="logoSrc" value={logoSrc} onChange={(e) => setLogoSrc(e.target.value)} className={fieldClass} />
-                </Field>
-              </div>
+            <Section title="Logo" description="The client's logo, shown above the project's name on its card on the Work page. Leave it empty to show the name on its own.">
+              <LogoField value={logoSrc} onChange={setLogoSrc} />
             </Section>
           </SectionStack>
         )}
@@ -290,23 +270,6 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
         {/* ── Story ────────────────────────────────────────────────────── */}
         {tab === "story" && (
           <div>
-            <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2">
-              <div className="inline-flex items-center gap-0.5 rounded-xl border border-border bg-card p-1" role="tablist" aria-label="Write-up">
-                {STORIES.map((option) => (
-                  <button key={option.id} type="button" role="tab" aria-selected={story === option.id} onClick={() => setStory(option.id)} className={tabClass(story === option.id)}>
-                    {option.label}
-                    {(option.id === "detailed") === longForm && <span className="ml-1.5 font-medium opacity-60">· on the site</span>}
-                  </button>
-                ))}
-              </div>
-              <p className="min-w-0 flex-1 text-[12.5px] text-muted-foreground">
-                {longForm
-                  ? "The public page shows the detailed write-up. The simple one is kept but not displayed."
-                  : "The public page shows the simple write-up. It switches to the detailed one as soon as a detailed chapter has content."}
-              </p>
-            </div>
-
-            {story === "detailed" ? (
               <div className="space-y-3">
                 <RichContentEditor value={rich} onChange={setRich} />
 
@@ -330,36 +293,6 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
                   </details>
                 )}
               </div>
-            ) : (
-              <SectionStack>
-                <Section title="The write-up" description="Challenge, Approach and Outcome are needed on every case study, even one that uses the detailed write-up.">
-                  <Field label="Challenge" htmlFor="challenge">
-                    <textarea id="challenge" value={challenge} onChange={(e) => setChallenge(e.target.value)} rows={4} className={areaClass} />
-                  </Field>
-                  <Field label="Approach" htmlFor="approach">
-                    <textarea id="approach" value={approach} onChange={(e) => setApproach(e.target.value)} rows={4} className={areaClass} />
-                  </Field>
-                  <Field label="Key contributions, one per line" htmlFor="highlights">
-                    <textarea id="highlights" value={highlights} onChange={(e) => setHighlights(e.target.value)} rows={4} className={areaClass} />
-                  </Field>
-                  <Field label="Outcome" htmlFor="outcome">
-                    <textarea id="outcome" value={outcome} onChange={(e) => setOutcome(e.target.value)} rows={3} className={areaClass} />
-                  </Field>
-                </Section>
-
-                <Section title="Optional notes" description="Short extra paragraphs. Leave any of them empty to leave it off the page.">
-                  <Field label="Accessibility" htmlFor="accessibility">
-                    <textarea id="accessibility" value={accessibility} onChange={(e) => setAccessibility(e.target.value)} rows={2} className={areaClass} />
-                  </Field>
-                  <Field label="Performance" htmlFor="performance">
-                    <textarea id="performance" value={performance} onChange={(e) => setPerformance(e.target.value)} rows={2} className={areaClass} />
-                  </Field>
-                  <Field label="SEO" htmlFor="seo">
-                    <textarea id="seo" value={seo} onChange={(e) => setSeo(e.target.value)} rows={2} className={areaClass} />
-                  </Field>
-                </Section>
-              </SectionStack>
-            )}
           </div>
         )}
       </div>
@@ -376,34 +309,61 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   );
 }
 
-/** A colour as a swatch that opens the colour picker, with its code beside it for pasting an exact value. */
-function ColorField({ label, id, value, onChange }: { label: string; id: string; value: string; onChange: (value: string) => void }) {
-  // The picker only understands six-digit codes; anything else still shows in the text box.
-  const pickable = /^#[0-9a-f]{6}$/i.test(value) ? value : "#ffffff";
-  return (
-    <Field label={label} htmlFor={id}>
-      <div className={`${fieldClass} flex items-center gap-2.5`}>
-        <input
-          type="color"
-          value={pickable}
-          onChange={(e) => onChange(e.target.value)}
-          aria-label={`${label}: pick a colour`}
-          className="h-6 w-6 shrink-0 cursor-pointer rounded-md border-0 bg-transparent p-0"
-        />
-        <input id={id} value={value} onChange={(e) => onChange(e.target.value)} className="min-w-0 flex-1 border-0 bg-transparent p-0 font-mono text-[13px] text-foreground focus:outline-none" />
-      </div>
-    </Field>
-  );
-}
+/** The logo upload: a preview that is also the button, with Remove once there's a logo. */
+function LogoField({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-/** An on/off choice shown as a field: what it is currently set to on the left, the switch on the right. */
-function ToggleField({ label, on, onChange, onText, offText }: { label: string; on: boolean; onChange: (on: boolean) => void; onText: string; offText: string }) {
+  function handleFile(file: File | undefined) {
+    if (!file) return;
+    setError(null);
+    setUploading(true);
+    const formData = new FormData();
+    formData.set("file", file);
+    uploadProjectLogo(formData)
+      .then((result) => {
+        if (!result.ok) return setError(result.error ?? "Upload failed.");
+        onChange(result.url!);
+      })
+      .catch(() => setError("Upload failed. Try a smaller file."))
+      .finally(() => setUploading(false));
+  }
+
   return (
-    <div>
-      <span className={labelClass}>{label}</span>
-      <div className={`${fieldClass} flex items-center justify-between gap-3`}>
-        <span className="min-w-0 truncate">{on ? onText : offText}</span>
-        <Switch checked={on} onCheckedChange={onChange} aria-label={label} />
+    <div className="flex flex-wrap items-center gap-4">
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        aria-label={value ? "Replace the logo" : "Upload a logo"}
+        className="group relative flex h-24 w-48 items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-white transition-colors hover:border-primary/50 disabled:opacity-60"
+      >
+        {value ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={value} alt="" className="h-full w-full object-contain p-4" />
+            <span className="absolute inset-0 flex items-center justify-center gap-1 bg-black/55 text-[12px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+              <Upload size={13} />
+              {uploading ? "Uploading…" : "Replace"}
+            </span>
+          </>
+        ) : (
+          <span className="flex items-center gap-1.5 text-[12px] font-semibold text-zinc-500 group-hover:text-primary">
+            <Upload size={13} />
+            {uploading ? "Uploading…" : "Upload SVG or PNG"}
+          </span>
+        )}
+      </button>
+      <input ref={inputRef} type="file" accept="image/png,image/svg+xml,.png,.svg" onChange={(e) => handleFile(e.target.files?.[0])} className="hidden" />
+      <div className="space-y-1.5">
+        <p className="text-[12px] text-muted-foreground">SVG or PNG with a transparent background.</p>
+        {value && (
+          <button type="button" onClick={() => onChange("")} className="text-[12.5px] font-semibold text-negative hover:underline">
+            Remove logo
+          </button>
+        )}
+        {error && <p className="text-[12px] font-medium text-negative" role="alert">{error}</p>}
       </div>
     </div>
   );

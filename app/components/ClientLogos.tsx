@@ -8,10 +8,13 @@ interface Props {
 }
 
 export function ClientLogos({ brands = STATIC_CLIENT_LOGOS }: Props) {
-  const marqueeItems = [...brands, ...brands, ...brands];
+  // Only logos with an image scroll past; ones still waiting for an upload stay out of sight.
+  const shown = brands.filter((b) => b.logoUrl);
+  if (shown.length === 0) return null;
+  const marqueeItems = [...shown, ...shown, ...shown];
 
   return (
-    <section className="py-16 md:py-24 bg-white overflow-hidden" aria-label="Brands and Clients">
+    <section className="py-10 md:py-16 bg-white overflow-hidden" aria-label="Brands and Clients">
       <style jsx>{`
         @keyframes marquee {
           0% { transform: translateX(0%); }
@@ -27,7 +30,8 @@ export function ClientLogos({ brands = STATIC_CLIENT_LOGOS }: Props) {
         }
       `}</style>
 
-      <div className="relative w-full overflow-hidden">
+      {/* Padded top and bottom so the name under a hovered logo isn't cut off by the clipping that hides the scroll. */}
+      <div className="relative w-full overflow-hidden py-6 pb-12">
         <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10" />
         <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10" />
 
@@ -49,7 +53,7 @@ export function ClientLogos({ brands = STATIC_CLIENT_LOGOS }: Props) {
                   {brand.name.charAt(0)}
                 </div>
               )}
-              <span className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[12px] font-semibold text-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <span className="pointer-events-none absolute top-full mt-3 left-1/2 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-full bg-zinc-900 px-3 py-1 text-[12px] font-medium text-white opacity-0 shadow-sm group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
                 {brand.name}
               </span>
             </div>

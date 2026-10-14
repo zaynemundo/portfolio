@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  Activity, ArrowRight, BarChart3, Boxes, BriefcaseBusiness, CalendarRange, LayoutPanelTop, Map as MapIcon, MessagesSquare, Check, CircleAlert, CircleCheck, FileText, Gauge, Hammer, Lightbulb,
+  PackageCheck, PenTool, Scale, Target, TrendingUp, Users, Workflow, X, Megaphone, ArrowUpRight, Wrench, type LucideIcon,
+} from "lucide-react";
 import { notFound } from "next/navigation";
 import { getPublishedProject, getPublishedProjectIndex } from "@/app/lib/projects-db";
 import type { Project } from "@/app/lib/projects";
@@ -13,6 +17,7 @@ import { CaseStudyChapterNav } from "@/app/components/work/CaseStudyChapterNav";
 import type { Chapter } from "@/app/components/work/CaseStudyChapterNav";
 import { AnimatedMetric } from "@/app/components/work/AnimatedMetric";
 import { ProcessTimeline } from "@/app/components/work/ProcessTimeline";
+import { BackToTop } from "@/app/components/BackToTop";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -24,16 +29,68 @@ const DEFAULT_THEME = { bg: "#f4f4f5", dark: false };
    no borrowing a gallery screenshot for an empty slot. */
 function buildSlides(project: Project): SliderImage[] {
   const all = (project.images ?? []).map((src, i) => ({ src, caption: project.imageLabels?.[i] }));
-  // The first screenshot is the thumbnail on the Work page, so the gallery
-  // starts from the second — unless the first is the only one there is.
-  const shown = all.length > 1 ? all.slice(1) : all;
+  // The first screenshot is the cover: the thumbnail on the Work page and the
+  // picture in the hero above. The gallery carries on from the second.
+  const shown = all.slice(1);
   return shown.map(({ src, caption }, i) => {
     const label = caption ?? `Screen ${i + 1}`;
     return { src, label, alt: `${project.name} — ${label}` };
   });
 }
 
+/** Columns for a row of result tiles, by how many figures the group has. */
+const RESULT_COLUMNS: Record<number, string> = {
+  1: "lg:grid-cols-2",
+  2: "lg:grid-cols-2",
+  3: "lg:grid-cols-3",
+  4: "lg:grid-cols-4",
+  5: "lg:grid-cols-3",
+};
+
+/** The icon beside each chapter's name. */
+const CHAPTER_ICONS: Record<string, LucideIcon> = {
+  "The problem": CircleAlert,
+  "The results": TrendingUp,
+  "The performance": Gauge,
+  "Competitive Analysis": Scale,
+  "User Research & Feedback": Users,
+  "Wireframes & Iterations": PenTool,
+  "User Flow & Architecture": Workflow,
+  "The work": Hammer,
+  "What was built": PackageCheck,
+};
+
 const DASHED_LINE = "repeating-linear-gradient(to bottom, #e4e4e7 0, #e4e4e7 4px, transparent 4px, transparent 9px)";
+
+/** Columns for the headline figure cards. */
+const STAT_COLUMNS: Record<number, string> = {
+  1: "sm:grid-cols-1 max-w-sm",
+  2: "sm:grid-cols-2",
+  3: "sm:grid-cols-3",
+  4: "grid-cols-2 lg:grid-cols-4 max-w-[1040px]",
+};
+
+/** An icon for a headline figure, picked from what it counts. */
+function statIcon(label: string, value: string): LucideIcon {
+  const text = label.toLowerCase();
+  if (/inquir|enquir|lead|message/.test(text)) return MessagesSquare;
+  if (/user|visitor|follower|audience|customer/.test(text)) return Users;
+  if (/page|screen|interface|storefront/.test(text)) return LayoutPanelTop;
+  if (/map/.test(text)) return MapIcon;
+  if (/session|traffic|view|event|engagement/.test(text)) return Activity;
+  if (/conversion|sale|order/.test(text)) return Target;
+  if (/product|categor|platform|brand|system/.test(text)) return Boxes;
+  if (/month|year|season|phase/.test(text)) return CalendarRange;
+  return metricIcon(value);
+}
+
+/** A figure that went up, a plain count, or a word such as "Live". */
+function metricIcon(value: string): LucideIcon {
+  if (/^[+↑]|%/.test(value)) return TrendingUp;
+  if (/\d/.test(value)) return BarChart3;
+  return CircleCheck;
+}
+
 
 export async function generateStaticParams() {
   return (await getPublishedProjectIndex()).map(({ slug }) => ({ slug }));
@@ -70,6 +127,7 @@ export default async function CaseStudyPage({ params }: Props) {
 
   const theme = { ...DEFAULT_THEME, ...(project.theme ?? {}) };
   const images = buildSlides(project);
+  const cover = project.images?.[0];
 
   const isRich = Boolean(
     project.heroMetrics ||
@@ -85,66 +143,216 @@ export default async function CaseStudyPage({ params }: Props) {
       project.takeaway,
   );
 
+  // A before/after comparison needs both pictures.
+  const compare = project.compare?.beforeImage && project.compare.afterImage ? project.compare : undefined;
+  // Results has its own figures, a closing note or a comparison — it never
+  // repeats the numbers already shown at the top of the page.
+  const outcomes = project.outcomes ?? [];
+  const hasResults = Boolean(outcomes.length || project.resultGroups?.length || project.resultsNote || compare);
+
+  const stats = project.heroMetrics ?? [];
+
+  const hasPhases = Boolean(project.transformationSections?.length);
+
+  // "Why it worked": its first sentence becomes the headline, the rest become numbered reasons.
+  const thinking = (() => {
+    const paras = project.whyItWorked ?? [];
+    if (!paras.length) return null;
+    const match = paras[0].match(/^(.+?[.!?])\s+([\s\S]+)$/);
+    const lead = match ? match[1] : paras[0];
+    const reasons = [...(match ? [match[2]] : []), ...paras.slice(1)];
+    return { lead, reasons };
+  })();
+
   const chapters: Chapter[] = isRich
     ? [
-        ...(project.problemSections?.length        ? [{ label: "Overview",       id: "section-the-problem"                  }] : []),
-        ...(project.transformationSections?.length ? [{ label: "Transformation",  id: "section-the-transformation"           }] : []),
-        ...(project.executionDisciplines?.length   ? [{ label: "Execution",       id: "section-execution"                    }] : []),
-        ...((project.resultGroups?.length || project.heroMetrics?.length)
-                                                   ? [{ label: "Results",         id: "section-final-results"                }] : []),
-        ...(project.performanceAudit               ? [{ label: "Performance",     id: "section-technical-performance-audit"  }] : []),
-        ...(project.whyItWorked?.length            ? [{ label: "Why It Worked",   id: "section-why-it-worked"                }] : []),
-        ...(project.takeaway                       ? [{ label: "Takeaway",        id: "section-takeaway"                     }] : []),
+        ...(project.problemSections?.length        ? [{ label: "The problem",     id: "section-the-problem"                  }] : []),
+        ...(hasPhases                              ? [{ label: "The work",        id: "section-the-work"                     }] : []),
+        ...(hasResults                             ? [{ label: "The results",     id: "section-the-results"                  }] : []),
+        ...(project.performanceAudit               ? [{ label: "The performance", id: "section-the-performance"              }] : []),
+        ...(project.whyItWorked?.length            ? [{ label: "Why it worked",   id: "section-the-thinking"                 }] : []),
       ]
     : [];
 
   return (
     <div className="min-h-screen bg-white">
       <ReadingProgress />
+      <BackToTop />
       {chapters.length >= 2 && <CaseStudyChapterNav chapters={chapters} />}
 
-      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <div className="bg-zinc-950 relative overflow-hidden">
-        <div className="max-w-[1200px] mx-auto px-6 md:px-10 pt-32 pb-20 relative z-10">
+      {/* ── Hero ───────────────────────────────────────────────────────────────
+          A cover: the name and one-line summary centred, the first screenshot
+          large beneath them, and the headline figures as cards that sit across
+          the cover's lower edge, where the dark band meets the page. */}
+      <div className="relative">
+        {/* The dark band stops part-way down the cover so the picture bridges into the page. */}
+        <div
+          aria-hidden="true"
+          className={`absolute inset-x-0 top-0 bg-zinc-950 overflow-hidden ${cover ? "bottom-[22%] md:bottom-[26%]" : stats.length ? "bottom-24" : "bottom-0"}`}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "radial-gradient(60% 55% at 50% 100%, rgba(139,92,246,0.38), transparent 70%), radial-gradient(35% 40% at 0% 0%, rgba(139,92,246,0.14), transparent 70%)",
+            }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
+              backgroundSize: "56px 56px",
+              maskImage: "radial-gradient(60% 70% at 50% 100%, #000, transparent 75%)",
+              WebkitMaskImage: "radial-gradient(60% 70% at 50% 100%, #000, transparent 75%)",
+            }}
+          />
+        </div>
 
+        <div className="relative max-w-[1200px] mx-auto px-6 md:px-10 pt-32">
           <Reveal>
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[12px] text-zinc-600 mb-14">
+            <nav aria-label="Breadcrumb" className="flex items-center justify-center gap-2 text-[12px] text-zinc-600 mb-8">
               <Link href="/work" className="hover:text-zinc-400 transition-colors duration-150">Work</Link>
               <span aria-hidden="true" className="text-zinc-700">/</span>
               <span className="text-zinc-500">{project.name}</span>
             </nav>
           </Reveal>
 
-          <Reveal delay={80}>
-            <h1
-              className="font-extrabold text-white tracking-tight mb-7 leading-[0.93]"
-              style={{ fontSize: "clamp(2.25rem, 6vw, 4.5rem)", letterSpacing: "-0.04em" }}
+          <div className="mx-auto max-w-4xl text-center">
+            <Reveal delay={40}>
+              <ul className="flex flex-wrap justify-center gap-2 mb-7" aria-label="Project details">
+                {[project.category, project.year].filter(Boolean).map((tag, i) => (
+                  <li
+                    key={tag}
+                    className={
+                      i === 0
+                        ? "rounded-full border border-[#8B5CF6]/40 bg-[#8B5CF6]/15 px-3.5 py-1 text-[12px] font-semibold text-[#c4b5fd]"
+                        : "rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1 text-[12px] font-medium text-zinc-400"
+                    }
+                  >
+                    {tag}
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+
+            <Reveal delay={80}>
+              <h1
+                className="font-extrabold text-white tracking-tight leading-[0.95] text-balance"
+                style={{ fontSize: "clamp(2.75rem, 8vw, 6rem)", letterSpacing: "-0.045em" }}
+              >
+                {project.name}
+              </h1>
+            </Reveal>
+
+            <Reveal delay={120}>
+              <p className="mx-auto mt-7 max-w-2xl text-[17px] md:text-[18px] text-zinc-300 leading-relaxed text-balance">
+                {project.shortDescription}
+              </p>
+            </Reveal>
+          </div>
+
+          {cover && (
+            <Reveal delay={160}>
+              <div className="relative mx-auto mt-14 max-w-[1040px]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={cover}
+                  alt={project.imageAlt}
+                  className="block w-full aspect-[1000/544] object-cover object-top rounded-3xl border border-white/15 shadow-[0_50px_100px_-30px_rgba(0,0,0,0.75)]"
+                />
+              </div>
+            </Reveal>
+          )}
+
+          {/* Headline figures: one card each, overlapping the cover's lower edge */}
+          {stats.length > 0 && (
+            <div
+              className={`relative mx-auto grid max-w-[940px] gap-3 sm:gap-4 ${STAT_COLUMNS[Math.min(stats.length, 4)]} ${cover ? "-mt-10 md:-mt-16 px-3 md:px-0" : "mt-14"}`}
             >
-              {project.name}
-            </h1>
-          </Reveal>
-
-          <Reveal delay={120}>
-            <p className="text-[17px] text-zinc-400 max-w-xl leading-relaxed mb-14">
-              {project.shortDescription}
-            </p>
-          </Reveal>
-
-          {project.heroMetrics && (
-            <div className="flex flex-wrap gap-10 md:gap-16 pt-2">
-              {project.heroMetrics.map((m, i) => (
-                <Reveal key={m.label} delay={160 + i * 100}>
-                  <div>
-                    <p className="font-bold text-white leading-none tracking-tight"
-                       style={{ fontSize: "clamp(2rem, 3.5vw, 2.75rem)" }}>
-                      <AnimatedMetric value={m.value} />
-                    </p>
-                    <p className="text-[12px] text-zinc-500 mt-2 max-w-[180px] leading-snug">{m.label}</p>
+              {stats.map((m, i) => {
+                // "New core pages: Berth · …" → what is being counted, then the detail.
+                const [lead, ...rest] = m.label.split(/: |, | — /);
+                const StatIcon = statIcon(lead, m.value);
+                return (
+                  <div key={m.label} className="rounded-2xl bg-white p-5 md:p-6 shadow-[0_24px_50px_-20px_rgba(24,24,27,0.35)] ring-1 ring-zinc-950/5">
+                    <Reveal delay={220 + i * 90}>
+                      <span className="mb-5 flex h-9 w-9 items-center justify-center rounded-full bg-[#8B5CF6]/12 text-[#7c3aed]">
+                        <StatIcon size={17} aria-hidden="true" />
+                      </span>
+                      <p
+                        className="font-extrabold text-zinc-950 leading-none tracking-tight tabular-nums whitespace-nowrap"
+                        style={{ fontSize: stats.length > 3 ? "clamp(2rem, 3.4vw, 2.75rem)" : "clamp(2.25rem, 4.4vw, 3.5rem)", letterSpacing: "-0.04em" }}
+                      >
+                        <AnimatedMetric value={m.value} />
+                      </p>
+                      {/* What is counted, then the detail */}
+                      <p className="mt-3.5">
+                        <span className="block text-[15px] font-semibold text-zinc-900 leading-snug first-letter:uppercase">{lead}</span>
+                        {rest.length > 0 && (
+                          <span className="block text-[13.5px] text-zinc-600 leading-relaxed mt-1 first-letter:uppercase">{rest.join(", ")}</span>
+                        )}
+                      </p>
+                    </Reveal>
                   </div>
-                </Reveal>
-              ))}
+                );
+              })}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* ── At a glance ──────────────────────────────────────────────────────────
+          The whole case study in one screen, for someone with a minute to spare.
+          Who did the work and with what. The problem is told in its own chapter, the outcome closes the page. */}
+      <div className="max-w-[1200px] mx-auto px-6 md:px-10 pt-16 md:pt-20">
+        <div>
+          <Reveal delay={80}>
+            <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-7 md:p-8 grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_auto] lg:items-center lg:gap-10">
+              {/* A soft violet wash in the corner, so the card reads as the "who" next to the problem */}
+              <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#8B5CF6]/10 blur-2xl" />
+
+              <div className="relative">
+                <div className="min-w-0">
+                  <h2 className="text-[12px] font-bold tracking-[0.14em] uppercase text-zinc-500">My role</h2>
+                  <p className="mt-1 text-[19px] font-semibold tracking-tight text-zinc-950 leading-snug">{project.role}</p>
+                </div>
+              </div>
+
+              <dl className="relative space-y-5">
+                {project.engineeringStack && <DetailRow label="Stack" value={project.engineeringStack} />}
+                {project.typography && <DetailRow label="Typography" value={project.typography} />}
+                <div>
+                  <dt className="flex items-center gap-1.5 text-[12px] font-bold tracking-[0.14em] uppercase text-zinc-500 mb-2.5">
+                    <Wrench size={13} aria-hidden="true" />
+                    Tools
+                  </dt>
+                  <dd className="flex flex-wrap gap-2">
+                    {project.technologies.map((tech) => (
+                      <span key={tech} className="rounded-full bg-zinc-100 px-3 py-1 text-[13px] font-medium text-zinc-800">{tech}</span>
+                    ))}
+                  </dd>
+                </div>
+              </dl>
+
+              {project.liveUrl && (
+                <a
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative flex items-center justify-between gap-5 rounded-2xl bg-zinc-950 px-5 py-4 text-white transition-colors duration-150 hover:bg-zinc-800"
+                >
+                  <span>
+                    <span className="block text-[14.5px] font-semibold">Visit the live site</span>
+                    <span className="block text-[12.5px] text-zinc-400 truncate">{project.liveUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}</span>
+                  </span>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                    <ArrowUpRight size={17} aria-hidden="true" />
+                  </span>
+                </a>
+              )}
+            </div>
+          </Reveal>
         </div>
       </div>
 
@@ -162,52 +370,60 @@ export default async function CaseStudyPage({ params }: Props) {
       )}
 
       {/* ── Body ─────────────────────────────────────────────────────────────── */}
-      <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-20 md:py-28">
-        <div className="grid lg:grid-cols-[1fr_210px] gap-16 lg:gap-20">
+      <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-16 md:py-24">
+        <div>
 
           {/* Main content */}
-          <div className="space-y-28 md:space-y-36">
+          <div className="space-y-24 md:space-y-28">
 
             {/* ── Generic layout ── */}
             {!isRich && (
               <>
                 <Reveal>
                   <Section title="Overview">
-                    <p className="text-[15px] text-zinc-600 leading-relaxed">{project.shortDescription}</p>
+                    <p className="text-[16px] text-zinc-600 leading-relaxed">{project.shortDescription}</p>
                   </Section>
                 </Reveal>
-                <Reveal>
-                  <Section title="Challenge">
-                    <p className="text-[15px] text-zinc-600 leading-relaxed">{project.challenge}</p>
-                  </Section>
-                </Reveal>
-                <Reveal>
-                  <Section title="Approach">
-                    <p className="text-[15px] text-zinc-600 leading-relaxed">{project.approach}</p>
-                  </Section>
-                </Reveal>
-                <Reveal>
-                  <Section title="Key Contributions">
-                    <BulletList items={project.highlights} />
-                  </Section>
-                </Reveal>
-                <Reveal>
-                  <Section title="Outcome">
-                    <p className="text-[15px] text-zinc-600 leading-relaxed">{project.outcome}</p>
-                  </Section>
-                </Reveal>
+                {project.challenge && (
+                  <Reveal>
+                    <Section title="Challenge">
+                      <p className="text-[16px] text-zinc-600 leading-relaxed">{project.challenge}</p>
+                    </Section>
+                  </Reveal>
+                )}
+                {project.approach && (
+                  <Reveal>
+                    <Section title="Approach">
+                      <p className="text-[16px] text-zinc-600 leading-relaxed">{project.approach}</p>
+                    </Section>
+                  </Reveal>
+                )}
+                {project.highlights.length > 0 && (
+                  <Reveal>
+                    <Section title="Key Contributions">
+                      <BulletList items={project.highlights} />
+                    </Section>
+                  </Reveal>
+                )}
+                {project.outcome && (
+                  <Reveal>
+                    <Section title="Outcome">
+                      <p className="text-[16px] text-zinc-600 leading-relaxed">{project.outcome}</p>
+                    </Section>
+                  </Reveal>
+                )}
                 {project.accessibility && (
                   <Reveal>
                     <Section title="Accessibility">
-                      <p className="text-[15px] text-zinc-600 leading-relaxed">{project.accessibility}</p>
+                      <p className="text-[16px] text-zinc-600 leading-relaxed">{project.accessibility}</p>
                     </Section>
                   </Reveal>
                 )}
                 {(project.performance || project.seo) && (
                   <Reveal>
                     <Section title="Performance & SEO">
-                      {project.performance && <p className="text-[15px] text-zinc-600 leading-relaxed mb-3">{project.performance}</p>}
-                      {project.seo && <p className="text-[15px] text-zinc-600 leading-relaxed">{project.seo}</p>}
+                      {project.performance && <p className="text-[16px] text-zinc-600 leading-relaxed mb-3">{project.performance}</p>}
+                      {project.seo && <p className="text-[16px] text-zinc-600 leading-relaxed">{project.seo}</p>}
                     </Section>
                   </Reveal>
                 )}
@@ -221,19 +437,18 @@ export default async function CaseStudyPage({ params }: Props) {
                 {/* THE PROBLEM */}
                 {project.problemSections?.map((ps) => (
                   <Reveal key={ps.title}>
-                    <Section title="The Problem">
+                    <Section title="The problem">
                       <EditorialHeadline>{ps.title}</EditorialHeadline>
                       {project.problemIntro && (
-                        <p className="text-[15px] text-zinc-500 leading-relaxed mb-10 max-w-xl">
-                          {project.problemIntro}
-                        </p>
+                        <p className="text-[18px] text-zinc-600 leading-relaxed -mt-3 mb-10 max-w-3xl">{project.problemIntro}</p>
                       )}
                       <div className="grid sm:grid-cols-2 gap-x-12 gap-y-9">
                         {ps.bullets.map((b, bi) => (
                           <Reveal key={b.heading} delay={bi * 80}>
-                            <div>
-                              <p className="text-[14px] font-semibold text-zinc-900 mb-1.5">{b.heading}</p>
-                              <p className="text-[13.5px] text-zinc-500 leading-relaxed">{b.body}</p>
+                            <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3.5">
+                              <span className="row-span-2 mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-700"><CircleAlert size={16} aria-hidden="true" /></span>
+                              <p className="text-[16px] font-semibold text-zinc-900 mb-1.5 self-center">{b.heading}</p>
+                              <p className="text-[16px] text-zinc-600 leading-relaxed">{b.body}</p>
                             </div>
                           </Reveal>
                         ))}
@@ -263,7 +478,7 @@ export default async function CaseStudyPage({ params }: Props) {
                         {project.competitiveAnalysis.headline ?? "Benchmarking existing market applications."}
                       </EditorialHeadline>
                       {project.competitiveAnalysis.intro && (
-                        <p className="text-[15px] text-zinc-500 leading-relaxed mb-8">{project.competitiveAnalysis.intro}</p>
+                        <p className="text-[16px] text-zinc-600 leading-relaxed mb-8">{project.competitiveAnalysis.intro}</p>
                       )}
                       <div className="flex flex-wrap gap-2.5 mb-8">
                         {project.competitiveAnalysis.competitors.map((c) => (
@@ -292,7 +507,7 @@ export default async function CaseStudyPage({ params }: Props) {
                         {project.userResearch.headline ?? "Identifying pain points from real user reviews."}
                       </EditorialHeadline>
                       {project.userResearch.intro && (
-                        <p className="text-[15px] text-zinc-500 leading-relaxed mb-8">{project.userResearch.intro}</p>
+                        <p className="text-[16px] text-zinc-600 leading-relaxed mb-8">{project.userResearch.intro}</p>
                       )}
                       {project.userResearch.ratingMetrics && (
                         <div className="flex flex-wrap gap-4 mb-8">
@@ -343,7 +558,7 @@ export default async function CaseStudyPage({ params }: Props) {
                         {project.wireframes.headline ?? "Sketching, information architecture & iterations."}
                       </EditorialHeadline>
                       {project.wireframes.intro && (
-                        <p className="text-[15px] text-zinc-500 leading-relaxed mb-8">{project.wireframes.intro}</p>
+                        <p className="text-[16px] text-zinc-600 leading-relaxed mb-8">{project.wireframes.intro}</p>
                       )}
                       {project.wireframes.sketches && (
                         <div className="grid sm:grid-cols-2 gap-5">
@@ -373,7 +588,7 @@ export default async function CaseStudyPage({ params }: Props) {
                     <Section title="User Flow & Architecture">
                       <EditorialHeadline>{project.userFlow.title}</EditorialHeadline>
                       {project.userFlow.description && (
-                        <p className="text-[15px] text-zinc-500 leading-relaxed mb-10">{project.userFlow.description}</p>
+                        <p className="text-[16px] text-zinc-600 leading-relaxed mb-10">{project.userFlow.description}</p>
                       )}
                       <div className="bg-zinc-900 text-white rounded-2xl p-6 md:p-8">
                         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -398,19 +613,20 @@ export default async function CaseStudyPage({ params }: Props) {
                 )}
 
                 {/* THE TRANSFORMATION — vertical numbered timeline */}
-                {project.transformationSections && project.transformationSections.length > 0 && (
+                {hasPhases && (
                   <Reveal>
-                    <Section title="The Transformation">
+                    <Section title="The work">
                       <EditorialHeadline>
                         {project.transformationHeadline ?? "What changed."}
                       </EditorialHeadline>
+
+                      {/* Numbered timeline: the step being read lights up as the reader scrolls (see ProcessTimeline). */}
                       <ProcessTimeline>
-                        {project.transformationSections.map((ts, i) => {
+                        {project.transformationSections!.map((ts, i) => {
                           const isLast = i === project.transformationSections!.length - 1;
                           return (
                             <Reveal key={ts.title}>
                               <div data-step className="flex gap-7 md:gap-9">
-                                {/* Number + connecting line */}
                                 <div className="flex flex-col items-center pt-0.5 shrink-0">
                                   <div
                                     data-step-circle
@@ -421,158 +637,41 @@ export default async function CaseStudyPage({ params }: Props) {
                                   </div>
                                   {!isLast && (
                                     <div data-step-line className="w-px flex-1 mt-3 relative overflow-hidden" style={{ background: DASHED_LINE }}>
-                                    <div data-step-progress className="absolute top-0 left-0 w-full bg-[#8B5CF6]" style={{ height: "0%" }} />
-                                  </div>
-                                  )}
-                                </div>
-                                {/* Content */}
-                                <div data-step-content className={isLast ? "pb-0 flex-1" : "pb-14 flex-1"}>
-                                  <h3 className="text-[12px] font-bold tracking-[0.12em] uppercase text-zinc-600 mb-7 pt-0.5">
-                                    {ts.title}
-                                  </h3>
-                                  <div className="grid sm:grid-cols-2 gap-x-12 gap-y-8">
-                                    {ts.bullets.map((b, bi) => (
-                                      <Reveal key={b.heading} delay={bi * 55}>
-                                        <div>
-                                          <p className="text-[14px] font-semibold text-zinc-900 mb-1.5">{b.heading}</p>
-                                          {b.body && <p className="text-[13px] text-zinc-500 leading-relaxed">{b.body}</p>}
-                                        </div>
-                                      </Reveal>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </Reveal>
-                          );
-                        })}
-                      </ProcessTimeline>
-                    </Section>
-                  </Reveal>
-                )}
-
-                {/* EXECUTION — same vertical timeline pattern */}
-                {project.executionDisciplines && project.executionDisciplines.length > 0 && (
-                  <Reveal>
-                    <Section title="Execution">
-                      <EditorialHeadline>
-                        {project.executionHeadline ?? "How it was delivered."}
-                      </EditorialHeadline>
-                      <ProcessTimeline>
-                        {project.executionDisciplines.map((d, i) => {
-                          const isLast = i === project.executionDisciplines!.length - 1;
-                          return (
-                            <Reveal key={d.name}>
-                              <div data-step className="flex gap-7 md:gap-9">
-                                <div className="flex flex-col items-center pt-0.5 shrink-0">
-                                  <div
-                                    data-step-circle
-                                    className="w-7 h-7 rounded-full border border-zinc-200 bg-white flex items-center justify-center text-[11px] font-mono text-zinc-400 relative z-10"
-                                    style={{ transition: "background-color 0.45s ease-in-out, border-color 0.45s ease-in-out, color 0.35s ease-in-out" }}
-                                  >
-                                    {i + 1}
-                                  </div>
-                                  {!isLast && (
-                                    <div data-step-line className="w-px flex-1 mt-3 relative overflow-hidden" style={{ background: DASHED_LINE }}>
-                                    <div data-step-progress className="absolute top-0 left-0 w-full bg-[#8B5CF6]" style={{ height: "0%" }} />
-                                  </div>
-                                  )}
-                                </div>
-                                <div data-step-content className={isLast ? "pb-0 flex-1" : "pb-16 flex-1"}>
-                                  <h3 className="text-[12px] font-bold tracking-[0.12em] uppercase text-zinc-600 mb-6 pt-0.5">
-                                    {d.name}
-                                  </h3>
-                                  <ul className="flex flex-wrap gap-2 mb-7" aria-label={`${d.name} deliverables`}>
-                                    {d.items.map((item, ii) => (
-                                      <Reveal key={item} delay={ii * 40}>
-                                        <li className="text-[12.5px] font-medium text-zinc-600 bg-zinc-50 border border-zinc-200 rounded-full px-4 py-1.5 hover:bg-zinc-100 transition-colors duration-150">
-                                          {item}
-                                        </li>
-                                      </Reveal>
-                                    ))}
-                                  </ul>
-                                  {d.image && (
-                                    <CaseStudyImage
-                                      label={d.name}
-                                      caption={d.visual}
-                                      src={d.image}
-                                      alt={`${project.name} — ${d.name}`}
-                                      bg={theme.bg}
-                                      dark={theme.dark}
-                                      aspect="aspect-[1000/544]"
-                                    />
-                                  )}
-                                </div>
-                              </div>
-                            </Reveal>
-                          );
-                        })}
-                      </ProcessTimeline>
-                    </Section>
-                  </Reveal>
-                )}
-
-                {/* FINAL RESULTS — large bare numbers, no cards */}
-                {(project.resultGroups?.length || project.heroMetrics?.length) && (
-                  <Reveal>
-                    <Section title="Final Results">
-                      <EditorialHeadline>
-                        {project.resultsHeadline ?? "The outcome."}
-                      </EditorialHeadline>
-                      {project.resultGroups?.length ? (
-                        <div className="space-y-14">
-                          {project.resultGroups.map((g) => (
-                            <div key={g.label}>
-                              <p className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#8B5CF6] mb-8">
-                                {g.label}
-                              </p>
-                              <div className="grid sm:grid-cols-2 gap-x-10 gap-y-10">
-                                {g.metrics.map((m, mi) => (
-                                  <Reveal key={m.label} delay={mi * 80}>
-                                    <div>
-                                      <p className="font-bold text-zinc-900 leading-none tracking-tight mb-2"
-                                         style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>
-                                        <AnimatedMetric value={m.value} />
-                                      </p>
-                                      <p className="text-[13px] text-zinc-500 leading-relaxed">{m.label}</p>
+                                      <div data-step-progress className="absolute top-0 left-0 w-full bg-[#8B5CF6]" style={{ height: "0%" }} />
                                     </div>
-                                  </Reveal>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="grid sm:grid-cols-2 gap-x-10 gap-y-10">
-                          {project.heroMetrics?.map((m, mi) => (
-                            <Reveal key={m.label} delay={mi * 80}>
-                              <div>
-                                <p className="font-bold text-zinc-900 leading-none tracking-tight mb-2"
-                                   style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>
-                                  <AnimatedMetric value={m.value} />
-                                </p>
-                                <p className="text-[13px] text-zinc-500">{m.label}</p>
+                                  )}
+                                </div>
+                                <div data-step-content className={isLast ? "pb-0 flex-1 min-w-0" : "pb-14 flex-1 min-w-0"}>
+                                  <h3 className="text-[20px] font-semibold tracking-tight text-zinc-900 mb-3 leading-snug">{ts.title}</h3>
+                                    <div>
+                                      {ts.bullets.map((b, bi) => (
+                                        <Reveal key={b.heading} delay={bi * 55}>
+                                          <div className="grid sm:grid-cols-[220px_minmax(0,1fr)] gap-x-8 gap-y-0.5 py-1.5">
+                                            <p className="flex items-start gap-2.5 text-[16px] font-semibold text-zinc-900"><Check size={17} strokeWidth={2.5} className="mt-[3px] shrink-0 text-[#8B5CF6]" aria-hidden="true" />{b.heading}</p>
+                                            {b.body && <p className="text-[16px] text-zinc-600 leading-relaxed">{b.body}</p>}
+                                          </div>
+                                        </Reveal>
+                                      ))}
+                                    </div>
+                                    {ts.image && (
+                                      <figure className="mt-6">
+                                        <a href={ts.image} target="_blank" rel="noopener noreferrer" className="group block overflow-hidden rounded-2xl border border-zinc-200" aria-label={`Open the ${ts.title} picture full size`}>
+                                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                                          <img
+                                            src={ts.image}
+                                            alt={`${project.name} — ${ts.title}`}
+                                            className="block w-full aspect-[1000/544] object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
+                                          />
+                                        </a>
+                                        {ts.imageCaption && <figcaption className="text-[13px] text-zinc-500 mt-2.5">{ts.imageCaption}</figcaption>}
+                                      </figure>
+                                    )}
+                                </div>
                               </div>
                             </Reveal>
-                          ))}
-                        </div>
-                      )}
-                      {project.resultsNote && (
-                        <p className="text-[14px] text-zinc-500 leading-relaxed mt-10 pl-5 border-l-2 border-zinc-200">
-                          {project.resultsNote}
-                        </p>
-                      )}
-                      {project.compare?.beforeImage && project.compare.afterImage && (
-                        <div className="mt-12">
-                          <BeforeAfterSlider
-                            beforeImage={project.compare.beforeImage}
-                            afterImage={project.compare.afterImage}
-                            beforeLabel={project.compare.beforeLabel}
-                            afterLabel={project.compare.afterLabel}
-                            caption={project.compare.caption}
-                            bg={theme.bg}
-                          />
-                        </div>
-                      )}
+                          );
+                        })}
+                      </ProcessTimeline>
                     </Section>
                   </Reveal>
                 )}
@@ -580,17 +679,17 @@ export default async function CaseStudyPage({ params }: Props) {
                 {/* WHAT WAS BUILT */}
                 {project.deliverables && project.deliverables.length > 0 && (
                   <Reveal>
-                    <Section title="What Was Built">
+                    <Section title="What was built">
                       {project.deliverablesHeadline && (
                         <EditorialHeadline>{project.deliverablesHeadline}</EditorialHeadline>
                       )}
                       <div className="space-y-8">
                         {project.deliverables.map((d) => (
                           <div key={d.label}>
-                            <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-zinc-400 mb-4">{d.label}</p>
+                            <p className="text-[20px] font-semibold tracking-tight text-zinc-900 mb-4">{d.label}</p>
                             <ul className="space-y-2.5">
                               {d.items.map((item) => (
-                                <li key={item} className="flex gap-3 text-[14px] text-zinc-600 leading-relaxed">
+                                <li key={item} className="flex gap-3 text-[16px] text-zinc-600 leading-relaxed">
                                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="mt-1 shrink-0 text-zinc-400">
                                     <path d="M2.5 7.5l3 3 6-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                                   </svg>
@@ -605,10 +704,132 @@ export default async function CaseStudyPage({ params }: Props) {
                   </Reveal>
                 )}
 
+                {/* FINAL RESULTS — large bare numbers, no cards */}
+                {hasResults && (
+                  <Reveal>
+                    <Section title="The results">
+                      <EditorialHeadline>
+                        {project.resultsHeadline ?? "The outcome."}
+                      </EditorialHeadline>
+
+                      {compare && (
+                        <div className="mb-14">
+                          <BeforeAfterSlider
+                            beforeImage={compare.beforeImage}
+                            afterImage={compare.afterImage}
+                            beforeLabel={compare.beforeLabel}
+                            afterLabel={compare.afterLabel}
+                            caption={compare.caption}
+                            bg={theme.bg}
+                          />
+                        </div>
+                      )}
+
+                      {/* Before → after: each part of the problem and what it became, in two aligned columns */}
+                      {outcomes.length > 0 && (
+                        <div className="mb-14">
+                          <div className="hidden md:grid grid-cols-2 gap-3 mb-3 px-1">
+                            <p className="flex items-center gap-2 text-[12px] font-bold tracking-[0.14em] uppercase text-zinc-500">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 text-zinc-600"><X size={13} strokeWidth={2.75} aria-hidden="true" /></span>
+                              Before
+                            </p>
+                            <p className="flex items-center gap-2 text-[12px] font-bold tracking-[0.14em] uppercase text-[#7c3aed] md:pl-6">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#8B5CF6] text-white"><Check size={13} strokeWidth={3} aria-hidden="true" /></span>
+                              After
+                            </p>
+                          </div>
+                          <ul className="space-y-3">
+                            {outcomes.map((o, oi) => (
+                              <li key={o.area}>
+                                <Reveal delay={oi * 70}>
+                                  <div className="relative grid gap-2 md:grid-cols-2 md:gap-3">
+                                    <div className="rounded-2xl bg-zinc-100/80 px-5 py-4 md:px-6 md:py-5">
+                                      <p className="text-[11.5px] font-bold tracking-[0.12em] uppercase text-zinc-400 mb-1.5">{o.area}</p>
+                                      <p className="text-[15.5px] text-zinc-500 leading-snug"><span className="sr-only">Before: </span>{o.before}</p>
+                                    </div>
+                                    {/* The step from one to the other */}
+                                    <span aria-hidden="true" className="absolute left-1/2 top-1/2 z-10 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[#7c3aed] shadow-md ring-1 ring-zinc-200 md:flex">
+                                      <ArrowRight size={15} strokeWidth={2.5} />
+                                    </span>
+                                    <div className="rounded-2xl bg-[#8B5CF6]/[0.09] px-5 py-4 md:px-6 md:py-5 md:pl-9 ring-1 ring-inset ring-[#8B5CF6]/15">
+                                      <p className="text-[11.5px] font-bold tracking-[0.12em] uppercase text-[#7c3aed]/80 mb-1.5 md:hidden">{o.area}, now</p>
+                                      <p className="text-[15.5px] font-semibold text-zinc-950 leading-snug md:mt-[22px]"><span className="sr-only">After: </span>{o.after}</p>
+                                    </div>
+                                  </div>
+                                </Reveal>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {project.resultGroups && project.resultGroups.length > 0 && (
+                        <div className="space-y-10">
+                          {project.resultGroups.map((g) => (
+                            <div key={g.label}>
+                              {outcomes.length > 0 ? (
+                                // A side story next to the before → after: one card, its figures in a row.
+                                <div className="rounded-3xl bg-zinc-100/80 px-6 py-7 md:px-9 md:py-8">
+                                  <p className="flex items-center gap-2.5 text-[16px] font-semibold text-zinc-950 mb-6">
+                                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#8B5CF6]/15 text-[#7c3aed]"><Megaphone size={15} aria-hidden="true" /></span>
+                                    {g.label}
+                                  </p>
+                                  <div className={`grid gap-6 sm:grid-cols-2 ${RESULT_COLUMNS[Math.min(g.metrics.length, 5)]}`}>
+                                    {g.metrics.map((m) => {
+                                      const [lead, ...rest] = m.label.split(" — ");
+                                      return (
+                                        <div key={m.label} className="rounded-2xl bg-white p-5 shadow-[0_1px_2px_rgba(24,24,27,0.06)]">
+                                          <p className="font-bold text-zinc-950 leading-none tracking-tight whitespace-nowrap" style={{ fontSize: "clamp(1.6rem, 2.4vw, 2.125rem)" }}>
+                                            <AnimatedMetric value={m.value} />
+                                          </p>
+                                          <p className="mt-3 text-[14.5px] font-semibold text-zinc-900">{lead}</p>
+                                          {rest.length > 0 && <p className="mt-0.5 text-[13.5px] text-zinc-500 leading-relaxed first-letter:uppercase">{rest.join(" — ")}</p>}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              ) : (
+                              /* One row of equal tiles: as many columns as there are figures, up to four. */
+                              <div className={`grid gap-3 sm:grid-cols-2 ${RESULT_COLUMNS[Math.min(g.metrics.length, 5)]}`}>
+                                {g.metrics.map((m, mi) => {
+                                  const [lead, ...rest] = m.label.split(" — ");
+                                  const TileIcon = metricIcon(m.value);
+                                  return (
+                                    <div key={m.label} className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-6">
+                                      <Reveal delay={mi * 80}>
+                                        <span className="mb-5 flex h-9 w-9 items-center justify-center rounded-full bg-[#8B5CF6]/12 text-[#7c3aed]"><TileIcon size={17} aria-hidden="true" /></span>
+                                        <p className="font-bold text-zinc-950 leading-none tracking-tight mb-4"
+                                           style={{ fontSize: "clamp(1.75rem, 2.6vw, 2.375rem)" }}>
+                                          <AnimatedMetric value={m.value} />
+                                        </p>
+                                        <p className="text-[15.5px] font-semibold text-zinc-900 leading-snug">{lead}</p>
+                                        {rest.length > 0 && (
+                                          <p className="text-[14.5px] text-zinc-600 leading-relaxed mt-1 first-letter:uppercase">{rest.join(" — ")}</p>
+                                        )}
+                                      </Reveal>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {project.resultsNote && outcomes.length === 0 && (
+                        <div className="mt-10 rounded-2xl bg-[#8B5CF6]/[0.07] px-7 py-6">
+                          <p className="flex items-center gap-2 text-[12px] font-bold tracking-[0.14em] uppercase text-[#7c3aed] mb-2.5"><BriefcaseBusiness size={15} aria-hidden="true" />What changed for the business</p>
+                          <p className="text-[17px] text-zinc-900 leading-relaxed max-w-3xl">{project.resultsNote}</p>
+                        </div>
+                      )}
+                    </Section>
+                  </Reveal>
+                )}
+
                 {/* TECHNICAL PERFORMANCE */}
                 {project.performanceAudit && (
                   <Reveal>
-                    <Section title="Technical Performance Audit">
+                    <Section title="The performance">
                       <div className="overflow-x-auto rounded-xl border border-zinc-200">
                         <table className="w-full text-left">
                           <thead>
@@ -622,9 +843,9 @@ export default async function CaseStudyPage({ params }: Props) {
                           <tbody className="divide-y divide-zinc-100">
                             {project.performanceAudit.map((row) => (
                               <tr key={row.metric} className="hover:bg-zinc-50/50 transition-colors">
-                                <td className="px-5 py-3.5 text-[13.5px] font-medium text-zinc-800">{row.metric}</td>
-                                <td className="px-5 py-3.5 text-[13px] text-zinc-400">{row.before}</td>
-                                <td className="px-5 py-3.5 text-[13.5px] font-semibold text-zinc-900">{row.after}</td>
+                                <td className="px-5 py-3.5 text-[15px] font-medium text-zinc-900">{row.metric}</td>
+                                <td className="px-5 py-3.5 text-[15px] text-zinc-500">{row.before}</td>
+                                <td className="px-5 py-3.5 text-[15px] font-semibold text-zinc-900">{row.after}</td>
                                 <td className="px-5 py-3.5">
                                   <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
                                     row.status === "Fast" || row.status === "Excellent"
@@ -645,116 +866,50 @@ export default async function CaseStudyPage({ params }: Props) {
                   </Reveal>
                 )}
 
-                {/* WHY IT WORKED */}
-                {project.whyItWorked && project.whyItWorked.length > 0 && (
+                {/* THE THINKING — why the approach worked. One short line up top, then the reasons, numbered. */}
+                {thinking && (
                   <Reveal>
-                    <Section title="Why it Worked">
-                      <div className="space-y-5 max-w-2xl">
-                        {project.whyItWorked.map((para, i) => (
-                          <p key={i} className={
-                            i === 0
-                              ? "text-[17px] text-zinc-800 leading-relaxed font-medium"
-                              : "text-[15px] text-zinc-600 leading-relaxed"
-                          }>
-                            {para}
-                          </p>
-                        ))}
-                      </div>
-                    </Section>
-                  </Reveal>
-                )}
-
-                {/* TAKEAWAY — full-bleed dark editorial close */}
-                {project.takeaway && (
-                  <Reveal>
-                    <div id="section-takeaway">
-                      {/* Break out of the content column with negative margins */}
-                      <div className="bg-zinc-950 rounded-2xl px-8 py-14 md:px-14 md:py-20 relative overflow-hidden">
-
-                        {/* Large ghosted quote mark — decorative */}
-                        <div
-                          aria-hidden="true"
-                          className="absolute -top-6 -left-2 font-serif text-white/[0.04] leading-none select-none pointer-events-none"
-                          style={{ fontSize: "clamp(10rem, 22vw, 18rem)", lineHeight: 1 }}
+                    <section
+                      id="section-the-thinking"
+                      aria-labelledby="section-the-thinking-heading"
+                      className="relative overflow-hidden rounded-3xl bg-zinc-950 px-7 py-12 md:px-14 md:py-16 scroll-mt-28"
+                    >
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-0 pointer-events-none"
+                        style={{ backgroundImage: "radial-gradient(50% 70% at 100% 0%, rgba(139,92,246,0.28), transparent 70%)" }}
+                      />
+                      <div className="relative">
+                        <h2 id="section-the-thinking-heading" className="flex items-center gap-3 text-[13px] font-bold tracking-[0.14em] uppercase text-[#c4b5fd] mb-6">
+                          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#8B5CF6]/25"><Lightbulb size={17} aria-hidden="true" /></span>
+                          Why it worked
+                        </h2>
+                        <p
+                          className="font-bold text-white leading-[1.12] tracking-tight text-balance max-w-3xl"
+                          style={{ fontSize: "clamp(1.75rem, 3.4vw, 2.75rem)", letterSpacing: "-0.03em" }}
                         >
-                          &ldquo;
-                        </div>
-
-                        {/* Label */}
-                        <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-[#c4b5fd] mb-8 relative z-10">
-                          Key Takeaway
+                          {thinking.lead}
                         </p>
-
-                        {/* Quote */}
-                        <blockquote
-                          className="font-extrabold text-white leading-[1.08] tracking-tight relative z-10"
-                          style={{ fontSize: "clamp(1.65rem, 3.5vw, 2.75rem)", letterSpacing: "-0.025em" }}
-                        >
-                          {project.takeaway}
-                        </blockquote>
-
-                        {/* Rule + attribution */}
-                        <div className="flex items-center gap-4 mt-10 relative z-10">
-                          <div className="w-6 h-px bg-zinc-700" />
-                          <p className="text-[12px] font-medium text-zinc-500">{project.name}</p>
-                        </div>
+                        {thinking.reasons.length > 0 && (
+                          // The reasons as a plain numbered list: one column, so a long reason never leaves a short one stranded.
+                          <ol className="mt-10 max-w-3xl space-y-7">
+                            {thinking.reasons.map((reason, ri) => (
+                              <li key={ri} className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4">
+                                <span className="pt-[3px] text-[14px] font-bold text-[#c4b5fd] tabular-nums">{String(ri + 1).padStart(2, "0")}</span>
+                                <p className="text-[16.5px] text-zinc-300 leading-relaxed">{reason}</p>
+                              </li>
+                            ))}
+                          </ol>
+                        )}
                       </div>
-                    </div>
+                    </section>
                   </Reveal>
                 )}
+
               </>
             )}
 
           </div>
-
-          {/* ── Sidebar — flat, no card borders ── */}
-          <aside className="space-y-10 lg:sticky lg:top-24 lg:self-start">
-            <div>
-              <h3 className="text-[10px] font-semibold tracking-[0.16em] uppercase text-[#8B5CF6] mb-5">
-                Details
-              </h3>
-              <dl className="space-y-5">
-                <DetailRow label="Role" value={project.role} />
-                <DetailRow label="Category" value={project.category} />
-                <DetailRow label="Year" value={project.year} />
-                {project.client && <DetailRow label="Client" value={project.client} />}
-                {project.engineeringStack && <DetailRow label="Stack" value={project.engineeringStack} />}
-                {project.typography && <DetailRow label="Typography" value={project.typography} />}
-              </dl>
-            </div>
-
-            <div className="border-t border-zinc-100 pt-8">
-              <h3 className="text-[10px] font-semibold tracking-[0.16em] uppercase text-zinc-400 mb-4">
-                Technologies
-              </h3>
-              <div className="flex flex-wrap gap-1.5">
-                {project.technologies.map((tech) => (
-                  <span
-                    key={tech}
-                    className="text-[11px] font-medium px-2 py-0.5 rounded bg-zinc-50 border border-zinc-200 text-zinc-600"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {project.liveUrl && (
-              <div className="border-t border-zinc-100 pt-8">
-                <a
-                  href={project.liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[13px] font-medium text-zinc-900 hover:text-zinc-500 flex items-center gap-1.5 transition-colors duration-150"
-                >
-                  Visit site
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                    <path d="M2 10L10 2M10 2H5M10 2v5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </a>
-              </div>
-            )}
-          </aside>
         </div>
       </div>
 
@@ -813,17 +968,24 @@ export default async function CaseStudyPage({ params }: Props) {
 
 /* ── Sub-components ──────────────────────────────────────────────────────── */
 
+/** One chapter: its name in a narrow left column (it stays in view while the chapter scrolls), the content on the right. */
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const slug = title.toLowerCase().replace(/\s+/g, "-");
+  const Icon = CHAPTER_ICONS[title] ?? FileText;
   return (
-    <section id={`section-${slug}`} aria-labelledby={`section-${slug}-heading`}>
+    <section
+      id={`section-${slug}`}
+      aria-labelledby={`section-${slug}-heading`}
+      className="grid lg:grid-cols-[200px_minmax(0,1fr)] gap-x-10 gap-y-5 border-t border-zinc-200 pt-10 scroll-mt-28"
+    >
       <h2
         id={`section-${slug}-heading`}
-        className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#8B5CF6] mb-7"
+        className="flex items-center gap-2.5 text-[13px] font-bold tracking-[0.14em] uppercase text-[#8B5CF6] lg:sticky lg:top-28 lg:self-start lg:pt-1"
       >
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#8B5CF6]/10"><Icon size={16} aria-hidden="true" /></span>
         {title}
       </h2>
-      {children}
+      <div className="min-w-0">{children}</div>
     </section>
   );
 }
@@ -832,8 +994,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function EditorialHeadline({ children }: { children: React.ReactNode }) {
   return (
     <p
-      className="font-semibold text-zinc-900 mb-6 leading-tight tracking-tight"
-      style={{ fontSize: "clamp(1.4rem, 2.5vw, 1.875rem)" }}
+      className="font-bold text-zinc-950 mb-9 leading-[1.12] tracking-tight text-balance max-w-3xl"
+      style={{ fontSize: "clamp(1.75rem, 3vw, 2.375rem)", letterSpacing: "-0.025em" }}
     >
       {children}
     </p>
@@ -856,8 +1018,8 @@ function BulletList({ items }: { items: string[] }) {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[11px] font-medium text-zinc-400 mb-0.5">{label}</dt>
-      <dd className="text-[13.5px] text-zinc-700 font-medium">{value}</dd>
+      <dt className="text-[12px] font-bold tracking-[0.14em] uppercase text-zinc-500 mb-1">{label}</dt>
+      <dd className="text-[14.5px] text-zinc-900 font-medium leading-snug">{value}</dd>
     </div>
   );
 }

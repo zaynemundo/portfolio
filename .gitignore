@@ -46,4 +46,4 @@ next-env.d.ts
 .claude/settings.local.json
 
 # written by prisma/scripts/import-case-studies.ts
-/case-studies-backup.json
+/case-studies-backup*.json

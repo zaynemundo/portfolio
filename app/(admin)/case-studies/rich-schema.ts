@@ -22,6 +22,8 @@ export interface RichSectionDef {
   fields: Field[];
   /** Not part of the usual write-up: left out of the editor until it has content or is added by hand. */
   optional?: boolean;
+  /** No longer shown on the public page. Its content stays stored but the editor leaves it out. */
+  retired?: boolean;
   /** Edited somewhere other than the Story tab (the sidebar rows sit with the other details). */
   elsewhere?: boolean;
 }
@@ -42,6 +44,14 @@ const WRITE_UP_FIELDS: Field[] = [
   },
 ];
 
+/** A phase of "What I did": a write-up with a picture of the work. */
+const PHASE_FIELDS: Field[] = [
+  WRITE_UP_FIELDS[0],
+  { kind: "image", key: "image", label: "Image (hidden on the page if left empty)", half: true },
+  { kind: "text", key: "imageCaption", label: "Image caption", half: true },
+  ...WRITE_UP_FIELDS.slice(1),
+];
+
 const METRIC_GROUP_FIELDS: Field[] = [
   { kind: "text", key: "label", label: "Group label", placeholder: "User & Engagement Impact", required: true },
   { kind: "list", key: "metrics", label: "Metrics", itemLabel: "Metric", fields: METRIC_FIELDS, required: true },
@@ -50,15 +60,15 @@ const METRIC_GROUP_FIELDS: Field[] = [
 export const RICH_SECTIONS: RichSectionDef[] = [
   {
     id: "hero",
-    title: "Hero metrics",
-    hint: "Big numbers under the title at the top of the page.",
+    title: "Top stats",
+    hint: "The figure cards over the cover image. Write the label as “What is counted: the detail”.",
     fields: [{ kind: "list", key: "heroMetrics", label: "Metrics", itemLabel: "Metric", fields: METRIC_FIELDS }],
   },
   {
     id: "sidebar",
     elsewhere: true,
     title: "Sidebar details",
-    hint: "Extra rows in the Details sidebar, next to Role, Category and Year.",
+    hint: "Extra rows in the My role bar under the top stats.",
     fields: [
       { kind: "text", key: "engineeringStack", label: "Stack", placeholder: "Laravel · Vue.js · Custom API", half: true },
       { kind: "text", key: "typography", label: "Typography", placeholder: "Aboreto (Display) · Inter (Body)", half: true },
@@ -66,8 +76,8 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "problem",
-    title: "The Problem",
-    hint: "“Overview” chapter. The intro paragraph sits under the headline; the image shows below the points.",
+    title: "The problem",
+    hint: "“The problem” chapter: the headline, an intro paragraph under it, then the points. The image shows below the points.",
     fields: [
       { kind: "textarea", key: "problemIntro", label: "Intro paragraph" },
       { kind: "list", key: "problemSections", label: "Problem write-ups", itemLabel: "Write-up", fields: WRITE_UP_FIELDS },
@@ -179,17 +189,18 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "transformation",
-    title: "The Transformation",
-    hint: "“Transformation” chapter — a numbered timeline, one entry per phase.",
+    title: "The work",
+    hint: "“The work” chapter: a numbered timeline, one entry per phase. Each phase can have a picture.",
     fields: [
       { kind: "text", key: "transformationHeadline", label: "Headline", placeholder: "What I changed." },
-      { kind: "list", key: "transformationSections", label: "Phases", itemLabel: "Phase", fields: WRITE_UP_FIELDS },
+      { kind: "list", key: "transformationSections", label: "Phases", itemLabel: "Phase", fields: PHASE_FIELDS },
     ],
   },
   {
     id: "execution",
-    title: "Execution",
-    hint: "“Execution” chapter — one entry per discipline, each with tags and an image.",
+    retired: true,
+    title: "What I did: areas of work",
+    hint: "The picture cards at the top of the “What I did” chapter: one per area of work, each with tags and an image.",
     fields: [
       { kind: "text", key: "executionHeadline", label: "Headline", placeholder: "Three disciplines. One system." },
       {
@@ -199,26 +210,6 @@ export const RICH_SECTIONS: RichSectionDef[] = [
           { kind: "lines", key: "items", label: "Tags (one per line)", required: true },
           { kind: "image", key: "image", label: "Image (hidden on the page if left empty)", half: true },
           { kind: "text", key: "visual", label: "Image caption", half: true },
-        ],
-      },
-    ],
-  },
-  {
-    id: "results",
-    title: "Results",
-    hint: "“Results” chapter — grouped numbers, a closing note, and an optional before/after slider.",
-    fields: [
-      { kind: "text", key: "resultsHeadline", label: "Headline" },
-      { kind: "list", key: "resultGroups", label: "Result groups", itemLabel: "Group", fields: METRIC_GROUP_FIELDS },
-      { kind: "textarea", key: "resultsNote", label: "Closing note" },
-      {
-        kind: "group", key: "compare", label: "Before / after slider (shown once both images are uploaded)",
-        fields: [
-          { kind: "text", key: "beforeLabel", label: "Before label", placeholder: "2024 — migration", required: true, half: true },
-          { kind: "text", key: "afterLabel", label: "After label", placeholder: "2026 — redesign", required: true, half: true },
-          { kind: "image", key: "beforeImage", label: "Before image", half: true },
-          { kind: "image", key: "afterImage", label: "After image", half: true },
-          { kind: "text", key: "caption", label: "Caption" },
         ],
       },
     ],
@@ -235,6 +226,34 @@ export const RICH_SECTIONS: RichSectionDef[] = [
         fields: [
           { kind: "text", key: "label", label: "Group label", required: true },
           { kind: "lines", key: "items", label: "Items (one per line)", required: true },
+        ],
+      },
+    ],
+  },
+  {
+    id: "results",
+    title: "The results",
+    hint: "“The results” chapter, after The work: before → after for each change, the before/after slider, figures and a closing note.",
+    fields: [
+      { kind: "text", key: "resultsHeadline", label: "Headline" },
+      {
+        kind: "list", key: "outcomes", label: "Before → after", itemLabel: "Change",
+        fields: [
+          { kind: "text", key: "area", label: "What changed", placeholder: "Booking journey", required: true },
+          { kind: "text", key: "before", label: "Before", placeholder: "No berth page or onboarding flow", required: true, half: true },
+          { kind: "text", key: "after", label: "After", placeholder: "Berth page and a step-by-step process", required: true, half: true },
+        ],
+      },
+      { kind: "list", key: "resultGroups", label: "Result groups", itemLabel: "Group", fields: METRIC_GROUP_FIELDS },
+      { kind: "textarea", key: "resultsNote", label: "Closing note (shown only when there are no before → after rows)" },
+      {
+        kind: "group", key: "compare", label: "Before / after slider (shown once both images are uploaded)",
+        fields: [
+          { kind: "text", key: "beforeLabel", label: "Before label", placeholder: "2024 — migration", required: true, half: true },
+          { kind: "text", key: "afterLabel", label: "After label", placeholder: "2026 — redesign", required: true, half: true },
+          { kind: "image", key: "beforeImage", label: "Before image", half: true },
+          { kind: "image", key: "afterImage", label: "After image", half: true },
+          { kind: "text", key: "caption", label: "Caption" },
         ],
       },
     ],
@@ -258,13 +277,14 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   {
     id: "why",
     title: "Why it worked",
-    hint: "“Why It Worked” chapter — one paragraph per line.",
+    hint: "The dark panel that closes the page. One paragraph per line. The first sentence becomes the headline; the rest become numbered reasons.",
     fields: [{ kind: "lines", key: "whyItWorked", label: "Paragraphs (one per line)" }],
   },
   {
     id: "takeaway",
+    retired: true,
     title: "Takeaway",
-    hint: "The dark closing quote at the end of the page.",
+    hint: "The last line of The thinking panel.",
     fields: [{ kind: "textarea", key: "takeaway", label: "Takeaway" }],
   },
 ];

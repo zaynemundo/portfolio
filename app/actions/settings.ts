@@ -279,7 +279,8 @@ export async function uploadClientLogoImage(formData: FormData): Promise<UploadR
   const file = formData.get("file") as File | null;
   if (!file) return { ok: false, error: "No file provided." };
 
-  return uploadAsset(file, "client-logo", ["image/jpeg", "image/png", "image/webp", "image/svg+xml"]);
+  // Logos sit on a light row, so only formats that keep a transparent background.
+  return uploadAsset(file, "client-logo", ["image/png", "image/svg+xml"]);
 }
 
 export interface ClientLogoInput {
@@ -301,9 +302,10 @@ export async function updateClientLogos(items: ClientLogoInput[]): Promise<Setti
         logoUrl: item.logoUrl.trim(),
         sortOrder: index,
       };
+      // Upsert, not update: the built-in starter logos carry ids that aren't in the database until first saved.
       return item.id.startsWith("new-")
         ? prisma.clientLogo.create({ data })
-        : prisma.clientLogo.update({ where: { id: item.id }, data });
+        : prisma.clientLogo.upsert({ where: { id: item.id }, update: data, create: { id: item.id, ...data } });
     })
   );
 

@@ -23,7 +23,7 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
 
   const [posts, projects, clients, freelanceProjects, invoices, inquiries] = await Promise.all([
     prisma.blogPost.findMany({ where: { title: insensitive }, take: RESULTS_PER_CATEGORY, select: { id: true, title: true } }),
-    prisma.project.findMany({ where: { name: insensitive }, take: RESULTS_PER_CATEGORY, select: { id: true, name: true } }),
+    prisma.project.findMany({ where: { name: insensitive }, take: RESULTS_PER_CATEGORY, select: { slug: true, name: true } }),
     prisma.client.findMany({ where: { name: insensitive }, take: RESULTS_PER_CATEGORY, select: { id: true, slug: true, name: true } }),
     prisma.freelanceProject.findMany({ where: { name: insensitive }, take: RESULTS_PER_CATEGORY, select: { id: true, name: true } }),
     prisma.invoice.findMany({ where: { invoiceNumber: insensitive }, take: RESULTS_PER_CATEGORY, select: { id: true, invoiceNumber: true } }),
@@ -32,7 +32,7 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
 
   return [
     ...posts.map((p) => ({ href: routes.blog.item(p.id), label: p.title, category: "Blog" })),
-    ...projects.map((p) => ({ href: routes.caseStudies.item(p.id), label: p.name, category: "Case Studies" })),
+    ...projects.map((p) => ({ href: routes.caseStudies.item(p.slug), label: p.name, category: "Case Studies" })),
     ...clients.map((c) => ({ href: routes.clients.item(c.slug ?? c.id), label: c.name, category: "Clients" })),
     ...freelanceProjects.map((p) => ({ href: routes.projects.item(p.id), label: p.name, category: "Jobs" })),
     ...invoices.map((i) => ({ href: routes.invoices.item(i.id), label: i.invoiceNumber, category: "Invoices" })),

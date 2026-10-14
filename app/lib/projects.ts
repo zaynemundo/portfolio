@@ -15,6 +15,9 @@ export interface PerformanceRow {
 
 export interface RichSection {
   title: string;
+  /** A picture of the work from this phase (phases of "What I did" only). */
+  image?: string;
+  imageCaption?: string;
   bullets: { heading: string; body: string }[];
 }
 
@@ -142,6 +145,8 @@ export interface Project {
   executionDisciplines?: ExecutionDiscipline[];
   resultsHeadline?: string;                    // e.g. "The site isn't just being found. It's converting."
   resultGroups?: MetricGroup[];
+  /** "Before → after" for each part of the problem: what it was, what it became. */
+  outcomes?: { area: string; before: string; after: string }[];
   resultsNote?: string;                        // caveat / closing note under the results
   resultsImage?: string;                       // analytics / outcome visual
   resultsImageCaption?: string;

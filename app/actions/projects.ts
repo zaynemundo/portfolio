@@ -79,9 +79,6 @@ function validate(data: ProjectFormData): string | null {
   if (!data.role.trim()) return "Role is required.";
   if (!data.category.trim()) return "Category is required.";
   if (!data.year.trim()) return "Year is required.";
-  if (!data.challenge.trim()) return "Challenge is required.";
-  if (!data.approach.trim()) return "Approach is required.";
-  if (!data.outcome.trim()) return "Outcome is required.";
   if (!data.imageAlt.trim()) return "Image alt text is required.";
   return null;
 }
@@ -161,7 +158,7 @@ export async function createProject(data: ProjectFormData): Promise<ProjectActio
 
   revalidatePublicPages();
   updateTag(CACHE_TAGS.caseStudies);
-  redirect(`/case-studies/${project.id}`);
+  redirect(`/case-studies/${project.slug}`);
 }
 
 export async function updateProject(id: string, data: ProjectFormData): Promise<ProjectActionResult> {
@@ -179,6 +176,8 @@ export async function updateProject(id: string, data: ProjectFormData): Promise<
     return { ok: false, error: `A project with slug "${slug}" already exists.` };
   }
 
+  const previous = await prisma.project.findUnique({ where: { id }, select: { slug: true } });
+
   await prisma.project.update({
     where: { id },
     data: buildData(data, slug, richResult.value),
@@ -186,6 +185,8 @@ export async function updateProject(id: string, data: ProjectFormData): Promise<
 
   revalidatePublicPages();
   updateTag(CACHE_TAGS.caseStudies);
+  // The editing page's address is the slug, so a renamed one moves with it.
+  if (previous && previous.slug !== slug) redirect(`/case-studies/${slug}`);
   return { ok: true };
 }
 
@@ -241,6 +242,18 @@ export async function updateFeaturedProjects(items: FeaturedProjectUpdate[]): Pr
   return { ok: true };
 }
 
+/** Sets the order case studies appear in on the Work page: `ids` from first to last. */
+export async function reorderProjects(ids: string[]): Promise<{ ok: boolean }> {
+  await requireSession();
+
+  await prisma.$transaction(ids.map((id, index) => prisma.project.update({ where: { id }, data: { sortOrder: index } })));
+
+  revalidatePublicPages();
+  revalidatePath("/case-studies");
+  updateTag(CACHE_TAGS.caseStudies);
+  return { ok: true };
+}
+
 export interface ImageUploadResult {
   ok: boolean;
   url?: string;
@@ -266,6 +279,23 @@ export async function uploadProjectImage(formData: FormData): Promise<ImageUploa
   return { ok: true, url: blob.url };
 }
 
+/** The client's logo, shown on the project's card on the Work page. SVG or PNG, so it keeps a transparent background. */
+export async function uploadProjectLogo(formData: FormData): Promise<ImageUploadResult> {
+  await requireSession();
+
+  const file = formData.get("file") as File | null;
+  if (!file) return { ok: false, error: "No file provided." };
+  if (!["image/png", "image/svg+xml"].includes(file.type)) return { ok: false, error: "Use an SVG or PNG file." };
+  if (file.size > MAX_IMAGE_BYTES) return { ok: false, error: "File is too large (max 10MB)." };
+
+  const blob = await put(`case-study-logos/${Date.now()}-${file.name}`, file, {
+    access: "public",
+    addRandomSuffix: false,
+  });
+
+  return { ok: true, url: blob.url };
+}
+
 export async function addProjectImage(id: string, url: string): Promise<void> {
   await requireSession();
   const project = await prisma.project.findUnique({ where: { id } });
@@ -275,7 +305,7 @@ export async function addProjectImage(id: string, url: string): Promise<void> {
     data: { images: [...project.images, url] },
   });
   revalidatePublicPages();
-  revalidatePath(`/case-studies/${id}`);
+  revalidatePath("/case-studies/[slug]", "page");
   updateTag(CACHE_TAGS.caseStudies);
 }
 
@@ -288,6 +318,6 @@ export async function removeProjectImage(id: string, url: string): Promise<void>
     data: { images: project.images.filter((img) => img !== url) },
   });
   revalidatePublicPages();
-  revalidatePath(`/case-studies/${id}`);
+  revalidatePath("/case-studies/[slug]", "page");
   updateTag(CACHE_TAGS.caseStudies);
 }

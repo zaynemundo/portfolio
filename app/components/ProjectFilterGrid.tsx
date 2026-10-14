@@ -12,6 +12,8 @@ interface Props {
 const DEFAULT_THEME = { bg: "#f4f4f5", dark: false };
 
 export function ProjectFilterGrid({ projects }: Props) {
+  const anyLogo = projects.some((p) => p.logo?.src);
+
   return (
     <div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-10 gap-y-14 md:gap-y-20">
@@ -50,6 +52,20 @@ export function ProjectFilterGrid({ projects }: Props) {
 
                 {/* Content */}
                 <div className="pt-5">
+                  {/* Once any project has a logo, every card keeps the room for one, so the names stay in line. */}
+                  {anyLogo && (
+                    <div className="mb-3 h-8">
+                      {project.logo?.src && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={project.logo.src}
+                          alt={`${project.name} logo`}
+                          className="h-full w-auto max-w-[140px] object-contain object-left"
+                          loading="lazy"
+                        />
+                      )}
+                    </div>
+                  )}
                   <h2 className="text-[20px] font-bold text-zinc-900 group-hover:opacity-60 transition-opacity duration-200 tracking-tight mb-2.5">
                     {project.name}
                   </h2>

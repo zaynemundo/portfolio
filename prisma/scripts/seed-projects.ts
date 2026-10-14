@@ -8,7 +8,7 @@ const prisma = new PrismaClient({ adapter });
 /* ── Card-only projects (no full case study written yet) ─────────────── */
 const cardProjects = [
   {
-    slug: "po-marinas",
+    slug: "pno-marinas",
     name: "P&O Marinas",
     tagline: "A DP World marina that buried its core service. Rebuilt around berth rental with a custom interactive map.",
     category: "Marine & Leisure",

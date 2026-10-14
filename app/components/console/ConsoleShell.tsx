@@ -106,10 +106,10 @@ function buildWorkspaces(unreadInquiries: number): Workspace[] {
         { href: routes.website, label: "Overview", icon: <LayoutDashboard {...ICON_PROPS} /> },
         { href: routes.homepage, label: "Home", icon: <Home {...ICON_PROPS} /> },
         { href: routes.about, label: "About", icon: <IdCard {...ICON_PROPS} /> },
-        { href: routes.caseStudies.list, label: "Work", icon: <Layers {...ICON_PROPS} /> },
-        { href: routes.blog.list, label: "Blog", icon: <Newspaper {...ICON_PROPS} /> },
+        { href: routes.caseStudies.list, label: "Work", icon: <Layers {...ICON_PROPS} />, also: [routes.workPage] },
+        { href: routes.blog.list, label: "Blog", icon: <Newspaper {...ICON_PROPS} />, also: [routes.blogPage] },
       ],
-      extraPaths: [routes.workPage, routes.blogPage],
+      extraPaths: [],
       quickAdd: [
         { href: routes.blog.new, label: "New article" },
         { href: routes.caseStudies.new, label: "New case study" },

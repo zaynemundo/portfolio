@@ -12,6 +12,7 @@ import { cardClass } from "@/app/(admin)/_components/ui/Card";
 import { DataTable } from "@/app/(admin)/_components/ui/DataTable";
 import { RowMenu, RowMenuItem } from "@/app/(admin)/_components/ui/RowMenu";
 import { routes } from "@/app/(admin)/_routes";
+import { reorderProjects } from "@/app/actions/projects";
 
 const getCaseStudies = unstable_cache(
   () => prisma.project.findMany({ orderBy: { sortOrder: "asc" } }),
@@ -26,7 +27,7 @@ export default async function CaseStudiesPage() {
     <div>
       <PageHeader
         title="Case Studies"
-        subtitle={`${projects.length} project${projects.length === 1 ? "" : "s"}`}
+        subtitle={`${projects.length} project${projects.length === 1 ? "" : "s"}, in the order the Work page shows them`}
         actionHref={routes.caseStudies.new}
         actionLabel="+ New case study"
         secondaryHref={routes.workPage}
@@ -40,12 +41,13 @@ export default async function CaseStudiesPage() {
           <DataTable
             inset={false}
             toolbar="always"
+            onReorder={projects.length > 1 ? reorderProjects : undefined}
             searchPlaceholder="Search by name, category or year…"
             filters={[{ key: "status", label: "Status", options: [{ value: "published", label: "Published" }, { value: "draft", label: "Draft" }] }]}
             columns={[{ label: "Name" }, { label: "Category" }, { label: "Year" }, { label: "Published" }, { className: "w-12" }]}
             rows={projects.map((project) => ({
               id: project.id,
-              href: routes.caseStudies.item(project.id),
+              href: routes.caseStudies.item(project.slug),
               search: `${project.name} ${project.category} ${project.year}`,
               sort: [project.name, project.category, project.year, project.published ? "Published" : "Draft", undefined],
               filters: { status: project.published ? "published" : "draft" },
@@ -53,7 +55,7 @@ export default async function CaseStudiesPage() {
                 <>
                 <td className="px-4 py-3">
                   <Link
-                    href={routes.caseStudies.item(project.id)}
+                    href={routes.caseStudies.item(project.slug)}
                     className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors"
                   >
                     {project.name}
@@ -67,7 +69,7 @@ export default async function CaseStudiesPage() {
                 </td>
                 <td className="px-4 py-3 text-right">
                   <RowMenu>
-                    <RowMenuItem href={routes.caseStudies.item(project.id)} icon={<Pencil size={14} />}>
+                    <RowMenuItem href={routes.caseStudies.item(project.slug)} icon={<Pencil size={14} />}>
                       Edit
                     </RowMenuItem>
                     <DeleteProjectButton id={project.id} name={project.name} menu />

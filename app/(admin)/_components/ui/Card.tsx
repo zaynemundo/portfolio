@@ -49,6 +49,7 @@ export function CardHeader({ title, count, description, action, leading, classNa
 interface CardFrameProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Off when the list sits in a card that has its own p-5 padding. */
   inset?: boolean;
+  ref?: React.Ref<HTMLDivElement>;
 }
 
 /**

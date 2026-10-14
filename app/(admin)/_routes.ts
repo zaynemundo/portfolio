@@ -40,7 +40,7 @@ export const routes = {
   caseStudies: {
     list: "/case-studies",
     new: "/case-studies/new",
-    item: (id: string) => `/case-studies/${id}`,
+    item: (slug: string) => `/case-studies/${slug}`,
   },
   projects: {
     list: "/freelance",

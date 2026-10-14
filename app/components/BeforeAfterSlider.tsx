@@ -73,7 +73,7 @@ export function BeforeAfterSlider({
   // Each side sharpens as the divider uncovers more of it and softens as it is
   // covered, so the eye follows the one being revealed. Level at the start,
   // the "after" side is fully sharp and the "before" side is part-way there.
-  const MAX_BLUR = 8;
+  const MAX_BLUR = 3.5;
   const amount = (n: number) => Math.max(0, Math.min(1, n));
   const beforeBlur = MAX_BLUR * amount((70 - sliderPosition) / 40); // clears from 30% to 70%
   const afterBlur = MAX_BLUR * amount((sliderPosition - 50) / 40);  // softens from 50% to 90%

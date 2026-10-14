@@ -15,9 +15,9 @@ const getWebsiteOverview = unstable_cache(
   () =>
     Promise.all([
       prisma.blogPost.findMany({ orderBy: { updatedAt: "desc" }, select: { id: true, title: true, published: true, dateFormatted: true } }),
-      prisma.project.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, name: true, published: true, featured: true } }),
+      prisma.project.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, slug: true, name: true, published: true, featured: true } }),
     ]),
-  ["website-overview"],
+  ["website-overview-v2"],
   { tags: [CACHE_TAGS.blog, CACHE_TAGS.caseStudies], revalidate: 60 }
 );
 
@@ -69,7 +69,7 @@ export default async function WebsiteOverviewPage() {
               <PanelRow key={post.id} href={routes.blog.item(post.id)} tag="Article" tagTone="brand" primary={post.title} right="Continue" />
             ))}
             {draftCaseStudies.map((cs) => (
-              <PanelRow key={cs.id} href={routes.caseStudies.item(cs.id)} tag="Case study" tagTone="neutral" primary={cs.name} right="Continue" />
+              <PanelRow key={cs.id} href={routes.caseStudies.item(cs.slug)} tag="Case study" tagTone="neutral" primary={cs.name} right="Continue" />
             ))}
           </div>
         </Panel>
