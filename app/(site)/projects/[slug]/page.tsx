@@ -132,13 +132,8 @@ export default async function CaseStudyPage({ params }: Props) {
   const isRich = Boolean(
     project.heroMetrics ||
       project.problemSections?.length ||
-      project.userResearch ||
-      project.competitiveAnalysis ||
-      project.wireframes ||
-      project.userFlow ||
       project.transformationSections?.length ||
       project.executionDisciplines?.length ||
-      project.deliverables?.length ||
       project.whyItWorked?.length ||
       project.takeaway,
   );
@@ -169,7 +164,6 @@ export default async function CaseStudyPage({ params }: Props) {
         ...(project.problemSections?.length        ? [{ label: "The problem",     id: "section-the-problem"                  }] : []),
         ...(hasPhases                              ? [{ label: "The work",        id: "section-the-work"                     }] : []),
         ...(hasResults                             ? [{ label: "The results",     id: "section-the-results"                  }] : []),
-        ...(project.performanceAudit               ? [{ label: "The performance", id: "section-the-performance"              }] : []),
         ...(project.whyItWorked?.length            ? [{ label: "Why it worked",   id: "section-the-thinking"                 }] : []),
       ]
     : [];
@@ -470,148 +464,6 @@ export default async function CaseStudyPage({ params }: Props) {
                   </Reveal>
                 ))}
 
-                {/* COMPETITIVE ANALYSIS */}
-                {project.competitiveAnalysis && (
-                  <Reveal>
-                    <Section title="Competitive Analysis">
-                      <EditorialHeadline>
-                        {project.competitiveAnalysis.headline ?? "Benchmarking existing market applications."}
-                      </EditorialHeadline>
-                      {project.competitiveAnalysis.intro && (
-                        <p className="text-[16px] text-zinc-600 leading-relaxed mb-8">{project.competitiveAnalysis.intro}</p>
-                      )}
-                      <div className="flex flex-wrap gap-2.5 mb-8">
-                        {project.competitiveAnalysis.competitors.map((c) => (
-                          <div key={c.name} className="px-3.5 py-2 rounded-xl bg-zinc-100 border border-zinc-200 text-[13px] font-medium text-zinc-800 flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-                            <span>{c.name}</span>
-                            {c.note && <span className="text-[11px] text-zinc-400 font-normal">({c.note})</span>}
-                          </div>
-                        ))}
-                      </div>
-                      {project.competitiveAnalysis.takeaway && (
-                        <p className="text-[14.5px] text-zinc-700 leading-relaxed pl-5 border-l-2 border-zinc-200">
-                          <strong className="font-semibold text-zinc-900">Key insight: </strong>
-                          {project.competitiveAnalysis.takeaway}
-                        </p>
-                      )}
-                    </Section>
-                  </Reveal>
-                )}
-
-                {/* USER RESEARCH */}
-                {project.userResearch && (
-                  <Reveal>
-                    <Section title="User Research & Feedback">
-                      <EditorialHeadline>
-                        {project.userResearch.headline ?? "Identifying pain points from real user reviews."}
-                      </EditorialHeadline>
-                      {project.userResearch.intro && (
-                        <p className="text-[16px] text-zinc-600 leading-relaxed mb-8">{project.userResearch.intro}</p>
-                      )}
-                      {project.userResearch.ratingMetrics && (
-                        <div className="flex flex-wrap gap-4 mb-8">
-                          {project.userResearch.ratingMetrics.map((rm) => (
-                            <div key={rm.label} className="px-4 py-3 rounded-xl bg-zinc-900 text-white flex items-center gap-3">
-                              <span className="text-[1.15rem] font-bold text-amber-400">★ {rm.value}</span>
-                              <span className="text-[12px] font-medium text-zinc-300">{rm.label}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {project.userResearch.painPoints && (
-                        <div className="mb-8">
-                          {project.userResearch.painPoints.map((pp, idx) => (
-                            <div key={idx} className="flex items-start gap-4 py-4 border-b border-zinc-100 last:border-0 text-[13.5px] text-zinc-700">
-                              <span className="text-zinc-300 font-mono text-[11px] mt-0.5 shrink-0 tabular-nums">
-                                {String(idx + 1).padStart(2, "0")}
-                              </span>
-                              <span>{pp}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {project.userResearch.reviews && (
-                        <div className="grid sm:grid-cols-2 gap-6 mt-6">
-                          {project.userResearch.reviews.map((r, idx) => (
-                            <div key={idx} className="pt-5 border-t border-zinc-100">
-                              <div className="flex text-amber-400 text-[12px] gap-0.5 mb-3">
-                                {Array.from({ length: 5 }, (_, i) => (
-                                  <span key={i}>{i < (r.rating ?? 5) ? "★" : "☆"}</span>
-                                ))}
-                              </div>
-                              <p className="text-[13.5px] text-zinc-700 leading-relaxed italic mb-3">&ldquo;{r.text}&rdquo;</p>
-                              {r.source && <p className="text-[11px] font-semibold text-zinc-400">{r.source}</p>}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </Section>
-                  </Reveal>
-                )}
-
-                {/* WIREFRAMES */}
-                {project.wireframes && (
-                  <Reveal>
-                    <Section title="Wireframes & Iterations">
-                      <EditorialHeadline>
-                        {project.wireframes.headline ?? "Sketching, information architecture & iterations."}
-                      </EditorialHeadline>
-                      {project.wireframes.intro && (
-                        <p className="text-[16px] text-zinc-600 leading-relaxed mb-8">{project.wireframes.intro}</p>
-                      )}
-                      {project.wireframes.sketches && (
-                        <div className="grid sm:grid-cols-2 gap-5">
-                          {project.wireframes.sketches.map((s, idx) => (
-                            <div key={idx} className="border border-zinc-200 rounded-xl overflow-hidden bg-zinc-50">
-                              {s.image && (
-                                <div className="aspect-[4/3] bg-zinc-100 overflow-hidden">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src={s.image} alt={s.title} className="w-full h-full object-cover" />
-                                </div>
-                              )}
-                              <div className="p-4">
-                                <p className="text-[13.5px] font-semibold text-zinc-900 mb-1">{s.title}</p>
-                                {s.note && <p className="text-[12.5px] text-zinc-500 leading-snug">{s.note}</p>}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </Section>
-                  </Reveal>
-                )}
-
-                {/* USER FLOW */}
-                {project.userFlow && (
-                  <Reveal>
-                    <Section title="User Flow & Architecture">
-                      <EditorialHeadline>{project.userFlow.title}</EditorialHeadline>
-                      {project.userFlow.description && (
-                        <p className="text-[16px] text-zinc-600 leading-relaxed mb-10">{project.userFlow.description}</p>
-                      )}
-                      <div className="bg-zinc-900 text-white rounded-2xl p-6 md:p-8">
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                          {project.userFlow.steps.map((st, idx) => (
-                            <div key={idx} className="flex-1 w-full flex flex-col items-center text-center group">
-                              <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 text-[12px] font-mono font-bold text-emerald-400 flex items-center justify-center mb-3 group-hover:bg-emerald-500 group-hover:text-zinc-950 transition-colors">
-                                0{idx + 1}
-                              </div>
-                              <p className="text-[13.5px] font-semibold text-white mb-1">{st.step}</p>
-                              {st.description && (
-                                <p className="text-[11.5px] text-zinc-400 leading-tight max-w-[160px]">{st.description}</p>
-                              )}
-                              {idx < project.userFlow!.steps.length - 1 && (
-                                <div className="hidden md:block w-full h-px bg-zinc-800 my-4" />
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </Section>
-                  </Reveal>
-                )}
-
                 {/* THE TRANSFORMATION — vertical numbered timeline */}
                 {hasPhases && (
                   <Reveal>
@@ -672,34 +524,6 @@ export default async function CaseStudyPage({ params }: Props) {
                           );
                         })}
                       </ProcessTimeline>
-                    </Section>
-                  </Reveal>
-                )}
-
-                {/* WHAT WAS BUILT */}
-                {project.deliverables && project.deliverables.length > 0 && (
-                  <Reveal>
-                    <Section title="What was built">
-                      {project.deliverablesHeadline && (
-                        <EditorialHeadline>{project.deliverablesHeadline}</EditorialHeadline>
-                      )}
-                      <div className="space-y-8">
-                        {project.deliverables.map((d) => (
-                          <div key={d.label}>
-                            <p className="text-[20px] font-semibold tracking-tight text-zinc-900 mb-4">{d.label}</p>
-                            <ul className="space-y-2.5">
-                              {d.items.map((item) => (
-                                <li key={item} className="flex gap-3 text-[16px] text-zinc-600 leading-relaxed">
-                                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="mt-1 shrink-0 text-zinc-400">
-                                    <path d="M2.5 7.5l3 3 6-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                                  </svg>
-                                  {item}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
-                      </div>
                     </Section>
                   </Reveal>
                 )}
@@ -822,46 +646,6 @@ export default async function CaseStudyPage({ params }: Props) {
                           <p className="text-[17px] text-zinc-900 leading-relaxed max-w-3xl">{project.resultsNote}</p>
                         </div>
                       )}
-                    </Section>
-                  </Reveal>
-                )}
-
-                {/* TECHNICAL PERFORMANCE */}
-                {project.performanceAudit && (
-                  <Reveal>
-                    <Section title="The performance">
-                      <div className="overflow-x-auto rounded-xl border border-zinc-200">
-                        <table className="w-full text-left">
-                          <thead>
-                            <tr className="border-b border-zinc-200 bg-zinc-50">
-                              <th className="px-5 py-3 text-[11px] font-semibold tracking-[0.08em] uppercase text-zinc-400">Metric</th>
-                              <th className="px-5 py-3 text-[11px] font-semibold tracking-[0.08em] uppercase text-zinc-400">Before</th>
-                              <th className="px-5 py-3 text-[11px] font-semibold tracking-[0.08em] uppercase text-zinc-400">After</th>
-                              <th className="px-5 py-3 text-[11px] font-semibold tracking-[0.08em] uppercase text-zinc-400">Status</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-zinc-100">
-                            {project.performanceAudit.map((row) => (
-                              <tr key={row.metric} className="hover:bg-zinc-50/50 transition-colors">
-                                <td className="px-5 py-3.5 text-[15px] font-medium text-zinc-900">{row.metric}</td>
-                                <td className="px-5 py-3.5 text-[15px] text-zinc-500">{row.before}</td>
-                                <td className="px-5 py-3.5 text-[15px] font-semibold text-zinc-900">{row.after}</td>
-                                <td className="px-5 py-3.5">
-                                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                                    row.status === "Fast" || row.status === "Excellent"
-                                      ? "bg-emerald-100 text-emerald-700"
-                                      : row.status === "Stable"
-                                        ? "bg-blue-100 text-blue-700"
-                                        : "bg-amber-100 text-amber-700"
-                                  }`}>
-                                    {row.status}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
                     </Section>
                   </Reveal>
                 )}

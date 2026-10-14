@@ -6,6 +6,7 @@ import { getSiteSettings } from "@/app/lib/settings-db";
 import { ContactSection } from "@/app/components/ContactSection";
 import { staticProjects } from "@/app/lib/projects-static";
 import { ScrollVideoHero } from "@/app/components/motion/ScrollVideoHero";
+import { SectionSnap } from "@/app/components/motion/SectionSnap";
 import type { HeroScene } from "@/app/components/motion/ScrollVideoHero";
 import { FeaturedWork } from "@/app/components/work/FeaturedWork";
 import { AboutStorySection } from "@/app/components/about/AboutStorySection";
@@ -79,6 +80,9 @@ export default async function Home() {
           }),
         }}
       />
+
+      {/* One scroll glides to the next hero scene or section */}
+      <SectionSnap />
 
       {/* ── 01 · HERO — Scroll-scrubbed video ──────────────────────────────── */}
       <ScrollVideoHero

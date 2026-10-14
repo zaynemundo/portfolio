@@ -88,7 +88,7 @@ export function AddLeadButton() {
             </div>
             <div>
               <label htmlFor="leadEmail" className={labelClass}>Email (optional)</label>
-              <input id="leadEmail" type="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} className={fieldClass} />
+              <input id="leadEmail" type="email" autoComplete="off" data-lpignore="true" data-1p-ignore="" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} className={fieldClass} />
             </div>
           </div>
           <div>

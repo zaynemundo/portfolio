@@ -86,6 +86,7 @@ export function AboutStorySection({ portraitUrl, chapters }: Props) {
       id="about"
       className="about-story pt-20"
       aria-label="About"
+      data-no-snap=""
     >
       <div className="about-story__container">
 

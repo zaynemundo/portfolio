@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Check, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 import { cardClass } from "@/app/(admin)/_components/ui/Card";
 
@@ -120,6 +120,8 @@ interface ItemCardProps {
   onRemove?: () => void;
   /** For a list whose order matters: shows the up / down arrows. Leave `up` or `down` undefined at the ends of the list. */
   move?: { up?: () => void; down?: () => void };
+  /** In a grid of cards (see useGridDrag): a grip to drag the card by, in place of the arrows. */
+  drag?: { handle: React.ButtonHTMLAttributes<HTMLButtonElement>; lifted: boolean; style?: React.CSSProperties };
   /** With these two, the header folds the card's fields away. */
   collapsed?: boolean;
   onToggle?: () => void;
@@ -127,7 +129,7 @@ interface ItemCardProps {
 }
 
 /** One entry in a list a section edits: a header with its name and reorder / remove buttons, then its fields. */
-export function ItemCard({ label, summary, onRemove, move, collapsed, onToggle, children }: ItemCardProps) {
+export function ItemCard({ label, summary, onRemove, move, drag, collapsed, onToggle, children }: ItemCardProps) {
   const heading = (
     <>
       <span className="text-[12.5px] font-semibold text-foreground">{label}</span>
@@ -135,8 +137,23 @@ export function ItemCard({ label, summary, onRemove, move, collapsed, onToggle, 
     </>
   );
   return (
-    <div className="rounded-xl border border-border/70 bg-background">
+    <div
+      data-tile={drag ? "" : undefined}
+      style={drag?.style}
+      className={cn("rounded-xl border bg-background", drag?.lifted ? "border-primary/40 shadow-[0_14px_30px_-8px_rgba(0,0,0,0.25)]" : "border-border/70")}
+    >
       <div className="flex items-center gap-1 px-3 py-2">
+        {drag && (
+          <button
+            type="button"
+            {...drag.handle}
+            aria-label={`Drag to move ${label}, or use the arrow keys`}
+            title="Drag to reorder"
+            className={cn(iconButton, "-ml-1 touch-none", drag.lifted ? "cursor-grabbing bg-muted text-foreground" : "cursor-grab")}
+          >
+            <GripVertical size={15} />
+          </button>
+        )}
         {onToggle ? (
           <button type="button" onClick={onToggle} aria-expanded={!collapsed} className="flex min-w-0 flex-1 items-center gap-2 text-left">
             <ChevronDown size={14} className={cn("shrink-0 text-muted-foreground transition-transform", collapsed && "-rotate-90")} />
@@ -167,12 +184,12 @@ export function ItemCard({ label, summary, onRemove, move, collapsed, onToggle, 
 }
 
 /** The dashed "+ Add …" button under a list. */
-export function AddItemButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+export function AddItemButton({ onClick, children, className }: { onClick: () => void; children: React.ReactNode; className?: string }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border py-2.5 text-[12.5px] font-semibold text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-colors"
+      className={cn("flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border py-2.5 text-[12.5px] font-semibold text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-colors", className)}
     >
       <Plus size={14} />
       {children}

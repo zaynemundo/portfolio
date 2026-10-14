@@ -7,11 +7,11 @@
 
 export type Field =
   | { kind: "text" | "textarea"; key: string; label: string; placeholder?: string; required?: boolean; half?: boolean }
-  /** An image: stored as its URL, picked with an upload button. */
-  | { kind: "image"; key: string; label: string; half?: boolean }
+  /** An image: stored as its URL, picked with an upload button. `captionKey` adds a caption box under it, stored under that key. */
+  | { kind: "image"; key: string; label: string; half?: boolean; captionKey?: string; optional?: boolean }
   | { kind: "number"; key: string; label: string; placeholder?: string; half?: boolean }
   | { kind: "lines"; key: string; label: string; placeholder?: string; required?: boolean }
-  | { kind: "list"; key: string; label: string; itemLabel: string; fields: Field[]; required?: boolean }
+  | { kind: "list"; key: string; label: string; itemLabel: string; fields: Field[]; required?: boolean; /** Short items (metrics, points): draggable cards side by side instead of one per row. */ grid?: boolean }
   | { kind: "group"; key: string; label: string; fields: Field[] };
 
 export interface RichSectionDef {
@@ -20,8 +20,6 @@ export interface RichSectionDef {
   /** Where this shows up on the public case study page. */
   hint: string;
   fields: Field[];
-  /** Not part of the usual write-up: left out of the editor until it has content or is added by hand. */
-  optional?: boolean;
   /** No longer shown on the public page. Its content stays stored but the editor leaves it out. */
   retired?: boolean;
   /** Edited somewhere other than the Story tab (the sidebar rows sit with the other details). */
@@ -36,7 +34,7 @@ const METRIC_FIELDS: Field[] = [
 const WRITE_UP_FIELDS: Field[] = [
   { kind: "text", key: "title", label: "Title", required: true },
   {
-    kind: "list", key: "bullets", label: "Points", itemLabel: "Point", required: true,
+    kind: "list", key: "bullets", label: "Points", itemLabel: "Point", required: true, grid: true,
     fields: [
       { kind: "text", key: "heading", label: "Heading", required: true },
       { kind: "textarea", key: "body", label: "Body", required: true },
@@ -47,14 +45,13 @@ const WRITE_UP_FIELDS: Field[] = [
 /** A phase of "What I did": a write-up with a picture of the work. */
 const PHASE_FIELDS: Field[] = [
   WRITE_UP_FIELDS[0],
-  { kind: "image", key: "image", label: "Image (hidden on the page if left empty)", half: true },
-  { kind: "text", key: "imageCaption", label: "Image caption", half: true },
+  { kind: "image", key: "image", label: "Image", captionKey: "imageCaption", optional: true },
   ...WRITE_UP_FIELDS.slice(1),
 ];
 
 const METRIC_GROUP_FIELDS: Field[] = [
   { kind: "text", key: "label", label: "Group label", placeholder: "User & Engagement Impact", required: true },
-  { kind: "list", key: "metrics", label: "Metrics", itemLabel: "Metric", fields: METRIC_FIELDS, required: true },
+  { kind: "list", key: "metrics", label: "Metrics", itemLabel: "Metric", fields: METRIC_FIELDS, grid: true, required: true },
 ];
 
 export const RICH_SECTIONS: RichSectionDef[] = [
@@ -62,7 +59,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
     id: "hero",
     title: "Top stats",
     hint: "The figure cards over the cover image. Write the label as “What is counted: the detail”.",
-    fields: [{ kind: "list", key: "heroMetrics", label: "Metrics", itemLabel: "Metric", fields: METRIC_FIELDS }],
+    fields: [{ kind: "list", key: "heroMetrics", label: "Metrics", itemLabel: "Metric", fields: METRIC_FIELDS, grid: true }],
   },
   {
     id: "sidebar",
@@ -81,13 +78,12 @@ export const RICH_SECTIONS: RichSectionDef[] = [
     fields: [
       { kind: "textarea", key: "problemIntro", label: "Intro paragraph" },
       { kind: "list", key: "problemSections", label: "Problem write-ups", itemLabel: "Write-up", fields: WRITE_UP_FIELDS },
-      { kind: "image", key: "resultsImage", label: "Image (hidden on the page if left empty)", half: true },
-      { kind: "text", key: "resultsImageCaption", label: "Image caption", half: true },
+      { kind: "image", key: "resultsImage", label: "Image", captionKey: "resultsImageCaption", optional: true },
     ],
   },
   {
     id: "competitive",
-    optional: true,
+    retired: true,
     title: "Competitive analysis",
     hint: "Benchmark of existing products, shown after The Problem.",
     fields: [
@@ -111,7 +107,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "research",
-    optional: true,
+    retired: true,
     title: "User research",
     hint: "Ratings, pain points and review quotes.",
     fields: [
@@ -144,7 +140,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "wireframes",
-    optional: true,
+    retired: true,
     title: "Wireframes & sketches",
     hint: "Early sketches and iterations.",
     fields: [
@@ -167,7 +163,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "flow",
-    optional: true,
+    retired: true,
     title: "User flow",
     hint: "Step-by-step user journey.",
     fields: [
@@ -208,15 +204,14 @@ export const RICH_SECTIONS: RichSectionDef[] = [
         fields: [
           { kind: "text", key: "name", label: "Name", placeholder: "Frontend Engineering", required: true },
           { kind: "lines", key: "items", label: "Tags (one per line)", required: true },
-          { kind: "image", key: "image", label: "Image (hidden on the page if left empty)", half: true },
-          { kind: "text", key: "visual", label: "Image caption", half: true },
+          { kind: "image", key: "image", label: "Image", captionKey: "visual", optional: true },
         ],
       },
     ],
   },
   {
     id: "deliverables",
-    optional: true,
+    retired: true,
     title: "What was built",
     hint: "Lists of what was delivered, grouped under labels.",
     fields: [
@@ -260,6 +255,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "performance",
+    retired: true,
     title: "Technical performance",
     hint: "“Performance” chapter — a before/after table.",
     fields: [
@@ -294,8 +290,7 @@ export const STRUCTURED_KEYS = new Set(RICH_SECTIONS.flatMap((s) => s.fields.map
 
 /** Same test the public page uses to switch from the simple layout to the long-form one. */
 const LONG_FORM_KEYS = [
-  "heroMetrics", "problemSections", "userResearch", "competitiveAnalysis", "wireframes", "userFlow",
-  "transformationSections", "executionDisciplines", "deliverables", "whyItWorked", "takeaway",
+  "heroMetrics", "problemSections", "transformationSections", "executionDisciplines", "whyItWorked", "takeaway",
 ];
 
 export function isLongForm(content: Record<string, unknown>): boolean {

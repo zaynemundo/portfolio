@@ -50,7 +50,8 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
 function TextField({ label, id, value, onChange, type = "text" }: { label: string; id: string; value: string; onChange: (v: string) => void; type?: string }) {
   return (
     <Field label={label} htmlFor={id}>
-      <input id={id} type={type} value={value} onChange={(e) => onChange(e.target.value)} className={fieldClass} />
+      {/* Not a login: keep password managers from adding their icon (it breaks hydration). */}
+      <input id={id} type={type} value={value} onChange={(e) => onChange(e.target.value)} autoComplete="off" data-lpignore="true" data-1p-ignore="" className={fieldClass} />
     </Field>
   );
 }

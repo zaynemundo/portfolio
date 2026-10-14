@@ -134,7 +134,7 @@ export function ContactList({ clientId, contacts }: { clientId: string; contacts
             </div>
             <div>
               <label htmlFor="contactEmail" className={labelClass}>Email</label>
-              <input id="contactEmail" type="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} className={fieldClass} />
+              <input id="contactEmail" type="email" autoComplete="off" data-lpignore="true" data-1p-ignore="" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} className={fieldClass} />
             </div>
             <div>
               <label htmlFor="contactPhone" className={labelClass}>Phone</label>
