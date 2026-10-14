@@ -19,6 +19,8 @@ interface Props {
   linkedinUrl: string;
   githubUrl: string;
   cvPath: string;
+  /** Empty until a portfolio PDF is uploaded in the dashboard. */
+  portfolioPath?: string;
 }
 
 /* ── Entrance timing constants ─────────────────────────────────────────────
@@ -86,6 +88,7 @@ export function ContactSection({
   linkedinUrl,
   githubUrl,
   cvPath,
+  portfolioPath,
 }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
   const pulseRef = useRef<HTMLSpanElement>(null);
@@ -360,6 +363,43 @@ export function ContactSection({
                   />
                 </svg>
               </a>
+              {/* Portfolio PDF, once one is uploaded */}
+              {portfolioPath && (
+                <a
+                  href={portfolioPath}
+                  download
+                  className="cs-row cs-row--download group p-4 rounded-xl border border-zinc-800 hover:border-zinc-500 bg-zinc-900/60 hover:bg-zinc-900 transition-all duration-200 flex items-center justify-between"
+                  aria-label="Download Portfolio as a PDF file"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/pdf.svg" alt="" className="w-5 h-5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-mono font-medium tracking-wider uppercase text-zinc-400 mb-0.5">
+                        Portfolio
+                      </p>
+                      <p className="text-[14.5px] font-semibold text-zinc-100 group-hover:text-white transition-colors duration-200 truncate">
+                        Download Portfolio
+                      </p>
+                    </div>
+                  </div>
+                  {/* Download arrow — moves down on hover, not diagonally */}
+                  <svg
+                    className="cs-row-arrow cs-row-arrow--download w-4 h-4 text-zinc-400 group-hover:text-white transform group-hover:translate-y-0.5 transition-all duration-200 shrink-0"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M6 2v6M3.5 6l2.5 2.5L8.5 6M2 10h8"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </a>
+              )}
 
             </div>
           </div>

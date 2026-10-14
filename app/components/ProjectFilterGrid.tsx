@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Reveal } from "@/app/components/Reveal";
 import type { Project } from "@/app/lib/projects";
+import { optimizedImage } from "@/app/lib/image-src";
 
 type ProjectCard = Pick<Project, "slug" | "name" | "tagline" | "category" | "year" | "technologies" | "role" | "workType">
   & { images?: string[]; imageAlt?: string; liveUrl?: string | null; theme?: Project["theme"]; logo?: Project["logo"] };
@@ -41,7 +42,7 @@ export function ProjectFilterGrid({ projects }: Props) {
                     {project.images?.[0] && (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
-                        src={project.images[0]}
+                        {...optimizedImage(project.images[0], "(min-width: 768px) 50vw, 100vw")}
                         alt={project.imageAlt || project.name}
                         className="w-full h-full object-cover object-top"
                         loading="lazy"

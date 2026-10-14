@@ -22,7 +22,10 @@ function isValidEmail(email: string): boolean {
 
 async function sendNotificationEmail(name: string, email: string, message: string) {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || apiKey.startsWith("re_placeholder")) return;
+  if (!apiKey || apiKey.startsWith("re_placeholder")) {
+    console.warn("[contact] RESEND_API_KEY is not set, so no notification email was sent.");
+    return;
+  }
 
   const resend = new Resend(apiKey);
   const receivedAt = new Date().toLocaleString("en-GB", {
@@ -34,7 +37,8 @@ async function sendNotificationEmail(name: string, email: string, message: strin
   const safeEmail = escapeHtml(email);
   const replyHref = `mailto:${safeEmail}?subject=${encodeURIComponent("Re: Your inquiry")}&amp;body=${encodeURIComponent(`Hi ${name},\n\n`)}`;
 
-  await resend.emails.send({
+  // Resend reports a failed send in `error` rather than throwing, so check it.
+  const { error } = await resend.emails.send({
     from: emailFrom(),
     to: "mzaira.mundo@gmail.com",
     replyTo: email,
@@ -73,6 +77,7 @@ async function sendNotificationEmail(name: string, email: string, message: strin
             Reply directly to this email to respond to ${safeName}.`,
     }),
   });
+  if (error) throw new Error(`${error.name}: ${error.message}`);
 }
 
 export async function submitContact(payload: ContactPayload): Promise<ContactResult> {

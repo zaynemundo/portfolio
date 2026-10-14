@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { Upload } from "lucide-react";
 import { createProject, updateProject, uploadProjectLogo, type ProjectFormData } from "@/app/actions/projects";
-import { ImageManager } from "./ImageManager";
+import { GalleryEditor, type GalleryImage } from "./GalleryEditor";
 import { RichContentEditor, FieldsEditor } from "./RichContentEditor";
 import { RICH_SECTIONS, STRUCTURED_KEYS, cleanRichContent } from "./rich-schema";
 import { SaveBar, useSaveState, useUnsavedWarning } from "@/app/(admin)/_components/SaveBar";
@@ -15,7 +15,6 @@ import { Section, SectionStack, Field, fieldClass, areaClass, labelClass } from 
 interface Props {
   mode: "new" | "edit";
   projectId?: string;
-  images?: string[];
   initial?: Partial<ProjectFormData>;
 }
 
@@ -47,7 +46,7 @@ function splitRichContent(json: string | undefined): { structured: Obj; other: O
   return { structured, other };
 }
 
-export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
+export function ProjectForm({ mode, projectId, initial }: Props) {
   const initialRich = useMemo(() => splitRichContent(initial?.richContentJson), [initial?.richContentJson]);
 
   const [name, setName] = useState(initial?.name ?? "");
@@ -70,8 +69,16 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   const [seo] = useState(initial?.seo ?? "");
   const [client, setClient] = useState(initial?.client ?? "");
   const [liveUrl, setLiveUrl] = useState(initial?.liveUrl ?? "");
-  const [imageAlt, setImageAlt] = useState(initial?.imageAlt ?? "");
-  const [imageLabels, setImageLabels] = useState(initial?.imageLabels ?? "");
+  // The project-wide alt text; each image's own alt text now takes its place, so it's only a fallback.
+  const [imageAlt] = useState(initial?.imageAlt ?? "");
+  const [gallery, setGallery] = useState<GalleryImage[]>(() =>
+    (initial?.images ?? []).map((url, i) => ({
+      url,
+      caption: initial?.imageLabels?.[i] ?? "",
+      // Images saved before per-image alt text existed start from the old shared description on the cover.
+      alt: initial?.imageAlts?.[i] ?? (i === 0 ? initial?.imageAlt ?? "" : ""),
+    })),
+  );
   // The card tint and the old initials tile no longer have controls; their saved values are carried through unchanged.
   const [themeBg] = useState(initial?.themeBg ?? "#f4f4f5");
   const [themeDark] = useState(initial?.themeDark ?? false);
@@ -105,7 +112,9 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
   const data: ProjectFormData = {
     slug, name, tagline, shortDescription, role, category, year, workType,
     technologies, challenge, approach, outcome, highlights, accessibility, performance, seo,
-    client, liveUrl, imageAlt, imageLabels, themeBg, themeDark, logoInitials, logoBg, logoLight, logoSrc,
+    client, liveUrl, imageAlt: gallery[0]?.alt || imageAlt,
+    images: gallery.map((g) => g.url), imageLabels: gallery.map((g) => g.caption), imageAlts: gallery.map((g) => g.alt),
+    themeBg, themeDark, logoInitials, logoBg, logoLight, logoSrc,
     richContentJson: JSON.stringify({ ...(other ?? {}), ...cleanedRich }),
     featured, published,
   };
@@ -156,7 +165,7 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
           className={`${borderlessInput} text-[26px] font-bold`}
         />
         <div className="mt-2 flex items-center gap-1.5">
-          <label htmlFor="slug" className="font-mono text-[12.5px] text-muted-foreground/70 shrink-0">/projects/</label>
+          <label htmlFor="slug" className="font-mono text-[12.5px] text-muted-foreground/70 shrink-0">/work/</label>
           <input
             id="slug"
             required
@@ -180,7 +189,7 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
         {/* ── Basics ───────────────────────────────────────────────────── */}
         {tab === "basics" && (
           <SectionStack>
-            <Section title="Summary" description="The line under the title at the top of the case study, and the short text on project cards across the site.">
+            <Section title="Summary">
               <Field label="Tagline" htmlFor="tagline">
                 <textarea id="tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} rows={2} className={areaClass} />
               </Field>
@@ -189,7 +198,7 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
               </Field>
             </Section>
 
-            <Section title="Visibility" description="A draft is only visible to you. Featured case studies can be picked for Selected Work on the homepage.">
+            <Section title="Visibility" description="Drafts are only visible to you.">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <span className={labelClass}>Status</span>
@@ -210,7 +219,7 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
               </div>
             </Section>
 
-            <Section title="Details" description="The Details sidebar on the case study, and the labels on project cards.">
+            <Section title="Details">
               <div className="grid sm:grid-cols-3 gap-4">
                 <Field label="Category" htmlFor="category">
                   <input id="category" value={category} onChange={(e) => setCategory(e.target.value)} className={fieldClass} />
@@ -245,23 +254,15 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
         {/* ── Media ────────────────────────────────────────────────────── */}
         {tab === "media" && (
           <SectionStack>
-            <Section title="Screenshots" description="The first screenshot is the thumbnail on the Work page. The rest make up the image slider at the top of the case study. Captions go with the screenshots in order, starting with the thumbnail.">
+            <Section title="Screenshots" description="The first is the Work page thumbnail; the rest make up the slider.">
               {mode === "edit" && projectId ? (
-                <ImageManager projectId={projectId} images={images} />
+                <GalleryEditor images={gallery} onChange={setGallery} projectName={name} />
               ) : (
                 <p className="text-[12.5px] text-muted-foreground">Screenshots can be uploaded once the case study has been created.</p>
               )}
-              <div className="grid sm:grid-cols-2 gap-4">
-                <Field label="Captions, one per line" htmlFor="imageLabels">
-                  <textarea id="imageLabels" value={imageLabels} onChange={(e) => setImageLabels(e.target.value)} rows={4} placeholder={"Homepage\nProduct Listing\nProduct Detail"} className={areaClass} />
-                </Field>
-                <Field label="Image description" htmlFor="imageAlt" hint="Read out by screen readers and shown if an image fails to load.">
-                  <input id="imageAlt" value={imageAlt} onChange={(e) => setImageAlt(e.target.value)} className={fieldClass} />
-                </Field>
-              </div>
             </Section>
 
-            <Section title="Logo" description="The client's logo, shown above the project's name on its card on the Work page. Leave it empty to show the name on its own.">
+            <Section title="Logo">
               <LogoField value={logoSrc} onChange={setLogoSrc} />
             </Section>
           </SectionStack>
@@ -303,7 +304,7 @@ export function ProjectForm({ mode, projectId, images = [], initial }: Props) {
         savedAt={saveState.savedAt}
         error={error}
         saveLabel={mode === "new" ? "Create case study" : "Save changes"}
-        viewHref={mode === "edit" && published && slug ? `/projects/${slug}` : undefined}
+        viewHref={mode === "edit" && published && slug ? `/work/${slug}` : undefined}
       />
     </form>
   );

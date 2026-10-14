@@ -107,6 +107,7 @@ export default async function Home() {
         linkedinUrl={linkedinUrl}
         githubUrl={githubUrl}
         cvPath={cvPath}
+        portfolioPath={settings.portfolioPdfUrl}
       />
     </>
   );

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useSyncExternalStore, useTransition } from "react";
 import { updateSiteSettings } from "@/app/actions/settings";
 import type { SiteSettingsData } from "@/app/lib/settings-db";
 import { Section, Field, fieldClass } from "@/app/(admin)/_components/Section";
+import { PortraitField } from "./PortraitField";
 
 export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
   const [name, setName] = useState(initial.name);
@@ -32,9 +33,11 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
   return (
     <Section
       title="Identity and contact"
-      description="Your name and job title as they appear across the site, and the contact details and links in the footer and contact section."
       save={{ onSave: save, pending: isPending, saved, error }}
     >
+      <div className="border-b border-border pb-4">
+        <PortraitField currentUrl={initial.portraitUrl} />
+      </div>
       <div className="grid sm:grid-cols-2 gap-4">
         <TextField label="Name" id="name" value={name} onChange={setName} />
         <TextField label="Job title" id="jobTitle" value={jobTitle} onChange={setJobTitle} />
@@ -47,11 +50,20 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
   );
 }
 
+const noSubscribe = () => () => {};
+
 function TextField({ label, id, value, onChange, type = "text" }: { label: string; id: string; value: string; onChange: (v: string) => void; type?: string }) {
+  // Password managers add an icon and a button to the email box before React
+  // loads, which breaks hydration. The server sends a look-alike box instead,
+  // and the real input appears once the page is running.
+  const hydrated = useSyncExternalStore(noSubscribe, () => true, () => false);
   return (
     <Field label={label} htmlFor={id}>
-      {/* Not a login: keep password managers from adding their icon (it breaks hydration). */}
-      <input id={id} type={type} value={value} onChange={(e) => onChange(e.target.value)} autoComplete="off" data-lpignore="true" data-1p-ignore="" className={fieldClass} />
+      {hydrated ? (
+        <input id={id} type={type} value={value} onChange={(e) => onChange(e.target.value)} autoComplete="off" data-lpignore="true" data-1p-ignore="" className={fieldClass} />
+      ) : (
+        <div aria-hidden className={`${fieldClass} truncate`}>{value || "\u00a0"}</div>
+      )}
     </Field>
   );
 }

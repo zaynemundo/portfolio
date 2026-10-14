@@ -18,6 +18,7 @@ import type { Chapter } from "@/app/components/work/CaseStudyChapterNav";
 import { AnimatedMetric } from "@/app/components/work/AnimatedMetric";
 import { ProcessTimeline } from "@/app/components/work/ProcessTimeline";
 import { BackToTop } from "@/app/components/BackToTop";
+import { optimizedImage } from "@/app/lib/image-src";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -28,13 +29,13 @@ const DEFAULT_THEME = { bg: "#f4f4f5", dark: false };
 /* Images only show where one has been uploaded: no placeholder frames, and
    no borrowing a gallery screenshot for an empty slot. */
 function buildSlides(project: Project): SliderImage[] {
-  const all = (project.images ?? []).map((src, i) => ({ src, caption: project.imageLabels?.[i] }));
+  const all = (project.images ?? []).map((src, i) => ({ src, caption: project.imageLabels?.[i] || undefined, alt: project.imageAlts?.[i] }));
   // The first screenshot is the cover: the thumbnail on the Work page and the
   // picture in the hero above. The gallery carries on from the second.
   const shown = all.slice(1);
-  return shown.map(({ src, caption }, i) => {
+  return shown.map(({ src, caption, alt }, i) => {
     const label = caption ?? `Screen ${i + 1}`;
-    return { src, label, alt: `${project.name} — ${label}` };
+    return { src, label, alt: alt || `${project.name} — ${label}` };
   });
 }
 
@@ -103,11 +104,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: project.name,
     description: project.shortDescription,
-    alternates: { canonical: `/projects/${slug}` },
+    alternates: { canonical: `/work/${slug}` },
     openGraph: {
       title: `${project.name} | Zaira Mundo`,
       description: project.shortDescription,
-      url: `/projects/${slug}`,
+      url: `/work/${slug}`,
     },
   };
 }
@@ -251,8 +252,9 @@ export default async function CaseStudyPage({ params }: Props) {
               <div className="relative mx-auto mt-14 max-w-[1040px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={cover}
-                  alt={project.imageAlt}
+                  {...optimizedImage(cover, "(min-width: 1088px) 1040px, 100vw")}
+                  fetchPriority="high"
+                  alt={project.imageAlts?.[0] || project.imageAlt}
                   className="block w-full aspect-[1000/544] object-cover object-top rounded-3xl border border-white/15 shadow-[0_50px_100px_-30px_rgba(0,0,0,0.75)]"
                 />
               </div>
@@ -510,7 +512,8 @@ export default async function CaseStudyPage({ params }: Props) {
                                         <a href={ts.image} target="_blank" rel="noopener noreferrer" className="group block overflow-hidden rounded-2xl border border-zinc-200" aria-label={`Open the ${ts.title} picture full size`}>
                                           {/* eslint-disable-next-line @next/next/no-img-element */}
                                           <img
-                                            src={ts.image}
+                                            {...optimizedImage(ts.image, "(min-width: 1024px) 760px, 100vw")}
+                                            loading="lazy"
                                             alt={`${project.name} — ${ts.title}`}
                                             className="block w-full aspect-[1000/544] object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
                                           />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
+import { optimizedImage } from "@/app/lib/image-src";
 
 export interface SliderImage {
   label: string;
@@ -196,7 +197,8 @@ export function CaseStudyImageSlider({
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={img.src}
+                      {...optimizedImage(img.src, "(min-width: 1024px) 1040px, 100vw")}
+                      loading="lazy"
                       alt={img.alt}
                       className="w-full h-full object-cover object-top"
                       draggable={false}

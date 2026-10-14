@@ -119,6 +119,7 @@ export interface Project {
   /* Rich case-study fields — optional, rendered when present */
   images?: string[];                           // uploaded screenshots, in order
   imageLabels?: string[];                      // slide captions, paired with images by index
+  imageAlts?: string[];                        // alt text per screenshot, paired by index
   theme?: { bg: string; dark?: boolean };      // placeholder / card tint for this project
   /**
    * Client logo shown on project cards and the track-record tiles.

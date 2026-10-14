@@ -60,6 +60,8 @@ model SiteSettings {
   linkedinUrl         String?
   githubUrl           String?
   resumeUrl           String?
+  /// Portfolio PDF offered for download beside the CV (contact section).
+  portfolioPdfUrl     String?
   portraitUrl         String?
   /// Hero banner background video + poster frame, edited via dashboard upload.
   heroVideoUrl        String?
@@ -160,6 +162,8 @@ model Project {
   client           String?
   images           String[]
   imageLabels      String[]
+  /// Alt text per screenshot, paired with images by index (imageAlt is the fallback).
+  imageAlts        String[] @default([])
   theme            Json?
   logo             Json?
   videoMp4         String?
@@ -397,4 +401,24 @@ model Note {
   pinned      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+/// One row per page view on the public site, recorded by app/api/track.
+/// No cookies and no IP address: visitorId is a hash of the connection,
+/// browser and the day, so it changes every day and can't be traced back.
+model PageView {
+  id        String   @id @default(cuid())
+  /// "/work/pno-marinas"
+  path      String
+  /// Only the referring site's name, e.g. "linkedin.com"; null for direct visits.
+  referrer  String?
+  visitorId String
+  /// Two-letter country code from Vercel, e.g. "AE".
+  country   String?
+  /// "mobile" or "desktop"
+  device    String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
 }

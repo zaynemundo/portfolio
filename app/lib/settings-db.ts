@@ -20,6 +20,8 @@ export interface SiteSettingsData {
   linkedinUrl: string;
   githubUrl: string;
   resumeUrl: string;
+  /** Empty until a portfolio PDF is uploaded; the download only shows once set. */
+  portfolioPdfUrl: string;
   portraitUrl: string;
   heroVideoUrl: string;
   heroPosterUrl: string;
@@ -75,6 +77,7 @@ const DEFAULTS: SiteSettingsData = {
   linkedinUrl: "https://linkedin.com/in/zaira-mundo/",
   githubUrl: "https://github.com/mzaira",
   resumeUrl: "/docs/zaira-mundo-cv.pdf",
+  portfolioPdfUrl: "",
   portraitUrl: "/portrait.jpg",
   heroVideoUrl: "/hero-banner-scroll.mp4",
   heroPosterUrl: "/hero-poster.jpg",
@@ -119,6 +122,7 @@ async function fetchSiteSettings(): Promise<SiteSettingsData> {
     linkedinUrl: row.linkedinUrl || DEFAULTS.linkedinUrl,
     githubUrl: row.githubUrl || DEFAULTS.githubUrl,
     resumeUrl: row.resumeUrl || DEFAULTS.resumeUrl,
+    portfolioPdfUrl: row.portfolioPdfUrl || DEFAULTS.portfolioPdfUrl,
     portraitUrl: row.portraitUrl || DEFAULTS.portraitUrl,
     heroVideoUrl: row.heroVideoUrl || DEFAULTS.heroVideoUrl,
     heroPosterUrl: row.heroPosterUrl || DEFAULTS.heroPosterUrl,

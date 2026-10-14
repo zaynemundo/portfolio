@@ -427,9 +427,7 @@ export function DataTable({ columns, rows: givenRows, filters = [], searchPlaceh
                   `Drop to move it to position ${drag.to + 1}.`
                 ) : sort ? (
                   <>Sorted by a column. <button type="button" onClick={() => setSort(null)} className="font-medium text-primary hover:underline">Back to your order</button> to drag rows.</>
-                ) : (
-                  "Drag a row by its handle to change the order."
-                )}
+                ) : null}
               </p>
             ) : null}
             {searchable && <SearchBox value={query} onChange={setQuery} placeholder={searchPlaceholder} className="w-72 max-w-full" />}

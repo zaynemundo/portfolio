@@ -15,6 +15,9 @@ export const hintClass = "text-[12px] text-muted-foreground mt-1.5";
 export const fieldClass =
   "w-full rounded-lg bg-background border border-border px-3 py-2 text-[13.5px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-ring transition-colors";
 export const areaClass = `${fieldClass} resize-y leading-relaxed`;
+/** A small outlined button beside a field, e.g. Replace on an upload. */
+export const pillButtonClass =
+  "flex items-center rounded-full border border-border px-3 py-1.5 text-[12px] font-semibold text-foreground/80 hover:bg-muted transition-colors";
 
 interface SaveState {
   /** Called by the Save button (and by Enter in a field, when the section is a form). */
@@ -93,9 +96,9 @@ export function Section({ title, description, save, card = true, children }: Sec
   );
 }
 
-/** A stack of Sections, with a rule between each. */
+/** A stack of Sections (each its own card), with a gap between them. */
 export function SectionStack({ children }: { children: React.ReactNode }) {
-  return <div className="space-y-8 [&>*+*]:border-t [&>*+*]:border-border [&>*+*]:pt-8">{children}</div>;
+  return <div className="space-y-10">{children}</div>;
 }
 
 /** A labelled field. Pass the input itself as the child. */

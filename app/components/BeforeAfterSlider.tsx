@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { optimizedImage } from "@/app/lib/image-src";
 
 interface Props {
   beforeImage?: string;
@@ -103,7 +104,7 @@ export function BeforeAfterSlider({
         <div className="absolute inset-0 w-full h-full">
           {beforeImage ? (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={beforeImage} alt={beforeLabel} className="w-full h-full object-cover object-top" style={softened(beforeBlur)} />
+            <img {...optimizedImage(beforeImage)} loading="lazy" alt={beforeLabel} className="w-full h-full object-cover object-top" style={softened(beforeBlur)} />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-200/80 p-6 text-center">
               <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 font-bold">
@@ -126,7 +127,7 @@ export function BeforeAfterSlider({
         >
           {afterImage ? (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={afterImage} alt={afterLabel} className="w-full h-full object-cover object-top" style={softened(afterBlur)} />
+            <img {...optimizedImage(afterImage)} loading="lazy" alt={afterLabel} className="w-full h-full object-cover object-top" style={softened(afterBlur)} />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-900 text-white p-6 text-center">
               <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-bold">

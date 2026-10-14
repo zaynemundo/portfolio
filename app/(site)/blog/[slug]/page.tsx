@@ -21,12 +21,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: post.title,
     description: post.excerpt,
     // The article also answers at /insights/<slug> — this is the address search engines should keep.
-    alternates: { canonical: `/blog/${slug}` },
+    alternates: { canonical: `/insights/${slug}` },
     openGraph: {
       title: `${post.title} | Zaira Mundo`,
       description: post.excerpt,
       type: "article",
-      url: `/blog/${slug}`,
+      url: `/insights/${slug}`,
       publishedTime: post.date,
       modifiedTime: post.updatedAt,
       authors: ["Zaira Mundo"],
@@ -50,7 +50,7 @@ export default async function ArticlePage({ params }: Props) {
   const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
   const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
 
-  const url = `${SITE_URL}/blog/${slug}`;
+  const url = `${SITE_URL}/insights/${slug}`;
   const author = { "@type": "Person", name: "Zaira Mundo", url: SITE_URL };
   /* Tells search engines this is an article, who wrote it and when — what they use for rich results. */
   const structuredData = [

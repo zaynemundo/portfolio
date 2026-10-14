@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SITE_URL } from "@/app/lib/site-url";
 
 const inter = Inter({
@@ -47,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={inter.variable}>
       <body>
         {children}
-        <SpeedInsights />
+        
       </body>
     </html>
   );

@@ -6,9 +6,10 @@ import { uploadProjectImage } from "@/app/actions/projects";
 import { RICH_SECTIONS, sectionHasContent, type Field } from "./rich-schema";
 import { StatusPill } from "@/app/(admin)/_components/ui/StatusPill";
 import { cardClass } from "@/app/(admin)/_components/ui/Card";
-import { ItemCard, AddItemButton, fieldClass, areaClass, labelClass } from "@/app/(admin)/_components/Section";
+import { ItemCard, AddItemButton, fieldClass, areaClass, labelClass, pillButtonClass } from "@/app/(admin)/_components/Section";
 import { useGridDrag } from "@/app/(admin)/_components/useGridDrag";
 import { cn } from "@/app/lib/utils";
+import { TileGridEditor } from "@/app/(admin)/_components/TileGridEditor";
 
 type Obj = Record<string, unknown>;
 
@@ -64,7 +65,7 @@ export function RichContentEditor({ value, onChange }: { value: Obj; onChange: (
 
 /** The fields of one chapter, or of one item in a list. Also used on the Basics tab for the extra sidebar rows. */
 export function FieldsEditor({
-  fields, value, onChange, path, stacked,
+  fields, value, onChange, path, stacked, areaRows,
 }: {
   fields: Field[];
   value: Obj;
@@ -72,6 +73,8 @@ export function FieldsEditor({
   path: string;
   /** One field per row, even the half-width ones (for narrow cards in a grid). */
   stacked?: boolean;
+  /** Height of the long text boxes, in rows. */
+  areaRows?: number;
 }) {
   return (
     <div className={stacked ? "grid gap-y-4" : "grid sm:grid-cols-2 gap-x-4 gap-y-4"}>
@@ -131,7 +134,7 @@ export function FieldsEditor({
                   value={typeof value[field.key] === "string" ? (value[field.key] as string) : ""}
                   onChange={(e) => set(e.target.value)}
                   placeholder={field.placeholder}
-                  rows={stacked ? 8 : 3}
+                  rows={areaRows ?? (stacked ? 8 : 3)}
                   className={areaClass}
                 />
               </>
@@ -145,7 +148,8 @@ export function FieldsEditor({
                   value={Array.isArray(value[field.key]) ? (value[field.key] as unknown[]).join("\n") : ""}
                   onChange={(e) => set(e.target.value.split("\n"))}
                   placeholder={field.placeholder}
-                  rows={4}
+                  // Tall enough for every line to show: about two rows per paragraph, between 6 and 24.
+                  rows={Math.min(24, Math.max(6, (Array.isArray(value[field.key]) ? (value[field.key] as unknown[]).length : 0) * 2 + 2))}
                   className={areaClass}
                 />
               </>
@@ -208,69 +212,74 @@ function ImageField({
   }
 
   const pick = () => inputRef.current?.click();
+  const drop = {
+    onDragOver: (e: React.DragEvent) => { e.preventDefault(); setOver(true); },
+    onDragLeave: () => setOver(false),
+    onDrop: (e: React.DragEvent) => { e.preventDefault(); setOver(false); handleFile(e.dataTransfer.files[0]); },
+  };
 
   return (
     <div>
       <span className={labelClass}>{label}</span>
-      {/* With a caption: the image row and the caption box side by side, half the width each. */}
-      <div className={caption ? "grid gap-2 sm:grid-cols-2" : undefined}>
-        {/* One compact row: the preview, what to do, then the buttons. The whole row takes a dropped file. */}
-        <div
-          onDragOver={(e) => { e.preventDefault(); setOver(true); }}
-          onDragLeave={() => setOver(false)}
-          onDrop={(e) => { e.preventDefault(); setOver(false); handleFile(e.dataTransfer.files[0]); }}
-          className={cn(
-            "flex items-center gap-3 rounded-lg border p-2 transition-colors",
-            value ? "border-border" : "border-dashed border-border",
-            over && "border-primary bg-primary/10",
-          )}
-        >
+      {value ? (
+        /* A real preview beside its caption and buttons. Dropping a file on it replaces the image. */
+        <div {...drop} className={cn("flex gap-4 rounded-xl border p-3 transition-colors", over ? "border-primary bg-primary/10" : "border-border")}>
           <button
             type="button"
             onClick={pick}
             disabled={isPending}
-            aria-label={value ? `Replace ${label.toLowerCase()}` : `Upload ${label.toLowerCase()}`}
-            className="flex h-12 w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground hover:text-primary transition-colors"
+            aria-label={`Replace ${label.toLowerCase()}`}
+            className="group relative w-44 shrink-0 overflow-hidden rounded-lg bg-muted"
           >
-            {value ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={value} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <ImagePlus size={18} />
-            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={value} alt="" className="aspect-[16/10] w-full object-cover" />
+            <span className={cn("absolute inset-0 flex items-center justify-center bg-black/50 text-[12px] font-semibold text-white transition-opacity", isPending || over ? "opacity-100" : "opacity-0 group-hover:opacity-100")}>
+              {isPending ? "Uploading…" : over ? "Drop to replace" : "Replace"}
+            </span>
           </button>
-          <div className="min-w-0 flex-1 text-[12px] leading-snug text-muted-foreground">
-            {isPending ? (
-              <span className="font-semibold text-foreground">Uploading…</span>
-            ) : over ? (
-              <span className="font-semibold text-primary">Drop to upload</span>
-            ) : value ? null : (
-              <>
-                <span className="block font-semibold text-foreground">Drop an image or click to upload</span>
-                JPG, PNG or WebP{optional ? " · nothing shows on the page if empty" : ""}
-              </>
+          <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
+            {caption ? (
+              <input
+                type="text"
+                value={caption.value}
+                onChange={(e) => caption.onChange(e.target.value)}
+                placeholder="Caption (optional)"
+                aria-label={`${label} caption`}
+                className={fieldClass}
+              />
+            ) : (
+              <span className="truncate text-[12px] text-muted-foreground">{decodeURIComponent(value.split("/").pop() ?? "")}</span>
             )}
-          </div>
-          {value && !isPending && (
-            <div className="flex shrink-0 gap-1">
-              <button type="button" onClick={pick} className={rowButton}>Replace</button>
-              <button type="button" onClick={() => onChange("")} aria-label={`Remove ${label.toLowerCase()}`} className={cn(rowButton, "px-2 hover:bg-negative/10 hover:text-negative")}>
+            <div className="flex gap-1.5">
+              <button type="button" onClick={pick} disabled={isPending} className={pillButtonClass}>Replace</button>
+              <button type="button" onClick={() => onChange("")} className={cn(pillButtonClass, "gap-1.5 hover:bg-negative/10 hover:text-negative")}>
                 <Trash2 size={13} />
+                Remove
               </button>
             </div>
-          )}
+          </div>
         </div>
-        {caption && (
-          <input
-            type="text"
-            value={caption.value}
-            onChange={(e) => caption.onChange(e.target.value)}
-            placeholder="Caption (optional)"
-            aria-label={`${label} caption`}
-            className={cn(fieldClass, "h-full")}
-          />
-        )}
-      </div>
+      ) : (
+        /* Empty: one drop zone. The caption appears once there's an image to caption. */
+        <button
+          type="button"
+          onClick={pick}
+          disabled={isPending}
+          {...drop}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-xl border border-dashed p-3 text-left transition-colors",
+            over ? "border-primary bg-primary/10" : "border-border hover:border-primary/50 hover:bg-primary/5",
+          )}
+        >
+          <span className="flex h-12 w-[72px] shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+            <ImagePlus size={18} />
+          </span>
+          <span className="text-[12px] leading-snug text-muted-foreground">
+            <span className="block font-semibold text-foreground">{isPending ? "Uploading…" : over ? "Drop to upload" : "Drop an image or click to upload"}</span>
+            JPG, PNG or WebP{optional ? " · nothing shows on the page if empty" : ""}
+          </span>
+        </button>
+      )}
       <input
         ref={inputRef}
         type="file"
@@ -286,18 +295,17 @@ function ImageField({
   );
 }
 
-const rowButton =
-  "flex items-center rounded-full border border-border px-3 py-1.5 text-[12px] font-semibold text-foreground/80 hover:bg-muted transition-colors";
 
 /** What to call an item in its header: its own title, name, label or value, whichever it has. */
 function itemSummary(item: Obj): string | undefined {
-  for (const key of ["title", "name", "label", "heading", "metric", "step", "value"]) {
+  for (const key of ["title", "name", "label", "heading", "area", "metric", "step", "value"]) {
     if (typeof item[key] === "string" && item[key]) return item[key] as string;
   }
   return undefined;
 }
 
-function ListEditor({
+/** Long items as tiles: title, picture and a count on the tile; everything else in a dialog. */
+function TileListEditor({
   field, items, onChange, path,
 }: {
   field: Extract<Field, { kind: "list" }>;
@@ -305,6 +313,66 @@ function ListEditor({
   onChange: (next: unknown[]) => void;
   path: string;
 }) {
+  const imageKey = field.fields.find((f) => f.kind === "image")?.key;
+  const subList = field.fields.find((f): f is Extract<Field, { kind: "list" }> => f.kind === "list");
+  // The other short texts (e.g. before and after) make the tile's second line.
+  const textKeys = field.fields.filter((f) => f.kind === "text").map((f) => f.key);
+  const wide = Boolean(subList || imageKey);
+  return (
+    <div>
+      <span className={labelClass}>{field.label}</span>
+      <TileGridEditor<Obj>
+        items={items.map(asObj)}
+        onChange={onChange}
+        itemLabel={field.itemLabel}
+        newItem={() => ({})}
+        saveHint="Save changes"
+        modalWidth={wide ? "max-w-5xl" : "max-w-2xl"}
+        titleOf={(item) => itemSummary(item) ?? ""}
+        renderMeta={(item) => {
+          if (!subList) return null;
+          const n = Array.isArray(item[subList.key]) ? (item[subList.key] as unknown[]).length : 0;
+          return n > 0 ? `${n} ${subList.itemLabel.toLowerCase()}${n === 1 ? "" : "s"}` : null;
+        }}
+        renderPreview={(item) => {
+          const image = imageKey && typeof item[imageKey] === "string" ? (item[imageKey] as string) : "";
+          return (
+            <span className="flex items-center gap-3">
+              {image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={image} alt="" className="h-12 w-[72px] shrink-0 rounded-md object-cover" />
+              )}
+              <span className="min-w-0">
+                <span className="block text-[14px] font-semibold leading-snug text-foreground">{itemSummary(item) || "Untitled"}</span>
+                {(() => {
+                  const summary = itemSummary(item);
+                  const rest = textKeys.map((k) => item[k]).filter((v): v is string => typeof v === "string" && v !== "" && v !== summary);
+                  return rest.length > 0 && <span className="mt-0.5 block line-clamp-2 text-[12.5px] leading-snug text-muted-foreground">{rest.join(" → ")}</span>;
+                })()}
+              </span>
+            </span>
+          );
+        }}
+        renderEditor={(item, update, i) => (
+          <FieldsEditor fields={field.fields} value={item} onChange={(next) => update(next)} path={`${path}-${i}`} />
+        )}
+      />
+    </div>
+  );
+}
+
+type ListProps = {
+  field: Extract<Field, { kind: "list" }>;
+  items: unknown[];
+  onChange: (next: unknown[]) => void;
+  path: string;
+};
+
+function ListEditor(props: ListProps) {
+  return props.field.tiles ? <TileListEditor {...props} /> : <CardListEditor {...props} />;
+}
+
+function CardListEditor({ field, items, onChange, path }: ListProps) {
   function move(from: number, to: number) {
     const next = [...items];
     const [item] = next.splice(from, 1);
@@ -314,7 +382,7 @@ function ListEditor({
   const { gridRef, liftedIndex, tileStyle, handleProps, dropTarget } = useGridDrag(items.length, move);
 
   // In a grid it's the tile after the last card, as tall as the cards; on a row of its own it runs the full width.
-  const addTile = field.grid && items.length % 4 !== 0;
+  const addTile = field.grid && items.length % field.grid !== 0;
   const addButton = (
     <AddItemButton onClick={() => onChange([...items, {}])} className={addTile ? "h-full min-h-[120px]" : undefined}>
       Add {field.itemLabel.toLowerCase()}
@@ -325,7 +393,7 @@ function ListEditor({
     <div>
       <span className={labelClass}>{field.label}</span>
       <div className="space-y-2.5">
-        <div ref={gridRef} className={field.grid ? "relative grid grid-cols-4 gap-2.5" : "space-y-2.5"}>
+        <div ref={gridRef} className={field.grid === 4 ? "relative grid grid-cols-4 gap-2.5" : field.grid === 2 ? "relative grid grid-cols-2 gap-2.5" : "space-y-2.5"}>
           {field.grid && dropTarget}
           {items.map((item, i) => (
             <ItemCard
@@ -341,7 +409,8 @@ function ListEditor({
                 value={asObj(item)}
                 onChange={(next) => onChange(items.map((it, idx) => (idx === i ? next : it)))}
                 path={`${path}-${i}`}
-                stacked={field.grid}
+                stacked={Boolean(field.grid)}
+                areaRows={field.grid === 2 ? 4 : undefined}
               />
             </ItemCard>
           ))}

@@ -19,7 +19,7 @@ export function SelectedWorkCopyForm({ initialHeading, initialIntro }: { initial
   }
 
   return (
-    <Section title="Heading and intro" description="The title and the short paragraph above the Selected Work carousel." save={{ onSave: save, pending: isPending, saved }}>
+    <Section title="Heading and intro" save={{ onSave: save, pending: isPending, saved }}>
       <Field label="Section heading" htmlFor="selectedWorkHeading">
         <input id="selectedWorkHeading" type="text" value={heading} onChange={(e) => setHeading(e.target.value)} className={fieldClass} />
       </Field>

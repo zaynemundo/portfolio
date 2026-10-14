@@ -10,7 +10,7 @@ import { Reveal } from "@/app/components/Reveal";
 export const metadata: Metadata = {
   title: "Work & Case Studies",
   // The same page also answers at /work — this is the address search engines should keep.
-  alternates: { canonical: "/projects" },
+  alternates: { canonical: "/work" },
   description:
     "Curated interface library and case studies of front-end development, responsive web design, e-commerce, and accessibility implementations.",
 };

@@ -5,6 +5,8 @@
  * placeholder using the same dotted treatment as CaseStudyImageSlider so
  * unfinished case studies still read as intentional layout rather than gaps.
  */
+
+import { optimizedImage } from "@/app/lib/image-src";
 interface Props {
   label: string;
   caption?: string;
@@ -40,7 +42,7 @@ export function CaseStudyImage({
       >
         {src ? (
           /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={src} alt={alt ?? label} className="w-full h-full object-cover object-top" />
+          <img {...optimizedImage(src)} loading="lazy" alt={alt ?? label} className="w-full h-full object-cover object-top" />
         ) : (
           <div className="text-center px-6">
             <p

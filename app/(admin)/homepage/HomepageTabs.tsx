@@ -61,7 +61,7 @@ export function HomepageTabs(props: Props) {
 
       {tab === "hero" && (
         <SectionStack>
-          <Section title="Banner media" description="The video that plays as a visitor scrolls through the top of the homepage, and the still image shown while it loads. Each uploads as soon as you choose a file." card={false}>
+          <Section title="Banner media" description="Uploads go live straight away." card={false}>
             <div className="grid sm:grid-cols-2 gap-4">
               <UploadCard
                 title="Banner video"

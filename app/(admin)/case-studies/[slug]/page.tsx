@@ -32,7 +32,6 @@ export default async function EditCaseStudyPage({ params }: Props) {
         <ProjectForm
           mode="edit"
           projectId={project.id}
-          images={project.images}
           initial={{
             name: project.name,
             slug: project.slug,
@@ -53,7 +52,9 @@ export default async function EditCaseStudyPage({ params }: Props) {
             client: project.client ?? "",
             liveUrl: project.liveUrl ?? "",
             imageAlt: project.imageAlt,
-            imageLabels: project.imageLabels.join("\n"),
+            images: project.images,
+            imageLabels: project.imageLabels,
+            imageAlts: project.imageAlts,
             themeBg: theme.bg ?? "#f4f4f5",
             themeDark: theme.dark ?? false,
             logoInitials: logo.initials ?? "",

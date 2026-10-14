@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { GripVertical, Plus, Trash2, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Section, fieldClass } from "@/app/(admin)/_components/Section";
 import { useGridDrag } from "@/app/(admin)/_components/useGridDrag";
+import { AddTile, TileActions, TileFrame } from "@/app/(admin)/_components/Tile";
 import { updateClientLogos, uploadClientLogoImage } from "@/app/actions/settings";
 import type { ClientLogoData } from "@/app/lib/client-logos";
 
@@ -43,7 +44,6 @@ export function ClientLogosManager({ initial }: { initial: ClientLogoData[] }) {
   return (
     <Section
       title="Client logos"
-      description="The scrolling row of brands at the bottom of /work. The name shows when a visitor hovers a logo. A logo doesn't need a matching case study."
       save={{ onSave: handleSave, pending: isPending, saved, label: "Save logos" }}
     >
       {/* A grid of small tiles, in the order the row scrolls: left to right, then down. Drag a tile by its handle to move it. */}
@@ -61,22 +61,12 @@ export function ClientLogosManager({ initial }: { initial: ClientLogoData[] }) {
             onRemove={() => setLogos((prev) => prev.filter((_, idx) => idx !== i))}
           />
         ))}
-        <button
-          type="button"
-          onClick={() => setLogos((prev) => [...prev, emptyLogo()])}
-          className="flex min-h-[176px] flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-border text-[12.5px] font-semibold text-muted-foreground hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-colors"
-        >
-          <Plus size={16} />
-          Add logo
-        </button>
+        <AddTile label="Add logo" onClick={() => setLogos((prev) => [...prev, emptyLogo()])} minHeight={176} />
       </div>
-      <p className="text-[12px] text-muted-foreground">Drag a tile by its handle to change the order. SVG or PNG with a transparent background works best. Logos without an image are kept here but stay hidden on the site until one is uploaded.</p>
+      <p className="text-[12px] text-muted-foreground">SVG or PNG with a transparent background works best. Logos without an image are kept here but stay hidden on the site until one is uploaded.</p>
     </Section>
   );
 }
-
-const tileButton =
-  "flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-muted-foreground";
 
 function LogoTile({
   logo, index, lifted, style, handle, onChange, onRemove,
@@ -113,11 +103,7 @@ function LogoTile({
   }
 
   return (
-    <div
-      data-tile
-      style={style}
-      className={`flex flex-col rounded-xl border bg-background p-2 ${lifted ? "border-primary/40 shadow-[0_14px_30px_-8px_rgba(0,0,0,0.25)]" : "border-border/70"}`}
-    >
+    <TileFrame lifted={lifted} style={style} compact>
       {/* The preview is the upload button: click it to add or replace the image. */}
       <button
         type="button"
@@ -158,20 +144,7 @@ function LogoTile({
         className={`${fieldClass} mt-2 px-2.5 py-1.5 text-[13px]`}
       />
       {error && <p className="mt-1.5 text-[11.5px] text-negative" role="alert">{error}</p>}
-      <div className="mt-1.5 flex items-center">
-        <button
-          type="button"
-          {...handle}
-          aria-label={`Drag to move ${label}, or use the arrow keys`}
-          title="Drag to reorder"
-          className={`${tileButton} touch-none ${lifted ? "cursor-grabbing bg-muted text-foreground" : "cursor-grab"}`}
-        >
-          <GripVertical size={15} />
-        </button>
-        <button type="button" onClick={onRemove} aria-label={`Remove ${label}`} className={`${tileButton} ml-auto hover:bg-negative/10 hover:text-negative`}>
-          <Trash2 size={14} />
-        </button>
-      </div>
-    </div>
+      <TileActions label={label} handle={handle} lifted={lifted} onRemove={onRemove} />
+    </TileFrame>
   );
 }

@@ -123,6 +123,28 @@ export async function uploadResume(formData: FormData): Promise<UploadResult> {
   return result;
 }
 
+/**
+ * Saves a document the browser uploaded straight to Blob (see app/api/upload):
+ * PDFs are often too big to pass through a server action.
+ */
+export async function saveDocumentUrl(field: "resumeUrl" | "portfolioPdfUrl", url: string): Promise<UploadResult> {
+  await requireSession();
+  if (!/^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/documents\//.test(url)) {
+    return { ok: false, error: "That file didn't come from an upload." };
+  }
+
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: { [field]: url },
+    create: { id: "singleton", [field]: url },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/about");
+  updateTag(CACHE_TAGS.settings);
+  return { ok: true, url };
+}
+
 export async function uploadPortrait(formData: FormData): Promise<UploadResult> {
   const file = formData.get("file") as File | null;
   if (!file) return { ok: false, error: "No file provided." };

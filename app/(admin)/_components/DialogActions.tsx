@@ -19,3 +19,15 @@ export function DialogActions({ onCancel, pending, submitLabel }: { onCancel: ()
     </div>
   );
 }
+
+/** The last row of an edit dialog whose changes publish with the page's own Save button. */
+export function DialogDone({ onDone, saveHint }: { onDone: () => void; saveHint: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 pt-1">
+      <p className="text-[12px] text-muted-foreground">Press {saveHint} to publish your changes.</p>
+      <button type="button" onClick={onDone} className="rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors">
+        Done
+      </button>
+    </div>
+  );
+}

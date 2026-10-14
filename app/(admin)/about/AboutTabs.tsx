@@ -17,9 +17,9 @@ type Tab = "profile" | "services" | "experience" | "education";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "profile", label: "Profile" },
-  { id: "services", label: "What I do" },
+  { id: "services", label: "Services" },
   { id: "experience", label: "Experience" },
-  { id: "education", label: "Education & skills" },
+  { id: "education", label: "Education" },
 ];
 
 interface Props {
@@ -63,10 +63,10 @@ export function AboutTabs({ settings, profile, services, experience, education }
       {tab === "profile" && (
         <SectionStack>
           <SettingsForm initial={settings} />
-          <Section title="CV and portrait" description="The PDF behind the Resume download link, and the photo in the About section. Each uploads as soon as you choose a file." card={false}>
+          <Section title="CV and portfolio" description="Uploads go live straight away." card={false}>
             <div className="grid sm:grid-cols-2 gap-4 items-start">
-              <FileUploadCard title="Portrait photo" description="JPG, PNG or WebP" currentUrl={settings.portraitUrl} accept="image/jpeg,image/png,image/webp" kind="portrait" />
               <FileUploadCard title="Resume / CV" description="PDF" currentUrl={settings.resumeUrl} accept="application/pdf" kind="resume" />
+              <FileUploadCard title="Portfolio" description="PDF" currentUrl={settings.portfolioPdfUrl} accept="application/pdf" kind="portfolio" />
             </div>
           </Section>
           <ProfileForm chapter={profile} />
@@ -74,7 +74,11 @@ export function AboutTabs({ settings, profile, services, experience, education }
       )}
       {tab === "services" && <ServicesForm chapter={services} />}
       {tab === "experience" && <ExperienceForm chapter={experience} />}
-      {tab === "education" && <EducationForm chapter={education} />}
+      {tab === "education" && (
+        <SectionStack>
+          <EducationForm chapter={education} />
+        </SectionStack>
+      )}
     </div>
   );
 }

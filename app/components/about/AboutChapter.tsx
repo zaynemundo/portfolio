@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
-import type { Chapter } from "@/app/data/aboutChapters";
+import { educationOf, type Chapter } from "@/app/data/aboutChapters";
 
 interface Props {
   chapter: Chapter;
@@ -80,19 +80,40 @@ export const AboutChapter = forwardRef<HTMLElement, Props>(
 
         {chapter.type === "education-skills" && (
           <div className="about-chapter__edu-skills">
-            {chapter.education && (
+            {educationOf(chapter).length > 0 && (
               <div className="about-chapter__edu-block">
-                <div className="about-chapter__edu-item">
-                  <p className="about-chapter__edu-degree">{chapter.education.degree}</p>
-                  <p className="about-chapter__edu-meta">
-                    {chapter.education.institution}
-                    {chapter.education.honours ? ` · ${chapter.education.honours}` : ""}
-                    {chapter.education.period ? ` (${chapter.education.period})` : ""}
-                  </p>
-                  {chapter.education.award && (
-                    <p className="about-chapter__edu-award">{chapter.education.award}</p>
-                  )}
-                </div>
+                {educationOf(chapter).map((edu, idx) => (
+                  <div key={idx} className="about-chapter__edu-item">
+                    <p className="about-chapter__edu-degree">{edu.degree}</p>
+                    <p className="about-chapter__edu-meta">
+                      {edu.institution}
+                      {edu.honours ? ` · ${edu.honours}` : ""}
+                      {edu.period ? ` (${edu.period})` : ""}
+                    </p>
+                    {edu.award && <p className="about-chapter__edu-award">{edu.award}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {chapter.certificates && chapter.certificates.length > 0 && (
+              <div className="about-chapter__edu-block">
+                <p className="about-chapter__skill-cat">Certificates</p>
+                {chapter.certificates.map((cert, idx) => (
+                  <div key={idx} className="about-chapter__edu-item">
+                    <p className="about-chapter__edu-degree">
+                      {cert.url ? (
+                        <a href={cert.url} target="_blank" rel="noopener noreferrer" className="about-chapter__edu-link">{cert.name}</a>
+                      ) : (
+                        cert.name
+                      )}
+                    </p>
+                    <p className="about-chapter__edu-meta">
+                      {cert.issuer}
+                      {cert.year ? ` (${cert.year})` : ""}
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
 

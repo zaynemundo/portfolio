@@ -9,6 +9,7 @@ import {
   setOverProjects,
 } from "@/app/hooks/useActiveProject";
 import type { ProjectCard } from "./ProjectChapter";
+import { optimizedImage, optimizedSrc } from "@/app/lib/image-src";
 
 interface Props {
   projects: ProjectCard[];
@@ -285,7 +286,7 @@ export function ProjectShowcase({ projects }: Props) {
               {(p.poster ?? p.images?.[0]) ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
-                  src={p.poster ?? p.images![0]}
+                  {...optimizedImage(p.poster ?? p.images![0])}
                   alt={p.imageAlt ?? p.name}
                   className="showcase__card-img"
                   loading="lazy"
@@ -379,8 +380,8 @@ export function ProjectShowcase({ projects }: Props) {
                     muted
                     loop
                     playsInline
-                    preload="auto"
-                    poster={p.poster ?? p.images?.[0]}
+                    preload="none"
+                    poster={optimizedSrc(p.poster ?? p.images?.[0])}
                     aria-label={`${p.name} project preview`}
                   >
                     {videoWebm && (
@@ -412,7 +413,7 @@ export function ProjectShowcase({ projects }: Props) {
                     </span>
                     <h3 className="showcase__card-title">
                       <Link
-                        href={`/projects/${p.slug}`}
+                        href={`/work/${p.slug}`}
                         tabIndex={isCurrent ? 0 : -1}
                       >
                         {p.name}
@@ -425,7 +426,7 @@ export function ProjectShowcase({ projects }: Props) {
 
                   <div className="showcase__card-info-right">
                     <Link
-                      href={`/projects/${p.slug}`}
+                      href={`/work/${p.slug}`}
                       className="showcase__card-cta"
                       tabIndex={isCurrent ? 0 : -1}
                     >

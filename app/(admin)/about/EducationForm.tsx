@@ -2,67 +2,137 @@
 
 import { useState, useTransition } from "react";
 import { updateAboutChapter } from "@/app/actions/settings";
-import type { Chapter, EducationItem, SkillGroup } from "@/app/data/aboutChapters";
-import { Section, Field, ItemCard, AddItemButton, fieldClass, labelClass } from "@/app/(admin)/_components/Section";
+import { educationOf, type Certificate, type Chapter, type EducationItem, type SkillGroup } from "@/app/data/aboutChapters";
+import { Section, Field, fieldClass, labelClass } from "@/app/(admin)/_components/Section";
+import { ChipListInput } from "@/app/(admin)/_components/ChipListInput";
+import { TileGridEditor } from "@/app/(admin)/_components/TileGridEditor";
 
 const EMPTY_EDUCATION: EducationItem = { degree: "", institution: "", honours: "", award: "", period: "" };
+const EMPTY_CERTIFICATE: Certificate = { name: "", issuer: "", year: "", url: "" };
 
 export function EducationForm({ chapter }: { chapter: Chapter }) {
-  const [education, setEducation] = useState<EducationItem>(chapter.education ?? EMPTY_EDUCATION);
+  const [educationList, setEducationList] = useState<EducationItem[]>(educationOf(chapter));
+  const [certificates, setCertificates] = useState<Certificate[]>(chapter.certificates ?? []);
   const [skillGroups, setSkillGroups] = useState<SkillGroup[]>(chapter.skillGroups ?? []);
-  const [saved, setSaved] = useState(false);
+  /* All three cards save the same chapter; "Saved" shows on the card whose button was pressed. */
+  const [savedOn, setSavedOn] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  function updateGroup(i: number, patch: Partial<{ category: string; skillsText: string }>) {
-    setSkillGroups((prev) =>
-      prev.map((g, idx) => {
-        if (idx !== i) return g;
-        if (patch.category !== undefined) return { ...g, category: patch.category };
-        if (patch.skillsText !== undefined) return { ...g, skills: patch.skillsText.split(",").map((s) => s.trim()).filter(Boolean) };
-        return g;
-      })
-    );
-  }
-
-  function save() {
-    setSaved(false);
+  function save(card: string) {
+    setSavedOn(null);
     startTransition(async () => {
-      await updateAboutChapter({ ...chapter, education, skillGroups: skillGroups.filter((g) => g.category.trim() !== "") });
-      setSaved(true);
+      const degrees = educationList.filter((e) => e.degree.trim() !== "");
+      await updateAboutChapter({
+        ...chapter,
+        educationList: degrees,
+        education: degrees[0],
+        certificates: certificates.filter((c) => c.name.trim() !== ""),
+        skillGroups: skillGroups
+        .filter((g) => g.category.trim() !== "")
+        .map((g) => ({ ...g, skills: g.skills.map((s) => s.trim()).filter(Boolean) })),
+      });
+      setSavedOn(card);
     });
   }
 
-  return (
-    <Section title="Education and skills" description="Your degree, and the skills shown as groups of tags beneath it." save={{ onSave: save, pending: isPending, saved }}>
-      <div className="grid sm:grid-cols-2 gap-4">
-        <TextField label="Degree" value={education.degree} onChange={(v) => setEducation({ ...education, degree: v })} />
-        <TextField label="Institution" value={education.institution} onChange={(v) => setEducation({ ...education, institution: v })} />
-      </div>
-      <div className="grid sm:grid-cols-3 gap-4">
-        <TextField label="Honours (optional)" value={education.honours ?? ""} onChange={(v) => setEducation({ ...education, honours: v })} />
-        <TextField label="Award (optional)" value={education.award ?? ""} onChange={(v) => setEducation({ ...education, award: v })} />
-        <TextField label="Period" value={education.period} onChange={(v) => setEducation({ ...education, period: v })} placeholder="2019 – 2021" />
-      </div>
+  const saveFor = (card: string) => ({ onSave: () => save(card), pending: isPending, saved: savedOn === card });
 
-      <div className="border-t border-border pt-4">
-        <span className={labelClass}>Skill groups</span>
-        <div className="space-y-3">
-          {skillGroups.map((g, i) => (
-            <ItemCard key={i} label={`Group ${i + 1}`} summary={g.category} onRemove={() => setSkillGroups((prev) => prev.filter((_, idx) => idx !== i))}>
-              <div className="grid sm:grid-cols-[200px_minmax(0,1fr)] gap-3">
-                <Field label="Category">
-                  <input type="text" value={g.category} onChange={(e) => updateGroup(i, { category: e.target.value })} placeholder="e.g. Development" className={fieldClass} />
-                </Field>
-                <Field label="Skills, separated by commas">
-                  <input type="text" defaultValue={g.skills.join(", ")} onBlur={(e) => updateGroup(i, { skillsText: e.target.value })} placeholder="React, Next.js, TypeScript" className={fieldClass} />
-                </Field>
+  return (
+    <>
+    <Section title="Education" save={saveFor("education")}>
+        <TileGridEditor
+          items={educationList}
+          onChange={setEducationList}
+          itemLabel="Degree"
+          newItem={() => ({ ...EMPTY_EDUCATION })}
+          saveHint="Save"
+          titleOf={(e) => e.degree}
+          renderPreview={(e) => (
+            <>
+              <span className="block text-[14px] font-semibold leading-snug text-foreground">{e.degree || "No degree yet"}</span>
+              {e.institution && <span className="mt-0.5 block text-[12.5px] text-foreground/70">{e.institution}</span>}
+              {e.period && <span className="mt-1.5 inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">{e.period}</span>}
+            </>
+          )}
+          renderEditor={(e, update) => (
+            <>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <TextField label="Degree" value={e.degree} onChange={(v) => update({ degree: v })} />
+                <TextField label="Institution" value={e.institution} onChange={(v) => update({ institution: v })} />
               </div>
-            </ItemCard>
-          ))}
-          <AddItemButton onClick={() => setSkillGroups((prev) => [...prev, { category: "", skills: [] }])}>Add skill group</AddItemButton>
-        </div>
-      </div>
+              <div className="grid sm:grid-cols-3 gap-3">
+                <TextField label="Honours (optional)" value={e.honours ?? ""} onChange={(v) => update({ honours: v })} />
+                <TextField label="Award (optional)" value={e.award ?? ""} onChange={(v) => update({ award: v })} />
+                <TextField label="Period" value={e.period} onChange={(v) => update({ period: v })} placeholder="2019 – 2021" />
+              </div>
+            </>
+          )}
+        />
     </Section>
+
+    <Section title="Certificates" description="Optional. Hidden on the site until you add one." save={saveFor("certificates")}>
+        <TileGridEditor
+          items={certificates}
+          onChange={setCertificates}
+          itemLabel="Certificate"
+          newItem={() => ({ ...EMPTY_CERTIFICATE })}
+          saveHint="Save"
+          titleOf={(c) => c.name}
+          renderPreview={(c) => (
+            <>
+              <span className="block text-[14px] font-semibold leading-snug text-foreground">{c.name || "No name yet"}</span>
+              {c.issuer && <span className="mt-0.5 block text-[12.5px] text-foreground/70">{c.issuer}</span>}
+              {c.year && <span className="mt-1.5 inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">{c.year}</span>}
+            </>
+          )}
+          renderEditor={(c, update) => (
+            <>
+              <TextField label="Certificate" value={c.name} onChange={(v) => update({ name: v })} placeholder="Google UX Design Certificate" />
+              <div className="grid sm:grid-cols-[minmax(0,1fr)_160px] gap-3">
+                <TextField label="Issued by" value={c.issuer} onChange={(v) => update({ issuer: v })} placeholder="Coursera" />
+                <TextField label="Year (optional)" value={c.year ?? ""} onChange={(v) => update({ year: v })} placeholder="2024" />
+              </div>
+              <TextField label="Link to check it (optional)" value={c.url ?? ""} onChange={(v) => update({ url: v })} placeholder="https://…" />
+            </>
+          )}
+        />
+    </Section>
+
+    <Section title="Skill groups" save={saveFor("skills")}>
+        <TileGridEditor
+          items={skillGroups}
+          onChange={setSkillGroups}
+          itemLabel="Skill group"
+          newItem={() => ({ category: "", skills: [] })}
+          saveHint="Save"
+          titleOf={(g) => g.category}
+          renderMeta={(g) => {
+            const count = g.skills.filter((skill) => skill.trim()).length;
+            return count > 0 ? `${count} skill${count === 1 ? "" : "s"}` : null;
+          }}
+          renderPreview={(g) => {
+            const count = g.skills.filter((skill) => skill.trim()).length;
+            return (
+              <>
+                <span className="block text-[14px] font-semibold leading-snug text-foreground">{g.category || "No category yet"}</span>
+                {count === 0 && <span className="mt-0.5 block text-[12.5px] text-muted-foreground">No skills yet</span>}
+              </>
+            );
+          }}
+          renderEditor={(g, update) => (
+            <>
+              <Field label="Category">
+                <input type="text" value={g.category} onChange={(e) => update({ category: e.target.value })} placeholder="e.g. Development" className={fieldClass} autoFocus />
+              </Field>
+              <div>
+                <span className={labelClass}>Skills</span>
+                <ChipListInput items={g.skills} onChange={(skills) => update({ skills })} itemLabel="skill" placeholder="e.g. React" />
+              </div>
+            </>
+          )}
+        />
+    </Section>
+    </>
   );
 }
 

@@ -247,7 +247,7 @@ export function BlogForm({ postId: initialPostId, initial, categories }: Props) 
 
   const searchTitle = `${title.trim() || "Untitled"} | Zaira Mundo`;
 
-  const liveHref = published && fields.slug && !saveState.dirty ? `/blog/${fields.slug}` : undefined;
+  const liveHref = published && fields.slug && !saveState.dirty ? `/insights/${fields.slug}` : undefined;
 
   return (
     <form onSubmit={handleSubmit} onKeyDown={blockEnterSubmit}>
@@ -376,7 +376,7 @@ export function BlogForm({ postId: initialPostId, initial, categories }: Props) 
             <div className="pt-5 border-t border-border">
               <label htmlFor="slug" className={labelClass}>Search</label>
               <div className="flex items-center rounded-lg bg-background border border-border focus-within:border-ring transition-colors">
-                <span className="pl-3 font-mono text-[12px] text-muted-foreground/70 shrink-0">/blog/</span>
+                <span className="pl-3 font-mono text-[12px] text-muted-foreground/70 shrink-0">/insights/</span>
                 <input
                   id="slug"
                   value={slugTouched ? slug : fields.slug}

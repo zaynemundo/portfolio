@@ -29,7 +29,10 @@ export interface ProjectFormData {
   client: string;
   liveUrl: string;
   imageAlt: string;
-  imageLabels: string; // one per line in the form
+  /** Screenshots in order, each with its caption and alt text at the same index. */
+  images: string[];
+  imageLabels: string[];
+  imageAlts: string[];
   themeBg: string;
   themeDark: boolean;
   logoInitials: string;
@@ -79,7 +82,6 @@ function validate(data: ProjectFormData): string | null {
   if (!data.role.trim()) return "Role is required.";
   if (!data.category.trim()) return "Category is required.";
   if (!data.year.trim()) return "Year is required.";
-  if (!data.imageAlt.trim()) return "Image alt text is required.";
   return null;
 }
 
@@ -121,8 +123,12 @@ function buildData(data: ProjectFormData, slug: string, richContent: Record<stri
     seo: data.seo.trim() || null,
     client: data.client.trim() || null,
     liveUrl: data.liveUrl.trim() || null,
-    imageAlt: data.imageAlt.trim(),
-    imageLabels: splitLines(data.imageLabels),
+    // Falls back to the project name, so the cover always has alt text.
+    imageAlt: data.imageAlt.trim() || data.name.trim(),
+    images: data.images,
+    // Kept index-for-index with images, so an empty caption stays empty rather than shifting the rest.
+    imageLabels: data.images.map((_, i) => data.imageLabels[i]?.trim() ?? ""),
+    imageAlts: data.images.map((_, i) => data.imageAlts[i]?.trim() ?? ""),
     theme: (data.themeBg.trim()
       ? { bg: data.themeBg.trim(), ...(data.themeDark ? { dark: true } : {}) }
       : undefined) as Prisma.InputJsonValue | undefined,
@@ -294,30 +300,4 @@ export async function uploadProjectLogo(formData: FormData): Promise<ImageUpload
   });
 
   return { ok: true, url: blob.url };
-}
-
-export async function addProjectImage(id: string, url: string): Promise<void> {
-  await requireSession();
-  const project = await prisma.project.findUnique({ where: { id } });
-  if (!project) return;
-  await prisma.project.update({
-    where: { id },
-    data: { images: [...project.images, url] },
-  });
-  revalidatePublicPages();
-  revalidatePath("/case-studies/[slug]", "page");
-  updateTag(CACHE_TAGS.caseStudies);
-}
-
-export async function removeProjectImage(id: string, url: string): Promise<void> {
-  await requireSession();
-  const project = await prisma.project.findUnique({ where: { id } });
-  if (!project) return;
-  await prisma.project.update({
-    where: { id },
-    data: { images: project.images.filter((img) => img !== url) },
-  });
-  revalidatePublicPages();
-  revalidatePath("/case-studies/[slug]", "page");
-  updateTag(CACHE_TAGS.caseStudies);
 }

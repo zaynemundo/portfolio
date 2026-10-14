@@ -19,7 +19,7 @@ export function WorkPageCopyForm({ initialHeading, initialIntro }: { initialHead
   }
 
   return (
-    <Section title="Page header" description="The dark banner heading and intro at the top of /work." save={{ onSave: save, pending: isPending, saved }}>
+    <Section title="Page header" save={{ onSave: save, pending: isPending, saved }}>
       <Field label="Heading" htmlFor="workHeading">
         <input id="workHeading" type="text" value={heading} onChange={(e) => setHeading(e.target.value)} className={fieldClass} />
       </Field>

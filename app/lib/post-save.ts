@@ -56,7 +56,7 @@ export async function savePost(id: string | null, data: PostFormData): Promise<P
   const slug = slugify(data.slug || data.title) || existing?.slug || `untitled-${Date.now().toString(36)}`;
   const clash = await prisma.blogPost.findUnique({ where: { slug } });
   if (clash && clash.id !== existing?.id) {
-    return { ok: false, error: `Another article already uses the address /blog/${slug}. Change it under Search.` };
+    return { ok: false, error: `Another article already uses the address /insights/${slug}. Change it under Search.` };
   }
 
   const requestedDay = isIsoDay(data.date) ? data.date : localToday();

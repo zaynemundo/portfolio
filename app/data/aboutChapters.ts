@@ -27,6 +27,14 @@ export interface EducationItem {
   period: string;
 }
 
+export interface Certificate {
+  name: string;
+  issuer: string;
+  year?: string;
+  /** Where the certificate can be checked (optional). */
+  url?: string;
+}
+
 export interface Chapter {
   id: string;
   number: string;
@@ -42,8 +50,12 @@ export interface Chapter {
   items?: string[];
   /** Experience principles / roles */
   principles?: Principle[];
-  /** Education item for Chapter 04 */
+  /** The first degree; kept for chapters saved before educationList existed. */
   education?: EducationItem;
+  /** Every degree for Chapter 04, most recent first */
+  educationList?: EducationItem[];
+  /** Certificates for Chapter 04 */
+  certificates?: Certificate[];
   /** Skill groups for Chapter 04 */
   skillGroups?: SkillGroup[];
   /** Download URL for Chapter 05 CV */
@@ -142,3 +154,8 @@ export const aboutChapters: Chapter[] = [
     ],
   },
 ];
+
+/** A chapter's degrees, whether it was saved with one or with a list. */
+export function educationOf(chapter: Chapter): EducationItem[] {
+  return chapter.educationList ?? (chapter.education ? [chapter.education] : []);
+}

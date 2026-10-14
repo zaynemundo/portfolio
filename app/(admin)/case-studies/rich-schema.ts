@@ -11,7 +11,7 @@ export type Field =
   | { kind: "image"; key: string; label: string; half?: boolean; captionKey?: string; optional?: boolean }
   | { kind: "number"; key: string; label: string; placeholder?: string; half?: boolean }
   | { kind: "lines"; key: string; label: string; placeholder?: string; required?: boolean }
-  | { kind: "list"; key: string; label: string; itemLabel: string; fields: Field[]; required?: boolean; /** Short items (metrics, points): draggable cards side by side instead of one per row. */ grid?: boolean }
+  | { kind: "list"; key: string; label: string; itemLabel: string; fields: Field[]; required?: boolean; /** Short items (metrics, points, before → after): draggable cards this many to a row instead of one per row. */ grid?: 2 | 4; /** Long items (phases, write-ups): a grid of tiles, each edited in a dialog. */ tiles?: boolean }
   | { kind: "group"; key: string; label: string; fields: Field[] };
 
 export interface RichSectionDef {
@@ -34,7 +34,7 @@ const METRIC_FIELDS: Field[] = [
 const WRITE_UP_FIELDS: Field[] = [
   { kind: "text", key: "title", label: "Title", required: true },
   {
-    kind: "list", key: "bullets", label: "Points", itemLabel: "Point", required: true, grid: true,
+    kind: "list", key: "bullets", label: "Points", itemLabel: "Point", required: true, grid: 2,
     fields: [
       { kind: "text", key: "heading", label: "Heading", required: true },
       { kind: "textarea", key: "body", label: "Body", required: true },
@@ -51,7 +51,7 @@ const PHASE_FIELDS: Field[] = [
 
 const METRIC_GROUP_FIELDS: Field[] = [
   { kind: "text", key: "label", label: "Group label", placeholder: "User & Engagement Impact", required: true },
-  { kind: "list", key: "metrics", label: "Metrics", itemLabel: "Metric", fields: METRIC_FIELDS, grid: true, required: true },
+  { kind: "list", key: "metrics", label: "Metrics", itemLabel: "Metric", fields: METRIC_FIELDS, grid: 4, required: true },
 ];
 
 export const RICH_SECTIONS: RichSectionDef[] = [
@@ -59,7 +59,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
     id: "hero",
     title: "Top stats",
     hint: "The figure cards over the cover image. Write the label as “What is counted: the detail”.",
-    fields: [{ kind: "list", key: "heroMetrics", label: "Metrics", itemLabel: "Metric", fields: METRIC_FIELDS, grid: true }],
+    fields: [{ kind: "list", key: "heroMetrics", label: "Metrics", itemLabel: "Metric", fields: METRIC_FIELDS, grid: 4 }],
   },
   {
     id: "sidebar",
@@ -77,7 +77,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
     hint: "“The problem” chapter: the headline, an intro paragraph under it, then the points. The image shows below the points.",
     fields: [
       { kind: "textarea", key: "problemIntro", label: "Intro paragraph" },
-      { kind: "list", key: "problemSections", label: "Problem write-ups", itemLabel: "Write-up", fields: WRITE_UP_FIELDS },
+      { kind: "list", key: "problemSections", label: "Problem write-ups", itemLabel: "Write-up", fields: WRITE_UP_FIELDS, tiles: true },
       { kind: "image", key: "resultsImage", label: "Image", captionKey: "resultsImageCaption", optional: true },
     ],
   },
@@ -189,7 +189,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
     hint: "“The work” chapter: a numbered timeline, one entry per phase. Each phase can have a picture.",
     fields: [
       { kind: "text", key: "transformationHeadline", label: "Headline", placeholder: "What I changed." },
-      { kind: "list", key: "transformationSections", label: "Phases", itemLabel: "Phase", fields: PHASE_FIELDS },
+      { kind: "list", key: "transformationSections", label: "Phases", itemLabel: "Phase", fields: PHASE_FIELDS, tiles: true },
     ],
   },
   {
@@ -232,7 +232,7 @@ export const RICH_SECTIONS: RichSectionDef[] = [
     fields: [
       { kind: "text", key: "resultsHeadline", label: "Headline" },
       {
-        kind: "list", key: "outcomes", label: "Before → after", itemLabel: "Change",
+        kind: "list", key: "outcomes", label: "Before → after", itemLabel: "Change", tiles: true,
         fields: [
           { kind: "text", key: "area", label: "What changed", placeholder: "Booking journey", required: true },
           { kind: "text", key: "before", label: "Before", placeholder: "No berth page or onboarding flow", required: true, half: true },

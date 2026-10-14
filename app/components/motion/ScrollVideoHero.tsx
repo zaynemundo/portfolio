@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, useCallback, useSyncExternalStore } from "
 import { useScrollProgress } from "./useScrollProgress";
 import { useReducedMotion } from "./useReducedMotion";
 import { FloatingPetals } from "./FloatingPetals";
+import { optimizedImage } from "@/app/lib/image-src";
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 
@@ -32,7 +33,10 @@ function subDesktop(cb: () => void) {
   return () => mq.removeEventListener("change", cb);
 }
 const snapDesktop = () => window.matchMedia(DESKTOP_MQ).matches;
-const serverDesktop = () => true;
+/* False on the server so the page HTML never carries the <video>: phones
+   (which never play it) don't download it, and desktops fetch it after the
+   page is up, behind the poster. */
+const serverDesktop = () => false;
 
 /* ── Lerp ─────────────────────────────────────────────────────────────────── */
 
@@ -320,7 +324,8 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
             {posterSrc ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
-                src={posterSrc}
+                {...optimizedImage(posterSrc)}
+                fetchPriority="high"
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
                 style={{ filter: "saturate(1.2)" }}

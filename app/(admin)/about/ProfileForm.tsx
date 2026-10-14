@@ -20,7 +20,7 @@ export function ProfileForm({ chapter }: { chapter: Chapter }) {
   }
 
   return (
-    <Section title="Bio" description="The opening headline and the paragraphs that introduce you in the About section." save={{ onSave: save, pending: isPending, saved }}>
+    <Section title="Bio" save={{ onSave: save, pending: isPending, saved }}>
       <Field label="Headline" htmlFor="profileHeadline">
         <textarea id="profileHeadline" value={title} onChange={(e) => setTitle(e.target.value)} rows={2} className={areaClass} />
       </Field>

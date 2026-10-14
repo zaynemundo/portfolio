@@ -21,7 +21,7 @@ export function InsightsCopyForm({ initialHeading, initialIntro }: { initialHead
   return (
     <Section
       title="Heading and intro"
-      description="The title and paragraph above the three articles on the homepage. The articles themselves are always your latest published posts, so there is nothing to choose here."
+      description="Your three latest published articles show under it automatically."
       save={{ onSave: save, pending: isPending, saved }}
     >
       <Field label="Section heading" htmlFor="insightsHeading">

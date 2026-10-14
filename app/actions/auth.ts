@@ -121,7 +121,10 @@ If you didn't request this, you can ignore this email — your password stays th
           <p style="margin:0;background:#fafafa;border:1px solid #e4e4e7;border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.6;word-break:break-all"><a href="${resetUrl}" style="color:#785EF7;text-decoration:none">${resetUrl}</a></p>`,
           footer: "If you didn't request this, you can safely ignore this email — your password stays the same.",
         }),
-      }).catch((err) => console.error("[auth] Reset email error:", err));
+      })
+        // Resend reports a failed send in `error` rather than throwing.
+        .then(({ error }) => { if (error) console.error("[auth] Reset email error:", error); })
+        .catch((err) => console.error("[auth] Reset email error:", err));
     } else {
       console.log(`[auth] Password reset link for ${cleanEmail}: ${resetUrl}`);
     }

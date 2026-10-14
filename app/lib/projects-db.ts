@@ -37,6 +37,7 @@ function rowToProject(row: ProjectRow): Project {
     client: row.client ?? undefined,
     images: row.images,
     imageLabels: row.imageLabels,
+    imageAlts: row.imageAlts,
     theme: row.theme as Project["theme"],
     logo: row.logo as Project["logo"],
     ...rich,
