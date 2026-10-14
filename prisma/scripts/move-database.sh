@@ -13,8 +13,10 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 get() { grep "^$1=" .env.local | head -1 | cut -d= -f2- | sed 's/^"//;s/"$//'; }
-OLD=$(get DATABASE_URL_UNPOOLED)
-NEW=$(get NEW_DATABASE_URL_UNPOOLED)
+# sslmode=verify-full needs a root certificate; use the Mac's own trusted ones.
+withroots() { case "$1" in *sslmode=verify-full*) case "$1" in *sslrootcert=*) echo "$1";; *) echo "$1&sslrootcert=system";; esac;; *) echo "$1";; esac; }
+OLD=$(withroots "$(get DATABASE_URL_UNPOOLED)")
+NEW=$(withroots "$(get NEW_DATABASE_URL_UNPOOLED)")
 [ -n "$OLD" ] || { echo "DATABASE_URL_UNPOOLED is missing from .env.local."; exit 1; }
 [ -n "$NEW" ] || { echo "NEW_DATABASE_URL_UNPOOLED is missing from .env.local."; exit 1; }
 [ "$OLD" != "$NEW" ] || { echo "Both point at the same database. Nothing to do."; exit 1; }

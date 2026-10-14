@@ -22,8 +22,7 @@ export function PasswordField({ id, value, onChange, autoComplete, placeholder }
         autoComplete={autoComplete}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={{ outline: "none" }}
-        className="w-full rounded-lg bg-card border border-border px-3.5 py-2.5 pr-10 text-[14px] text-foreground placeholder:text-muted-foreground focus:border-ring transition-colors"
+        className="outline-none w-full rounded-lg bg-card border border-border px-3.5 py-2.5 pr-10 text-[14px] text-foreground placeholder:text-muted-foreground focus:border-ring transition-colors"
         placeholder={placeholder ?? "••••••••"}
       />
       <button
