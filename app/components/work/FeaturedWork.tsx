@@ -16,7 +16,6 @@ export function FeaturedWork({ projects, heading = "Selected Work", intro }: Pro
     <section
       id="work"
       aria-labelledby="work-heading"
-      data-no-snap=""
       className="featured-work bg-white pt-32 md:pt-44 pb-24 md:pb-32"
     >
       <div className="featured-work__header mb-16 md:mb-20">

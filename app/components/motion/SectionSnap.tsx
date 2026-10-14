@@ -17,13 +17,11 @@ function easeInOutCubic(t: number) {
 }
 
 /**
- * Homepage paging: one scroll down (wheel, trackpad swipe, arrow / Page / space
- * key) glides smoothly to the next stop, one scroll up to the previous one.
- * The stops are each scene of the hero (see ScrollVideoHero), then the top of
- * each section, except those marked `data-no-snap` (Selected Work, About). Where the
- * next stop is more than a screen away (inside a long section) scrolling is
- * left free so the section reads at your own pace.
- * Touch screens scroll normally; off for reduced motion.
+ * Hero paging: inside the homepage hero, one scroll down (wheel, trackpad
+ * swipe, arrow / Page / space key) glides smoothly to the next scene of the
+ * video (see ScrollVideoHero), one scroll up to the previous one. The last
+ * step leaves the hero for the section below. Everywhere else the page
+ * scrolls normally. Touch screens scroll normally; off for reduced motion.
  */
 export function SectionSnap() {
   const reducedMotion = useReducedMotion();
@@ -38,22 +36,19 @@ export function SectionSnap() {
     let lastWheel = 0;
     let lastDelta = 0;
 
+    /** Each scene of the hero, then the hero's end (where the next section starts). */
     function stops(): number[] {
-      const out: number[] = [];
       const hero = document.querySelector<HTMLElement>('section[aria-label="Hero"]');
-      if (hero) {
-        const top = hero.getBoundingClientRect().top + window.scrollY;
-        const scrollable = hero.offsetHeight - window.innerHeight;
-        hero.querySelectorAll<HTMLElement>("[data-scene]").forEach((scene, i) => {
-          // The first scene shows at the very top; the others are fully in view mid-range.
-          const p = i === 0 ? 0 : (Number(scene.dataset.start) + Number(scene.dataset.end)) / 2;
-          out.push(Math.round(top + p * scrollable));
-        });
-      }
-      document.querySelectorAll<HTMLElement>("#main > section").forEach((section) => {
-        if (section === hero || section.hasAttribute("data-no-snap")) return;
-        out.push(Math.round(section.getBoundingClientRect().top + window.scrollY));
+      if (!hero) return [];
+      const top = hero.getBoundingClientRect().top + window.scrollY;
+      const out: number[] = [];
+      const scrollable = hero.offsetHeight - window.innerHeight;
+      hero.querySelectorAll<HTMLElement>("[data-scene]").forEach((scene, i) => {
+        // The first scene shows at the very top; the others are fully in view mid-range.
+        const p = i === 0 ? 0 : (Number(scene.dataset.start) + Number(scene.dataset.end)) / 2;
+        out.push(Math.round(top + p * scrollable));
       });
+      out.push(Math.round(top + hero.offsetHeight));
       return out.sort((a, b) => a - b);
     }
 
@@ -61,6 +56,8 @@ export function SectionSnap() {
     function target(direction: 1 | -1): number | null {
       const y = window.scrollY;
       const all = stops();
+      // Below the hero the page scrolls freely, even scrolling back up to it.
+      if (!all.length || y > all[all.length - 1] + 2) return null;
       const next = direction > 0 ? all.find((s) => s > y + 2) : [...all].reverse().find((s) => s < y - 2);
       if (next === undefined || Math.abs(next - y) > window.innerHeight * 1.05) return null;
       return next;

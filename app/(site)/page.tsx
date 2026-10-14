@@ -81,7 +81,7 @@ export default async function Home() {
         }}
       />
 
-      {/* One scroll glides to the next hero scene or section */}
+      {/* One scroll glides to the next hero scene */}
       <SectionSnap />
 
       {/* ── 01 · HERO — Scroll-scrubbed video ──────────────────────────────── */}

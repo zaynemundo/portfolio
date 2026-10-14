@@ -1,4 +1,8 @@
 /** The widths Next's image optimizer makes by default (its deviceSizes). */
+/* The dev server's optimizer can stall on some sizes and leave the page
+   loading forever, so locally the original files are used. */
+const OPTIMIZE = process.env.NODE_ENV === "production";
+
 const WIDTHS = [640, 828, 1080, 1200, 1920];
 
 /**
@@ -8,7 +12,7 @@ const WIDTHS = [640, 828, 1080, 1200, 1920];
  * SVGs and data URLs are passed through untouched.
  */
 export function optimizedImage(src: string, sizes = "100vw") {
-  if (!src || src.endsWith(".svg") || src.startsWith("data:")) return { src };
+  if (!OPTIMIZE || !src || src.endsWith(".svg") || src.startsWith("data:")) return { src };
   const url = (w: number) => `/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=75`;
   return {
     src: url(1200),
@@ -19,6 +23,6 @@ export function optimizedImage(src: string, sizes = "100vw") {
 
 /** One optimized URL, for attributes that take a single image (a video's poster). */
 export function optimizedSrc(src: string | undefined, width = 1200): string | undefined {
-  if (!src || src.endsWith(".svg") || src.startsWith("data:")) return src;
+  if (!OPTIMIZE || !src || src.endsWith(".svg") || src.startsWith("data:")) return src;
   return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=75`;
 }
