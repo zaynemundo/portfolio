@@ -25,7 +25,6 @@ export function TrafficChart({ days, empty }: { days: { day: string; views: numb
   const visitors = points(days.map((d) => d.visitors), max, W, H);
   const label = (day: string) => new Date(`${day}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   const ticks = [max, max / 2, 0];
-  const slot = W / days.length;
 
   return (
     <div>
@@ -46,22 +45,52 @@ export function TrafficChart({ days, empty }: { days: { day: string; views: numb
             <path d={`${path(views)} L${W},${H} L0,${H} Z`} className="fill-primary/15" />
             <path d={path(views)} fill="none" className="stroke-primary" strokeWidth={2} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
             <path d={path(visitors)} fill="none" className="stroke-foreground/45" strokeWidth={1.5} strokeDasharray="4 4" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
-            {/* One invisible column per day; hovering shows a thin guide line and that day's numbers. */}
-            {days.map((d, i) => (
-              <g key={d.day} className="group">
-                <rect x={i * slot} y={0} width={slot} height={H} fill="transparent" />
-                <line
-                  x1={views[i][0]}
-                  x2={views[i][0]}
-                  y1={0}
-                  y2={H}
-                  className="stroke-primary/40 opacity-0 transition-opacity group-hover:opacity-100"
-                  vectorEffect="non-scaling-stroke"
-                />
-                <title>{`${label(d.day)}: ${d.views} views, ${d.visitors} visitors`}</title>
-              </g>
-            ))}
           </svg>
+
+          {/* One column per day, laid over the chart in HTML so the dots stay round
+              however wide the chart is. Hovering a day enlarges its dots and shows its numbers. */}
+          {days.map((d, i) => {
+            const x = days.length === 1 ? 50 : (i / (days.length - 1)) * 100;
+            const width = 100 / days.length;
+            const yViews = (1 - d.views / max) * 100;
+            const yVisitors = (1 - d.visitors / max) * 100;
+            const tipBelow = yViews < 30; // near the top: show the card under the dot so it isn't cut off
+            const align = i === 0 ? "left-1/2" : i === days.length - 1 ? "right-1/2" : "left-1/2 -translate-x-1/2"; // first and last open inwards
+            return (
+              <div
+                key={d.day}
+                className="group absolute inset-y-0 -translate-x-1/2"
+                style={{ left: `${x}%`, width: `${width}%` }}
+                tabIndex={0}
+                aria-label={`${label(d.day)}: ${d.views} page views, ${d.visitors} visitors`}
+              >
+                <span className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-primary/30 opacity-0 transition-opacity group-hover:opacity-100 group-focus:opacity-100" />
+                <span
+                  className="pointer-events-none absolute left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-card bg-foreground/45 transition-transform group-hover:scale-150 group-focus:scale-150"
+                  style={{ top: `${yVisitors}%` }}
+                />
+                <span
+                  className="pointer-events-none absolute left-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-card bg-primary shadow-sm transition-transform group-hover:scale-150 group-focus:scale-150"
+                  style={{ top: `${yViews}%` }}
+                />
+                <div
+                  className={`pointer-events-none absolute z-10 w-max rounded-lg border border-border bg-card px-3 py-2 text-[12px] shadow-lg opacity-0 transition-opacity group-hover:opacity-100 group-focus:opacity-100 ${align}`}
+                  style={tipBelow ? { top: `calc(${yViews}% + 14px)` } : { bottom: `calc(${100 - yViews}% + 14px)` }}
+                >
+                  <p className="mb-1 font-semibold text-foreground">{label(d.day)}</p>
+                  <p className="flex items-center gap-2 text-muted-foreground">
+                    <span className="h-2 w-2 rounded-full bg-primary" />
+                    <span className="tabular-nums font-semibold text-foreground">{d.views}</span> page view{d.views === 1 ? "" : "s"}
+                  </p>
+                  <p className="flex items-center gap-2 text-muted-foreground">
+                    <span className="h-2 w-2 rounded-full bg-foreground/45" />
+                    <span className="tabular-nums font-semibold text-foreground">{d.visitors}</span> visitor{d.visitors === 1 ? "" : "s"}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+
           {empty && (
             <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-[12.5px] text-muted-foreground">{empty}</p>
           )}

@@ -22,6 +22,8 @@ function siteName(referrer: unknown, ownHost: string | null): string | null {
 export async function POST(request: Request) {
   const userAgent = request.headers.get("user-agent") ?? "";
   if (!userAgent || BOT.test(userAgent)) return new Response(null, { status: 204 });
+  // Signed in to the admin on this browser: that's the site's owner, not a visitor.
+  if (/(?:^|;\s*)admin_session=/.test(request.headers.get("cookie") ?? "")) return new Response(null, { status: 204 });
 
   let body: { path?: unknown; referrer?: unknown };
   try {
