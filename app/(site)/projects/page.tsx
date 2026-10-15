@@ -43,7 +43,8 @@ export default async function WorkPage() {
             >
               {workPageHeading}
             </h1>
-            <p className="text-[15.5px] text-zinc-400 max-w-xl leading-relaxed">
+            {/* Phones go straight from the heading to the work. */}
+            <p className="hidden md:block text-[15.5px] text-zinc-400 max-w-xl leading-relaxed">
               {workPageIntro}
             </p>
           </Reveal>

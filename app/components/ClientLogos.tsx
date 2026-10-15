@@ -2,6 +2,7 @@
 
 import type { ClientLogoData } from "@/app/lib/client-logos";
 import { STATIC_CLIENT_LOGOS } from "@/app/lib/client-logos";
+import { optimizedImage, SMALL_WIDTHS } from "@/app/lib/image-src";
 
 interface Props {
   brands?: ClientLogoData[];
@@ -44,7 +45,9 @@ export function ClientLogos({ brands = STATIC_CLIENT_LOGOS }: Props) {
               {brand.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={brand.logoUrl}
+                  // Small WebP copies sized for a logo about 140px wide, not the uploaded original.
+                  {...optimizedImage(brand.logoUrl, "140px", 75, SMALL_WIDTHS)}
+                  loading="lazy"
                   alt={brand.name}
                   className="h-10 md:h-12 w-auto max-w-[140px] object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-200"
                 />

@@ -11,15 +11,18 @@ const WIDTHS = [384, 640, 828, 1080, 1200, 1920];
  * places where <Image> doesn't fit (CSS-sized covers, sliders, posters).
  * SVGs and data URLs are passed through untouched.
  */
-export function optimizedImage(src: string, sizes = "100vw", quality = 75) {
+export function optimizedImage(src: string, sizes = "100vw", quality = 75, widths: number[] = WIDTHS) {
   if (!OPTIMIZE || !src || src.endsWith(".svg") || src.startsWith("data:")) return { src };
   const url = (w: number) => `/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=${quality}`;
   return {
-    src: url(1200),
-    srcSet: WIDTHS.map((w) => `${url(w)} ${w}w`).join(", "),
+    src: url(widths.includes(1200) ? 1200 : widths[widths.length - 1]),
+    srcSet: widths.map((w) => `${url(w)} ${w}w`).join(", "),
     sizes,
   };
 }
+
+/** Small widths (from Next's default imageSizes) for logos and icons. */
+export const SMALL_WIDTHS = [128, 256, 384];
 
 /** One optimized URL, for attributes that take a single image (a video's poster). */
 export function optimizedSrc(src: string | undefined, width = 1200, quality = 75): string | undefined {
