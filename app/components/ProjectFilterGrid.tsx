@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Reveal } from "@/app/components/Reveal";
 import type { Project } from "@/app/lib/projects";
 import { optimizedImage } from "@/app/lib/image-src";
+import { NearImage } from "@/app/components/NearImage";
 
 /** How wide a card's picture shows: 1, 2 or 3 columns. Shared with the Work page's preload. */
 export const WORK_GRID_SIZES = "(min-width: 1024px) min(30vw, 520px), (min-width: 768px) 45vw, calc(100vw - 48px)";
@@ -41,30 +42,37 @@ export function ProjectFilterGrid({ projects }: Props) {
                       backgroundSize: "20px 20px",
                     }}
                   >
-                    {project.images?.[0] && (
+                    {project.images?.[0] && i === 0 && (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         // Sizes match the grid (1, 2 or 3 columns), so phones get a 640px image, not 828px.
                         {...optimizedImage(project.images[0], WORK_GRID_SIZES)}
                         alt={project.imageAlt || project.name}
                         className="w-full h-full object-cover object-top"
-                        // The first row is on screen straight away: load it now, the very first card first.
-                        loading={i < 3 ? "eager" : "lazy"}
+                        // Only the first picture loads straight away (it's the page's main image);
+                        // the rest follow as they come into view, so on a phone they don't compete with it.
+                        loading={i === 0 ? "eager" : "lazy"}
                         fetchPriority={i === 0 ? "high" : undefined}
+                      />
+                    )}
+                    {/* The other pictures wait until they're about to scroll into view. */}
+                    {project.images?.[0] && i > 0 && (
+                      <NearImage
+                        {...optimizedImage(project.images[0], WORK_GRID_SIZES)}
+                        alt={project.imageAlt || project.name}
+                        className="w-full h-full object-cover object-top"
                       />
                     )}
                   </div>
                   {/* The client's logo on a white tile in the picture's corner (it doesn't zoom with the picture). */}
                   {project.logo?.src && (
                     <span className="absolute bottom-3 left-3 flex h-11 items-center rounded-lg bg-white px-3 shadow-[0_4px_16px_rgba(0,0,0,0.12)]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      {/* Logos come after the pictures: never let one compete with the page's main image. */}
+                      <NearImage
                         src={project.logo.src}
                         alt={`${project.name} logo`}
                         className="h-7 w-auto max-w-[120px] object-contain"
-                        // Logos come after the pictures: never let one compete with the page's main image.
-                        loading="lazy"
-                        fetchPriority="low"
+                        margin="0px"
                       />
                     </span>
                   )}

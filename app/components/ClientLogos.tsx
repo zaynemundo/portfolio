@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import type { ClientLogoData } from "@/app/lib/client-logos";
 import { STATIC_CLIENT_LOGOS } from "@/app/lib/client-logos";
 import { optimizedImage, SMALL_WIDTHS } from "@/app/lib/image-src";
@@ -9,13 +10,26 @@ interface Props {
 }
 
 export function ClientLogos({ brands = STATIC_CLIENT_LOGOS }: Props) {
+  /* The strip sits at the bottom of the page: its logos load only once it's
+     close, so they never compete with the page's main picture. They then
+     all load together, so none changes width mid-scroll. */
+  const sectionRef = useRef<HTMLElement>(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || near) return;
+    const observer = new IntersectionObserver(([entry]) => entry.isIntersecting && setNear(true), { rootMargin: "600px 0px" });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [near]);
+
   // Only logos with an image scroll past; ones still waiting for an upload stay out of sight.
   const shown = brands.filter((b) => b.logoUrl);
   if (shown.length === 0) return null;
   const marqueeItems = [...shown, ...shown, ...shown];
 
   return (
-    <section className="py-10 md:py-16 bg-white overflow-hidden" aria-label="Brands and Clients">
+    <section ref={sectionRef} className="py-10 md:py-16 bg-white overflow-hidden" aria-label="Brands and Clients">
       <style jsx>{`
         @keyframes marquee {
           0% { transform: translateX(0%); }
@@ -45,7 +59,10 @@ export function ClientLogos({ brands = STATIC_CLIENT_LOGOS }: Props) {
               key={`${brand.id}-${i}`}
               className="relative flex items-center justify-center shrink-0 cursor-default group h-12 mr-14 md:mr-24"
             >
-              {brand.logoUrl ? (
+              {brand.logoUrl && !near ? (
+                // Until the strip is close: an empty space the size of a logo.
+                <span className="block h-10 w-24 md:h-12" aria-hidden />
+              ) : brand.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   // Small WebP copies sized for a logo about 140px wide, not the uploaded original.
