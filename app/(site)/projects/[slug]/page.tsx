@@ -652,7 +652,7 @@ export default async function CaseStudyPage({ params }: Props) {
                     <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-zinc-400 mb-1">Previous</p>
+                    <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-zinc-500 mb-1">Previous</p>
                     <p className="text-[14px] font-semibold text-zinc-900 group-hover:text-[#8B5CF6] transition-colors duration-150 truncate">
                       {prevProject.name}
                     </p>
@@ -669,7 +669,7 @@ export default async function CaseStudyPage({ params }: Props) {
                   className="group flex items-center gap-3 text-right min-w-0"
                 >
                   <div className="min-w-0">
-                    <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-zinc-400 mb-1">Next</p>
+                    <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-zinc-500 mb-1">Next</p>
                     <p className="text-[14px] font-semibold text-zinc-900 group-hover:text-[#8B5CF6] transition-colors duration-150 truncate">
                       {nextProject.name}
                     </p>

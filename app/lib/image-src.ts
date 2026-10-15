@@ -1,9 +1,9 @@
-/** The widths Next's image optimizer makes by default (its deviceSizes). */
+/** Widths Next's image optimizer allows by default (384 from imageSizes, the rest from deviceSizes). */
 /* The dev server's optimizer can stall on some sizes and leave the page
    loading forever, so locally the original files are used. */
 const OPTIMIZE = process.env.NODE_ENV === "production";
 
-const WIDTHS = [640, 828, 1080, 1200, 1920];
+const WIDTHS = [384, 640, 828, 1080, 1200, 1920];
 
 /**
  * Props for a plain <img> that still gets Next's image optimizer: a WebP/AVIF

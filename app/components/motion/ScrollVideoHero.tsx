@@ -229,7 +229,8 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
 
         el.style.opacity = String(opacity);
         el.style.transform = `translate3d(0,${ty}px,0)`;
-        el.setAttribute("aria-hidden", opacity < 0.01 ? "true" : "false");
+        // A hidden scene is out of reach too: screen readers skip it and Tab can't land on its button.
+        el.inert = opacity < 0.01;
       });
 
       /* Scroll indicator */
@@ -351,6 +352,8 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
             <div
               key={i}
               data-scene=""
+              // Only the first scene is showing before the page's script runs.
+              inert={i !== 0}
               data-start={scene.start}
               data-end={scene.end}
               className="absolute inset-0 flex items-center px-6 md:px-10"

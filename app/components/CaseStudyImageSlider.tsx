@@ -239,7 +239,8 @@ export function CaseStudyImageSlider({
                   onClick={() => goTo(i)}
                   aria-label={`View ${img.label}`}
                   className="flex items-center gap-2 transition-opacity duration-300"
-                  style={{ opacity: isActive ? 1 : 0.3 }}
+                  // Dimmed, but still readable (about 5:1): the current one is marked by weight and its label.
+                  style={{ opacity: isActive ? 1 : 0.62 }}
                 >
                   <span
                     className="font-mono transition-all duration-300"
@@ -254,7 +255,7 @@ export function CaseStudyImageSlider({
                   {isActive && (
                     <span
                       className="text-[11px] font-medium truncate max-w-[140px]"
-                      style={{ color: placeholderDark ? "rgba(255,255,255,0.55)" : "#71717a" }}
+                      style={{ color: placeholderDark ? "rgba(255,255,255,0.75)" : "#71717a" }}
                     >
                       {img.label}
                     </span>

@@ -156,10 +156,10 @@ export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
                     isActive(link.href)
                       ? isTransparent
                         ? "text-white bg-white/15 font-semibold"
-                        : "text-[#8B5CF6] bg-[#8B5CF6]/10 font-semibold"
+                        : "text-[#7c3aed] bg-[#8B5CF6]/10 font-semibold"
                       : isTransparent
-                        ? "text-white/60 hover:text-white hover:bg-white/10"
-                        : "text-zinc-500 hover:text-[#8B5CF6] hover:bg-[#8B5CF6]/8"
+                        ? "text-white/85 hover:text-white hover:bg-white/10"
+                        : "text-zinc-700 hover:text-[#7c3aed] hover:bg-[#8B5CF6]/8"
                   }`}
                 >
                   {link.label}
@@ -174,8 +174,8 @@ export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
                 download
                 className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13.5px] font-medium transition-colors duration-150 ${
                   isTransparent
-                    ? "text-white/50 hover:text-white hover:bg-white/10"
-                    : "text-zinc-600 hover:text-[#8B5CF6] hover:bg-[#8B5CF6]/8"
+                    ? "text-white/85 hover:text-white hover:bg-white/10"
+                    : "text-zinc-700 hover:text-[#7c3aed] hover:bg-[#8B5CF6]/8"
                 }`}
               >
                 <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -275,7 +275,8 @@ export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
           {/* Mobile dropdown */}
           <div
             id="mobile-nav"
-            aria-hidden={!menuOpen}
+            // Closed, the menu is fully out of reach: hidden from screen readers and skipped by Tab.
+            inert={!menuOpen}
             className={`absolute top-full mt-2 left-0 right-0 md:hidden bg-white/95 backdrop-blur-lg rounded-3xl border border-zinc-200 shadow-[0_24px_60px_-12px_rgba(0,0,0,0.25)] overflow-hidden transition-all duration-200 origin-top ${
               menuOpen
                 ? "opacity-100 scale-y-100 pointer-events-auto"

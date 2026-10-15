@@ -87,7 +87,7 @@ export function InsightsList({ posts, initialLimit = 6 }: Props) {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-8">
                 <div className="flex-1 min-w-0 pr-4">
                   {/* Category & Meta */}
-                  <div className="text-[11px] font-mono font-medium text-[#8B5CF6] uppercase tracking-wider mb-2">
+                  <div className="text-[11px] font-mono font-medium text-[#7c3aed] uppercase tracking-wider mb-2">
                     <span>{post.category}</span>
                     {post.readTime && (
                       <>

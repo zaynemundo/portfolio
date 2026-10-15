@@ -42,10 +42,13 @@ export function ProjectFilterGrid({ projects }: Props) {
                     {project.images?.[0] && (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
-                        {...optimizedImage(project.images[0], "(min-width: 768px) 50vw, 100vw")}
+                        // Sizes match the grid (1, 2 or 3 columns), so phones get a 640px image, not 828px.
+                        {...optimizedImage(project.images[0], "(min-width: 1024px) min(30vw, 520px), (min-width: 768px) 45vw, calc(100vw - 48px)")}
                         alt={project.imageAlt || project.name}
                         className="w-full h-full object-cover object-top"
-                        loading="lazy"
+                        // The first row is on screen straight away: load it now, the very first card first.
+                        loading={i < 3 ? "eager" : "lazy"}
+                        fetchPriority={i === 0 ? "high" : undefined}
                       />
                     )}
                   </div>
