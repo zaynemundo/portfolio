@@ -62,7 +62,9 @@ export function ProjectFilterGrid({ projects }: Props) {
                         src={project.logo.src}
                         alt={`${project.name} logo`}
                         className="h-7 w-auto max-w-[120px] object-contain"
-                        loading={i < 3 ? "eager" : "lazy"}
+                        // Logos come after the pictures: never let one compete with the page's main image.
+                        loading="lazy"
+                        fetchPriority="low"
                       />
                     </span>
                   )}
