@@ -25,6 +25,7 @@ export function ClientLogos({ brands = STATIC_CLIENT_LOGOS }: Props) {
           display: flex;
           width: max-content;
           animation: marquee 28s linear infinite;
+          will-change: transform;
         }
         .animate-marquee:hover {
           animation-play-state: paused;
@@ -36,18 +37,21 @@ export function ClientLogos({ brands = STATIC_CLIENT_LOGOS }: Props) {
         <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10" />
         <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10" />
 
-        <div className="animate-marquee flex items-center gap-14 md:gap-24">
+        {/* Spacing sits on each logo (not as a gap between them), so one third of the track is
+            exactly one set of logos and the loop never jumps. */}
+        <div className="animate-marquee flex items-center">
           {marqueeItems.map((brand, i) => (
             <div
               key={`${brand.id}-${i}`}
-              className="relative flex items-center justify-center shrink-0 cursor-default group h-12"
+              className="relative flex items-center justify-center shrink-0 cursor-default group h-12 mr-14 md:mr-24"
             >
               {brand.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   // Small WebP copies sized for a logo about 140px wide, not the uploaded original.
                   {...optimizedImage(brand.logoUrl, "140px", 75, SMALL_WIDTHS)}
-                  loading="lazy"
+                  // All copies load together (they're small), so no logo changes width mid-scroll.
+                  decoding="async"
                   alt={brand.name}
                   className="h-10 md:h-12 w-auto max-w-[140px] object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-200"
                 />
