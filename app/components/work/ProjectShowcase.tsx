@@ -230,7 +230,8 @@ export function ProjectShowcase({ projects }: Props) {
                     loop
                     playsInline
                     preload="none"
-                    poster={optimizedSrc(p.poster ?? p.images?.[0], 1200, 60)}
+                    // The poster waits too, so nothing for the carousel downloads before the page's first paint.
+                    poster={near ? optimizedSrc(p.poster ?? p.images?.[0], 1200, 60) : undefined}
                     /* A silent preview: the card's name and description say what it shows, so screen readers skip it. */
                     aria-hidden="true"
                   >

@@ -338,6 +338,9 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
           </div>
         )}
 
+        {/* ── Phones and tablets: a soft dark wash instead of text shadows ─── */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/45 via-black/25 to-black/5 md:hidden" />
+
         {/* ── Floating petals ──────────────────────────────────────────── */}
         <FloatingPetals />
 
@@ -362,30 +365,24 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
               <div className="max-w-2xl" style={{ pointerEvents: "auto" }}>
                 {scene.eyebrow && (
                   <p
-                    className="text-[12px] md:text-[13px] font-semibold tracking-[0.2em] uppercase text-white/70 mb-5"
-                    style={{ textShadow: "0 2px 12px rgba(0,0,0,0.6), 0 0px 4px rgba(0,0,0,0.4)" }}
+                    className="hero-shadow-sm text-[12px] md:text-[13px] font-semibold tracking-[0.2em] uppercase text-white mb-5"
                   >
                     {scene.eyebrow}
                   </p>
                 )}
                 <h2
-                  className="font-extrabold text-white leading-[0.92] mb-6"
+                  className="hero-shadow-lg font-extrabold text-white leading-[0.92] mb-6"
                   style={{
                     fontSize: "clamp(2.75rem, 9vw, 5rem)",
                     letterSpacing: "-0.04em",
-                    textShadow: "0 4px 30px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
                   }}
                 >
                   {scene.heading}
                 </h2>
                 {scene.description && (
                   <p
-                    className="text-white/95 leading-relaxed max-w-lg mb-8"
-                    style={{
-                      fontSize: "clamp(1rem, 0.9rem + 0.35vw, 1.1875rem)",
-                      /* A tight shadow for crisp edges plus a soft halo, so it reads over any frame of the video. */
-                      textShadow: "0 1px 2px rgba(0,0,0,0.75), 0 2px 10px rgba(0,0,0,0.55), 0 4px 28px rgba(0,0,0,0.45)",
-                    }}
+                    className="hero-shadow-md text-white leading-relaxed max-w-lg mb-8"
+                    style={{ fontSize: "clamp(1rem, 0.9rem + 0.35vw, 1.1875rem)" }}
                   >
                     {scene.description}
                   </p>
