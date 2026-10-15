@@ -1,11 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Inline the (small, Tailwind) CSS into the page, so the first paint
-  // doesn't wait for separate stylesheet requests.
-  experimental: {
-    inlineCss: true,
-  },
+  // inlineCss was tried (2026-10-15) and measured 1–2 points slower: the one
+  // stylesheet covers the whole app, admin included, so inlining it made every
+  // page much heavier than the stylesheet request it saved.
   images: {
     // 60 for pictures under a dark overlay or behind a video; 75 everywhere else.
     qualities: [60, 75],
