@@ -19,7 +19,7 @@ export function Footer() {
             <Link
               href="/"
               className="inline-flex items-center gap-2.5 group focus-visible:outline-none shrink-0"
-              aria-label="Zaira Mundo — home"
+              aria-label="ZM Zaira Mundo, home"
             >
               <span className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center text-[12px] font-bold tracking-tight group-hover:bg-white/15 transition-colors duration-200">
                 ZM
@@ -49,7 +49,7 @@ export function Footer() {
         </div>
 
         {/* Copyright & Location */}
-        <div className="mt-8 md:mt-10 pt-6 border-t border-zinc-800/40 flex flex-wrap items-center justify-between gap-4 text-[12.5px] text-zinc-500">
+        <div className="mt-8 md:mt-10 pt-6 border-t border-zinc-800/40 flex flex-wrap items-center justify-between gap-4 text-[12.5px] text-zinc-400">
           <span>&copy; {year} Zaira Mundo. All rights reserved.</span>
           <span>Dubai, United Arab Emirates</span>
         </div>

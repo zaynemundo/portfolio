@@ -117,7 +117,7 @@ export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
             {/* Logo */}
             <Link
               href="/"
-              aria-label="Zaira Mundo — home"
+              aria-label="ZM Zaira Mundo, home"
               className="flex items-center gap-2.5 shrink-0 group focus-visible:outline-none"
             >
               <span

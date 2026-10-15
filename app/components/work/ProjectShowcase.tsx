@@ -58,6 +58,17 @@ export function ProjectShowcase({ projects }: Props) {
     return () => observer.disconnect();
   }, []); // setOverProjects is stable; containerRef never changes
 
+  /* ── Near the screen? Clips only load and play once the carousel is close,
+        so a visitor who never scrolls this far never downloads them. ── */
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setNear(entry.isIntersecting), { rootMargin: "300px 0px" });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   /* ── Scroll progress ─────────────────────────────────────────────── */
   useEffect(() => {
     if (n === 0) return;
@@ -98,7 +109,7 @@ export function ProjectShowcase({ projects }: Props) {
         video.pause();
         return;
       }
-      if (i === activeIndex) {
+      if (i === activeIndex && near) {
         if (video.paused) {
           // readyState 0 (HAVE_NOTHING) means the browser never actually
           // started fetching — an explicit load() kicks it off. play()
@@ -112,7 +123,7 @@ export function ProjectShowcase({ projects }: Props) {
         if (!video.paused) video.pause();
       }
     });
-  }, [activeIndex, reduced]);
+  }, [activeIndex, reduced, near]);
 
   /* ── Reduced motion: simple stacked list ────────────────────────── */
   if (reduced) {
@@ -219,8 +230,9 @@ export function ProjectShowcase({ projects }: Props) {
                     loop
                     playsInline
                     preload="none"
-                    poster={optimizedSrc(p.poster ?? p.images?.[0])}
-                    aria-label={`${p.name} project preview`}
+                    poster={optimizedSrc(p.poster ?? p.images?.[0], 1200, 60)}
+                    /* A silent preview: the card's name and description say what it shows, so screen readers skip it. */
+                    aria-hidden="true"
                   >
                     {videoWebm && (
                       <source src={videoWebm} type="video/webm" />

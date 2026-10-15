@@ -78,13 +78,16 @@ export function InsightsSection({
         </header>
 
         {/* ── Article list — uniform editorial rows ───────────────────────── */}
-        <div className="divide-y divide-zinc-200/80" role="list">
+        {/* A real list: each row is a list item, with the reveal animation inside it. */}
+        <ul className="divide-y divide-zinc-200/80">
           {posts.map((post, i) => (
-            <Reveal key={post.slug} delay={i * 60}>
-              <InsightRow post={post} />
-            </Reveal>
+            <li key={post.slug}>
+              <Reveal delay={i * 60}>
+                <InsightRow post={post} />
+              </Reveal>
+            </li>
           ))}
-        </div>
+        </ul>
 
       </div>
     </section>
@@ -93,7 +96,7 @@ export function InsightsSection({
 
 function InsightRow({ post }: { post: PostSummary }) {
   return (
-    <article className="in-row" role="listitem">
+    <article className="in-row">
       <Link
         href={`/insights/${post.slug}`}
         className="group block py-7 md:py-8 transition-colors duration-200"

@@ -318,7 +318,7 @@
 .about-chapter__principle-num {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10px;
-  color: #8B5CF6;
+  color: #7c3aed; /* violet-600: readable on white (5.7:1) */
   font-weight: 600;
   flex-shrink: 0;
 }
@@ -426,7 +426,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #a1a1aa;
+  color: #71717a; /* zinc-500: readable on white (4.8:1) */
   margin-bottom: 0.5rem;
 }
 

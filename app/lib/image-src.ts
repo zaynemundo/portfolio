@@ -11,9 +11,9 @@ const WIDTHS = [640, 828, 1080, 1200, 1920];
  * places where <Image> doesn't fit (CSS-sized covers, sliders, posters).
  * SVGs and data URLs are passed through untouched.
  */
-export function optimizedImage(src: string, sizes = "100vw") {
+export function optimizedImage(src: string, sizes = "100vw", quality = 75) {
   if (!OPTIMIZE || !src || src.endsWith(".svg") || src.startsWith("data:")) return { src };
-  const url = (w: number) => `/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=75`;
+  const url = (w: number) => `/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=${quality}`;
   return {
     src: url(1200),
     srcSet: WIDTHS.map((w) => `${url(w)} ${w}w`).join(", "),
@@ -22,7 +22,7 @@ export function optimizedImage(src: string, sizes = "100vw") {
 }
 
 /** One optimized URL, for attributes that take a single image (a video's poster). */
-export function optimizedSrc(src: string | undefined, width = 1200): string | undefined {
+export function optimizedSrc(src: string | undefined, width = 1200, quality = 75): string | undefined {
   if (!OPTIMIZE || !src || src.endsWith(".svg") || src.startsWith("data:")) return src;
-  return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=75`;
+  return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
 }

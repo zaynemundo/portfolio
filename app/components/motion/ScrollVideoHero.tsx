@@ -326,7 +326,7 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
             {posterSrc ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
-                {...optimizedImage(posterSrc)}
+                {...optimizedImage(posterSrc, "100vw", 60)}
                 fetchPriority="high"
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
@@ -380,10 +380,11 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
                 </h2>
                 {scene.description && (
                   <p
-                    className="text-white/80 leading-relaxed max-w-lg mb-8"
+                    className="text-white/95 leading-relaxed max-w-lg mb-8"
                     style={{
                       fontSize: "clamp(1rem, 0.9rem + 0.35vw, 1.1875rem)",
-                      textShadow: "0 2px 16px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4)",
+                      /* A tight shadow for crisp edges plus a soft halo, so it reads over any frame of the video. */
+                      textShadow: "0 1px 2px rgba(0,0,0,0.75), 0 2px 10px rgba(0,0,0,0.55), 0 4px 28px rgba(0,0,0,0.45)",
                     }}
                   >
                     {scene.description}
