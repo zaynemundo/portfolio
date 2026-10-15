@@ -16,7 +16,6 @@ interface Props {
 const DEFAULT_THEME = { bg: "#f4f4f5", dark: false };
 
 export function ProjectFilterGrid({ projects }: Props) {
-  const anyLogo = projects.some((p) => p.logo?.src);
 
   return (
     <div>
@@ -55,24 +54,22 @@ export function ProjectFilterGrid({ projects }: Props) {
                       />
                     )}
                   </div>
+                  {/* The client's logo on a white tile in the picture's corner (it doesn't zoom with the picture). */}
+                  {project.logo?.src && (
+                    <span className="absolute bottom-3 left-3 flex h-11 items-center rounded-lg bg-white px-3 shadow-[0_4px_16px_rgba(0,0,0,0.12)]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={project.logo.src}
+                        alt={`${project.name} logo`}
+                        className="h-7 w-auto max-w-[120px] object-contain"
+                        loading={i < 3 ? "eager" : "lazy"}
+                      />
+                    </span>
+                  )}
                 </div>
 
                 {/* Content */}
                 <div className="pt-5">
-                  {/* Once any project has a logo, every card keeps the room for one, so the names stay in line. */}
-                  {anyLogo && (
-                    <div className="mb-3 h-8">
-                      {project.logo?.src && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={project.logo.src}
-                          alt={`${project.name} logo`}
-                          className="h-full w-auto max-w-[140px] object-contain object-left"
-                          loading="lazy"
-                        />
-                      )}
-                    </div>
-                  )}
                   <h2 className="text-[20px] font-bold text-zinc-900 group-hover:opacity-60 transition-opacity duration-200 tracking-tight mb-2.5">
                     {project.name}
                   </h2>
