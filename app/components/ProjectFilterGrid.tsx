@@ -3,6 +3,9 @@ import { Reveal } from "@/app/components/Reveal";
 import type { Project } from "@/app/lib/projects";
 import { optimizedImage } from "@/app/lib/image-src";
 
+/** How wide a card's picture shows: 1, 2 or 3 columns. Shared with the Work page's preload. */
+export const WORK_GRID_SIZES = "(min-width: 1024px) min(30vw, 520px), (min-width: 768px) 45vw, calc(100vw - 48px)";
+
 type ProjectCard = Pick<Project, "slug" | "name" | "tagline" | "category" | "year" | "technologies" | "role" | "workType">
   & { images?: string[]; imageAlt?: string; liveUrl?: string | null; theme?: Project["theme"]; logo?: Project["logo"] };
 
@@ -43,7 +46,7 @@ export function ProjectFilterGrid({ projects }: Props) {
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         // Sizes match the grid (1, 2 or 3 columns), so phones get a 640px image, not 828px.
-                        {...optimizedImage(project.images[0], "(min-width: 1024px) min(30vw, 520px), (min-width: 768px) 45vw, calc(100vw - 48px)")}
+                        {...optimizedImage(project.images[0], WORK_GRID_SIZES)}
                         alt={project.imageAlt || project.name}
                         className="w-full h-full object-cover object-top"
                         // The first row is on screen straight away: load it now, the very first card first.

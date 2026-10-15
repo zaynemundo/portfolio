@@ -6,6 +6,9 @@ import { getClientLogos } from "@/app/lib/client-logos-db";
 import { ProjectFilterGrid } from "@/app/components/ProjectFilterGrid";
 import { ClientLogos } from "@/app/components/ClientLogos";
 import { Reveal } from "@/app/components/Reveal";
+import { preload } from "react-dom";
+import { optimizedImage } from "@/app/lib/image-src";
+import { WORK_GRID_SIZES } from "@/app/components/ProjectFilterGrid";
 
 export const metadata: Metadata = {
   title: "Work & Case Studies",
@@ -20,6 +23,13 @@ export default async function WorkPage() {
   const projects = dbProjects.length > 0 ? dbProjects : staticProjects;
   const { workPageHeading, workPageIntro } = await getSiteSettings();
   const clientLogos = await getClientLogos();
+
+  // The first project's picture is the page's main image: fetch it alongside the page itself.
+  const firstImage = projects[0]?.images?.[0];
+  if (firstImage) {
+    const img = optimizedImage(firstImage, WORK_GRID_SIZES);
+    preload(img.src, { as: "image", imageSrcSet: img.srcSet, imageSizes: img.sizes, fetchPriority: "high" });
+  }
 
   return (
     <div className="min-h-screen bg-white">

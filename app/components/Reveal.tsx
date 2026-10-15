@@ -18,6 +18,9 @@ export function Reveal({
     if (!el) return;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Already on screen when the page loads: leave it showing. Hiding it to fade it
+    // back in would make the first view flash and delay the page's main content.
+    if (el.getBoundingClientRect().top < window.innerHeight) return;
 
     el.setAttribute("data-reveal", "");
 

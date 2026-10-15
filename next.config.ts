@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
   images: {
     // 60 for pictures under a dark overlay or behind a video; 75 everywhere else.
     qualities: [60, 75],
+    // Keep optimized copies for a month (default 4 hours), so visitors rarely
+    // wait for an image to be resized on the spot.
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
     ],
