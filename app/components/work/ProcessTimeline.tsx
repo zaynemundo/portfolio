@@ -24,9 +24,6 @@ import { useEffect, useRef } from "react";
  * No layout shifts — only color/background/opacity mutations on existing elements.
  */
 
-const DASHED =
-  "repeating-linear-gradient(to bottom, #e4e4e7 0, #e4e4e7 4px, transparent 4px, transparent 9px)";
-
 function applyActive(
   steps: HTMLElement[],
   activeIdx: number,

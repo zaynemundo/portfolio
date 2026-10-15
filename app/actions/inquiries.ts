@@ -16,6 +16,7 @@ export interface LeadActionResult {
 
 function invalidate() {
   revalidatePath("/inquiries");
+  revalidatePath("/inquiries/archive");
   revalidatePath("/inquiries/[id]", "page");
   updateTag(CACHE_TAGS.inquiries);
 }

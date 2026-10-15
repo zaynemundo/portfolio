@@ -3,6 +3,7 @@ import { prisma } from "@/app/lib/prisma";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { invoiceTotals } from "@/app/lib/invoice-math";
 import { FinanceTabs } from "./FinanceTabs";
+import { RepeatCatchUp } from "../invoices/RepeatCatchUp";
 
 interface Props {
   searchParams: Promise<{ month?: string; tab?: string }>;
@@ -71,35 +72,38 @@ export default async function FinancePage({ searchParams }: Props) {
   });
 
   return (
-    <FinanceTabs
-      initialTab={initialTab}
-      month={month}
-      income={income}
-      expense={expense}
-      net={net}
-      currency={currency}
-      clients={clients}
-      projects={projects}
-      transactions={transactions.map((t) => {
-        // unstable_cache round-trips through JSON, so Date fields come back as strings.
-        const date = new Date(t.date);
-        return {
-          id: t.id,
-          date: date.toISOString().slice(0, 10),
-          displayDate: date.toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
-          type: t.type,
-          amount: String(t.amount),
-          currency: t.currency,
-          category: t.category ?? "",
-          description: t.description ?? "",
-          clientId: t.clientId ?? "",
-          projectId: t.projectId ?? "",
-          clientName: t.client?.name ?? null,
-          attachmentUrl: t.attachmentUrl ?? "",
-        };
-      })}
-      invoices={documents.filter((d) => !d.isQuote)}
-      quotes={documents.filter((d) => d.isQuote)}
-    />
+    <>
+      <RepeatCatchUp />
+      <FinanceTabs
+        initialTab={initialTab}
+        month={month}
+        income={income}
+        expense={expense}
+        net={net}
+        currency={currency}
+        clients={clients}
+        projects={projects}
+        transactions={transactions.map((t) => {
+          // unstable_cache round-trips through JSON, so Date fields come back as strings.
+          const date = new Date(t.date);
+          return {
+            id: t.id,
+            date: date.toISOString().slice(0, 10),
+            displayDate: date.toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+            type: t.type,
+            amount: String(t.amount),
+            currency: t.currency,
+            category: t.category ?? "",
+            description: t.description ?? "",
+            clientId: t.clientId ?? "",
+            projectId: t.projectId ?? "",
+            clientName: t.client?.name ?? null,
+            attachmentUrl: t.attachmentUrl ?? "",
+          };
+        })}
+        invoices={documents.filter((d) => !d.isQuote)}
+        quotes={documents.filter((d) => d.isQuote)}
+      />
+    </>
   );
 }

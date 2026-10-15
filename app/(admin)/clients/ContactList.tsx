@@ -6,8 +6,7 @@ import { RowMenu, RowMenuItem } from "@/app/(admin)/_components/ui/RowMenu";
 import { addContact, updateContact, deleteContact } from "@/app/actions/contacts";
 import { Modal } from "@/app/(admin)/_components/Modal";
 import { DialogActions } from "@/app/(admin)/_components/DialogActions";
-import { Card, CardHeader } from "@/app/(admin)/_components/ui/Card";
-import { DataTable } from "@/app/(admin)/_components/ui/DataTable";
+import { Card, CardHeader, cardActionClass } from "@/app/(admin)/_components/ui/Card";
 
 interface Contact {
   id: string;
@@ -60,65 +59,53 @@ export function ContactList({ clientId, contacts }: { clientId: string; contacts
     <Card>
       <CardHeader
         title="Contacts"
-        description={<>The first contact&rsquo;s email is used when you send an invoice or quote.</>}
+        count={contacts.length}
         action={
-          <button
-            type="button"
-            onClick={() => open("new")}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border text-foreground/80 text-[12.5px] font-medium px-3 py-1.5 hover:bg-card transition-colors shrink-0"
-          >
+          <button type="button" onClick={() => open("new")} className={`${cardActionClass} inline-flex items-center gap-1.5`}>
             <Plus size={13} />
-            Add contact
+            Add
           </button>
         }
       />
 
       {contacts.length === 0 ? (
-        <p className="px-5 pb-5 text-[13px] text-muted-foreground">No contacts yet.</p>
+        <p className="px-5 pb-5 text-[13px] text-muted-foreground">No contacts yet. Invoices and quotes are emailed to the first one you add.</p>
       ) : (
-        <DataTable
-          tableClassName="min-w-[560px]"
-          searchPlaceholder="Search contacts…"
-          columns={[{ label: "Name", className: "px-5" }, { label: "Email", className: "px-3" }, { label: "Phone", className: "px-3" }, { className: "w-12" }]}
-          rows={contacts.map((contact) => ({
-            id: contact.id,
-            onClick: () => open(contact),
-            search: `${contact.name} ${contact.role} ${contact.email} ${contact.phone}`,
-            sort: [contact.name, contact.email || null, contact.phone || null, undefined],
-            cells: (
-              <>
-                  <td className="px-5 py-2.5">
-                    <span className="text-[13.5px] font-medium text-foreground">{contact.name}</span>
-                    {contact.role && <span className="block text-[12px] text-muted-foreground">{contact.role}</span>}
-                  </td>
-                  <td className="px-3 py-2.5 text-[13px]">
-                    {contact.email ? (
-                      <a href={`mailto:${contact.email}`} className="text-foreground/80 hover:text-primary transition-colors">{contact.email}</a>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2.5 text-[13px]">
-                    {contact.phone ? (
-                      <a href={`tel:${contact.phone}`} className="text-foreground/80 hover:text-primary transition-colors">{contact.phone}</a>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-2.5 text-right whitespace-nowrap">
-                    <RowMenu disabled={isPending}>
-                      <RowMenuItem onClick={() => open(contact)} icon={<Pencil size={14} />}>
-                        Edit
-                      </RowMenuItem>
-                      <RowMenuItem onClick={() => remove(contact)} danger icon={<Trash2 size={14} />}>
-                        Remove
-                      </RowMenuItem>
-                    </RowMenu>
-                  </td>
-              </>
-            ),
-          }))}
-        />
+        <ul className="border-t border-border">
+          {contacts.map((contact, i) => (
+            <li key={contact.id} className="group relative flex items-start gap-3 border-b border-border/70 px-5 py-3 last:border-b-0 hover:bg-primary/[0.04] transition-colors">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-accent-foreground" aria-hidden>
+                {contact.name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+              </span>
+              <div className="min-w-0 flex-1">
+                <button type="button" onClick={() => open(contact)} className="text-left text-[13.5px] font-semibold text-foreground hover:text-primary transition-colors after:absolute after:inset-0">
+                  {contact.name}
+                </button>
+                {(contact.role || i === 0) && (
+                  <p className="text-[12px] text-muted-foreground">
+                    {contact.role}
+                    {contact.role && i === 0 && " · "}
+                    {i === 0 && "Gets invoices"}
+                  </p>
+                )}
+                <p className="relative z-10 mt-0.5 flex flex-col text-[12.5px]">
+                  {contact.email && <a href={`mailto:${contact.email}`} className="truncate text-foreground/80 hover:text-primary transition-colors">{contact.email}</a>}
+                  {contact.phone && <a href={`tel:${contact.phone}`} className="text-foreground/80 hover:text-primary transition-colors">{contact.phone}</a>}
+                </p>
+              </div>
+              <div className="relative z-10">
+                <RowMenu disabled={isPending}>
+                  <RowMenuItem onClick={() => open(contact)} icon={<Pencil size={14} />}>
+                    Edit
+                  </RowMenuItem>
+                  <RowMenuItem onClick={() => remove(contact)} danger icon={<Trash2 size={14} />}>
+                    Remove
+                  </RowMenuItem>
+                </RowMenu>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
 
       <Modal open={editing !== null} onClose={() => setEditing(null)} title={editing === "new" ? "Add contact" : "Edit contact"}>

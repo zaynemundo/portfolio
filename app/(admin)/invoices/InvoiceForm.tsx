@@ -12,7 +12,14 @@ import { cardClass } from "@/app/(admin)/_components/ui/Card";
 interface Option {
   id: string;
   name: string;
+  /** The job's rate, so an hourly invoice can start from it. */
+  rateType?: string | null;
+  rateAmount?: number | null;
+  rateCurrency?: string | null;
 }
+
+/** The job's rate type, as the invoice's billing type. */
+const BILLING_FOR_RATE: Record<string, string> = { FIXED: "PROJECT", HOURLY: "HOURLY", RETAINER: "MONTHLY" };
 
 interface Props {
   mode: "new" | "edit";
@@ -41,6 +48,35 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
   const [discount, setDiscount] = useState(initial?.discount ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
   const [items, setItems] = useState<InvoiceItemInput[]>(initial?.items && initial.items.length > 0 ? initial.items : [emptyItem()]);
+  const jobOf = (id: string) => projects.find((p) => p.id === id);
+  const [billing, setBilling] = useState(
+    initial?.billing ?? BILLING_FOR_RATE[jobOf(initial?.projectId ?? "")?.rateType ?? ""] ?? "PROJECT",
+  );
+  const [repeats, setRepeats] = useState(initial?.repeats ?? true);
+  const [repeatUntil, setRepeatUntil] = useState(initial?.repeatUntil ?? "");
+  const hourly = billing === "HOURLY";
+  const billingOptions = isQuote ? BILLING_OPTIONS.filter((b) => b.value !== "MONTHLY") : BILLING_OPTIONS;
+
+  /** Picking a job sets the billing type from its rate (on a new document), and an hourly rate for empty lines. */
+  function chooseJob(id: string) {
+    setProjectId(id);
+    const job = jobOf(id);
+    if (!job || mode !== "new") return;
+    const next = BILLING_FOR_RATE[job.rateType ?? ""];
+    if (next && (!isQuote || next !== "MONTHLY")) changeBilling(next, job);
+  }
+
+  function changeBilling(next: string, job = jobOf(projectId)) {
+    setBilling(next);
+    setItems((prev) =>
+      prev.map((it) => {
+        // Project and monthly lines are one price each; hourly lines start with an hour at the job's rate.
+        if (next !== "HOURLY") return Number(it.quantity) === 1 ? it : { ...it, quantity: "1" };
+        const rate = it.rate || (job?.rateType === "HOURLY" && job.rateAmount ? String(job.rateAmount) : "");
+        return { ...it, rate };
+      }),
+    );
+  }
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -60,7 +96,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
     e.preventDefault();
     setError(null);
 
-    const data: InvoiceFormData = { kind, clientId, projectId, status, issueDate, dueDate, currency, discount, notes, items };
+    const data: InvoiceFormData = { kind, clientId, projectId, status, issueDate, dueDate, currency, discount, notes, items, billing, repeats, repeatUntil };
 
     startTransition(async () => {
       const result = mode === "new"
@@ -81,6 +117,28 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
 
   return (
     <form onSubmit={handleSubmit} className={`${cardClass} p-5 space-y-5`}>
+      {/* How this one is billed: decides the line columns, and whether it repeats. */}
+      <div>
+        <span className="block text-xs font-medium text-muted-foreground mb-1.5">Billing</span>
+        <div className="inline-flex rounded-full border border-border bg-background p-0.5" role="radiogroup" aria-label="Billing">
+          {billingOptions.map((b) => (
+            <button
+              key={b.value}
+              type="button"
+              role="radio"
+              aria-checked={billing === b.value}
+              onClick={() => changeBilling(b.value)}
+              className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${
+                billing === b.value ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {b.label}
+            </button>
+          ))}
+        </div>
+        <p className="mt-1.5 text-[12px] text-muted-foreground">{billingOptions.find((b) => b.value === billing)?.hint}</p>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">Client (optional)</label>
@@ -90,7 +148,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">Job (optional)</label>
           <Select
             value={projectId}
-            onChange={setProjectId}
+            onChange={chooseJob}
             className={selectClass}
             options={[{ value: "", label: "—" }, ...projects.map((p) => ({ value: p.id, label: p.name }))]}
           />
@@ -137,34 +195,68 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
 
       <div>
         <label className="block text-xs font-medium text-muted-foreground mb-1.5">Line items</label>
+        {/* Project and monthly: one price per line. Hourly: hours × rate, with the line's amount worked out. */}
+        <div className={`${hourly ? HOURLY_GRID : LINE_GRID} mb-1.5 px-0.5 text-[11.5px] font-medium text-muted-foreground`} aria-hidden>
+          <span>Description</span>
+          {hourly && <span className="text-right">Hours</span>}
+          {hourly && <span className="text-right">Rate</span>}
+          <span className="text-right">Amount</span>
+          <span />
+        </div>
         <div className="space-y-2">
           {items.map((item, i) => (
-            <div key={i} className="flex items-center gap-2">
+            <div key={i} className={`${hourly ? HOURLY_GRID : LINE_GRID} items-center`}>
               <input
                 type="text"
                 value={item.description}
                 onChange={(e) => updateItem(i, { description: e.target.value })}
-                placeholder="Description"
-                className={`${inputClass} flex-1`}
+                placeholder={hourly ? "e.g. Homepage fixes" : billing === "MONTHLY" ? "e.g. Website care, monthly" : "What the work was"}
+                aria-label={`Line ${i + 1} description`}
+                className={inputClass}
               />
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={item.quantity}
-                onChange={(e) => updateItem(i, { quantity: e.target.value })}
-                placeholder="Qty"
-                className={`${inputClass} w-20`}
-              />
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={item.rate}
-                onChange={(e) => updateItem(i, { rate: e.target.value })}
-                placeholder="Rate"
-                className={`${inputClass} w-28`}
-              />
+              {hourly ? (
+                <>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.25"
+                    value={item.quantity}
+                    onChange={(e) => updateItem(i, { quantity: e.target.value })}
+                    placeholder="0"
+                    aria-label={`Line ${i + 1} hours`}
+                    className={`${inputClass} px-2.5 text-right`}
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={item.rate}
+                    onChange={(e) => updateItem(i, { rate: e.target.value })}
+                    placeholder="0"
+                    aria-label={`Line ${i + 1} hourly rate`}
+                    className={`${inputClass} px-2.5 text-right`}
+                  />
+                  <span className="truncate text-right text-[13.5px] tabular-nums text-foreground/90">
+                    {((Number(item.quantity) || 0) * (Number(item.rate) || 0)).toLocaleString()}
+                  </span>
+                </>
+              ) : (
+                <span className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={item.rate}
+                    onChange={(e) => updateItem(i, { rate: e.target.value })}
+                    placeholder="0"
+                    aria-label={`Line ${i + 1} amount`}
+                    className={`${inputClass} px-2.5 text-right`}
+                  />
+                  {Number(item.quantity) !== 1 && item.quantity !== "" && (
+                    <span className="absolute -bottom-4 right-1 text-[10.5px] text-muted-foreground">× {item.quantity}</span>
+                  )}
+                </span>
+              )}
               <button
                 type="button"
                 onClick={() => setItems((prev) => prev.filter((_, idx) => idx !== i))}
@@ -193,7 +285,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
             </div>
             <div className="flex items-center justify-between gap-3">
               <dt><label htmlFor="discount" className="text-muted-foreground">Discount</label></dt>
-              <dd>
+              <dd className="w-32">
                 <input
                   id="discount"
                   type="number"
@@ -202,7 +294,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
                   value={discount}
                   onChange={(e) => setDiscount(e.target.value)}
                   placeholder="0"
-                  className={`${inputClass} w-32 py-1.5 text-right`}
+                  className={`${inputClass} py-1.5 text-right`}
                 />
               </dd>
             </div>
@@ -213,6 +305,27 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
           </dl>
         </div>
       </div>
+
+      {billing === "MONTHLY" && !isQuote && (
+        <div className="rounded-xl border border-border bg-background p-4">
+          <label className="flex items-center gap-2.5 text-[13.5px] font-medium text-foreground">
+            <input type="checkbox" checked={repeats} onChange={(e) => setRepeats(e.target.checked)} className="h-4 w-4 rounded border-border" />
+            Repeat every month
+          </label>
+          {repeats && (
+            <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_220px] sm:items-end">
+              <p className="text-[12.5px] leading-relaxed text-muted-foreground">
+                This invoice is the first month. On day {Number(issueDate.slice(8, 10)) || 1} of each month after, a draft copy is made
+                with the next number and that month&rsquo;s dates, ready for you to check and send. Nothing is sent by itself.
+              </p>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Last month (optional)</label>
+                <DateField value={repeatUntil} onChange={setRepeatUntil} placeholder="Keeps going" className={inputClass} />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div>
         <label className="block text-xs font-medium text-muted-foreground mb-1.5">Notes (optional)</label>
@@ -234,5 +347,13 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
   );
 }
 
+const LINE_GRID = "grid grid-cols-[minmax(0,1fr)_140px_36px] gap-2";
+const HOURLY_GRID = "grid grid-cols-[minmax(0,1fr)_80px_112px_96px_36px] gap-2";
+
+const BILLING_OPTIONS = [
+  { value: "PROJECT", label: "Project", hint: "A price for each piece of work." },
+  { value: "HOURLY", label: "Hourly", hint: "Hours × your hourly rate, line by line." },
+  { value: "MONTHLY", label: "Monthly", hint: "A retainer: a fresh draft of this invoice is made every month." },
+];
 const inputClass = "w-full rounded-lg bg-card border border-border px-3.5 py-2.5 text-[14px] text-foreground focus:outline-none focus:border-ring transition-colors";
 const selectClass = `${inputClass} flex items-center justify-between gap-2`;

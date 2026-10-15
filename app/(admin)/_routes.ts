@@ -23,6 +23,8 @@ export const routes = {
   blogPage: "/insights-settings",
   inquiries: {
     list: "/inquiries",
+    /** Lost leads, out of the board but kept, so they can be brought back. */
+    archive: "/inquiries/archive",
     item: (id: string) => `/inquiries/${id}`,
   },
   /** Single page with client-side tabs (Hero/Selected Work/About/Insights) —

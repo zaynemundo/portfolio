@@ -63,14 +63,14 @@ export function ClientDetails({ clientId, name, type, company }: Props) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
-        <h1 className="text-[24px] font-semibold text-foreground leading-tight">{name}</h1>
-        <p className="text-[13px] text-muted-foreground mt-1">{subtitle || "Client"}</p>
+        <h1 className="text-[26px] font-bold tracking-tight text-foreground leading-none">{name}</h1>
+        <p className="text-[13.5px] text-muted-foreground mt-2.5">{subtitle || "Client"}</p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <button
           type="button"
           onClick={openEditor}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border text-foreground/80 text-[13px] font-medium px-3.5 py-2 hover:bg-card transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card text-foreground text-[13px] font-semibold px-4 py-2 hover:bg-muted transition-colors"
         >
           <Pencil size={13} />
           Edit
@@ -79,7 +79,7 @@ export function ClientDetails({ clientId, name, type, company }: Props) {
           type="button"
           onClick={handleDelete}
           disabled={isPending}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border text-destructive text-[13px] font-medium px-3.5 py-2 hover:bg-destructive/10 transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card text-destructive text-[13px] font-semibold px-4 py-2 hover:bg-destructive/10 transition-colors disabled:opacity-50"
         >
           <Trash2 size={13} />
           Delete

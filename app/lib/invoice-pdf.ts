@@ -149,12 +149,17 @@ export async function buildInvoicePdf(invoice: InvoiceDocument): Promise<Uint8Ar
   /* ── Line items ── */
   const colQty = MARGIN + CONTENT_W - 190;
   const colRate = MARGIN + CONTENT_W - 100;
-  const descWidth = colQty - MARGIN - 50;
+  // Services billed one price per line need no quantity or rate columns.
+  const hourly = invoice.billing === "HOURLY";
+  const servicesOnly = !hourly && invoice.lines.every((line) => line.quantity === 1);
+  const descWidth = (servicesOnly ? colRate : colQty) - MARGIN - 50;
 
   const tableHead = () => {
     label("Description", MARGIN);
-    text("QTY", colQty, { size: 7.5, font: bold, color: MUTED, right: true });
-    text("RATE", colRate, { size: 7.5, font: bold, color: MUTED, right: true });
+    if (!servicesOnly) {
+      text(hourly ? "HOURS" : "QTY", colQty, { size: 7.5, font: bold, color: MUTED, right: true });
+      text("RATE", colRate, { size: 7.5, font: bold, color: MUTED, right: true });
+    }
     text("AMOUNT", right, { size: 7.5, font: bold, color: MUTED, right: true });
     y -= 8;
     rule();
@@ -177,8 +182,10 @@ export async function buildInvoicePdf(invoice: InvoiceDocument): Promise<Uint8Ar
     }
     const rowBottom = y;
     y = rowTop;
-    text(String(line.quantity), colQty, { color: MUTED, right: true });
-    text(line.rate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), colRate, { color: MUTED, right: true });
+    if (!servicesOnly) {
+      text(String(line.quantity), colQty, { color: MUTED, right: true });
+      text(line.rate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), colRate, { color: MUTED, right: true });
+    }
     text(line.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), right, { right: true });
     y = rowBottom - 4;
     rule();

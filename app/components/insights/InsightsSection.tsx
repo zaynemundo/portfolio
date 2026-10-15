@@ -35,7 +35,7 @@ export function InsightsSection({
       aria-labelledby="insights-heading"
       className="in bg-white rounded-b-[32px] md:rounded-b-[48px] overflow-hidden relative z-10 py-24 md:py-32"
     >
-      <div className="max-w-[1200px] mx-auto px-6 md:px-10">
+      <div className="max-w-(--site-max) mx-auto px-6 md:px-10">
 
         {/* ── Section header ──────────────────────────────────────────────── */}
         <header className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -151,26 +151,3 @@ function InsightRow({ post }: { post: PostSummary }) {
     </article>
   );
 }
-
-/* ── Icons ───────────────────────────────────────────────────────────────────── */
-
-function IconArrowRight() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 13 13"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M2 6.5h9M7.5 3l3.5 3.5L7.5 10"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-

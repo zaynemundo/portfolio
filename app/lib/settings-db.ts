@@ -53,13 +53,6 @@ const DEFAULT_HERO_SCENES: HeroSceneData[] = [
     end: 0.52,
   },
   {
-    heading: "Every detail is a decision",
-    description:
-      "Thoughtful visual design paired with WCAG 2.1 AA compliance, sub-second load times, and semantic information architecture — the rigour behind every pixel and every line of code.",
-    start: 0.5,
-    end: 0.74,
-  },
-  {
     heading: "Let’s build something that lasts.",
     ctaLabel: "Get in touch",
     ctaHref: "#contact",

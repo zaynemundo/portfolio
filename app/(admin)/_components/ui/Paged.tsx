@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 
 /* Long lists are shown ten rows at a time. Use PagedBody in place of a
-   table's <tbody>, or PagedList in place of a row list's <ul> — each takes
+   table's <tbody> — each takes
    the rows as children exactly as the plain element would, and adds the
    Previous / page numbers / Next footer once there are more rows than fit on
    one page. With ten or fewer, nothing extra is shown. */
@@ -102,13 +102,3 @@ export function PagedBody({ children, className }: { children: React.ReactNode; 
   );
 }
 
-/** A row list's <ul>, ten rows at a time. Children are the <li> rows. */
-export function PagedList({ children, className }: { children: React.ReactNode; className?: string }) {
-  const { visible, ...pager } = usePage(children);
-  return (
-    <>
-      <ul className={className}>{visible}</ul>
-      {pager.total > PAGE_SIZE && <Pager {...pager} />}
-    </>
-  );
-}

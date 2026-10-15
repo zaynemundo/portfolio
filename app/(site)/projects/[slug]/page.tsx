@@ -130,15 +130,6 @@ export default async function CaseStudyPage({ params }: Props) {
   const images = buildSlides(project);
   const cover = project.images?.[0];
 
-  const isRich = Boolean(
-    project.heroMetrics ||
-      project.problemSections?.length ||
-      project.transformationSections?.length ||
-      project.executionDisciplines?.length ||
-      project.whyItWorked?.length ||
-      project.takeaway,
-  );
-
   // A before/after comparison needs both pictures.
   const compare = project.compare?.beforeImage && project.compare.afterImage ? project.compare : undefined;
   // Results has its own figures, a closing note or a comparison — it never
@@ -160,14 +151,12 @@ export default async function CaseStudyPage({ params }: Props) {
     return { lead, reasons };
   })();
 
-  const chapters: Chapter[] = isRich
-    ? [
-        ...(project.problemSections?.length        ? [{ label: "The problem",     id: "section-the-problem"                  }] : []),
-        ...(hasPhases                              ? [{ label: "The work",        id: "section-the-work"                     }] : []),
-        ...(hasResults                             ? [{ label: "The results",     id: "section-the-results"                  }] : []),
-        ...(project.whyItWorked?.length            ? [{ label: "Why it worked",   id: "section-the-thinking"                 }] : []),
-      ]
-    : [];
+  const chapters: Chapter[] = [
+    ...(project.problemSections?.length ? [{ label: "The problem", id: "section-the-problem" }] : []),
+    ...(hasPhases ? [{ label: "The work", id: "section-the-work" }] : []),
+    ...(hasResults ? [{ label: "The results", id: "section-the-results" }] : []),
+    ...(project.whyItWorked?.length ? [{ label: "Why it worked", id: "section-the-thinking" }] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -204,7 +193,7 @@ export default async function CaseStudyPage({ params }: Props) {
           />
         </div>
 
-        <div className="relative max-w-[1200px] mx-auto px-6 md:px-10 pt-32">
+        <div className="relative max-w-(--site-max) mx-auto px-6 md:px-10 pt-32">
           <Reveal>
             <nav aria-label="Breadcrumb" className="flex items-center justify-center gap-2 text-[12px] text-zinc-600 mb-8">
               <Link href="/work" className="hover:text-zinc-400 transition-colors duration-150">Work</Link>
@@ -301,7 +290,7 @@ export default async function CaseStudyPage({ params }: Props) {
       {/* ── At a glance ──────────────────────────────────────────────────────────
           The whole case study in one screen, for someone with a minute to spare.
           Who did the work and with what. The problem is told in its own chapter, the outcome closes the page. */}
-      <div className="max-w-[1200px] mx-auto px-6 md:px-10 pt-16 md:pt-20">
+      <div className="max-w-(--site-max) mx-auto px-6 md:px-10 pt-16 md:pt-20">
         <div>
           <Reveal delay={80}>
             <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-7 md:p-8 grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_auto] lg:items-center lg:gap-10">
@@ -355,7 +344,7 @@ export default async function CaseStudyPage({ params }: Props) {
       {/* ── Screenshot gallery ───────────────────────────────────────────────── */}
       {images.length > 0 && (
         <div>
-          <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-12">
+          <div className="max-w-(--site-max) mx-auto px-6 md:px-10 py-12">
             <CaseStudyImageSlider
               images={images}
               placeholderBg={theme.bg}
@@ -366,68 +355,14 @@ export default async function CaseStudyPage({ params }: Props) {
       )}
 
       {/* ── Body ─────────────────────────────────────────────────────────────── */}
-      <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-16 md:py-24">
+      <div className="max-w-(--site-max) mx-auto px-6 md:px-10 py-16 md:py-24">
         <div>
 
           {/* Main content */}
           <div className="space-y-24 md:space-y-28">
 
-            {/* ── Generic layout ── */}
-            {!isRich && (
-              <>
-                <Reveal>
-                  <Section title="Overview">
-                    <p className="text-[16px] text-zinc-600 leading-relaxed">{project.shortDescription}</p>
-                  </Section>
-                </Reveal>
-                {project.challenge && (
-                  <Reveal>
-                    <Section title="Challenge">
-                      <p className="text-[16px] text-zinc-600 leading-relaxed">{project.challenge}</p>
-                    </Section>
-                  </Reveal>
-                )}
-                {project.approach && (
-                  <Reveal>
-                    <Section title="Approach">
-                      <p className="text-[16px] text-zinc-600 leading-relaxed">{project.approach}</p>
-                    </Section>
-                  </Reveal>
-                )}
-                {project.highlights.length > 0 && (
-                  <Reveal>
-                    <Section title="Key Contributions">
-                      <BulletList items={project.highlights} />
-                    </Section>
-                  </Reveal>
-                )}
-                {project.outcome && (
-                  <Reveal>
-                    <Section title="Outcome">
-                      <p className="text-[16px] text-zinc-600 leading-relaxed">{project.outcome}</p>
-                    </Section>
-                  </Reveal>
-                )}
-                {project.accessibility && (
-                  <Reveal>
-                    <Section title="Accessibility">
-                      <p className="text-[16px] text-zinc-600 leading-relaxed">{project.accessibility}</p>
-                    </Section>
-                  </Reveal>
-                )}
-                {(project.performance || project.seo) && (
-                  <Reveal>
-                    <Section title="Performance & SEO">
-                      {project.performance && <p className="text-[16px] text-zinc-600 leading-relaxed mb-3">{project.performance}</p>}
-                      {project.seo && <p className="text-[16px] text-zinc-600 leading-relaxed">{project.seo}</p>}
-                    </Section>
-                  </Reveal>
-                )}
-              </>
-            )}
-
             {/* ── Rich case study ── */}
-            {isRich && (
+            <>
               <>
 
                 {/* THE PROBLEM */}
@@ -694,7 +629,7 @@ export default async function CaseStudyPage({ params }: Props) {
                 )}
 
               </>
-            )}
+            </>
 
           </div>
         </div>
@@ -703,7 +638,7 @@ export default async function CaseStudyPage({ params }: Props) {
       {/* ── Project navigation ───────────────────────────────────────────────── */}
       {(prevProject || nextProject) && (
         <nav aria-label="Case study navigation" className="border-t border-zinc-200 bg-zinc-50">
-          <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-10">
+          <div className="max-w-(--site-max) mx-auto px-6 md:px-10 py-10">
             <div className="flex items-stretch justify-between gap-4">
 
               {/* Previous */}
@@ -786,19 +721,6 @@ function EditorialHeadline({ children }: { children: React.ReactNode }) {
     >
       {children}
     </p>
-  );
-}
-
-function BulletList({ items }: { items: string[] }) {
-  return (
-    <ul className="space-y-3">
-      {items.map((item) => (
-        <li key={item} className="flex gap-3 text-[14.5px] text-zinc-600 leading-relaxed">
-          <span className="mt-2 w-1.5 h-1.5 rounded-full bg-zinc-300 shrink-0" aria-hidden="true" />
-          {item}
-        </li>
-      ))}
-    </ul>
   );
 }
 

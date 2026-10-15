@@ -11,7 +11,7 @@ export function Footer() {
 
   return (
     <footer className="bg-[#09090b] text-zinc-400 border-t border-zinc-800/60" aria-label="Site footer">
-      <div className="max-w-[1200px] mx-auto px-6 md:px-10 pt-12 md:pt-14 pb-10 md:pb-12">
+      <div className="max-w-(--site-max) mx-auto px-6 md:px-10 pt-12 md:pt-14 pb-10 md:pb-12">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-8">
           
           {/* ZM Mark + Brand + Signature */}

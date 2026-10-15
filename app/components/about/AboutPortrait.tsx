@@ -41,7 +41,7 @@ export function AboutPortrait({ state, portraitUrl }: Props) {
             src={portraitUrl}
             alt="Portrait of Zaira Mundo"
             fill
-            sizes="(max-width: 767px) 80vw, (max-width: 1200px) 40vw, 480px"
+            sizes="(max-width: 1023px) 80vw, (max-width: 1200px) 40vw, 480px"
             className="about-portrait__image"
             style={{
               objectFit: "cover",

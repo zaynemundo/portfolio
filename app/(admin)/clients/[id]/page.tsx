@@ -63,7 +63,7 @@ export default async function ClientDetailPage({ params }: Props) {
         <ClientDetails clientId={client.id} name={client.name} type={client.type ?? ""} company={client.company ?? ""} />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6">
         <StatStrip
           cells={[
             { label: "Paid to you", value: money(totalIncome), tone: totalIncome > 0 ? "good" : undefined },
@@ -93,99 +93,100 @@ export default async function ClientDetailPage({ params }: Props) {
         )}
       </div>
 
-      <div className="space-y-5 mt-8">
-        <Panel
-          title="Jobs"
-          actionHref={`${routes.projects.new}?clientId=${client.id}`}
-          actionLabel="+ New job"
-          empty="No jobs for this client yet."
-          isEmpty={client.projects.length === 0}
-          framed={false}
-        >
-          <DataTable
-            searchPlaceholder="Search jobs…"
-            columns={[{ label: "Name", className: "px-5" }, { label: "Status", className: "px-5" }, { label: "Updated", className: "px-5", align: "right" }]}
-            rows={client.projects.map((p) => ({
-              id: p.id,
-              className: "group relative transition-colors",
-              search: p.name,
-              sort: [p.name, p.status, new Date(p.updatedAt).getTime()],
-              cells: (
-                <>
-                  <td className="px-5 py-2.5 text-[13.5px] font-medium text-foreground group-hover:text-primary transition-colors">
-                    <Link href={routes.projects.item(p.id)} className="absolute inset-0 z-0" aria-label={`Open ${p.name}`} />
-                    <span className="relative pointer-events-none">{p.name}</span>
-                  </td>
-                  <td className="px-5 py-2.5 pointer-events-none">
-                    <StatusBadge status={p.status} />
-                  </td>
-                  <td className="px-5 py-2.5 text-[12.5px] text-muted-foreground text-right whitespace-nowrap pointer-events-none">
-                    {new Date(p.updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                  </td>
-                </>
-              ),
+      {/* The work on the left; who to talk to on the right. */}
+      <div className="mt-6 grid items-start gap-5 lg:grid-cols-3">
+        <div className="space-y-5 lg:col-span-2">
+          <Panel
+            title="Jobs"
+            actionHref={`${routes.projects.new}?clientId=${client.id}`}
+            actionLabel="+ New job"
+            empty="No jobs for this client yet."
+            isEmpty={client.projects.length === 0}
+            framed={false}
+          >
+            <DataTable
+              searchPlaceholder="Search jobs…"
+              columns={[{ label: "Name", className: "px-5" }, { label: "Status", className: "px-5" }, { label: "Updated", className: "px-5", align: "right" }]}
+              rows={client.projects.map((p) => ({
+                id: p.id,
+                className: "group relative transition-colors",
+                search: p.name,
+                sort: [p.name, p.status, new Date(p.updatedAt).getTime()],
+                cells: (
+                  <>
+                    <td className="px-5 py-2.5 text-[13.5px] font-medium text-foreground group-hover:text-primary transition-colors">
+                      <Link href={routes.projects.item(p.id)} className="absolute inset-0 z-0" aria-label={`Open ${p.name}`} />
+                      <span className="relative pointer-events-none">{p.name}</span>
+                    </td>
+                    <td className="px-5 py-2.5 pointer-events-none">
+                      <StatusBadge status={p.status} />
+                    </td>
+                    <td className="px-5 py-2.5 text-[12.5px] text-muted-foreground text-right whitespace-nowrap pointer-events-none">
+                      {new Date(p.updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                    </td>
+                  </>
+                ),
+              }))}
+            />
+          </Panel>
+          <ClientDocuments
+            clientId={client.id}
+            jobs={client.projects.map((p) => ({ id: p.id, name: p.name }))}
+            documents={client.documents.map((d) => ({
+              id: d.id,
+              name: d.name,
+              fileUrl: d.fileUrl,
+              projectId: d.projectId,
+              shareToken: d.shareToken,
+              shareExpiresAt: d.shareExpiresAt ? new Date(d.shareExpiresAt).toISOString() : null,
+              shareOpenCount: d.shareOpenCount,
+              shareLastOpenedAt: d.shareLastOpenedAt ? new Date(d.shareLastOpenedAt).toISOString() : null,
+              addedAt: new Date(d.createdAt).toISOString(),
+              added: new Date(d.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
             }))}
           />
-        </Panel>
-
-        <ContactList
-          clientId={client.id}
-          contacts={client.contacts.map((c) => ({
-            id: c.id,
-            name: c.name,
-            role: c.role ?? "",
-            email: c.email ?? "",
-            phone: c.phone ?? "",
-          }))}
-        />
-
-        <ClientDocuments
-          clientId={client.id}
-          hint="Everything filed for this client. Choose a job to show a document on that job's page."
-          jobs={client.projects.map((p) => ({ id: p.id, name: p.name }))}
-          documents={client.documents.map((d) => ({
-            id: d.id,
-            name: d.name,
-            fileUrl: d.fileUrl,
-            projectId: d.projectId,
-            shareToken: d.shareToken,
-            shareExpiresAt: d.shareExpiresAt ? new Date(d.shareExpiresAt).toISOString() : null,
-            shareOpenCount: d.shareOpenCount,
-            shareLastOpenedAt: d.shareLastOpenedAt ? new Date(d.shareLastOpenedAt).toISOString() : null,
-            addedAt: new Date(d.createdAt).toISOString(),
-            added: new Date(d.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
-          }))}
-        />
-
-        <Panel
-          title="Recent payments & expenses"
-          actionHref={`${routes.finance.new}?clientId=${client.id}`}
-          actionLabel="+ Add"
-          empty="Nothing recorded for this client yet."
-          isEmpty={client.transactions.length === 0}
-        >
-          <table className="w-full text-left">
-            <tbody>
-              {client.transactions.slice(0, 8).map((t) => (
-                <tr key={t.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-primary/[0.06] transition-colors">
-                  <td className="px-5 py-2.5 text-[12.5px] text-muted-foreground whitespace-nowrap">
-                    <Link href={routes.finance.item(t.id)} className="absolute inset-0 z-0" aria-label="Open transaction" />
-                    <span className="relative pointer-events-none">{new Date(t.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
-                  </td>
-                  <td className="px-5 py-2.5 text-[13px] text-foreground/80 w-full pointer-events-none">{t.description ?? t.category ?? "—"}</td>
-                  <td
-                    className={`px-5 py-2.5 text-[13px] font-medium text-right whitespace-nowrap tabular-nums pointer-events-none ${
-                      t.type === "INCOME" ? "text-success" : "text-destructive"
-                    }`}
-                  >
-                    {t.type === "INCOME" ? "+" : "−"}
-                    {t.currency} {t.amount.toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Panel>
+          <Panel
+            title="Recent payments & expenses"
+            actionHref={`${routes.finance.new}?clientId=${client.id}`}
+            actionLabel="+ Add"
+            empty="Nothing recorded for this client yet."
+            isEmpty={client.transactions.length === 0}
+          >
+            <table className="w-full text-left">
+              <tbody>
+                {client.transactions.slice(0, 8).map((t) => (
+                  <tr key={t.id} className="group relative border-b border-border/70 last:border-b-0 hover:bg-primary/[0.06] transition-colors">
+                    <td className="px-5 py-2.5 text-[12.5px] text-muted-foreground whitespace-nowrap">
+                      <Link href={routes.finance.item(t.id)} className="absolute inset-0 z-0" aria-label="Open transaction" />
+                      <span className="relative pointer-events-none">{new Date(t.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
+                    </td>
+                    <td className="px-5 py-2.5 text-[13px] text-foreground/80 w-full pointer-events-none">{t.description ?? t.category ?? "—"}</td>
+                    <td
+                      className={`px-5 py-2.5 text-[13px] font-medium text-right whitespace-nowrap tabular-nums pointer-events-none ${
+                        t.type === "INCOME" ? "text-success" : "text-destructive"
+                      }`}
+                    >
+                      {t.type === "INCOME" ? "+" : "−"}
+                      {t.currency} {t.amount.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Panel>
+        </div>
+        <div className="space-y-5">
+          <ContactList
+            clientId={client.id}
+            contacts={client.contacts.map((c) => ({
+              id: c.id,
+              name: c.name,
+              role: c.role ?? "",
+              email: c.email ?? "",
+              phone: c.phone ?? "",
+            }))}
+          />
+        </div>
       </div>
     </div>
   );

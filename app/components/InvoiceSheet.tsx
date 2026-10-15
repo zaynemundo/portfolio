@@ -10,6 +10,9 @@ const label = "text-[11px] font-semibold uppercase tracking-wider text-zinc-500 
 export function InvoiceSheet({ invoice }: { invoice: InvoiceDocument }) {
   const { sender, isQuote } = invoice;
   const showPayment = !isQuote;
+  // Services billed one price per line need no quantity or rate columns.
+  const hourly = invoice.billing === "HOURLY";
+  const servicesOnly = !hourly && invoice.lines.every((line) => line.quantity === 1);
   return (
     <div className="rounded-xl border border-zinc-200 bg-white text-zinc-900 p-6 sm:p-10 print:border-0 print:p-0">
       <div className="flex flex-wrap items-start justify-between gap-6 mb-8 pb-6 border-b border-zinc-200">
@@ -48,8 +51,8 @@ export function InvoiceSheet({ invoice }: { invoice: InvoiceDocument }) {
           <thead>
             <tr className="border-b border-zinc-200">
               <th className="py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Description</th>
-              <th className="py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 text-right">Qty</th>
-              <th className="py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 text-right">Rate</th>
+              {!servicesOnly && <th className="py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 text-right">{hourly ? "Hours" : "Qty"}</th>}
+              {!servicesOnly && <th className="py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 text-right">Rate</th>}
               <th className="py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 text-right">Amount</th>
             </tr>
           </thead>
@@ -57,8 +60,8 @@ export function InvoiceSheet({ invoice }: { invoice: InvoiceDocument }) {
             {invoice.lines.map((line, i) => (
               <tr key={i} className="border-b border-zinc-100">
                 <td className="py-2.5 pr-4 text-[13.5px]">{line.description}</td>
-                <td className="py-2.5 text-[13.5px] text-zinc-500 text-right">{line.quantity}</td>
-                <td className="py-2.5 text-[13.5px] text-zinc-500 text-right">{line.rate.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>
+                {!servicesOnly && <td className="py-2.5 text-[13.5px] text-zinc-500 text-right">{line.quantity}</td>}
+                {!servicesOnly && <td className="py-2.5 text-[13.5px] text-zinc-500 text-right">{line.rate.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>}
                 <td className="py-2.5 text-[13.5px] text-right">{line.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>
               </tr>
             ))}

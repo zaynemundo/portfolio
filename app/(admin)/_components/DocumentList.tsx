@@ -9,8 +9,9 @@ import { Modal } from "@/app/(admin)/_components/Modal";
 import { DialogActions } from "@/app/(admin)/_components/DialogActions";
 import { DocumentDialog, ShareBadge, shareState, type ViewableDocument } from "@/app/(admin)/_components/DocumentDialog";
 import { routes } from "@/app/(admin)/_routes";
-import { Card, CardHeader } from "@/app/(admin)/_components/ui/Card";
+import { Card, CardHeader, cardActionClass } from "@/app/(admin)/_components/ui/Card";
 import { DataTable } from "@/app/(admin)/_components/ui/DataTable";
+import { pageActionClass } from "@/app/(admin)/_components/PageHeader";
 
 /* Documents are filed under a client. Each one can also be put on one of
  * that client's jobs, so a job shows its own list while the client keeps
@@ -42,8 +43,7 @@ interface JobOption {
   name: string;
 }
 
-const UPLOAD_BUTTON =
-  "inline-flex items-center gap-1.5 rounded-lg border border-border text-foreground/80 text-[12.5px] font-medium px-3 py-1.5 hover:bg-card transition-colors shrink-0 cursor-pointer";
+const UPLOAD_BUTTON = `${cardActionClass} inline-flex shrink-0 items-center gap-1.5`;
 const NO_JOB = "";
 /** Filter value for documents with no job, or no client (a filter value can't be empty). */
 const NONE = "none";
@@ -64,10 +64,12 @@ const LABEL = "block text-[12px] font-medium text-foreground/80 mb-1.5";
  * From the all-clients list neither is known, so `clients` is passed and the
  * client is asked for first.
  */
-function AddDocumentButton({
-  label, clientId, projectId, jobs = [], clients,
+export function AddDocumentButton({
+  label, clientId, projectId, jobs = [], clients, primary,
 }: {
   label: string;
+  /** The page's main action (black pill in the page header) rather than a small button in a card. */
+  primary?: boolean;
   clientId?: string | null;
   /** Fixed job, when adding from a job page. */
   projectId?: string;
@@ -137,10 +139,16 @@ function AddDocumentButton({
 
   return (
     <>
-      <button type="button" onClick={openDialog} className={UPLOAD_BUTTON}>
-        <Plus size={13} />
-        {label}
-      </button>
+      {primary ? (
+        <button type="button" onClick={openDialog} className={pageActionClass}>
+          + {label}
+        </button>
+      ) : (
+        <button type="button" onClick={openDialog} className={UPLOAD_BUTTON}>
+          <Plus size={13} />
+          {label}
+        </button>
+      )}
 
       <Modal open={open} onClose={() => setOpen(false)} title="Add document">
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -198,8 +206,10 @@ function AddDocumentButton({
  * can be renamed, put on a job, shared or deleted.
  */
 export function ClientDocuments({
-  clientId, documents, jobs = [], clients, title = "Documents", titleHref, hint, toolbar,
+  clientId, documents, jobs = [], clients, title = "Documents", titleHref, hint, toolbar, header = true,
 }: {
+  /** Off when the page header already has the title and the Add button, as on the Documents page. */
+  header?: boolean;
   /** The one client this list is for. Leave out, and pass `clients`, for the all-clients list. */
   clientId?: string;
   documents: ClientDocument[];
@@ -244,18 +254,21 @@ export function ClientDocuments({
 
   return (
     // Not clipped, so the Filters menu can hang below a short list.
-    <Card className="overflow-visible">
-      <CardHeader
-        title={titleHref ? <Link href={titleHref} className="hover:text-primary transition-colors">{title}</Link> : title}
-        count={documents.length}
-        description={hint}
-        action={<AddDocumentButton label="Add document" clientId={clientId} jobs={jobs} clients={clients} />}
-      />
+    <Card className={header ? "overflow-visible" : "overflow-visible p-5"}>
+      {header && (
+        <CardHeader
+          title={titleHref ? <Link href={titleHref} className="hover:text-primary transition-colors">{title}</Link> : title}
+          count={documents.length}
+          description={hint}
+          action={<AddDocumentButton label="Add document" clientId={clientId} jobs={jobs} clients={clients} />}
+        />
+      )}
 
       {documents.length === 0 ? (
-        <p className="px-5 pb-5 text-[13px] text-muted-foreground">No documents yet.</p>
+        <p className={`text-[13px] text-muted-foreground ${header ? "px-5 pb-5" : ""}`}>No documents yet.</p>
       ) : (
         <DataTable
+          inset={header}
           toolbar={toolbar}
           tableClassName="min-w-[640px]"
           searchPlaceholder={clients ? "Search by name, client or job…" : "Search documents…"}
@@ -397,12 +410,19 @@ export function JobDocuments({
                 type="button"
                 onClick={() => setViewing(doc)}
                 title="Preview and share"
-                className="flex items-center gap-2 min-w-0 flex-1 text-left text-[12.5px] text-foreground/80 hover:text-foreground transition-colors"
+                className="flex items-center gap-2 min-w-0 flex-1 text-left text-[12.5px] text-foreground/80 hover:text-primary hover:underline underline-offset-2 transition-colors"
               >
                 <FileIcon />
                 <span className="truncate">{doc.name}</span>
               </button>
               <ShareBadge doc={doc} />
+              <button
+                type="button"
+                onClick={() => setViewing(doc)}
+                className="shrink-0 text-[12px] font-semibold text-primary hover:text-primary/80 transition-colors"
+              >
+                View
+              </button>
               <button
                 type="button"
                 onClick={() => remove(doc)}

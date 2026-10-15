@@ -157,3 +157,30 @@ export interface Project {
   whyItWorked?: string[];                      // one entry per paragraph
   takeaway?: string;
 }
+
+/** What a project card or carousel slide needs: a slice of Project plus its media. */
+export type ProjectCard = Pick<
+  Project,
+  | "slug"
+  | "name"
+  | "tagline"
+  | "category"
+  | "year"
+  | "technologies"
+  | "role"
+  | "workType"
+> & {
+  images?: string[];
+  imageAlt?: string;
+  liveUrl?: string | null;
+  theme?: Project["theme"];
+  logo?: Project["logo"];
+  client?: string;
+  /** Highlight video — WebM source (preferred) */
+  videoWebm?: string;
+  /** Highlight video — MP4 source (fallback) */
+  videoMp4?: string;
+  /** Poster frame shown before / instead of video */
+  poster?: string;
+};
+

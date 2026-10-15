@@ -28,7 +28,7 @@
 /* ── Header ─────────────────────────────────────────────────────────── */
 
 .featured-work__header {
-  max-width: 1200px;
+  max-width: var(--site-max);
   margin: 0 auto;
   /* Top padding clears the fixed nav; compact bottom flows into dark showcase */
   padding: calc(var(--sw-nav-clearance) + 2.5rem) 1.5rem 1.75rem;
@@ -82,7 +82,7 @@
 /* ── Footer ─────────────────────────────────────────────────────────── */
 
 .featured-work__footer {
-  max-width: 1200px;
+  max-width: var(--site-max);
   margin: 0 auto;
   padding: 4rem 1.5rem 6rem;
   text-align: center;

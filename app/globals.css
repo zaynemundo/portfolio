@@ -186,6 +186,28 @@ body {
   --accent-hover: #3f3f46;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  /* How wide the public site's content runs. Grows on large screens so a
+     1920px display isn't mostly empty margin; on desktops it always leaves a
+     margin of at least 80px each side, so text never runs to the edges. */
+  --site-max: 1200px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --site-max: min(1200px, 100vw - 160px);
+  }
+}
+
+@media (min-width: 1600px) {
+  :root {
+    --site-max: min(1440px, 100vw - 200px);
+  }
+}
+
+@media (min-width: 1880px) {
+  :root {
+    --site-max: min(1640px, 100vw - 240px);
+  }
 }
 
 /* ── Focus — WCAG 2.2 AA ─────────────────────────────────────────────────── */

@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { DateField } from "@/app/(admin)/_components/ui/DateField";
 import { addTask, toggleTask, deleteTask, setTaskDueDate } from "@/app/actions/freelance";
-import { Card, CardHeader } from "@/app/(admin)/_components/ui/Card";
+import { Card, CardHeader, cardActionClass } from "@/app/(admin)/_components/ui/Card";
+import { fieldClass } from "@/app/(admin)/_components/Section";
 
 interface Task {
   id: string;
@@ -91,14 +92,13 @@ export function TaskList({ projectId, tasks, today }: { projectId: string; tasks
         </table>
       )}
 
-      <form onSubmit={handleAdd} className="flex gap-2">
+      <form onSubmit={handleAdd} className="flex items-center gap-2">
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Add a task…"
           aria-label="New task"
-          style={{ outline: "none" }}
-          className="flex-1 min-w-0 rounded-lg bg-card border border-border px-2.5 py-1.5 text-[12.5px] text-foreground placeholder:text-muted-foreground/70 focus:border-ring transition-colors"
+          className={`${fieldClass} min-w-0 flex-1`}
         />
         <DateField
           fullWidth={false}
@@ -106,12 +106,12 @@ export function TaskList({ projectId, tasks, today }: { projectId: string; tasks
           value={dueDate}
           onChange={setDueDate}
           aria-label="Due date for the new task"
-          className="rounded-lg bg-card border border-border px-2 py-1.5 text-[12px] text-muted-foreground focus:outline-none focus:border-ring transition-colors"
+          className={`${fieldClass} w-auto text-muted-foreground`}
         />
         <button
           type="submit"
           disabled={isPending || !title.trim()}
-          className="rounded-lg border border-border text-foreground/70 text-[12px] font-medium px-2.5 hover:bg-secondary transition-colors disabled:opacity-50"
+          className={`${cardActionClass} disabled:opacity-50`}
         >
           Add
         </button>

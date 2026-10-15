@@ -194,7 +194,7 @@ export function ContactSection({
       aria-labelledby="contact-heading"
       className="contact-section bg-zinc-950 border-t border-zinc-800"
     >
-      <div className="max-w-[1200px] mx-auto px-6 md:px-10 pt-24 pb-20">
+      <div className="max-w-(--site-max) mx-auto px-6 md:px-10 pt-24 pb-20">
 
         {/* ── Heading + paragraph ───────────────────────────────────────
             Each span.cs-heading-line is display:inline-block so that

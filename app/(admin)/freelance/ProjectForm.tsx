@@ -14,7 +14,7 @@ import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/Clien
 import { Select } from "@/app/(admin)/_components/Select";
 import { Modal } from "@/app/(admin)/_components/Modal";
 import { routes } from "@/app/(admin)/_routes";
-import { cardClass } from "@/app/(admin)/_components/ui/Card";
+import { Card, CardHeader, cardClass } from "@/app/(admin)/_components/ui/Card";
 
 const SELECT_CLASS = "w-full flex items-center justify-between gap-2 rounded-lg bg-secondary/60 px-3 py-2 text-[13.5px] text-foreground/90 hover:bg-secondary transition-colors";
 
@@ -27,6 +27,10 @@ interface Props {
   onDeleted?: () => void;
   /** True right after a job is created, so its details stay in the page until "Done". */
   setup?: boolean;
+  /** The job page's layout: figures under the header, then the main column, with Notes heading the sidebar above `aside`. */
+  summary?: React.ReactNode;
+  main?: React.ReactNode;
+  aside?: React.ReactNode;
 }
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -52,7 +56,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 /** Apple-Notes-style: no separate edit mode, no Save button — every change autosaves. */
-export function ProjectForm({ projectId, initial, clients, onClientCreated, onDeleted, setup = false }: Props) {
+export function ProjectForm({ projectId, initial, clients, onClientCreated, onDeleted, setup = false, summary: figures, main, aside }: Props) {
   const router = useRouter();
   const [id, setId] = useState(projectId ?? null);
   const [name, setName] = useState(initial?.name ?? "");
@@ -206,6 +210,31 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
     </>
   );
 
+  // Autosaves with everything else; the card's header says when it's saved.
+  const notes = (
+    <Card>
+      <CardHeader
+        title="Notes"
+        action={
+          <span className="text-[12px] font-normal text-muted-foreground">
+            {saveStatus === "saving" && "Saving…"}
+            {saveStatus === "saved" && "Saved"}
+            {saveStatus === "error" && <span className="text-destructive">Couldn&apos;t save</span>}
+          </span>
+        }
+      />
+      <textarea
+        id="jobNotes"
+        aria-label="Notes"
+        rows={6}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Brief, scope, anything worth remembering about this job…"
+        className="block w-full resize-y border-t border-border bg-transparent px-5 py-4 text-[13.5px] leading-relaxed text-foreground/90 placeholder:text-muted-foreground/70 focus:outline-none"
+      />
+    </Card>
+  );
+
   return (
     <div>
       <div className={`${cardClass} p-5 mb-5`}>
@@ -297,21 +326,19 @@ export function ProjectForm({ projectId, initial, clients, onClientCreated, onDe
         </div>
       </Modal>
 
-      <label htmlFor="jobNotes" className="block text-[13px] font-semibold text-foreground mb-2">Notes</label>
-      <textarea
-        id="jobNotes"
-        rows={4}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Brief, scope, anything worth remembering about this job…"
-        className="block w-full rounded-xl bg-card/40 px-4 py-3 text-[14px] leading-relaxed text-foreground/90 placeholder:text-muted-foreground/70 resize-y"
-      />
+      {figures}
 
-      <p className="text-[11.5px] text-muted-foreground/70 mt-3">
-        {saveStatus === "saving" && "Saving…"}
-        {saveStatus === "saved" && "Saved"}
-        {saveStatus === "error" && <span className="text-destructive">Couldn&apos;t save — check your connection.</span>}
-      </p>
+      {main || aside ? (
+        <div className="mt-5 grid items-start gap-5 lg:grid-cols-3">
+          <div className="space-y-5 lg:col-span-2">{main}</div>
+          <div className="space-y-5">
+            {notes}
+            {aside}
+          </div>
+        </div>
+      ) : (
+        notes
+      )}
     </div>
   );
 }

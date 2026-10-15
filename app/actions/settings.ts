@@ -104,25 +104,6 @@ async function uploadAsset(file: File, prefix: string, allowedTypes: string[], m
   return { ok: true, url: blob.url };
 }
 
-export async function uploadResume(formData: FormData): Promise<UploadResult> {
-  const file = formData.get("file") as File | null;
-  if (!file) return { ok: false, error: "No file provided." };
-
-  const result = await uploadAsset(file, "resume", ["application/pdf"]);
-  if (!result.ok || !result.url) return result;
-
-  await prisma.siteSettings.upsert({
-    where: { id: "singleton" },
-    update: { resumeUrl: result.url },
-    create: { id: "singleton", resumeUrl: result.url },
-  });
-
-  revalidatePath("/");
-  revalidatePath("/about");
-  updateTag(CACHE_TAGS.settings);
-  return result;
-}
-
 /**
  * Saves a document the browser uploaded straight to Blob (see app/api/upload):
  * PDFs are often too big to pass through a server action.

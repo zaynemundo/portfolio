@@ -41,6 +41,3 @@ export function invoiceTotals(invoice: {
   return { subtotal, discount, total, paid, balance: Math.max(round(total - paid), 0) };
 }
 
-export function isQuote(invoice: { kind: string }): boolean {
-  return invoice.kind === "QUOTE";
-}

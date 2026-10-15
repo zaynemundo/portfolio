@@ -13,10 +13,16 @@ interface Props {
   secondaryNewTab?: boolean;
   /** A secondary control that isn't a link — e.g. a button that opens a dialog. Shown before the primary action. */
   secondary?: React.ReactNode;
+  /** A primary control that isn't a link — e.g. "+ Add document", which opens a dialog. Style it with pageActionClass. */
+  primary?: React.ReactNode;
 }
 
+/** The black pill of a page's main action. */
+export const pageActionClass =
+  "rounded-full bg-foreground text-background text-[13px] font-semibold px-4 py-2 hover:bg-foreground/85 transition-colors";
+
 /** Title + count/subtitle on the left, primary "+ New" action (and an optional secondary link) on the right. */
-export function PageHeader({ title, subtitle, actionHref, actionLabel, secondaryHref, secondaryLabel, secondaryNewTab, secondary }: Props) {
+export function PageHeader({ title, subtitle, actionHref, actionLabel, secondaryHref, secondaryLabel, secondaryNewTab, secondary, primary }: Props) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
       <div>
@@ -45,13 +51,11 @@ export function PageHeader({ title, subtitle, actionHref, actionLabel, secondary
           </Link>
         )}
         {actionHref && actionLabel && (
-          <Link
-            href={actionHref}
-            className="rounded-full bg-foreground text-background text-[13px] font-semibold px-4 py-2 hover:bg-foreground/85 transition-colors"
-          >
+          <Link href={actionHref} className={pageActionClass}>
             {actionLabel}
           </Link>
         )}
+        {primary}
       </div>
     </div>
   );

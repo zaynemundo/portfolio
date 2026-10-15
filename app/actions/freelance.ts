@@ -2,12 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { updateTag } from "next/cache";
-import { put } from "@vercel/blob";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { FreelanceStatus, RateType } from "@/generated/prisma/client/client";
-import type { UploadResult } from "@/app/actions/settings";
 
 export interface FreelanceProjectFormData {
   name: string;
@@ -90,21 +88,6 @@ export async function archiveFreelanceProject(id: string, archived: boolean): Pr
   revalidatePath("/freelance");
   revalidatePath(`/freelance/${id}`);
   updateTag(CACHE_TAGS.freelance);
-}
-
-export async function uploadFreelanceAttachment(formData: FormData): Promise<UploadResult> {
-  await requireSession();
-
-  const file = formData.get("file") as File | null;
-  if (!file) return { ok: false, error: "No file provided." };
-  if (file.size > 15 * 1024 * 1024) return { ok: false, error: "File is too large (max 15MB)." };
-
-  const blob = await put(`freelance-attachment/${Date.now()}-${file.name}`, file, {
-    access: "public",
-    addRandomSuffix: false,
-  });
-
-  return { ok: true, url: blob.url };
 }
 
 /* ── Tasks ─────────────────────────────────────────────────────────── */

@@ -6,7 +6,7 @@ import { Check, ChevronDown, ChevronLeft, GripVertical, Search, X } from "lucide
 import { cn } from "@/app/lib/utils";
 import { Table, THead, Th, SortTh, type SortDirection } from "./Table";
 import { PagedBody, PAGE_SIZE } from "./Paged";
-import { CardFrame } from "./Card";
+import { CardFrame, cardClass } from "./Card";
 
 /* The one table every admin list is built from. On top of the Card / THead /
    rows look it adds what makes a long list findable:
@@ -237,6 +237,15 @@ function FilterMenu({ filters, chosen, onApply }: { filters: DataFilter[]; chose
 function compareValues(a: string | number, b: string | number): number {
   if (typeof a === "number" && typeof b === "number") return a - b;
   return String(a).localeCompare(String(b), undefined, { sensitivity: "base", numeric: true });
+}
+
+/** A page's main list: the table in a padded card, with search and filters always showing. */
+export function PageTable(props: Omit<Props, "inset" | "toolbar">) {
+  return (
+    <div className={cn(cardClass, "p-5")}>
+      <DataTable {...props} inset={false} toolbar="always" />
+    </div>
+  );
 }
 
 export function DataTable({ columns, rows: givenRows, filters = [], searchPlaceholder = "Search…", toolbar = "auto", defaultSort, inset = true, tableClassName, onReorder }: Props) {

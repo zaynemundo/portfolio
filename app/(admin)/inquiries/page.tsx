@@ -15,6 +15,7 @@ export default async function InquiriesPage() {
   const inquiries = await getInquiries();
   const unreadCount = inquiries.filter((i) => !i.read).length;
   const open = inquiries.filter((i) => i.stage !== "WON" && i.stage !== "LOST").length;
+  const archived = inquiries.filter((i) => i.stage === "LOST").length;
 
   return (
     <div>
@@ -28,6 +29,7 @@ export default async function InquiriesPage() {
         <EmptyState message="No leads yet. Messages from your website's contact form will show up here, or add one yourself." />
       ) : (
         <LeadBoard
+          archived={archived}
           leads={inquiries.map((inquiry) => ({
             id: inquiry.id,
             name: inquiry.name,

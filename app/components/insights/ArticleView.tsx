@@ -34,7 +34,7 @@ export function ArticleView({ post, siblings, prevPost, nextPost }: Props) {
 
       {/* ── Header ── */}
       <div className="bg-zinc-950">
-        <div className="max-w-[1200px] mx-auto px-6 md:px-10 pt-28 pb-12">
+        <div className="max-w-(--site-max) mx-auto px-6 md:px-10 pt-28 pb-12">
           <Reveal>
             <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[12.5px] text-zinc-500 mb-8">
               <Link href="/insights" className="hover:text-zinc-300 transition-colors duration-150">Insights</Link>
@@ -57,7 +57,7 @@ export function ArticleView({ post, siblings, prevPost, nextPost }: Props) {
       </div>
 
       {/* ── Article content ── */}
-      <div className="max-w-[1200px] mx-auto px-6 md:px-10 pt-10 pb-16">
+      <div className="max-w-(--site-max) mx-auto px-6 md:px-10 pt-10 pb-16">
         <div className="grid lg:grid-cols-[1fr_260px] gap-16">
 
           <Reveal>
@@ -112,7 +112,7 @@ export function ArticleView({ post, siblings, prevPost, nextPost }: Props) {
       {/* ── Post navigation ── */}
       {(prevPost || nextPost) && (
         <nav aria-label="Article navigation" className="border-t border-zinc-200 bg-zinc-50">
-          <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-10 flex items-center justify-between gap-4">
+          <div className="max-w-(--site-max) mx-auto px-6 md:px-10 py-10 flex items-center justify-between gap-4">
             <div>
               {prevPost && (
                 <Link href={`/insights/${prevPost.slug}`} className="group flex items-center gap-3">

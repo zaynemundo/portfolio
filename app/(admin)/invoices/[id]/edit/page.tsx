@@ -19,7 +19,7 @@ export default async function EditInvoicePage({ params }: Props) {
   const [invoice, clients, projects] = await Promise.all([
     prisma.invoice.findUnique({ where: { id } }),
     prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
-    prisma.freelanceProject.findMany({ where: { archived: false }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.freelanceProject.findMany({ where: { archived: false }, orderBy: { name: "asc" }, select: { id: true, name: true, rateType: true, rateAmount: true, rateCurrency: true } }),
   ]);
   if (!invoice) notFound();
 
@@ -46,6 +46,9 @@ export default async function EditInvoicePage({ params }: Props) {
           currency: invoice.currency,
           notes: invoice.notes ?? "",
           items: items.map((i) => ({ description: i.description, quantity: String(i.quantity), rate: String(i.rate) })),
+          billing: invoice.billing,
+          repeats: invoice.nextRepeatAt !== null,
+          repeatUntil: invoice.repeatUntil ? invoice.repeatUntil.toISOString().slice(0, 10) : "",
         }}
       />
     </div>

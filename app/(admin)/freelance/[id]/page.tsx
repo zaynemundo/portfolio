@@ -113,69 +113,67 @@ export default async function FreelanceProjectDetailPage({ params, searchParams 
             description: project.description ?? "",
             archived: project.archived,
           }}
+          summary={<JobMoneyStrip money={money} />}
+          main={
+            <>
+              <TaskList
+                projectId={project.id}
+                today={toDateInput(new Date())}
+                tasks={project.tasks.map((t) => ({ id: t.id, title: t.title, done: t.done, dueDate: toDateInput(t.dueDate) }))}
+              />
+              <InvoiceList projectId={project.id} documents={documents} />
+              <JobTransactions
+                projectId={project.id}
+                clientId={project.clientId}
+                transactions={project.transactions.map((t) => ({
+                  id: t.id,
+                  displayDate: new Date(t.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+                  type: t.type,
+                  amount: t.amount,
+                  currency: t.currency,
+                  label: t.description ?? t.category ?? (t.type === "INCOME" ? "Payment" : "Expense"),
+                }))}
+              />
+            </>
+          }
+          aside={
+            <>
+              <JobClientPanel
+                client={
+                  project.clientRecord
+                    ? {
+                        id: project.clientRecord.id,
+                        slug: project.clientRecord.slug,
+                        name: project.clientRecord.name,
+                        company: project.clientRecord.company,
+                        contacts: project.clientRecord.contacts.map((c) => ({
+                          id: c.id, name: c.name, role: c.role, email: c.email, phone: c.phone,
+                        })),
+                      }
+                    : null
+                }
+              />
+              <JobDocuments
+                projectId={project.id}
+                client={project.clientRecord ? { id: project.clientRecord.id, slug: project.clientRecord.slug, name: project.clientRecord.name } : null}
+                documents={project.documents.map((d) => ({
+                  id: d.id,
+                  name: d.name,
+                  fileUrl: d.fileUrl,
+                  shareToken: d.shareToken,
+                  shareExpiresAt: d.shareExpiresAt ? new Date(d.shareExpiresAt).toISOString() : null,
+                  shareOpenCount: d.shareOpenCount,
+                  shareLastOpenedAt: d.shareLastOpenedAt ? new Date(d.shareLastOpenedAt).toISOString() : null,
+                }))}
+                available={(project.clientRecord?.documents ?? [])
+                  .filter((d) => d.projectId !== project.id)
+                  .map((d) => ({ id: d.id, name: d.name, otherJobName: d.project?.name ?? null }))}
+              />
+            </>
+          }
         />
       </div>
 
-      <div className="mt-6">
-        <JobMoneyStrip money={money} />
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-5 mt-5 items-start">
-        <TaskList
-          projectId={project.id}
-          today={toDateInput(new Date())}
-          tasks={project.tasks.map((t) => ({ id: t.id, title: t.title, done: t.done, dueDate: toDateInput(t.dueDate) }))}
-        />
-        <div className="space-y-5">
-          <JobClientPanel
-            client={
-              project.clientRecord
-                ? {
-                    id: project.clientRecord.id,
-                    slug: project.clientRecord.slug,
-                    name: project.clientRecord.name,
-                    company: project.clientRecord.company,
-                    contacts: project.clientRecord.contacts.map((c) => ({
-                      id: c.id, name: c.name, role: c.role, email: c.email, phone: c.phone,
-                    })),
-                  }
-                : null
-            }
-          />
-          <JobDocuments
-            projectId={project.id}
-            client={project.clientRecord ? { id: project.clientRecord.id, slug: project.clientRecord.slug, name: project.clientRecord.name } : null}
-            documents={project.documents.map((d) => ({
-              id: d.id,
-              name: d.name,
-              fileUrl: d.fileUrl,
-              shareToken: d.shareToken,
-              shareExpiresAt: d.shareExpiresAt ? new Date(d.shareExpiresAt).toISOString() : null,
-              shareOpenCount: d.shareOpenCount,
-              shareLastOpenedAt: d.shareLastOpenedAt ? new Date(d.shareLastOpenedAt).toISOString() : null,
-            }))}
-            available={(project.clientRecord?.documents ?? [])
-              .filter((d) => d.projectId !== project.id)
-              .map((d) => ({ id: d.id, name: d.name, otherJobName: d.project?.name ?? null }))}
-          />
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-5 mt-5 items-start">
-        <InvoiceList projectId={project.id} documents={documents} />
-        <JobTransactions
-          projectId={project.id}
-          clientId={project.clientId}
-          transactions={project.transactions.map((t) => ({
-            id: t.id,
-            displayDate: new Date(t.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
-            type: t.type,
-            amount: t.amount,
-            currency: t.currency,
-            label: t.description ?? t.category ?? (t.type === "INCOME" ? "Payment" : "Expense"),
-          }))}
-        />
-      </div>
     </div>
   );
 }

@@ -138,7 +138,7 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
       const delta = Math.abs(target - current);
 
       /* Adaptive lerp */
-      const factor = delta > 2 ? 0.18 : delta > 0.8 ? 0.12 : delta > 0.2 ? 0.08 : 0.05;
+      const factor = delta > 2 ? 0.2 : delta > 0.8 ? 0.15 : delta > 0.2 ? 0.12 : 0.1;
       const next = delta < 0.002 ? target : lerp(current, target, factor);
       videoCurrentRef.current = next;
 
@@ -340,14 +340,15 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
         <FloatingPetals />
 
         {/* ── Text scenes ────────────────────────────────────────────────── */}
-        <div className="relative z-10 max-w-[1200px] mx-auto px-6 md:px-10 w-full h-full">
+        {/* The scenes are absolutely placed, which ignores padding, so each one carries the side padding itself. */}
+        <div className="relative z-10 max-w-(--site-max) mx-auto w-full h-full">
           {scenes.map((scene, i) => (
             <div
               key={i}
               data-scene=""
               data-start={scene.start}
               data-end={scene.end}
-              className="absolute inset-0 flex items-center"
+              className="absolute inset-0 flex items-center px-6 md:px-10"
               style={{
                 opacity: i === 0 ? 1 : 0,
                 willChange: reducedMotion ? "auto" : "opacity, transform",
@@ -359,7 +360,7 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
               <div className="max-w-2xl" style={{ pointerEvents: "auto" }}>
                 {scene.eyebrow && (
                   <p
-                    className="text-[11px] md:text-[12px] font-semibold tracking-[0.2em] uppercase text-white/70 mb-5"
+                    className="text-[12px] md:text-[13px] font-semibold tracking-[0.2em] uppercase text-white/70 mb-5"
                     style={{ textShadow: "0 2px 12px rgba(0,0,0,0.6), 0 0px 4px rgba(0,0,0,0.4)" }}
                   >
                     {scene.eyebrow}
@@ -368,7 +369,7 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
                 <h2
                   className="font-extrabold text-white leading-[0.92] mb-6"
                   style={{
-                    fontSize: "clamp(2.25rem, 6.5vw, 5rem)",
+                    fontSize: "clamp(2.75rem, 9vw, 5rem)",
                     letterSpacing: "-0.04em",
                     textShadow: "0 4px 30px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
                   }}
@@ -379,7 +380,7 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
                   <p
                     className="text-white/80 leading-relaxed max-w-lg mb-8"
                     style={{
-                      fontSize: "clamp(0.9375rem, 1.2vw, 1.0625rem)",
+                      fontSize: "clamp(1rem, 0.9rem + 0.35vw, 1.1875rem)",
                       textShadow: "0 2px 16px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4)",
                     }}
                   >
@@ -400,7 +401,7 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
                           }
                         }
                       }}
-                      className="inline-flex items-center px-6 py-3 rounded-full bg-white text-zinc-900 text-[13.5px] font-semibold hover:bg-[#8B5CF6] hover:text-white transition-colors duration-200"
+                      className="inline-flex items-center px-6 py-3 rounded-full bg-white text-zinc-900 text-[14.5px] font-semibold hover:bg-[#8B5CF6] hover:text-white transition-colors duration-200"
                       style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.25)" }}
                     >
                       {scene.ctaLabel}

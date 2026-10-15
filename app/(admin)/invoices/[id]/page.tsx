@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { Download } from "lucide-react";
-import { getInvoiceDocument } from "@/app/lib/invoice-document";
+import { Download, Repeat } from "lucide-react";
+import { formatInvoiceDate, getInvoiceDocument } from "@/app/lib/invoice-document";
 import { canEmailClients } from "@/app/lib/email";
 import { InvoiceSheet } from "@/app/components/InvoiceSheet";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
@@ -12,6 +12,7 @@ import { DeleteInvoiceButton } from "../DeleteInvoiceButton";
 import { InvoiceShare } from "../InvoiceShare";
 import { PaymentsPanel } from "../PaymentsPanel";
 import { AcceptQuoteButton } from "../AcceptQuoteButton";
+import { StopRepeatingButton } from "../StopRepeatingButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -86,6 +87,34 @@ export default async function InvoiceViewPage({ params }: Props) {
           {isQuote && !invoice.linked && <AcceptQuoteButton id={invoice.id} />}
         </div>
       </div>
+
+      {/* Monthly invoices: when the next draft is made, or which invoice this draft was made from. */}
+      {(invoice.nextRepeatAt || invoice.repeatedFrom) && (
+        <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-border/60 bg-card px-5 py-3.5 text-[13px]">
+          <Repeat size={15} className="text-primary" aria-hidden />
+          {invoice.nextRepeatAt ? (
+            <>
+              <span className="text-foreground">
+                Repeats monthly. Next draft on <span className="font-semibold">{formatInvoiceDate(invoice.nextRepeatAt)}</span>
+                {invoice.repeatUntil && <span className="text-muted-foreground">, until {formatInvoiceDate(invoice.repeatUntil)}</span>}.
+              </span>
+              <span className="ml-auto">
+                <StopRepeatingButton id={invoice.id} />
+              </span>
+            </>
+          ) : (
+            invoice.repeatedFrom && (
+              <span className="text-foreground">
+                Monthly draft made from{" "}
+                <Link href={routes.invoices.item(invoice.repeatedFrom.id)} className="font-medium text-primary hover:underline">
+                  {invoice.repeatedFrom.number}
+                </Link>
+                . Check it, then set it to Sent.
+              </span>
+            )
+          )}
+        </div>
+      )}
 
       {!isQuote && (
         <PaymentsPanel

@@ -9,7 +9,7 @@
 
 import { prisma } from "@/app/lib/prisma";
 import type { Project } from "@/app/lib/projects";
-import type { ProjectCard } from "@/app/components/work/ProjectChapter";
+import type { ProjectCard } from "@/app/lib/projects";
 
 type ProjectRow = Awaited<ReturnType<typeof prisma.project.findMany>>[number];
 
@@ -64,15 +64,6 @@ function rowToCard(row: ProjectRow): ProjectCard {
     videoWebm: row.videoWebm ?? undefined,
     poster: row.poster ?? undefined,
   };
-}
-
-/** Every published project, in display order. */
-export async function getPublishedProjects(): Promise<Project[]> {
-  const rows = await prisma.project.findMany({
-    where: { published: true },
-    orderBy: { sortOrder: "asc" },
-  });
-  return rows.map(rowToProject);
 }
 
 /** Published projects as lightweight cards, in display order. */

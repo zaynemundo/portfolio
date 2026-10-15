@@ -25,7 +25,7 @@ export default async function WorkPage() {
     <div className="min-h-screen bg-white">
       {/* Page Header */}
       <div className="bg-zinc-950">
-        <div className="max-w-[1200px] mx-auto px-6 md:px-10 pt-36 md:pt-44 pb-24 md:pb-28">
+        <div className="max-w-(--site-max) mx-auto px-6 md:px-10 pt-36 md:pt-44 pb-24 md:pb-28">
           <Reveal>
             <h1
               className="font-extrabold text-white tracking-tight mb-6 md:mb-8"
@@ -41,7 +41,7 @@ export default async function WorkPage() {
       </div>
 
       {/* Main Grid Section */}
-      <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-20 md:py-28">
+      <div className="max-w-(--site-max) mx-auto px-6 md:px-10 py-20 md:py-28">
         <ProjectFilterGrid projects={projects} />
       </div>
 

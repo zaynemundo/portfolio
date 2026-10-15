@@ -6,8 +6,8 @@ import { useState, useEffect } from "react";
 import { useActiveProject } from "@/app/hooks/useActiveProject";
 
 const navLinks = [
-  { label: "Work", href: "/work" },
-  { label: "Insights", href: "/insights" },
+  { label: "Work", href: "/work", hint: "Case studies" },
+  { label: "Insights", href: "/insights", hint: "Articles and notes" },
 ];
 
 /* Flag read by the homepage-mount effect below — lets "Let's Connect"
@@ -103,7 +103,7 @@ export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
           transform: "translateY(0)",
         }}
       >
-        <div className="relative w-full max-w-[760px]">
+        <div className="relative w-full max-w-[760px] min-[1600px]:max-w-[900px] min-[1880px]:max-w-[1040px]">
           {/* Pill */}
           <div
             className={`h-[52px] rounded-full flex items-center justify-between px-3.5 sm:px-5 transition-all duration-300 ${
@@ -152,7 +152,7 @@ export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3.5 py-1.5 rounded-full text-[13.5px] font-medium transition-colors duration-150 ${
+                  className={`px-3.5 py-1.5 rounded-full text-[14px] font-medium transition-colors duration-150 ${
                     isActive(link.href)
                       ? isTransparent
                         ? "text-white bg-white/15 font-semibold"
@@ -172,7 +172,7 @@ export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
               <a
                 href={cvPath}
                 download
-                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium transition-colors duration-150 ${
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13.5px] font-medium transition-colors duration-150 ${
                   isTransparent
                     ? "text-white/50 hover:text-white hover:bg-white/10"
                     : "text-zinc-600 hover:text-[#8B5CF6] hover:bg-[#8B5CF6]/8"
@@ -192,7 +192,7 @@ export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
               <button
                 type="button"
                 onClick={goToContact}
-                className={`inline-flex items-center gap-1.5 px-4.5 py-2 rounded-full text-[13px] font-semibold transition-all duration-200 cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 px-4.5 py-2 rounded-full text-[13.5px] font-semibold transition-all duration-200 cursor-pointer ${
                   isTransparent
                     ? "bg-white/15 text-white hover:bg-[#8B5CF6]/60 backdrop-blur-md"
                     : "bg-zinc-900 text-white hover:bg-[#8B5CF6] shadow-xs"
@@ -276,46 +276,62 @@ export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
           <div
             id="mobile-nav"
             aria-hidden={!menuOpen}
-            className={`absolute top-full mt-2 left-0 right-0 md:hidden bg-white/95 backdrop-blur-lg rounded-2xl border border-zinc-200 shadow-xl overflow-hidden transition-all duration-200 origin-top ${
+            className={`absolute top-full mt-2 left-0 right-0 md:hidden bg-white/95 backdrop-blur-lg rounded-3xl border border-zinc-200 shadow-[0_24px_60px_-12px_rgba(0,0,0,0.25)] overflow-hidden transition-all duration-200 origin-top ${
               menuOpen
                 ? "opacity-100 scale-y-100 pointer-events-auto"
                 : "opacity-0 scale-y-95 pointer-events-none"
             }`}
           >
-            <nav aria-label="Mobile navigation">
-              <ul className="py-2">
-                {navLinks.map((link) => (
+            <nav aria-label="Mobile navigation" className="p-2">
+              {/* Big, easy targets: each page with a line on what's there. */}
+              <ul>
+                {navLinks.map((link, i) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
                       onClick={() => setMenuOpen(false)}
-                      className={`flex items-center px-5 py-3 text-[15px] font-medium transition-colors duration-150 ${
-                        isActive(link.href)
-                          ? "text-[#8B5CF6] bg-[#8B5CF6]/8 font-semibold"
-                          : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
+                      className={`group flex items-center gap-4 rounded-2xl px-4 py-3.5 transition-colors duration-150 ${
+                        isActive(link.href) ? "bg-[#8B5CF6]/8" : "hover:bg-zinc-50"
                       }`}
                     >
-                      {link.label}
+                      <span className="w-6 font-mono text-[11px] font-semibold tabular-nums text-zinc-400">0{i + 1}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className={`block text-[20px] font-bold leading-tight tracking-tight ${isActive(link.href) ? "text-[#8B5CF6]" : "text-zinc-900"}`}>
+                          {link.label}
+                        </span>
+                        <span className="block text-[13px] text-zinc-500">{link.hint}</span>
+                      </span>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className="shrink-0 text-zinc-300 transition-all duration-150 group-hover:translate-x-0.5 group-hover:text-zinc-900">
+                        <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
                     </Link>
                   </li>
                 ))}
-                <li className="px-5 py-3 border-t border-zinc-100 mt-1 flex flex-col gap-2">
-                  <button
-                    type="button"
-                    onClick={(e) => { setMenuOpen(false); goToContact(e); }}
-                    className="flex items-center justify-center w-full py-3 rounded-full bg-zinc-900 text-white text-[14px] font-semibold hover:bg-[#8B5CF6] transition-colors duration-200 cursor-pointer"
-                  >
-                    Let&apos;s Connect
-                  </button>
-                  <a
-                    href={cvPath}
-                    download
-                    className="flex items-center justify-center w-full py-2.5 rounded-full border border-zinc-200 text-zinc-700 text-[13.5px] font-medium hover:border-[#8B5CF6] hover:text-[#8B5CF6] transition-colors duration-200"
-                  >
-                    Download Resume
-                  </a>
-                </li>
               </ul>
+
+              {/* The two actions side by side: talk, or take the CV. */}
+              <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-2 border-t border-zinc-100 px-2 pb-2 pt-3">
+                <button
+                  type="button"
+                  onClick={(e) => { setMenuOpen(false); goToContact(e); }}
+                  className="flex h-12 items-center justify-center gap-2 rounded-full bg-zinc-900 text-[14.5px] font-semibold text-white transition-colors duration-200 hover:bg-[#8B5CF6] cursor-pointer"
+                >
+                  Let&apos;s Connect
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <a
+                  href={cvPath}
+                  download
+                  className="flex h-12 items-center justify-center gap-2 rounded-full border border-zinc-200 px-5 text-[14px] font-semibold text-zinc-800 transition-colors duration-200 hover:border-[#8B5CF6] hover:text-[#8B5CF6]"
+                >
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+                    <path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Resume
+                </a>
+              </div>
             </nav>
           </div>
         </div>

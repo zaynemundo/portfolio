@@ -21,7 +21,7 @@ export default async function WritingPage() {
 
       {/* Page header */}
       <div className="bg-zinc-950">
-        <div className="max-w-[1200px] mx-auto px-6 md:px-10 pt-36 md:pt-40 pb-14 md:pb-16">
+        <div className="max-w-(--site-max) mx-auto px-6 md:px-10 pt-36 md:pt-40 pb-14 md:pb-16">
           <Reveal>
             <h1
               className="font-extrabold text-white tracking-tight mb-4 md:mb-5"
@@ -37,7 +37,7 @@ export default async function WritingPage() {
       </div>
 
       {/* Editorial List — Scalable with Progressive Load More */}
-      <div className="max-w-[1200px] mx-auto px-6 md:px-10 pt-12 md:pt-16 pb-20 md:pb-24">
+      <div className="max-w-(--site-max) mx-auto px-6 md:px-10 pt-12 md:pt-16 pb-20 md:pb-24">
         <InsightsList posts={allPosts} initialLimit={6} />
       </div>
     </div>

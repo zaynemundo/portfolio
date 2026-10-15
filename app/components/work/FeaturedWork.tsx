@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Reveal } from "@/app/components/Reveal";
 import { ProjectShowcase } from "./ProjectShowcase";
-import type { ProjectCard } from "./ProjectChapter";
+import type { ProjectCard } from "@/app/lib/projects";
 
 interface Props {
   projects: ProjectCard[];

@@ -26,6 +26,13 @@ export interface InvoiceDocument {
   /** A quote is the same document one step before an invoice. */
   isQuote: boolean;
   status: string;
+  /** "PROJECT", "HOURLY" or "MONTHLY". */
+  billing: string;
+  /** A monthly invoice that is still repeating: when its next draft copy is made. */
+  nextRepeatAt: Date | null;
+  repeatUntil: Date | null;
+  /** On a draft made by a monthly invoice: that invoice. */
+  repeatedFrom: { id: string; number: string } | null;
   issueDate: Date;
   /** For a quote, the date it is valid until. */
   dueDate: Date | null;
@@ -89,6 +96,9 @@ async function load(where: { id: string } | { shareToken: string }): Promise<Inv
   ]);
   if (!invoice) return null;
 
+  const repeatedFrom = invoice.repeatedFromId
+    ? await prisma.invoice.findUnique({ where: { id: invoice.repeatedFromId }, select: { id: true, invoiceNumber: true } })
+    : null;
   const isQuote = invoice.kind === "QUOTE";
   const linkedRow = isQuote ? invoice.createdInvoice : invoice.quote;
   return {
@@ -96,6 +106,10 @@ async function load(where: { id: string } | { shareToken: string }): Promise<Inv
     number: invoice.invoiceNumber,
     isQuote,
     status: invoice.status,
+    billing: invoice.billing,
+    nextRepeatAt: invoice.nextRepeatAt,
+    repeatUntil: invoice.repeatUntil,
+    repeatedFrom: repeatedFrom ? { id: repeatedFrom.id, number: repeatedFrom.invoiceNumber } : null,
     issueDate: invoice.issueDate,
     dueDate: invoice.dueDate,
     currency: invoice.currency,

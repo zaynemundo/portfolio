@@ -15,13 +15,6 @@ const TONE: Record<StatusTone, { className: string; Icon: typeof Check }> = {
   negative: { className: "bg-negative/12 text-negative", Icon: CircleAlert },
 };
 
-/** Dot colour for a tone, for places that show a status as a dot beside a title. */
-export const TONE_DOT: Record<StatusTone, string> = {
-  positive: "bg-positive",
-  neutral: "bg-warning",
-  negative: "bg-negative",
-};
-
 export function StatusPill({ tone, children, className }: { tone: StatusTone; children: React.ReactNode; className?: string }) {
   const { className: toneClass, Icon } = TONE[tone];
   return (

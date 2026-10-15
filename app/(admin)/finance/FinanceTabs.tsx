@@ -15,8 +15,8 @@ import { TransactionForm } from "./TransactionForm";
 import type { TransactionFormData } from "@/app/actions/finance";
 import type { ClientOption } from "@/app/(admin)/_components/ClientSelect";
 import { InvoiceStatusPill, INVOICE_STATUS } from "@/app/(admin)/_components/ui/StatusPill";
-import { DataTable } from "@/app/(admin)/_components/ui/DataTable";
-import { cardClass, tabBarClass, tabClass } from "@/app/(admin)/_components/ui/Card";
+import { PageTable } from "@/app/(admin)/_components/ui/DataTable";
+import { tabBarClass, tabClass } from "@/app/(admin)/_components/ui/Card";
 
 type Tab = "transactions" | "invoices" | "quotes";
 
@@ -159,10 +159,7 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
           {transactions.length === 0 ? (
             <EmptyState message="No transactions this month." />
           ) : (
-            <div className={`${cardClass} p-5`}>
-            <DataTable
-              inset={false}
-              toolbar="always"
+            <PageTable
               searchPlaceholder="Search by description, client or category…"
               filters={[{ key: "type", label: "Type", options: [{ value: "INCOME", label: "Income" }, { value: "EXPENSE", label: "Expenses" }] }]}
               columns={[{ label: "Date" }, { label: "Description" }, { label: "Client" }, { label: "Category" }, { label: "Amount", align: "right" }, { className: "w-12" }]}
@@ -210,7 +207,6 @@ export function FinanceTabs({ month, transactions, income, expense, net, currenc
                 ),
               }))}
             />
-            </div>
           )}
         </div>
       )}
@@ -279,56 +275,52 @@ function DocumentTable({ rows, empty, onDeleted }: { rows: InvoiceRow[]; empty: 
     .map((status) => ({ value: status, label: INVOICE_STATUS[status].label }));
 
   return (
-    <div className={`${cardClass} p-5`}>
-      <DataTable
-        inset={false}
-        toolbar="always"
-        tableClassName="min-w-[720px]"
-        searchPlaceholder="Search by number, client or job…"
-        filters={[{ key: "status", label: "Status", options: statusOptions }]}
-        columns={[{ label: "Number" }, { label: "Client" }, { label: "Job" }, { label: "Issued" }, { label: "Status" }, { label: "Total", align: "right" }, { className: "w-12" }]}
-        rows={rows.map((row) => {
-          const partPaid = !row.isQuote && row.balance > 0 && row.balance < row.total;
-          return {
-            id: row.id,
-            href: routes.invoices.item(row.id),
-            search: `${row.invoiceNumber} ${row.clientName ?? ""} ${row.projectName ?? ""}`,
-            sort: [row.invoiceNumber, row.clientName, row.projectName, row.issueDate, INVOICE_STATUS[row.status]?.label ?? row.status, row.total, undefined],
-            filters: { status: row.status },
-            cells: (
-              <>
-                <td className="px-4 py-3">
-                  <Link href={routes.invoices.item(row.id)} className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors">
-                    {row.invoiceNumber}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-[13px] text-muted-foreground">{row.clientName ?? "—"}</td>
-                <td className="px-4 py-3 text-[13px] text-muted-foreground">{row.projectName ?? "—"}</td>
-                <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">{row.displayIssueDate}</td>
-                <td className="px-4 py-3">
-                  <InvoiceStatusPill status={row.status} />
-                </td>
-                <td className="px-4 py-3 text-right tabular-nums">
-                  <span className="text-[13.5px] font-medium text-foreground/90">
-                    {row.total.toLocaleString()} {row.currency}
-                  </span>
-                  {partPaid && (
-                    <span className="block text-[11.5px] text-muted-foreground">{row.balance.toLocaleString()} still owed</span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <RowMenu>
-                    <RowMenuItem href={routes.invoices.edit(row.id)} icon={<Pencil size={14} />}>
-                      Edit
-                    </RowMenuItem>
-                    <DeleteInvoiceButton id={row.id} number={row.invoiceNumber} onDeleted={onDeleted} menu />
-                  </RowMenu>
-                </td>
-              </>
-            ),
-          };
-        })}
-      />
-    </div>
+    <PageTable
+      tableClassName="min-w-[720px]"
+      searchPlaceholder="Search by number, client or job…"
+      filters={[{ key: "status", label: "Status", options: statusOptions }]}
+      columns={[{ label: "Number" }, { label: "Client" }, { label: "Job" }, { label: "Issued" }, { label: "Status" }, { label: "Total", align: "right" }, { className: "w-12" }]}
+      rows={rows.map((row) => {
+        const partPaid = !row.isQuote && row.balance > 0 && row.balance < row.total;
+        return {
+          id: row.id,
+          href: routes.invoices.item(row.id),
+          search: `${row.invoiceNumber} ${row.clientName ?? ""} ${row.projectName ?? ""}`,
+          sort: [row.invoiceNumber, row.clientName, row.projectName, row.issueDate, INVOICE_STATUS[row.status]?.label ?? row.status, row.total, undefined],
+          filters: { status: row.status },
+          cells: (
+            <>
+              <td className="px-4 py-3">
+                <Link href={routes.invoices.item(row.id)} className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors">
+                  {row.invoiceNumber}
+                </Link>
+              </td>
+              <td className="px-4 py-3 text-[13px] text-muted-foreground">{row.clientName ?? "—"}</td>
+              <td className="px-4 py-3 text-[13px] text-muted-foreground">{row.projectName ?? "—"}</td>
+              <td className="px-4 py-3 text-[13px] text-muted-foreground whitespace-nowrap">{row.displayIssueDate}</td>
+              <td className="px-4 py-3">
+                <InvoiceStatusPill status={row.status} />
+              </td>
+              <td className="px-4 py-3 text-right tabular-nums">
+                <span className="text-[13.5px] font-medium text-foreground/90">
+                  {row.total.toLocaleString()} {row.currency}
+                </span>
+                {partPaid && (
+                  <span className="block text-[11.5px] text-muted-foreground">{row.balance.toLocaleString()} still owed</span>
+                )}
+              </td>
+              <td className="px-4 py-3 text-right">
+                <RowMenu>
+                  <RowMenuItem href={routes.invoices.edit(row.id)} icon={<Pencil size={14} />}>
+                    Edit
+                  </RowMenuItem>
+                  <DeleteInvoiceButton id={row.id} number={row.invoiceNumber} onDeleted={onDeleted} menu />
+                </RowMenu>
+              </td>
+            </>
+          ),
+        };
+      })}
+    />
   );
 }

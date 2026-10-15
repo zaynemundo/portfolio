@@ -10,7 +10,7 @@ const GLIDE_MS = 900;
  * leftover momentum until the wheel rests this long, or a clearly new swipe
  * starts. Scrolling the other way always goes through at once.
  */
-const QUIET_MS = 220;
+const QUIET_MS = 260;
 
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -19,9 +19,10 @@ function easeInOutCubic(t: number) {
 /**
  * Hero paging: inside the homepage hero, one scroll down (wheel, trackpad
  * swipe, arrow / Page / space key) glides smoothly to the next scene of the
- * video (see ScrollVideoHero), one scroll up to the previous one. The last
- * step leaves the hero for the section below. Everywhere else the page
- * scrolls normally. Touch screens scroll normally; off for reduced motion.
+ * video (see ScrollVideoHero), one scroll up to the previous one. From the
+ * last scene, one scroll down glides out of the hero to the next section.
+ * Below that the page scrolls normally, and scrolling back up into the hero
+ * is free too. Touch screens scroll normally; off for reduced motion.
  */
 export function SectionSnap() {
   const reducedMotion = useReducedMotion();
@@ -36,7 +37,13 @@ export function SectionSnap() {
     let lastWheel = 0;
     let lastDelta = 0;
 
-    /** Each scene of the hero, then the hero's end (where the next section starts). */
+    /** Where the hero ends: the top of the section after it. */
+    function heroExit(): number | null {
+      const hero = document.querySelector<HTMLElement>('section[aria-label="Hero"]');
+      return hero ? Math.round(hero.getBoundingClientRect().top + window.scrollY + hero.offsetHeight) : null;
+    }
+
+    /** Each scene of the hero. */
     function stops(): number[] {
       const hero = document.querySelector<HTMLElement>('section[aria-label="Hero"]');
       if (!hero) return [];
@@ -48,7 +55,6 @@ export function SectionSnap() {
         const p = i === 0 ? 0 : (Number(scene.dataset.start) + Number(scene.dataset.end)) / 2;
         out.push(Math.round(top + p * scrollable));
       });
-      out.push(Math.round(top + hero.offsetHeight));
       return out.sort((a, b) => a - b);
     }
 
@@ -56,11 +62,11 @@ export function SectionSnap() {
     function target(direction: 1 | -1): number | null {
       const y = window.scrollY;
       const all = stops();
-      // Below the hero the page scrolls freely, even scrolling back up to it.
+      // Past the last scene the page scrolls freely, even scrolling back up into the hero.
       if (!all.length || y > all[all.length - 1] + 2) return null;
-      const next = direction > 0 ? all.find((s) => s > y + 2) : [...all].reverse().find((s) => s < y - 2);
-      if (next === undefined || Math.abs(next - y) > window.innerHeight * 1.05) return null;
-      return next;
+      const next = direction > 0 ? (all.find((s) => s > y + 2) ?? heroExit() ?? undefined) : [...all].reverse().find((s) => s < y - 2);
+      // Scenes can be more than a screen apart; the glide covers the whole step either way.
+      return next ?? null;
     }
 
     function glide(to: number) {
@@ -89,7 +95,8 @@ export function SectionSnap() {
       const now = performance.now();
       const sinceLast = now - lastWheel;
       const size = Math.abs(e.deltaY);
-      const growing = size > lastDelta + 15; // momentum only ever fades; a jump means a new swipe
+      // Momentum only fades, with small wobbles; a clear jump in strength means a new swipe.
+      const growing = size > 25 && size > lastDelta * 1.8;
       lastWheel = now;
       lastDelta = size;
       if (size < 4) return;

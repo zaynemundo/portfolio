@@ -11,7 +11,7 @@ export default async function NewInvoicePage({ searchParams }: Props) {
 
   const [clients, projects, project] = await Promise.all([
     prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
-    prisma.freelanceProject.findMany({ where: { archived: false }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.freelanceProject.findMany({ where: { archived: false }, orderBy: { name: "asc" }, select: { id: true, name: true, rateType: true, rateAmount: true, rateCurrency: true } }),
     projectId ? prisma.freelanceProject.findUnique({ where: { id: projectId }, select: { clientId: true } }) : null,
   ]);
 

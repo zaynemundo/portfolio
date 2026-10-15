@@ -14,6 +14,8 @@ import { emailButton, emailShell, escapeHtml } from "@/app/lib/email-template";
 import { getInvoiceDocument, formatInvoiceDate, formatMoney } from "@/app/lib/invoice-document";
 import { invoiceTotals } from "@/app/lib/invoice-math";
 import { settleInvoice } from "@/app/lib/invoice-settle";
+import { nextNumber } from "@/app/lib/invoice-number";
+import { addMonths, firstRepeat, makeDueRepeats } from "@/app/lib/invoice-repeat";
 
 export interface InvoiceItemInput {
   description: string;
@@ -33,6 +35,37 @@ export interface InvoiceFormData {
   discount: string; // numeric string from the input, "" for none
   notes: string;
   items: InvoiceItemInput[];
+  /** "PROJECT", "HOURLY" or "MONTHLY". */
+  billing: string;
+  /** Monthly invoices: keep making a draft copy each month. */
+  repeats: boolean;
+  /** Monthly invoices: the last date a copy may be made, yyyy-mm-dd or "". */
+  repeatUntil: string;
+}
+
+const BILLING = ["PROJECT", "HOURLY", "MONTHLY"];
+
+/** A quote can be project or hourly; only invoices repeat monthly. */
+function cleanBilling(kind: string, billing: string): string {
+  if (!BILLING.includes(billing)) return "PROJECT";
+  return kind === "QUOTE" && billing === "MONTHLY" ? "PROJECT" : billing;
+}
+
+/** When a monthly invoice should next make its copy: the same day next month, never in the past. */
+function repeatFrom(issueDate: Date, existing: Date | null): Date {
+  if (existing) return existing;
+  let next = firstRepeat(issueDate);
+  while (next <= new Date()) next = addMonths(next, 1, issueDate.getUTCDate());
+  return next;
+}
+
+/** The repeat fields to store, given the form. */
+function repeatFields(kind: string, data: InvoiceFormData, existing: Date | null) {
+  const monthly = kind === "INVOICE" && cleanBilling(kind, data.billing) === "MONTHLY" && data.repeats;
+  return {
+    nextRepeatAt: monthly ? repeatFrom(parseDate(data.issueDate)!, existing) : null,
+    repeatUntil: monthly ? parseDate(data.repeatUntil) : null,
+  };
 }
 
 export interface InvoiceActionResult {
@@ -52,8 +85,9 @@ function validate(data: InvoiceFormData): string | null {
   const cleanItems = data.items.filter((i) => i.description.trim());
   if (cleanItems.length === 0) return "Add at least one line item.";
   for (const item of cleanItems) {
-    if (!item.quantity || Number.isNaN(Number(item.quantity))) return "Each item needs a valid quantity.";
-    if (!item.rate || Number.isNaN(Number(item.rate))) return "Each item needs a valid rate.";
+    const hourly = data.billing === "HOURLY";
+    if (!item.quantity || Number.isNaN(Number(item.quantity))) return hourly ? "Each line needs its hours." : "Each item needs a valid quantity.";
+    if (!item.rate || Number.isNaN(Number(item.rate))) return hourly ? "Each line needs an hourly rate." : "Each line needs an amount.";
   }
   const discount = Number(data.discount || 0);
   if (Number.isNaN(discount) || discount < 0) return "Discount must be zero or more.";
@@ -76,24 +110,6 @@ function buildItems(data: InvoiceFormData) {
 function cleanStatus(kind: string, status: string): InvoiceStatus {
   const allowed = kind === "QUOTE" ? ["DRAFT", "SENT", "ACCEPTED", "DECLINED"] : ["DRAFT", "SENT", "PAID", "OVERDUE"];
   return (allowed.includes(status) ? status : "DRAFT") as InvoiceStatus;
-}
-
-/**
- * Next number in a series (INV-0001, QUO-0001). Continues from the highest
- * number ever used rather than counting rows, so deleting a document can
- * never cause the next one to reuse a number.
- */
-async function nextNumber(kind: string): Promise<string> {
-  const prefix = kind === "QUOTE" ? "QUO-" : "INV-";
-  const existing = await prisma.invoice.findMany({
-    where: { invoiceNumber: { startsWith: prefix } },
-    select: { invoiceNumber: true },
-  });
-  const highest = existing.reduce((max, row) => {
-    const n = Number.parseInt(row.invoiceNumber.slice(prefix.length), 10);
-    return Number.isNaN(n) ? max : Math.max(max, n);
-  }, 0);
-  return `${prefix}${String(highest + 1).padStart(4, "0")}`;
 }
 
 /** Records one payment against an invoice. Not exported: callers check the session and settle afterwards. */
@@ -142,6 +158,8 @@ export async function createInvoice(data: InvoiceFormData): Promise<InvoiceActio
     data: {
       invoiceNumber: await nextNumber(kind),
       kind,
+      billing: cleanBilling(kind, data.billing),
+      ...repeatFields(kind, data, null),
       clientId: data.clientId || null,
       projectId: data.projectId || null,
       // "Paid" is reached by recording the payment below, not stored directly.
@@ -166,13 +184,15 @@ export async function updateInvoice(id: string, data: InvoiceFormData): Promise<
   const error = validate(data);
   if (error) return { ok: false, error };
 
-  const existing = await prisma.invoice.findUnique({ where: { id }, select: { kind: true } });
+  const existing = await prisma.invoice.findUnique({ where: { id }, select: { kind: true, nextRepeatAt: true } });
   if (!existing) return { ok: false, error: "Not found." };
   const status = cleanStatus(existing.kind, data.status);
 
   await prisma.invoice.update({
     where: { id },
     data: {
+      billing: cleanBilling(existing.kind, data.billing),
+      ...repeatFields(existing.kind, data, existing.nextRepeatAt),
       clientId: data.clientId || null,
       projectId: data.projectId || null,
       status: status === "PAID" ? "SENT" : status,
@@ -243,6 +263,21 @@ export async function deleteInvoicePayment(invoiceId: string, paymentId: string)
   revalidateLists(invoiceId);
 }
 
+/** Makes any monthly drafts that are due — the safety net for a day the scheduled run missed. Returns how many. */
+export async function catchUpRepeats(): Promise<number> {
+  await requireSession();
+  const made = await makeDueRepeats();
+  if (made > 0) revalidateLists();
+  return made;
+}
+
+/** Stops a monthly invoice making new copies. The copies already made stay. */
+export async function stopRepeating(id: string): Promise<void> {
+  await requireSession();
+  await prisma.invoice.update({ where: { id }, data: { nextRepeatAt: null } });
+  revalidateLists(id);
+}
+
 /**
  * The client said yes: creates a draft invoice with the quote's lines and
  * marks the quote accepted. Calling it again returns the invoice that
@@ -259,6 +294,7 @@ export async function acceptQuote(id: string): Promise<InvoiceActionResult> {
     data: {
       invoiceNumber: await nextNumber("INVOICE"),
       kind: "INVOICE",
+      billing: quote.billing,
       quoteId: quote.id,
       clientId: quote.clientId,
       projectId: quote.projectId,

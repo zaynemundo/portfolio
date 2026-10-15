@@ -21,7 +21,7 @@
 }
 
 .about-story__container {
-  max-width: 1200px; /* matches every other section on the page */
+  max-width: var(--site-max); /* matches every other section on the page */
   margin: 0 auto;
   padding-inline: 1.5rem; /* px-6 */
 }
@@ -498,7 +498,8 @@
   }
 }
 
-@media (max-width: 767px) {
+/* Phones and tablets: the portrait sits above the chapters instead of beside them. */
+@media (max-width: 1023px) {
   .about-story__layout {
     display: block;
   }
@@ -511,10 +512,10 @@
   }
 
   /* Portrait: fixed portrait-ratio box on mobile */
+  /* Full width, cropped to a landscape-ish height so the text below isn't pushed off screen. */
   .about-portrait__frame {
-    aspect-ratio: 4 / 5;
-    max-height: 72vw;
-    height: auto;
+    width: 100%;
+    height: min(90vw, 640px);
   }
 
   .about-portrait {
@@ -526,18 +527,21 @@
     display: none;
   }
 
-  /* Chapters: full opacity, no transform, normal flow */
+  /* Chapters: full opacity, no transform, normal flow, using the full width. */
   .about-chapter {
     min-height: auto;
     opacity: 1;
     transform: none;
-    padding-block: 3rem;
-    border-bottom: 1px solid #f4f4f5;
+    padding-block: 2.5rem;
   }
 
   .about-chapter:last-child {
     min-height: auto;
-    border-bottom: none;
+  }
+
+  .about-chapter,
+  .about-chapter * {
+    max-width: none;
   }
 
   .about-story__chapters {
@@ -549,10 +553,6 @@
   .about-story__header {
     padding-top: clamp(3.5rem, 8vw, 5rem);
     padding-bottom: clamp(2.5rem, 5vw, 4rem);
-  }
-
-  .about-portrait__frame {
-    max-height: 90vw;
   }
 }
 

@@ -18,7 +18,7 @@
  * meantime (placeholder state).
  */
 
-import type { ProjectCard } from "@/app/components/work/ProjectChapter";
+import type { ProjectCard } from "@/app/lib/projects";
 
 export const staticProjects: ProjectCard[] = [
   {

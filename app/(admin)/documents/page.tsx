@@ -3,7 +3,7 @@ import { prisma } from "@/app/lib/prisma";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
-import { ClientDocuments } from "@/app/(admin)/_components/DocumentList";
+import { AddDocumentButton, ClientDocuments } from "@/app/(admin)/_components/DocumentList";
 
 /* Every document in one table. Each row says which client (and job, if any)
  * it is under; the Filters menu narrows the table to one client. A document's
@@ -62,20 +62,23 @@ export default async function DocumentsPage() {
     // Newest first, across all clients.
     .sort((a, b) => b.addedAt.localeCompare(a.addedAt));
 
+  const clientOptions = clients.map((c) => ({ id: c.id, slug: c.slug, name: c.name, jobs: c.projects }));
+
   return (
     <div>
       <PageHeader
         title="Documents"
         subtitle={`${documents.length} document${documents.length === 1 ? "" : "s"} across all clients`}
+        primary={clients.length > 0 && <AddDocumentButton primary label="Add document" clients={clientOptions} />}
       />
 
       {clients.length === 0 && documents.length === 0 ? (
         <EmptyState message="Add a client first. Documents are filed under the client they belong to." />
       ) : (
         <ClientDocuments
-          title="All documents"
+          header={false}
           toolbar="always"
-          clients={clients.map((c) => ({ id: c.id, slug: c.slug, name: c.name, jobs: c.projects }))}
+          clients={clientOptions}
           documents={documents}
         />
       )}

@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { routes } from "@/app/(admin)/_routes";
 import { Card, CardHeader } from "@/app/(admin)/_components/ui/Card";
-import { Donut, Sparkline, TrafficChart } from "./Charts";
+import { TrafficChart } from "@/app/(admin)/_components/Charts";
 import type { AnalyticsRange, AnalyticsSummary } from "@/app/lib/analytics";
 import { cn } from "@/app/lib/utils";
 
@@ -51,84 +50,90 @@ function change(now: number, before: number): { text: string; up: boolean } | nu
   return { text: `${pct > 0 ? "+" : ""}${pct}%`, up: pct >= 0 };
 }
 
-function StatCard({ label, value, before, spark, href, days }: { label: string; value: number; before: number; spark?: number[]; href?: string; days: number }) {
+/** One headline figure in the traffic card's header, with its change against the period before. */
+function Figure({ label, value, before, days, swatch }: { label: string; value: number; before: number; days: number; swatch: React.ReactNode }) {
   const delta = change(value, before);
-  const body = (
-    <>
-      <dt className="text-[12px] font-medium text-muted-foreground">{label}</dt>
+  return (
+    <div>
+      <dt className="flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground">
+        {swatch}
+        {label}
+      </dt>
       <dd className="mt-1 flex items-baseline gap-2">
-        <span className="text-[22px] font-bold leading-tight tracking-tight tabular-nums">{NUMBER.format(value)}</span>
+        <span className="text-[26px] font-bold leading-none tracking-tight tabular-nums">{NUMBER.format(value)}</span>
         {delta && (
           <span className={cn("text-[12px] font-semibold tabular-nums", delta.up ? "text-positive" : "text-negative")} title={`Compared with the ${days} days before`}>
             {delta.text}
           </span>
         )}
       </dd>
-      {spark && <dd className="mt-2"><Sparkline values={spark} /></dd>}
-    </>
+    </div>
   );
-  const className = "block rounded-2xl border border-border/60 bg-card px-4 py-3.5";
-  return href ? <Link href={href} className={cn(className, "transition-opacity hover:opacity-85")}>{body}</Link> : <div className={className}>{body}</div>;
+}
+
+function ListCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Card>
+      <CardHeader title={title} />
+      {children}
+    </Card>
+  );
 }
 
 export function AnalyticsSection({ data, days, caseStudies }: { data: AnalyticsSummary; days: AnalyticsRange; caseStudies: Map<string, string> }) {
-  const devices = ["desktop", "mobile"].map((d) => ({ label: d === "mobile" ? "Phones" : "Computers", value: data.devices.find((x) => x.device === d)?.views ?? 0 }));
   const referred = data.referrers.reduce((sum, r) => sum + r.views, 0);
-  const sources = [...data.referrers.slice(0, 3).map((r) => ({ label: r.site, value: r.views })), { label: "Direct and others", value: Math.max(0, data.views - referred) }].filter((p) => p.value > 0);
+  const direct = Math.max(0, data.views - referred);
+  const sources = [...data.referrers.map((r) => ({ label: r.site, value: r.views })), ...(direct ? [{ label: "Direct", detail: "typed in, bookmarks, apps", value: direct }] : [])].sort(
+    (a, b) => b.value - a.value,
+  );
 
   return (
-    <section>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-[14.5px] font-semibold tracking-tight text-foreground">Visitors</h2>
-        <div className="flex rounded-full border border-border bg-card p-0.5 text-[12px] font-semibold">
-          {([7, 30] as const).map((n) => (
-            <Link
-              key={n}
-              href={n === 7 ? "?" : `?days=${n}`}
-              scroll={false}
-              className={cn("rounded-full px-3 py-1 transition-colors", days === n ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}
-            >
-              {n} days
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatCard label="Page views" value={data.views} before={data.previous.views} spark={data.daily.map((d) => d.views)} days={days} />
-        <StatCard label="Visitors" value={data.visitors} before={data.previous.visitors} spark={data.daily.map((d) => d.visitors)} days={days} />
-        <StatCard label="Messages" value={data.messages} before={data.previous.messages} href={routes.inquiries.list} days={days} />
-      </dl>
-
-      <div className="mt-3 grid gap-3 lg:grid-cols-3">
+    <section className="space-y-3">
+      {/* The headline numbers sit on the chart they describe, with the period switch beside them. */}
+      <div className="grid gap-3 lg:grid-cols-3">
         <Card padded className="lg:col-span-2">
-          <h3 className="mb-4 text-[14.5px] font-semibold tracking-tight text-foreground">Traffic</h3>
-          <TrafficChart days={data.daily} />
+          <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+            <dl className="flex gap-8">
+              <Figure label="Page views" value={data.views} before={data.previous.views} days={days} swatch={<span className="h-0.5 w-3 rounded-full bg-primary" />} />
+              <Figure
+                label="Visitors"
+                value={data.visitors}
+                before={data.previous.visitors}
+                days={days}
+                swatch={<span className="w-3 border-t-2 border-dashed border-foreground/45" />}
+              />
+            </dl>
+            <div className="flex rounded-full border border-border bg-background p-0.5 text-[12px] font-semibold">
+              {([7, 30] as const).map((n) => (
+                <Link
+                  key={n}
+                  href={n === 7 ? "?" : `?days=${n}`}
+                  scroll={false}
+                  className={cn("rounded-full px-3 py-1 transition-colors", days === n ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}
+                >
+                  {n} days
+                </Link>
+              ))}
+            </div>
+          </div>
+          <TrafficChart days={data.daily} empty={data.views === 0 ? `No visits in the last ${days} days yet.` : undefined} />
         </Card>
-        <div className="grid gap-3">
-          <Card padded>
-            <h3 className="mb-4 text-[14.5px] font-semibold tracking-tight text-foreground">Devices</h3>
-            <Donut parts={devices} empty="No visits yet." />
-          </Card>
-          <Card padded>
-            <h3 className="mb-4 text-[14.5px] font-semibold tracking-tight text-foreground">Sources</h3>
-            <Donut parts={sources} empty="No visits yet." />
-          </Card>
-        </div>
-      </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
-        <Card>
-          <CardHeader title="Top pages" />
+        <ListCard title="Top pages">
           <BarList
             rows={data.pages.map((p) => ({ label: pageName(p.path, caseStudies), detail: pageName(p.path, caseStudies) === p.path ? undefined : p.path, value: p.views }))}
-            empty="No page views yet."
+            empty="Pages appear here once people visit."
           />
-        </Card>
-        <Card>
-          <CardHeader title="Countries" />
-          <BarList rows={data.countries.map((c) => ({ label: countryName(c.code), value: c.views }))} empty="No countries yet." />
-        </Card>
+        </ListCard>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <ListCard title="Sources">
+          <BarList rows={sources} empty="Where visitors come from: LinkedIn, Google, or straight in." />
+        </ListCard>
+        <ListCard title="Countries">
+          <BarList rows={data.countries.map((c) => ({ label: countryName(c.code), value: c.views }))} empty="Where in the world visitors are." />
+        </ListCard>
       </div>
     </section>
   );

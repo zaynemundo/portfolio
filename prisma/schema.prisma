@@ -368,6 +368,15 @@ model Invoice {
   kind          String        @default("INVOICE")
   /// Flat amount taken off the subtotal, in the invoice's currency.
   discount      Float         @default(0)
+  /// How it's billed: "PROJECT" (one price per line), "HOURLY" (hours × rate)
+  /// or "MONTHLY" (a retainer: a new draft copy is made each month, see app/lib/invoice-repeat.ts).
+  billing       String        @default("PROJECT")
+  /// Monthly invoices only: when the next draft copy is due to be made (null = not repeating),
+  /// and the last date one may be made.
+  nextRepeatAt  DateTime?
+  repeatUntil   DateTime?
+  /// On a draft made by a monthly invoice: the invoice it was copied from.
+  repeatedFromId String?
   /// On an invoice: the quote it was created from.
   quoteId       String?       @unique
   quote         Invoice?      @relation("QuoteToInvoice", fields: [quoteId], references: [id], onDelete: SetNull)

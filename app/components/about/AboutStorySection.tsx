@@ -29,8 +29,6 @@ export function AboutStorySection({ portraitUrl, chapters }: Props) {
   const {
     activeIndex,
     activeChapter,
-    formattedActiveChapter,
-    formattedTotalChapters,
     setActiveChapter,
   } = useAboutStory(chapters);
 

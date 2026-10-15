@@ -8,7 +8,7 @@ import {
   setTotal,
   setOverProjects,
 } from "@/app/hooks/useActiveProject";
-import type { ProjectCard } from "./ProjectChapter";
+import type { ProjectCard } from "@/app/lib/projects";
 import { optimizedImage, optimizedSrc } from "@/app/lib/image-src";
 
 interface Props {
@@ -25,10 +25,6 @@ interface Props {
  * Videos play only while their project is active; all others are paused.
  * Active project index is communicated to the global nav via useActiveProject.
  */
-function sleep(ms: number) {
-  return new Promise<void>((resolve) => setTimeout(resolve, ms));
-}
-
 export function ProjectShowcase({ projects }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -92,164 +88,6 @@ export function ProjectShowcase({ projects }: Props) {
       if (raf !== null) cancelAnimationFrame(raf);
     };
   }, [n]);
-
-  /* ── Snap to nearest project when scrolling stops ───────────────────
-   *
-   * After 600 ms of idle scroll, check if centerPoint has a fractional
-   * part (we're mid-crossfade between two projects). If so:
-   *   – fraction ≥ 0.5 → snap forward to the next project
-   *   – fraction < 0.5 → snap back to the current project
-   *
-   * The isAutoScrolling guard stops the smooth-scroll from re-triggering
-   * the idle timer (smooth-scroll fires its own scroll events).
-   * Disabled under prefers-reduced-motion.
-   *
-   * ────────────────────────────────────────────────────────────────── */
-  useEffect(() => {
-    if (reduced || n === 0) return;
-
-    let idleTimer: ReturnType<typeof setTimeout> | null = null;
-    let isAutoScrolling = false;
-
-    const snapToNearest = () => {
-      const el = containerRef.current;
-      if (!el) return;
-
-      const rect = el.getBoundingClientRect();
-      const scrollable = Math.max(el.offsetHeight - window.innerHeight, 1);
-      const p = Math.min(Math.max(-rect.top / scrollable, 0), 1);
-
-      /* Not inside the active scroll zone of the showcase */
-      if (p <= 0 || p >= 1) return;
-
-      const centerPt = p * n;
-
-      /* Round to the nearest "i + 0.5" snap point where exactly one
-       * project is fully visible (opacity = 1, zero crossfade overlap).
-       * Threshold sits at integer centerPt values — the 50/50 mid-cross-
-       * fade point — so the snap commits to the next project the moment
-       * the user crosses it. */
-      const snappedIndex = Math.max(0, Math.min(n - 1, Math.round(centerPt - 0.5)));
-      const targetCenterPt = snappedIndex + 0.5;
-
-      /* Already at (or within 2% of) the correct snap point — do nothing */
-      if (Math.abs(centerPt - targetCenterPt) < 0.02) return;
-
-      const targetP = targetCenterPt / n;
-      /* Document-relative top of the showcase container */
-      const containerDocTop = rect.top + window.scrollY;
-      const targetScrollY = containerDocTop + targetP * scrollable;
-
-      isAutoScrolling = true;
-      window.scrollTo({ top: targetScrollY, behavior: "smooth" });
-
-      /* Release the guard after the smooth scroll finishes (~700 ms) */
-      setTimeout(() => {
-        isAutoScrolling = false;
-      }, 700);
-    };
-
-    const onScroll = () => {
-      /* Ignore scroll events fired by our own smooth scroll */
-      if (isAutoScrolling) return;
-      if (idleTimer !== null) clearTimeout(idleTimer);
-      idleTimer = setTimeout(snapToNearest, 600);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (idleTimer !== null) clearTimeout(idleTimer);
-    };
-  }, [n, reduced]);
-
-  /* ── Auto-advance through slides on first entry ──────────────────────
-   *
-   * Once the showcase first scrolls into view (and only the first time —
-   * a ref guards against re-triggering if the user scrolls back up into
-   * it later), automatically scroll through the remaining projects one
-   * at a time. Any real user input (wheel, touch, arrow/space/page keys)
-   * cancels it immediately and hands control back permanently.
-   *
-   * Disabled under prefers-reduced-motion, same as the rest of the
-   * component's scroll-driven motion.
-   * ────────────────────────────────────────────────────────────────── */
-  useEffect(() => {
-    if (reduced || n <= 1) return;
-
-    let cancelled = false;
-    let started = false;
-    let detachInputListeners: (() => void) | null = null;
-
-    const scrollToIndex = (idx: number) => {
-      const el = containerRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const scrollable = Math.max(el.offsetHeight - window.innerHeight, 1);
-      const targetP = (idx + 0.5) / n;
-      const containerDocTop = rect.top + window.scrollY;
-      const targetScrollY = containerDocTop + targetP * scrollable;
-      window.scrollTo({ top: targetScrollY, behavior: "smooth" });
-    };
-
-    const DWELL_MS = 2200; // time to "read" each slide before advancing
-    const SCROLL_SETTLE_MS = 700; // roughly how long the smooth scroll takes
-
-    const runAutoplay = async () => {
-      for (let i = 1; i < n; i++) {
-        await sleep(DWELL_MS);
-        if (cancelled) return;
-        scrollToIndex(i);
-        await sleep(SCROLL_SETTLE_MS);
-      }
-    };
-
-    const cancelAutoplay = () => {
-      cancelled = true;
-      detachInputListeners?.();
-    };
-
-    /* Only listen for cancel-worthy input while autoplay is actually
-       running — attaching these for the component's whole lifetime would
-       mean the ordinary scrolling a user does just to reach this section
-       cancels autoplay before it ever gets a chance to start. */
-    const attachInputListeners = () => {
-      const onUserInput = () => cancelAutoplay();
-      window.addEventListener("wheel", onUserInput, { passive: true });
-      window.addEventListener("touchstart", onUserInput, { passive: true });
-      window.addEventListener("keydown", onUserInput);
-      detachInputListeners = () => {
-        window.removeEventListener("wheel", onUserInput);
-        window.removeEventListener("touchstart", onUserInput);
-        window.removeEventListener("keydown", onUserInput);
-      };
-    };
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting || started) return;
-        // Only kick off if we're still at (or very near) the first slide —
-        // avoids re-launching autoplay mid-showcase on reload/fast-scroll.
-        const rect = entry.boundingClientRect;
-        const scrollable = Math.max((containerRef.current?.offsetHeight ?? 0) - window.innerHeight, 1);
-        const p = Math.min(Math.max(-rect.top / scrollable, 0), 1);
-        if (p * n > 0.5) return;
-        started = true;
-        attachInputListeners();
-        runAutoplay().finally(() => detachInputListeners?.());
-      },
-      { threshold: 0.01 },
-    );
-    const el = containerRef.current;
-    if (el) observer.observe(el);
-
-    return () => {
-      cancelled = true;
-      observer.disconnect();
-      detachInputListeners?.();
-    };
-  }, [n, reduced]);
 
   /* ── Video play / pause ──────────────────────────────────────────── */
   useEffect(() => {

@@ -288,15 +288,6 @@ export const RICH_SECTIONS: RichSectionDef[] = [
 /** Every richContent key the structured editor owns. Anything else stays in the "Other data" JSON box. */
 export const STRUCTURED_KEYS = new Set(RICH_SECTIONS.flatMap((s) => s.fields.map((f) => f.key)));
 
-/** Same test the public page uses to switch from the simple layout to the long-form one. */
-const LONG_FORM_KEYS = [
-  "heroMetrics", "problemSections", "transformationSections", "executionDisciplines", "whyItWorked", "takeaway",
-];
-
-export function isLongForm(content: Record<string, unknown>): boolean {
-  return LONG_FORM_KEYS.some((key) => content[key] !== undefined);
-}
-
 function cleanValue(field: Field, value: unknown): unknown {
   switch (field.kind) {
     case "text":

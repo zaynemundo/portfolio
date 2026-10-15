@@ -8,6 +8,7 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import { PageHeader } from "@/app/(admin)/_components/PageHeader";
 import { Panel, PanelRow, StatStrip } from "@/app/(admin)/_components/OverviewParts";
 import { Card, CardHeader, cardActionClass } from "@/app/(admin)/_components/ui/Card";
+import { GroupedBars } from "@/app/(admin)/_components/Charts";
 import { DataTable } from "@/app/(admin)/_components/ui/DataTable";
 import { JOB_STATUS } from "@/app/(admin)/_components/ui/StatusPill";
 import { StatusBadge } from "../freelance/StatusBadge";
@@ -193,36 +194,20 @@ export default async function FreelanceOverviewPage() {
             description={`Income and expenses in ${DEFAULT_CURRENCY}`}
             action={<Link href={`${routes.finance.list}?tab=transactions`} className={cardActionClass}>Finance</Link>}
           />
-          {chartMax === 0 ? (
-            <p className="px-5 pb-5 text-[13px] text-muted-foreground">
-              Nothing recorded yet. Income appears here when an invoice is marked paid; expenses when you add them under Finance.
-            </p>
-          ) : (
-            <div className="px-5 pb-5">
-              <div className="flex items-end gap-3 h-40" role="img" aria-label={`Income and expenses for the last ${CHART_MONTHS} months`}>
-                {months.map((m, i) => (
-                  <div key={m.label} className="flex-1 min-w-0 h-full flex flex-col justify-end gap-1.5" title={`${m.label}: ${money(m.income)} in, ${money(m.expense)} out`}>
-                    <div className="flex-1 flex items-end justify-center gap-1">
-                      <div
-                        className={`w-full max-w-7 rounded-t-lg rounded-b-sm ${i === CHART_MONTHS - 1 ? "bg-positive" : "bg-positive/45"}`}
-                        style={{ height: `${Math.max(m.income > 0 ? 3 : 0, (m.income / chartMax) * 100)}%` }}
-                      />
-                      <div
-                        className={`w-full max-w-7 rounded-t-lg rounded-b-sm ${i === CHART_MONTHS - 1 ? "bg-negative" : "bg-negative/40"}`}
-                        style={{ height: `${Math.max(m.expense > 0 ? 3 : 0, (m.expense / chartMax) * 100)}%` }}
-                      />
-                    </div>
-                    <span className={`text-center text-[11.5px] ${i === CHART_MONTHS - 1 ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{m.label}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-4 mt-4 pt-3 border-t border-border text-[12px] text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-positive" aria-hidden="true" />Income</span>
-                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-negative" aria-hidden="true" />Expenses</span>
-                <span className="ml-auto tabular-nums">Highest month: {money(chartMax)}</span>
-              </div>
-            </div>
-          )}
+          <div className="px-5 pb-5">
+            <GroupedBars
+              label={`Income and expenses for the last ${CHART_MONTHS} months`}
+              groups={months.map((m, i) => ({ label: m.label, values: [m.income, m.expense], current: i === CHART_MONTHS - 1 }))}
+              series={[
+                { name: "Income", bar: "bg-positive", faded: "bg-positive/45", dot: "bg-positive" },
+                { name: "Expenses", bar: "bg-negative", faded: "bg-negative/40", dot: "bg-negative" },
+              ]}
+              format={money}
+            />
+            {chartMax === 0 && (
+              <p className="mt-3 text-[12.5px] text-muted-foreground">Income appears when an invoice is marked paid; expenses when you add them under Finance.</p>
+            )}
+          </div>
         </Card>
 
         <Panel title="Needs attention" empty="Nothing needs your attention right now." isEmpty={attentionCount === 0}>
@@ -283,19 +268,20 @@ export default async function FreelanceOverviewPage() {
       {/* Not clipped, so the table's menus can hang below a short list. */}
       <Card className="mt-5 overflow-visible">
         <CardHeader
-          title="Jobs"
-          count={allJobs.length}
+          title="Open jobs"
+          count={jobs.length}
           action={<Link href={routes.projects.list} className={cardActionClass}>All jobs</Link>}
         />
-        {allJobs.length === 0 ? (
-          <p className="px-5 pb-5 text-[13px] text-muted-foreground">No jobs yet. Start one with “New job”.</p>
+        {jobs.length === 0 ? (
+          <p className="px-5 pb-5 text-[13px] text-muted-foreground">
+            {allJobs.length ? "Every job is completed. Finished jobs are under All jobs." : "No jobs yet. Start one with “New job”."}
+          </p>
         ) : (
           <DataTable
-            toolbar="always"
             searchPlaceholder="Search jobs…"
-            filters={[{ key: "status", label: "Status", options: JOB_STATUS_ORDER.map((status) => ({ value: status, label: JOB_STATUS[status].label })) }]}
+            filters={[{ key: "status", label: "Status", options: JOB_STATUS_ORDER.filter((status) => status !== "COMPLETED").map((status) => ({ value: status, label: JOB_STATUS[status].label })) }]}
             columns={[{ label: "Job", className: "px-5" }, { label: "Next action" }, { label: "Tasks" }, { label: "Due" }, { label: "Status", className: "px-5" }]}
-            rows={allJobs.map((job) => {
+            rows={jobs.map((job) => {
               const done = job.tasks.filter((t) => t.done).length;
               const client = job.clientRecord?.name ?? null;
               const endDate = job.endDate ? new Date(job.endDate) : null;

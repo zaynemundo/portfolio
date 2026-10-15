@@ -2,6 +2,7 @@ import Link from "next/link";
 import { routes } from "@/app/(admin)/_routes";
 import { Card, CardFrame, CardHeader, cardActionClass } from "@/app/(admin)/_components/ui/Card";
 import { PagedBody } from "@/app/(admin)/_components/ui/Paged";
+import { StatStrip, type StatCell } from "@/app/(admin)/_components/OverviewParts";
 
 /* Read-only panels on the job page. Each one is a window onto something
  * that's edited elsewhere (invoices, transactions, the client), so the job
@@ -28,7 +29,7 @@ export function JobMoneyStrip({ money: m }: { money: JobMoney }) {
   const outstanding = m.invoiced - m.paid;
   const toInvoice = m.value !== null ? Math.max(m.value - m.invoiced, 0) : null;
 
-  const cells: { label: string; value: string; note?: string; tone?: "bad" | "good" }[] = [
+  const cells: StatCell[] = [
     {
       label: "Job value",
       value: m.value !== null ? money(m.value, m.currency) : "—",
@@ -46,21 +47,7 @@ export function JobMoneyStrip({ money: m }: { money: JobMoney }) {
 
   return (
     <div>
-      <dl className="grid grid-cols-2 lg:grid-cols-4 gap-px rounded-xl border border-border bg-border overflow-hidden">
-        {cells.map((cell) => (
-          <div key={cell.label} className="px-4 py-3.5 bg-card">
-            <dt className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground/70">{cell.label}</dt>
-            <dd
-              className={`text-[19px] font-semibold tabular-nums leading-tight mt-1 ${
-                cell.tone === "bad" ? "text-destructive" : cell.tone === "good" ? "text-success" : "text-foreground"
-              }`}
-            >
-              {cell.value}
-            </dd>
-            {cell.note && <dd className={`text-[11.5px] mt-0.5 ${cell.tone === "bad" ? "text-destructive" : "text-muted-foreground"}`}>{cell.note}</dd>}
-          </div>
-        ))}
-      </dl>
+      <StatStrip cells={cells} />
       {m.mixedCurrencies && (
         <p className="text-[11.5px] text-muted-foreground mt-2">
           Some invoices or transactions on this job use a different currency and are left out of these totals.
@@ -127,16 +114,12 @@ export interface JobClient {
 /** Who the job is for, and who to talk to — contacts are edited on the client's own page. */
 export function JobClientPanel({ client }: { client: JobClient | null }) {
   return (
-    <div className="rounded-xl border border-border bg-card shadow-xs p-5">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-[13px] font-semibold text-foreground">Client</h2>
-        {client && (
-          <Link href={routes.clients.item(client.slug ?? client.id)} className="text-[12.5px] font-medium text-primary hover:text-primary/80 transition-colors">
-            Open client
-          </Link>
-        )}
-      </div>
-
+    <Card>
+      <CardHeader
+        title="Client"
+        action={client && <Link href={routes.clients.item(client.slug ?? client.id)} className={cardActionClass}>Open client</Link>}
+      />
+      <div className="px-5 pb-5">
       {!client ? (
         <p className="text-[12.5px] text-muted-foreground/70">No client chosen yet. Pick one in the details above.</p>
       ) : (
@@ -164,6 +147,7 @@ export function JobClientPanel({ client }: { client: JobClient | null }) {
           )}
         </>
       )}
-    </div>
+      </div>
+    </Card>
   );
 }

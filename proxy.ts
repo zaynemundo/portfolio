@@ -48,9 +48,8 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/website/:path*",
-    "/settings/:path*",
     "/account/:path*",
-    "/cv/:path*",
+    "/about/:path*",
     "/work-settings/:path*",
     "/insights-settings/:path*",
     "/inquiries/:path*",
