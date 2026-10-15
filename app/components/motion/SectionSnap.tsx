@@ -3,14 +3,27 @@
 import { useEffect } from "react";
 import { useReducedMotion } from "./useReducedMotion";
 
-/** How long one glide from stop to stop takes. */
-const GLIDE_MS = 900;
+/**
+ * How long a glide takes per screen of distance, and its limits: a long step
+ * through the video takes longer, so every step moves at the same easy pace.
+ */
+const GLIDE_MS_PER_SCREEN = 720;
+const GLIDE_MIN_MS = 700;
+const GLIDE_MAX_MS = 1500;
 /**
  * After a glide, wheel events in the same direction are taken as the trackpad's
  * leftover momentum until the wheel rests this long, or a clearly new swipe
  * starts. Scrolling the other way always goes through at once.
  */
 const QUIET_MS = 260;
+/**
+ * Past the last scene there's nothing to skip, so after arriving there the
+ * wheel is held only this long (just enough to absorb the flick that got you
+ * there), then scrolls the page normally.
+ */
+const EXIT_HOLD_MS = 350;
+/** After a glide lands, how long before a mere rise in scroll strength counts as a new swipe. */
+const SETTLE_MS = 300;
 
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -20,9 +33,9 @@ function easeInOutCubic(t: number) {
  * Hero paging: inside the homepage hero, one scroll down (wheel, trackpad
  * swipe, arrow / Page / space key) glides smoothly to the next scene of the
  * video (see ScrollVideoHero), one scroll up to the previous one. From the
- * last scene, one scroll down glides out of the hero to the next section.
- * Below that the page scrolls normally, and scrolling back up into the hero
- * is free too. Touch screens scroll normally; off for reduced motion.
+ * last scene, which sits at the very end of the video, the page scrolls
+ * normally: the hero slides away and the next section comes up under your own
+ * scrolling, never snapped to. Touch screens scroll normally; off for reduced motion.
  */
 export function SectionSnap() {
   const reducedMotion = useReducedMotion();
@@ -36,11 +49,12 @@ export function SectionSnap() {
     let glideId = 0;
     let lastWheel = 0;
     let lastDelta = 0;
+    let glideEndedAt = 0;
 
-    /** Where the hero ends: the top of the section after it. */
-    function heroExit(): number | null {
+    /** Where the hero's video ends: from here the hero simply scrolls away, revealing the next section. */
+    function heroEnd(): number | null {
       const hero = document.querySelector<HTMLElement>('section[aria-label="Hero"]');
-      return hero ? Math.round(hero.getBoundingClientRect().top + window.scrollY + hero.offsetHeight) : null;
+      return hero ? Math.round(hero.getBoundingClientRect().top + window.scrollY + hero.offsetHeight - window.innerHeight) : null;
     }
 
     /** Each scene of the hero. */
@@ -50,9 +64,11 @@ export function SectionSnap() {
       const top = hero.getBoundingClientRect().top + window.scrollY;
       const out: number[] = [];
       const scrollable = hero.offsetHeight - window.innerHeight;
-      hero.querySelectorAll<HTMLElement>("[data-scene]").forEach((scene, i) => {
-        // The first scene shows at the very top; the others are fully in view mid-range.
-        const p = i === 0 ? 0 : (Number(scene.dataset.start) + Number(scene.dataset.end)) / 2;
+      const scenes = hero.querySelectorAll<HTMLElement>("[data-scene]");
+      scenes.forEach((scene, i) => {
+        // The first scene shows at the very top, the last at the very end of the video
+        // (with the fade into the next section already showing); the others mid-range.
+        const p = i === 0 ? 0 : i === scenes.length - 1 ? 1 : (Number(scene.dataset.start) + Number(scene.dataset.end)) / 2;
         out.push(Math.round(top + p * scrollable));
       });
       return out.sort((a, b) => a - b);
@@ -62,9 +78,11 @@ export function SectionSnap() {
     function target(direction: 1 | -1): number | null {
       const y = window.scrollY;
       const all = stops();
-      // Past the last scene the page scrolls freely, even scrolling back up into the hero.
-      if (!all.length || y > all[all.length - 1] + 2) return null;
-      const next = direction > 0 ? (all.find((s) => s > y + 2) ?? heroExit() ?? undefined) : [...all].reverse().find((s) => s < y - 2);
+      const end = heroEnd();
+      // Once the video has ended the page scrolls normally: the hero slides away and the next section comes up by itself.
+      if (!all.length || end === null || y >= end - 2) return null;
+      // Inside the video, even past the last scene: down goes to the next scene or the video's end, up to the scene before.
+      const next = direction > 0 ? (all.find((s) => s > y + 2) ?? end) : [...all].reverse().find((s) => s < y - 2);
       // Scenes can be more than a screen apart; the glide covers the whole step either way.
       return next ?? null;
     }
@@ -75,16 +93,18 @@ export function SectionSnap() {
       resting = false;
       const from = window.scrollY;
       glideDir = to > from ? 1 : -1;
+      const duration = Math.min(GLIDE_MAX_MS, Math.max(GLIDE_MIN_MS, (Math.abs(to - from) / window.innerHeight) * GLIDE_MS_PER_SCREEN));
       const start = performance.now();
       const step = (now: number) => {
         if (id !== glideId) return; // replaced by a glide the other way
-        const t = Math.min((now - start) / GLIDE_MS, 1);
+        const t = Math.min((now - start) / duration, 1);
         window.scrollTo({ top: from + (to - from) * easeInOutCubic(t), behavior: "instant" });
         if (t < 1) {
           requestAnimationFrame(step);
         } else {
           gliding = false;
           resting = true;
+          glideEndedAt = performance.now();
         }
       };
       requestAnimationFrame(step);
@@ -95,17 +115,24 @@ export function SectionSnap() {
       const now = performance.now();
       const sinceLast = now - lastWheel;
       const size = Math.abs(e.deltaY);
-      // Momentum only fades, with small wobbles; a clear jump in strength means a new swipe.
-      const growing = size > 25 && size > lastDelta * 1.8;
+      // Momentum only fades. A clear jump in strength is a new swipe straight away; once the
+      // glide has settled, any rise at all is one (momentum never picks up again).
+      const growing = (size > 25 && size > lastDelta * 1.8) || (now - glideEndedAt > SETTLE_MS && size > lastDelta + 2);
       lastWheel = now;
       lastDelta = size;
       if (size < 4) return;
       const direction: 1 | -1 = e.deltaY > 0 ? 1 : -1;
+      const to = target(direction);
       if ((gliding || resting) && direction === glideDir) {
-        if (gliding || (sinceLast < QUIET_MS && !growing)) return e.preventDefault();
+        if (gliding) return e.preventDefault();
+        // Nowhere further to glide (past the last scene): only a brief hold, then the page scrolls.
+        if (to === null) {
+          if (now - glideEndedAt < EXIT_HOLD_MS) return e.preventDefault();
+        } else if (sinceLast < QUIET_MS && !growing) {
+          return e.preventDefault();
+        }
       }
       resting = false;
-      const to = target(direction);
       if (to === null) {
         // Free scrolling here: stop any glide so it doesn't fight the wheel.
         glideId++;

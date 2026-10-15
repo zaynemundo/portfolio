@@ -177,8 +177,10 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
       /* Set video target time — the lerp loop chases it */
       const video = videoRef.current;
       if (video && videoReady && isDesktop && !reducedMotion) {
-        const vp = Math.min(p / 0.82, 1);
-        videoTargetRef.current = vp * video.duration;
+        /* The video runs over the whole hero, so its last frame lands as the
+           page settles on the last scene, gliding down as smoothly as up.
+           Kept a hair before the very end, where seeking can stall. */
+        videoTargetRef.current = Math.min(p, 1) * Math.max(video.duration - 0.05, 0);
       }
 
       /* (stage stays fully visible — no exit fade) */
