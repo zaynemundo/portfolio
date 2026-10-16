@@ -63,7 +63,7 @@ export function RichContentEditor({ value, onChange }: { value: Obj; onChange: (
   );
 }
 
-/** The fields of one chapter, or of one item in a list. Also used on the Basics tab for the extra sidebar rows. */
+/** The fields of one chapter, or of one item in a list. */
 export function FieldsEditor({
   fields, value, onChange, path, stacked, areaRows,
 }: {

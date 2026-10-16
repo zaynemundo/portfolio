@@ -92,7 +92,6 @@ function metricIcon(value: string): LucideIcon {
   return CircleCheck;
 }
 
-
 export async function generateStaticParams() {
   return (await getPublishedProjectIndex()).map(({ slug }) => ({ slug }));
 }
@@ -305,8 +304,6 @@ export default async function CaseStudyPage({ params }: Props) {
               </div>
 
               <dl className="relative space-y-5">
-                {project.engineeringStack && <DetailRow label="Stack" value={project.engineeringStack} />}
-                {project.typography && <DetailRow label="Typography" value={project.typography} />}
                 <div>
                   <dt className="flex items-center gap-1.5 text-[12px] font-bold tracking-[0.14em] uppercase text-zinc-500 mb-2.5">
                     <Wrench size={13} aria-hidden="true" />
@@ -724,11 +721,3 @@ function EditorialHeadline({ children }: { children: React.ReactNode }) {
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-[12px] font-bold tracking-[0.14em] uppercase text-zinc-500 mb-1">{label}</dt>
-      <dd className="text-[14.5px] text-zinc-900 font-medium leading-snug">{value}</dd>
-    </div>
-  );
-}

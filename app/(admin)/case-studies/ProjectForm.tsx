@@ -4,8 +4,8 @@ import { useMemo, useRef, useState, useTransition } from "react";
 import { Upload } from "lucide-react";
 import { createProject, updateProject, uploadProjectLogo, type ProjectFormData } from "@/app/actions/projects";
 import { GalleryEditor, type GalleryImage } from "./GalleryEditor";
-import { RichContentEditor, FieldsEditor } from "./RichContentEditor";
-import { RICH_SECTIONS, STRUCTURED_KEYS, cleanRichContent } from "./rich-schema";
+import { RichContentEditor } from "./RichContentEditor";
+import { STRUCTURED_KEYS, cleanRichContent } from "./rich-schema";
 import { SaveBar, useSaveState, useUnsavedWarning } from "@/app/(admin)/_components/SaveBar";
 import { cardClass, tabBarClass, tabClass } from "@/app/(admin)/_components/ui/Card";
 import { Switch } from "@/app/(admin)/_components/ui/Switch";
@@ -150,7 +150,6 @@ export function ProjectForm({ mode, projectId, initial }: Props) {
 
   const borderlessInput = "w-full bg-transparent border-0 border-b border-transparent focus:border-border px-0 py-1.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-colors";
   const selectClass = `${fieldClass} flex items-center justify-between gap-2 text-left`;
-  const sidebarFields = RICH_SECTIONS.find((section) => section.id === "sidebar")?.fields ?? [];
 
   return (
     <form onSubmit={handleSubmit}>
@@ -246,7 +245,6 @@ export function ProjectForm({ mode, projectId, initial }: Props) {
                   <input id="liveUrl" value={liveUrl} onChange={(e) => setLiveUrl(e.target.value)} placeholder="https://" className={fieldClass} />
                 </Field>
               </div>
-              <FieldsEditor fields={sidebarFields} value={rich} onChange={setRich} path="sidebar" />
             </Section>
           </SectionStack>
         )}

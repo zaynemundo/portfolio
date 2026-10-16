@@ -63,6 +63,8 @@ export const RICH_SECTIONS: RichSectionDef[] = [
   },
   {
     id: "sidebar",
+    // The Technologies field covers this now.
+    retired: true,
     elsewhere: true,
     title: "Sidebar details",
     hint: "Extra rows in the My role bar under the top stats.",
