@@ -57,7 +57,7 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
         renderPreview={(scene) => <ScenePreview scene={scene} />}
         renderEditor={(scene, update) => (
           <>
-            <Field label="Heading">
+            <Field label="Heading" required>
               <input type="text" value={scene.heading} onChange={(e) => update({ heading: e.target.value })} className={fieldClass} autoFocus />
             </Field>
             <Field label="Description (optional)">
@@ -72,10 +72,10 @@ export function HeroScenesForm({ initial }: { initial: HeroSceneData[] }) {
               </Field>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Shows from (0–1)">
+              <Field label="Shows from (0–1)" required>
                 <input type="number" step="0.01" min="0" max="1" value={scene.start} onChange={(e) => update({ start: Number(e.target.value) })} className={fieldClass} />
               </Field>
-              <Field label="Until (0–1)">
+              <Field label="Until (0–1)" required>
                 <input type="number" step="0.01" min="0" max="1" value={scene.end} onChange={(e) => update({ end: Number(e.target.value) })} className={fieldClass} />
               </Field>
             </div>

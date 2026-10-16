@@ -12,6 +12,7 @@ import { routes } from "@/app/(admin)/_routes";
 import { Card, CardHeader, cardActionClass } from "@/app/(admin)/_components/ui/Card";
 import { DataTable } from "@/app/(admin)/_components/ui/DataTable";
 import { pageActionClass } from "@/app/(admin)/_components/PageHeader";
+import { RequiredMark } from "@/app/(admin)/_components/Section";
 
 /* Documents are filed under a client. Each one can also be put on one of
  * that client's jobs, so a job shows its own list while the client keeps
@@ -153,7 +154,7 @@ export function AddDocumentButton({
       <Modal open={open} onClose={() => setOpen(false)} title="Add document">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="documentFile" className={LABEL}>File</label>
+            <label htmlFor="documentFile" className={LABEL}>File<RequiredMark /></label>
             <input
               id="documentFile"
               type="file"
@@ -163,7 +164,7 @@ export function AddDocumentButton({
             <p className="text-[11.5px] text-muted-foreground mt-1.5">PDF, image or any file up to 15MB.</p>
           </div>
           <div>
-            <label htmlFor="documentName" className={LABEL}>Name</label>
+            <label htmlFor="documentName" className={LABEL}>Name<RequiredMark /></label>
             <input id="documentName" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Project brief" className={FIELD} />
           </div>
           {clients && (

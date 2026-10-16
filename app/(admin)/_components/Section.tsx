@@ -102,10 +102,20 @@ export function SectionStack({ children }: { children: React.ReactNode }) {
 }
 
 /** A labelled field. Pass the input itself as the child. */
-export function Field({ label, hint, htmlFor, className, children }: { label: string; hint?: React.ReactNode; htmlFor?: string; className?: string; children: React.ReactNode }) {
+/** The red asterisk on a required field's label. Screen readers hear "required" instead. */
+export function RequiredMark() {
+  return (
+    <>
+      <span aria-hidden="true" className="ml-0.5 text-negative">*</span>
+      <span className="sr-only"> (required)</span>
+    </>
+  );
+}
+
+export function Field({ label, hint, htmlFor, className, required, children }: { label: string; hint?: React.ReactNode; htmlFor?: string; className?: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div className={className}>
-      <label htmlFor={htmlFor} className={labelClass}>{label}</label>
+      <label htmlFor={htmlFor} className={labelClass}>{label}{required && <RequiredMark />}</label>
       {children}
       {hint && <p className={hintClass}>{hint}</p>}
     </div>

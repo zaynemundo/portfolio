@@ -6,7 +6,7 @@ import { uploadProjectImage } from "@/app/actions/projects";
 import { RICH_SECTIONS, sectionHasContent, type Field } from "./rich-schema";
 import { StatusPill } from "@/app/(admin)/_components/ui/StatusPill";
 import { cardClass } from "@/app/(admin)/_components/ui/Card";
-import { ItemCard, AddItemButton, fieldClass, areaClass, labelClass, pillButtonClass } from "@/app/(admin)/_components/Section";
+import { ItemCard, AddItemButton, fieldClass, areaClass, labelClass, pillButtonClass, RequiredMark } from "@/app/(admin)/_components/Section";
 import { useGridDrag } from "@/app/(admin)/_components/useGridDrag";
 import { cn } from "@/app/lib/utils";
 import { TileGridEditor } from "@/app/(admin)/_components/TileGridEditor";
@@ -87,7 +87,7 @@ export function FieldsEditor({
           <div key={field.key} className={half || stacked ? "" : "sm:col-span-2"}>
             {field.kind === "text" && (
               <>
-                <label htmlFor={id} className={labelClass}>{field.label}</label>
+                <label htmlFor={id} className={labelClass}>{field.label}{isRequired(field) && <RequiredMark />}</label>
                 <input
                   id={id}
                   type="text"
@@ -114,7 +114,7 @@ export function FieldsEditor({
 
             {field.kind === "number" && (
               <>
-                <label htmlFor={id} className={labelClass}>{field.label}</label>
+                <label htmlFor={id} className={labelClass}>{field.label}{isRequired(field) && <RequiredMark />}</label>
                 <input
                   id={id}
                   type="number"
@@ -128,7 +128,7 @@ export function FieldsEditor({
 
             {field.kind === "textarea" && (
               <>
-                <label htmlFor={id} className={labelClass}>{field.label}</label>
+                <label htmlFor={id} className={labelClass}>{field.label}{isRequired(field) && <RequiredMark />}</label>
                 <textarea
                   id={id}
                   value={typeof value[field.key] === "string" ? (value[field.key] as string) : ""}
@@ -142,7 +142,7 @@ export function FieldsEditor({
 
             {field.kind === "lines" && (
               <>
-                <label htmlFor={id} className={labelClass}>{field.label}</label>
+                <label htmlFor={id} className={labelClass}>{field.label}{isRequired(field) && <RequiredMark />}</label>
                 <textarea
                   id={id}
                   value={Array.isArray(value[field.key]) ? (value[field.key] as unknown[]).join("\n") : ""}
@@ -296,6 +296,11 @@ function ImageField({
 }
 
 
+/** Whether a field must be filled in for its item or section to count. */
+function isRequired(field: Field): boolean {
+  return Boolean((field as { required?: boolean }).required);
+}
+
 /** What to call an item in its header: its own title, name, label or value, whichever it has. */
 function itemSummary(item: Obj): string | undefined {
   for (const key of ["title", "name", "label", "heading", "area", "metric", "step", "value"]) {
@@ -320,7 +325,7 @@ function TileListEditor({
   const wide = Boolean(subList || imageKey);
   return (
     <div>
-      <span className={labelClass}>{field.label}</span>
+      <span className={labelClass}>{field.label}{field.required && <RequiredMark />}</span>
       <TileGridEditor<Obj>
         items={items.map(asObj)}
         onChange={onChange}
@@ -391,7 +396,7 @@ function CardListEditor({ field, items, onChange, path }: ListProps) {
 
   return (
     <div>
-      <span className={labelClass}>{field.label}</span>
+      <span className={labelClass}>{field.label}{field.required && <RequiredMark />}</span>
       <div className="space-y-2.5">
         <div ref={gridRef} className={field.grid === 4 ? "relative grid grid-cols-4 gap-2.5" : field.grid === 2 ? "relative grid grid-cols-2 gap-2.5" : "space-y-2.5"}>
           {field.grid && dropTarget}

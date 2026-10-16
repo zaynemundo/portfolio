@@ -2,6 +2,7 @@ import { Nav } from "../components/Nav";
 import { Footer } from "../components/Footer";
 import { getSiteSettings } from "@/app/lib/settings-db";
 import { PageViewTracker } from "@/app/components/PageViewTracker";
+import { ImageProtection } from "@/app/components/ImageProtection";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const { resumeUrl } = await getSiteSettings();
@@ -15,6 +16,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       </main>
       <Footer />
       <PageViewTracker />
+      <ImageProtection />
     </>
   );
 }

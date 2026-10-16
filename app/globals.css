@@ -386,3 +386,14 @@ body {
     text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
   }
 }
+
+/* ── Pictures on the public site: no dragging out, no long-press "Save" ────
+   (right-click is blocked by ImageProtection). The admin isn't affected. */
+#main img,
+#main video,
+#main canvas {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}

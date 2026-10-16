@@ -8,6 +8,7 @@ import { ClientSelect, type ClientOption } from "@/app/(admin)/_components/Clien
 import { Select } from "@/app/(admin)/_components/Select";
 import { routes } from "@/app/(admin)/_routes";
 import { cardClass } from "@/app/(admin)/_components/ui/Card";
+import { RequiredMark } from "@/app/(admin)/_components/Section";
 
 interface Option {
   id: string;
@@ -180,7 +181,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Issue date</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Issue date<RequiredMark /></label>
           <DateField required value={issueDate} onChange={setIssueDate} className={inputClass} />
         </div>
         <div>
@@ -194,7 +195,7 @@ export function InvoiceForm({ mode, invoiceId, initial, clients, onClientCreated
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Line items</label>
+        <label className="block text-xs font-medium text-muted-foreground mb-1.5">Line items<RequiredMark /></label>
         {/* Project and monthly: one price per line. Hourly: hours × rate, with the line's amount worked out. */}
         <div className={`${hourly ? HOURLY_GRID : LINE_GRID} mb-1.5 px-0.5 text-[11.5px] font-medium text-muted-foreground`} aria-hidden>
           <span>Description</span>

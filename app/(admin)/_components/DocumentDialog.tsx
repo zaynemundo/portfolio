@@ -7,6 +7,7 @@ import { documentKind } from "@/app/lib/document-kind";
 import { Modal } from "@/app/(admin)/_components/Modal";
 import { Select } from "@/app/(admin)/_components/Select";
 import { StatusPill } from "@/app/(admin)/_components/ui/StatusPill";
+import { RequiredMark } from "@/app/(admin)/_components/Section";
 
 /** The parts of a document needed to preview and share it. */
 export interface ViewableDocument {
@@ -243,7 +244,7 @@ export function DocumentDialog({
             {draftName !== null ? (
               <form onSubmit={saveEdit}>
                 <label htmlFor="documentRename" className={FIELD_LABEL}>
-                  Name
+                  Name<RequiredMark />
                 </label>
                 <input
                   id="documentRename"

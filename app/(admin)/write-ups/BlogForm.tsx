@@ -20,6 +20,7 @@ import {
   type PostFormData,
   type PostPreviewDraft,
 } from "@/app/lib/post-meta";
+import { RequiredMark } from "@/app/(admin)/_components/Section";
 
 interface Props {
   /** Omitted for an article that hasn't been saved yet. */
@@ -332,7 +333,7 @@ export function BlogForm({ postId: initialPostId, initial, categories }: Props) 
             </div>
 
             <div>
-              <label htmlFor="category" className={labelClass}>Category</label>
+              <label htmlFor="category" className={labelClass}>Category<RequiredMark /></label>
               <input
                 id="category"
                 list="article-categories"
@@ -347,7 +348,7 @@ export function BlogForm({ postId: initialPostId, initial, categories }: Props) 
             </div>
 
             <div>
-              <label htmlFor="excerpt" className={labelClass}>Excerpt</label>
+              <label htmlFor="excerpt" className={labelClass}>Excerpt<RequiredMark /></label>
               <textarea
                 id="excerpt"
                 rows={4}
@@ -360,7 +361,7 @@ export function BlogForm({ postId: initialPostId, initial, categories }: Props) 
             </div>
 
             <div>
-              {published ? <label htmlFor="date" className={labelClass}>Date</label> : <span className={labelClass}>Date</span>}
+              {published ? <label htmlFor="date" className={labelClass}>Date<RequiredMark /></label> : <span className={labelClass}>Date</span>}
               {published ? (
                 <DateField id="date" required value={date} onChange={setDate} className={inputClass} />
               ) : (

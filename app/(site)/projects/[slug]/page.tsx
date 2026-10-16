@@ -444,15 +444,15 @@ export default async function CaseStudyPage({ params }: Props) {
                                     </div>
                                     {ts.image && (
                                       <figure className="mt-6">
-                                        <a href={ts.image} target="_blank" rel="noopener noreferrer" className="group block overflow-hidden rounded-2xl border border-zinc-200" aria-label={`Open the ${ts.title} picture full size`}>
+                                        <div className="overflow-hidden rounded-2xl border border-zinc-200">
                                           {/* eslint-disable-next-line @next/next/no-img-element */}
                                           <img
                                             {...optimizedImage(ts.image, "(min-width: 1024px) 760px, 100vw")}
                                             loading="lazy"
                                             alt={`${project.name} — ${ts.title}`}
-                                            className="block w-full aspect-[1000/544] object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
+                                            className="block w-full aspect-[1000/544] object-cover object-top"
                                           />
-                                        </a>
+                                        </div>
                                         {ts.imageCaption && <figcaption className="text-[13px] text-zinc-500 mt-2.5">{ts.imageCaption}</figcaption>}
                                       </figure>
                                     )}

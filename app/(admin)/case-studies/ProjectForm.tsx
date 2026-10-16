@@ -10,7 +10,7 @@ import { SaveBar, useSaveState, useUnsavedWarning } from "@/app/(admin)/_compone
 import { cardClass, tabBarClass, tabClass } from "@/app/(admin)/_components/ui/Card";
 import { Switch } from "@/app/(admin)/_components/ui/Switch";
 import { Select } from "@/app/(admin)/_components/Select";
-import { Section, SectionStack, Field, fieldClass, areaClass, labelClass } from "@/app/(admin)/_components/Section";
+import { Section, SectionStack, Field, fieldClass, areaClass, labelClass, RequiredMark } from "@/app/(admin)/_components/Section";
 
 interface Props {
   mode: "new" | "edit";
@@ -155,7 +155,7 @@ export function ProjectForm({ mode, projectId, initial }: Props) {
   return (
     <form onSubmit={handleSubmit}>
       <div className={`${cardClass} p-5 mb-5`}>
-        <label htmlFor="name" className={labelClass}>Name</label>
+        <label htmlFor="name" className={labelClass}>Name<RequiredMark /></label>
         <input
           id="name"
           required
@@ -190,10 +190,10 @@ export function ProjectForm({ mode, projectId, initial }: Props) {
         {tab === "basics" && (
           <SectionStack>
             <Section title="Summary">
-              <Field label="Tagline" htmlFor="tagline">
+              <Field label="Tagline" htmlFor="tagline" required>
                 <textarea id="tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} rows={2} className={areaClass} />
               </Field>
-              <Field label="Short description" htmlFor="shortDescription">
+              <Field label="Short description" htmlFor="shortDescription" required>
                 <textarea id="shortDescription" value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} rows={3} className={areaClass} />
               </Field>
             </Section>
@@ -221,10 +221,10 @@ export function ProjectForm({ mode, projectId, initial }: Props) {
 
             <Section title="Details">
               <div className="grid sm:grid-cols-3 gap-4">
-                <Field label="Category" htmlFor="category">
+                <Field label="Category" htmlFor="category" required>
                   <input id="category" value={category} onChange={(e) => setCategory(e.target.value)} className={fieldClass} />
                 </Field>
-                <Field label="Year" htmlFor="year">
+                <Field label="Year" htmlFor="year" required>
                   <input id="year" value={year} onChange={(e) => setYear(e.target.value)} placeholder="2024–2025" className={fieldClass} />
                 </Field>
                 <div>
@@ -233,7 +233,7 @@ export function ProjectForm({ mode, projectId, initial }: Props) {
                 </div>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
-                <Field label="Role" htmlFor="role">
+                <Field label="Role" htmlFor="role" required>
                   <input id="role" value={role} onChange={(e) => setRole(e.target.value)} className={fieldClass} />
                 </Field>
                 <Field label="Client (optional)" htmlFor="client">

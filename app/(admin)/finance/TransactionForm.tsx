@@ -9,6 +9,7 @@ import { Select } from "@/app/(admin)/_components/Select";
 import { UploadCard } from "@/app/(admin)/_components/UploadCard";
 import { routes } from "@/app/(admin)/_routes";
 import { cardClass } from "@/app/(admin)/_components/ui/Card";
+import { RequiredMark } from "@/app/(admin)/_components/Section";
 
 interface Option {
   id: string;
@@ -78,14 +79,14 @@ export function TransactionForm({ mode, transactionId, initial, clients, onClien
           />
         </div>
         <div>
-          <label htmlFor="date" className="block text-xs font-medium text-muted-foreground mb-1.5">Date</label>
+          <label htmlFor="date" className="block text-xs font-medium text-muted-foreground mb-1.5">Date<RequiredMark /></label>
           <DateField id="date" required value={date} onChange={setDate} className={inputClass} />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="amount" className="block text-xs font-medium text-muted-foreground mb-1.5">Amount</label>
+          <label htmlFor="amount" className="block text-xs font-medium text-muted-foreground mb-1.5">Amount<RequiredMark /></label>
           <input id="amount" type="number" min="0" step="0.01" required value={amount} onChange={(e) => setAmount(e.target.value)} className={inputClass} />
         </div>
         <div>

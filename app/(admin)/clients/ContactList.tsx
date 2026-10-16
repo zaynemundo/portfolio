@@ -7,6 +7,7 @@ import { addContact, updateContact, deleteContact } from "@/app/actions/contacts
 import { Modal } from "@/app/(admin)/_components/Modal";
 import { DialogActions } from "@/app/(admin)/_components/DialogActions";
 import { Card, CardHeader, cardActionClass } from "@/app/(admin)/_components/ui/Card";
+import { RequiredMark } from "@/app/(admin)/_components/Section";
 
 interface Contact {
   id: string;
@@ -112,7 +113,7 @@ export function ContactList({ clientId, contacts }: { clientId: string; contacts
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="contactName" className={labelClass}>Name</label>
+              <label htmlFor="contactName" className={labelClass}>Name<RequiredMark /></label>
               <input id="contactName" required autoFocus value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className={fieldClass} />
             </div>
             <div>

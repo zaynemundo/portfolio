@@ -11,6 +11,7 @@ import { RowMenu, RowMenuItem } from "@/app/(admin)/_components/ui/RowMenu";
 import { StatusPill } from "@/app/(admin)/_components/ui/StatusPill";
 import { cardClass } from "@/app/(admin)/_components/ui/Card";
 import { routes } from "@/app/(admin)/_routes";
+import { RequiredMark } from "@/app/(admin)/_components/Section";
 
 export interface Lead {
   id: string;
@@ -83,7 +84,7 @@ export function AddLeadButton() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="leadName" className={labelClass}>Name</label>
+              <label htmlFor="leadName" className={labelClass}>Name<RequiredMark /></label>
               <input id="leadName" required autoFocus value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className={fieldClass} />
             </div>
             <div>

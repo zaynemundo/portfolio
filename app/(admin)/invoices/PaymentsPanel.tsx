@@ -5,6 +5,7 @@ import { DateField } from "@/app/(admin)/_components/ui/DateField";
 import { deleteInvoicePayment, recordInvoicePayment } from "@/app/actions/invoices";
 import { Modal } from "@/app/(admin)/_components/Modal";
 import { DialogActions } from "@/app/(admin)/_components/DialogActions";
+import { RequiredMark } from "@/app/(admin)/_components/Section";
 
 interface Payment {
   id: string;
@@ -134,7 +135,7 @@ export function PaymentsPanel({ invoiceId, currency, total, paid, balance, payme
             For a deposit or part-payment. {money(balance, currency)} is still owed on this invoice.
           </p>
           <div>
-            <label htmlFor="paymentAmount" className="block text-[12px] font-medium text-foreground/80 mb-1.5">Amount ({currency})</label>
+            <label htmlFor="paymentAmount" className="block text-[12px] font-medium text-foreground/80 mb-1.5">Amount ({currency})<RequiredMark /></label>
             <input
               id="paymentAmount"
               type="number"
@@ -149,7 +150,7 @@ export function PaymentsPanel({ invoiceId, currency, total, paid, balance, payme
             />
           </div>
           <div>
-            <label htmlFor="paymentDate" className="block text-[12px] font-medium text-foreground/80 mb-1.5">Received on</label>
+            <label htmlFor="paymentDate" className="block text-[12px] font-medium text-foreground/80 mb-1.5">Received on<RequiredMark /></label>
             <DateField id="paymentDate" value={date} onChange={setDate} />
           </div>
           {error && <p className="text-[12.5px] text-destructive" role="alert">{error}</p>}

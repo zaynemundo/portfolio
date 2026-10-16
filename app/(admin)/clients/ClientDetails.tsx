@@ -7,6 +7,7 @@ import { updateClient, deleteClient } from "@/app/actions/clients";
 import { Modal } from "@/app/(admin)/_components/Modal";
 import { DialogActions } from "@/app/(admin)/_components/DialogActions";
 import { routes } from "@/app/(admin)/_routes";
+import { RequiredMark } from "@/app/(admin)/_components/Section";
 
 interface Props {
   clientId: string;
@@ -89,7 +90,7 @@ export function ClientDetails({ clientId, name, type, company }: Props) {
       <Modal open={open} onClose={() => setOpen(false)} title="Edit client">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="clientName" className={labelClass}>Name</label>
+            <label htmlFor="clientName" className={labelClass}>Name<RequiredMark /></label>
             <input id="clientName" required autoFocus value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className={fieldClass} />
           </div>
           <div>
