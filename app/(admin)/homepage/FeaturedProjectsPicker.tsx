@@ -133,7 +133,6 @@ function FeaturedPreview({ project, index }: { project: FeaturedPickerProject; i
       </span>
       <span className="block px-1 pt-2.5">
         <span className="block text-[13.5px] font-semibold text-foreground">{project.name}</span>
-        <span className="mt-0.5 line-clamp-2 block text-[12px] leading-snug text-muted-foreground">{project.shortDescription || "No description yet."}</span>
       </span>
     </>
   );
