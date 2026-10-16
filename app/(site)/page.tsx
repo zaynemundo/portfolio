@@ -46,7 +46,7 @@ export default async function Home() {
      in the dashboard — falls back to the original 3 while DB is empty. */
   const featuredSlugs = dbProjects.length > 0
     ? new Set(await getFeaturedProjectSlugs())
-    : new Set(["monili-jewellers", "scandinavian-physio", "pno-marinas"]);
+    : new Set(["monili-jewellers", "scandinavian-physiotherapy-center", "pno-marinas"]);
   const featuredProjects: ProjectCard[] = allProjects.filter((p) => featuredSlugs.has(p.slug));
 
   const settings = await getSiteSettings();

@@ -74,7 +74,7 @@ export const staticProjects: ProjectCard[] = [
     logo: { initials: "VPA", bg: "#ddd8d0" },
   },
   {
-    slug: "scandinavian-physio",
+    slug: "scandinavian-physiotherapy-center",
     name: "Scandinavian Physiotherapy Center",
     tagline:
       "11.1s to 0.6s. A healthcare website rebuilt from the infrastructure up.",

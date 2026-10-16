@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
     ],
   },
+  // Case studies whose address was renamed: the old address keeps working.
+  async redirects() {
+    return [
+      { source: "/work/scandinavian-physio", destination: "/work/scandinavian-physiotherapy-center", permanent: true },
+      { source: "/projects/scandinavian-physio", destination: "/work/scandinavian-physiotherapy-center", permanent: true },
+    ];
+  },
   async rewrites() {
     return [
       {
