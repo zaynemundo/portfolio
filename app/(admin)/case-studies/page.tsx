@@ -43,7 +43,7 @@ export default async function CaseStudiesPage() {
           columns={[{ label: "Name" }, { label: "Category" }, { label: "Year" }, { label: "Published" }, { className: "w-12" }]}
           rows={projects.map((project) => ({
             id: project.id,
-            href: routes.caseStudies.item(project.slug),
+            href: routes.caseStudies.item(project.id),
             search: `${project.name} ${project.category} ${project.year}`,
             sort: [project.name, project.category, project.year, project.published ? "Published" : "Draft", undefined],
             filters: { status: project.published ? "published" : "draft" },
@@ -51,7 +51,7 @@ export default async function CaseStudiesPage() {
               <>
               <td className="px-4 py-3">
                 <Link
-                  href={routes.caseStudies.item(project.slug)}
+                  href={routes.caseStudies.item(project.id)}
                   className="text-[13.5px] font-medium text-foreground hover:text-primary transition-colors"
                 >
                   {project.name}
@@ -65,7 +65,7 @@ export default async function CaseStudiesPage() {
               </td>
               <td className="px-4 py-3 text-right">
                 <RowMenu>
-                  <RowMenuItem href={routes.caseStudies.item(project.slug)} icon={<Pencil size={14} />}>
+                  <RowMenuItem href={routes.caseStudies.item(project.id)} icon={<Pencil size={14} />}>
                     Edit
                   </RowMenuItem>
                   <DeleteProjectButton id={project.id} name={project.name} menu />

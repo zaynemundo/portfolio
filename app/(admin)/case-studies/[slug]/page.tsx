@@ -16,7 +16,8 @@ export default async function EditCaseStudyPage({ params }: Props) {
   const { slug } = await params;
   const project = await prisma.project.findUnique({ where: { slug } });
   if (!project) {
-    // Links saved before the address used the case study's name pointed at its id.
+    // Lists link by id (it never changes), so a cached list still opens the right
+    // case study after its address is renamed: forward to the current address.
     const byId = await prisma.project.findUnique({ where: { id: slug }, select: { slug: true } });
     if (byId) redirect(routes.caseStudies.item(byId.slug));
     notFound();

@@ -61,7 +61,7 @@ export default async function WebsiteOverviewPage({ searchParams }: { searchPara
                 <PanelRow key={post.id} href={routes.blog.item(post.id)} tag="Article" tagTone="brand" primary={post.title} right="Continue" />
               ))}
               {draftCaseStudies.map((cs) => (
-                <PanelRow key={cs.id} href={routes.caseStudies.item(cs.slug)} tag="Case study" tagTone="neutral" primary={cs.name} right="Continue" />
+                <PanelRow key={cs.id} href={routes.caseStudies.item(cs.id)} tag="Case study" tagTone="neutral" primary={cs.name} right="Continue" />
               ))}
             </div>
           </Panel>
