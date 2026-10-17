@@ -3,15 +3,29 @@
 import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 
-/** A round button fixed to the bottom right that appears once the reader has scrolled a screen down. */
+/**
+ * A round button fixed to the bottom right that appears once the reader has
+ * scrolled a screen down. It steps aside when the footer comes into view, as
+ * the footer has its own "Back to Top".
+ */
 export function BackToTop() {
-  const [shown, setShown] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [atFooter, setAtFooter] = useState(false);
+  const shown = scrolled && !atFooter;
 
   useEffect(() => {
-    const onScroll = () => setShown(window.scrollY > window.innerHeight);
+    const onScroll = () => setScrolled(window.scrollY > window.innerHeight);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+
+    const footer = document.querySelector(`footer[aria-label="Site footer"]`);
+    const observer = footer ? new IntersectionObserver(([entry]) => setAtFooter(entry.isIntersecting)) : null;
+    if (footer) observer?.observe(footer);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      observer?.disconnect();
+    };
   }, []);
 
   return (
