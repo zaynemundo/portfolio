@@ -62,7 +62,7 @@ export function ArticleView({ post, siblings, prevPost, nextPost }: Props) {
 
           <Reveal>
             <article
-              className="prose prose-zinc max-w-none [&_p]:leading-[1.8] [&_p]:mb-6 [&_h2]:mt-12 [&_h2]:mb-4 [&_h3]:mt-8 [&_h3]:mb-3 [&_li]:leading-[1.75]"
+              className="prose prose-zinc max-w-none [&_p]:leading-[1.8] [&_p]:mb-6 [&_h2]:mt-12 [&_h2]:mb-4 [&_h3]:mt-8 [&_h3]:mb-3 [&_li]:leading-[1.75] [&_img]:block [&_img]:mb-8"
               dangerouslySetInnerHTML={{ __html: post.contentHtml }}
             />
           </Reveal>
