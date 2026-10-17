@@ -75,6 +75,8 @@ const STAT_COLUMNS: Record<number, string> = {
 function statIcon(label: string, value: string): LucideIcon {
   const text = label.toLowerCase();
   if (/inquir|enquir|lead|message/.test(text)) return MessagesSquare;
+  if (/growth|increase/.test(text)) return TrendingUp;
+  if (/built from|logo|identity/.test(text)) return PenTool;
   if (/user|visitor|follower|audience|customer/.test(text)) return Users;
   if (/page|screen|interface|storefront/.test(text)) return LayoutPanelTop;
   if (/map/.test(text)) return MapIcon;
@@ -86,6 +88,22 @@ function statIcon(label: string, value: string): LucideIcon {
 }
 
 /** A figure that went up, a plain count, or a word such as "Live". */
+/** A results group's icon, from what it is about. */
+function groupIcon(label: string): LucideIcon {
+  if (/traffic|growth|visit|search/i.test(label)) return TrendingUp;
+  if (/customer|user|people|experience/i.test(label)) return Users;
+  if (/scale|scope|platform|product/i.test(label)) return Boxes;
+  if (/speed|performance/i.test(label)) return Gauge;
+  if (/business|outcome|revenue|sales/i.test(label)) return BarChart3;
+  return Megaphone;
+}
+
+/** "Repair inquiries: up from 3–4…" → the short title, then the detail. */
+function splitMetricLabel(label: string): [string, string] {
+  const match = label.match(/^(.+?)(?:: | — )(.+)$/);
+  return match ? [match[1], match[2]] : [label, ""];
+}
+
 function metricIcon(value: string): LucideIcon {
   if (/^[+↑]|%/.test(value)) return TrendingUp;
   if (/\d/.test(value)) return BarChart3;
@@ -523,25 +541,27 @@ export default async function CaseStudyPage({ params }: Props) {
                       )}
                       {project.resultGroups && project.resultGroups.length > 0 && (
                         <div className="space-y-10">
-                          {project.resultGroups.map((g) => (
+                          {project.resultGroups.map((g) => {
+                            const GroupIcon = groupIcon(g.label);
+                            return (
                             <div key={g.label}>
                               {outcomes.length > 0 ? (
                                 // A side story next to the before → after: one card, its figures in a row.
                                 <div className="rounded-3xl bg-zinc-100/80 px-6 py-7 md:px-9 md:py-8">
                                   <p className="flex items-center gap-2.5 text-[16px] font-semibold text-zinc-950 mb-6">
-                                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#8B5CF6]/15 text-[#7c3aed]"><Megaphone size={15} aria-hidden="true" /></span>
+                                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#8B5CF6]/15 text-[#7c3aed]"><GroupIcon size={15} aria-hidden="true" /></span>
                                     {g.label}
                                   </p>
                                   <div className={`grid gap-6 sm:grid-cols-2 ${RESULT_COLUMNS[Math.min(g.metrics.length, 5)]}`}>
                                     {g.metrics.map((m) => {
-                                      const [lead, ...rest] = m.label.split(" — ");
+                                      const [lead, detail] = splitMetricLabel(m.label);
                                       return (
                                         <div key={m.label} className="rounded-2xl bg-white p-5 shadow-[0_1px_2px_rgba(24,24,27,0.06)]">
                                           <p className="font-bold text-zinc-950 leading-none tracking-tight whitespace-nowrap" style={{ fontSize: "clamp(1.6rem, 2.4vw, 2.125rem)" }}>
                                             <AnimatedMetric value={m.value} />
                                           </p>
                                           <p className="mt-3 text-[14.5px] font-semibold text-zinc-900">{lead}</p>
-                                          {rest.length > 0 && <p className="mt-0.5 text-[13.5px] text-zinc-500 leading-relaxed first-letter:uppercase">{rest.join(" — ")}</p>}
+                                          {detail && <p className="mt-1 text-[13.5px] text-zinc-500 leading-relaxed first-letter:uppercase">{detail}</p>}
                                         </div>
                                       );
                                     })}
@@ -551,7 +571,7 @@ export default async function CaseStudyPage({ params }: Props) {
                               /* One row of equal tiles: as many columns as there are figures, up to four. */
                               <div className={`grid gap-3 sm:grid-cols-2 ${RESULT_COLUMNS[Math.min(g.metrics.length, 5)]}`}>
                                 {g.metrics.map((m, mi) => {
-                                  const [lead, ...rest] = m.label.split(" — ");
+                                  const [lead, detail] = splitMetricLabel(m.label);
                                   const TileIcon = metricIcon(m.value);
                                   return (
                                     <div key={m.label} className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-6">
@@ -562,8 +582,8 @@ export default async function CaseStudyPage({ params }: Props) {
                                           <AnimatedMetric value={m.value} />
                                         </p>
                                         <p className="text-[15.5px] font-semibold text-zinc-900 leading-snug">{lead}</p>
-                                        {rest.length > 0 && (
-                                          <p className="text-[14.5px] text-zinc-600 leading-relaxed mt-1 first-letter:uppercase">{rest.join(" — ")}</p>
+                                        {detail && (
+                                          <p className="text-[14.5px] text-zinc-600 leading-relaxed mt-1 first-letter:uppercase">{detail}</p>
                                         )}
                                       </Reveal>
                                     </div>
@@ -572,7 +592,8 @@ export default async function CaseStudyPage({ params }: Props) {
                               </div>
                               )}
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                       {project.resultsNote && outcomes.length === 0 && (
