@@ -85,13 +85,23 @@ export function SectionSnap() {
       return out.sort((a, b) => a - b);
     }
 
-    /** Each About chapter, centred on screen. Only on desktop, where the portrait stays beside them. */
+    /**
+     * Each About chapter, its text centred on the portrait beside it. Only on
+     * desktop, where the portrait stays put. Measured from the text itself, not
+     * the chapter's box, which has extra room (most of all the last one).
+     */
     function aboutStops(): number[] {
       if (!window.matchMedia("(min-width: 1024px)").matches) return [];
+      const portrait = document.querySelector<HTMLElement>("#about .about-story__visual");
+      if (!portrait) return [];
+      const portraitCentre = parseFloat(getComputedStyle(portrait).top) + portrait.offsetHeight / 2;
       const chapters = document.querySelectorAll<HTMLElement>("#about [data-chapter-index]");
       return [...chapters].map((el) => {
-        const box = el.getBoundingClientRect();
-        return Math.round(box.top + window.scrollY + box.height / 2 - window.innerHeight / 2);
+        const parts = [...el.children].map((child) => child.getBoundingClientRect()).filter((r) => r.height > 0);
+        if (!parts.length) return Math.round(el.getBoundingClientRect().top + window.scrollY);
+        const top = Math.min(...parts.map((r) => r.top));
+        const bottom = Math.max(...parts.map((r) => r.bottom));
+        return Math.round((top + bottom) / 2 + window.scrollY - portraitCentre);
       });
     }
 
