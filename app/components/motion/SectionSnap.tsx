@@ -24,11 +24,6 @@ const QUIET_MS = 260;
 const EXIT_HOLD_MS = 350;
 /** After a glide lands, how long before a mere rise in scroll strength counts as a new swipe. */
 const SETTLE_MS = 300;
-/**
- * The About story pages one chapter at a time once its first chapter is this
- * close (a share of the screen height): the glide takes over just as you reach it.
- */
-const ABOUT_ENTRY = 0.6;
 
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -43,8 +38,9 @@ function easeInOutCubic(t: number) {
  * scrolling, never snapped to.
  *
  * The About story (desktop, where its portrait stays put) pages the same way:
- * once you reach its first chapter, each scroll glides to the next chapter,
- * and after the last one the page scrolls normally again.
+ * only between its first and last chapters, each scroll glides to the next
+ * chapter. Reaching the first chapter, and leaving after the last, is your own
+ * scrolling, never snapped to.
  *
  * Touch screens scroll normally; off for reduced motion.
  */
@@ -105,19 +101,18 @@ export function SectionSnap() {
       });
     }
 
-    /** The About chapter one step away, or null outside the story (before its first chapter, after its last). */
+    /** The About chapter one step away, or null outside the story (before its first chapter, past its last). */
     function aboutTarget(direction: 1 | -1): number | null {
       const all = aboutStops();
       if (!all.length) return null;
       const y = window.scrollY;
       const first = all[0];
       const last = all[all.length - 1];
-      const reach = window.innerHeight * ABOUT_ENTRY;
       if (direction > 0) {
-        if (y < first - reach || y >= last - 2) return null;
+        if (y < first - 2 || y >= last - 2) return null;
         return all.find((s) => s > y + 2) ?? null;
       }
-      if (y <= first + 2 || y > last + reach) return null;
+      if (y <= first + 2 || y > last + 2) return null;
       return [...all].reverse().find((s) => s < y - 2) ?? null;
     }
 
