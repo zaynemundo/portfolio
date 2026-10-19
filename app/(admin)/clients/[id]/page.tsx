@@ -4,6 +4,7 @@ import { prisma } from "@/app/lib/prisma";
 import { invoiceTotals } from "@/app/lib/invoice-math";
 import { ClientDetails } from "../ClientDetails";
 import { ContactList } from "../ContactList";
+import { AccessList } from "@/app/(admin)/_components/AccessList";
 import { ClientDocuments } from "@/app/(admin)/_components/DocumentList";
 import { Panel, StatStrip } from "@/app/(admin)/_components/OverviewParts";
 import { StatusBadge } from "../../freelance/StatusBadge";
@@ -34,6 +35,7 @@ export default async function ClientDetailPage({ params }: Props) {
       projects: { orderBy: { updatedAt: "desc" } },
       transactions: { orderBy: { date: "desc" } },
       contacts: { orderBy: { sortOrder: "asc" } },
+      access: { orderBy: [{ projectId: "asc" }, { sortOrder: "asc" }] },
       documents: { orderBy: { createdAt: "desc" } },
       invoices: { where: { kind: "INVOICE", status: { in: ["SENT", "OVERDUE"] } }, include: { payments: true } },
     },
@@ -184,6 +186,19 @@ export default async function ClientDetailPage({ params }: Props) {
               role: c.role ?? "",
               email: c.email ?? "",
               phone: c.phone ?? "",
+            }))}
+          />
+          <AccessList
+            clientId={client.id}
+            jobs={client.projects.map((p) => ({ id: p.id, name: p.name }))}
+            items={client.access.map((a) => ({
+              id: a.id,
+              label: a.label,
+              url: a.url ?? "",
+              username: a.username ?? "",
+              hasPassword: a.passwordEncrypted !== null,
+              notes: a.notes ?? "",
+              projectId: a.projectId,
             }))}
           />
         </div>

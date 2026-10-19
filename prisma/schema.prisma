@@ -217,6 +217,31 @@ model Client {
   transactions Transaction[]
   invoices     Invoice[]
   documents    Document[]
+  access       AccessDetail[]
+}
+
+/// A login a client has handed over: a WordPress admin, hosting, a tool.
+/// Filed under a client, and optionally one of their jobs (like Documents);
+/// one with no job applies to all of the client's jobs. The password is
+/// stored encrypted (see app/lib/vault.ts), never as readable text.
+model AccessDetail {
+  id        String            @id @default(cuid())
+  clientId  String?
+  client    Client?           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projectId String?
+  project   FreelanceProject? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  /// What it's for, e.g. "WordPress admin" or "Hosting".
+  label     String
+  /// Where to log in.
+  url       String?
+  /// Username or email.
+  username  String?
+  /// The password, encrypted. Null = none saved.
+  passwordEncrypted String?
+  notes     String?
+  sortOrder Int               @default(0)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 }
 
 /// A person at a Client — a Client (company or individual) can have several
@@ -293,6 +318,7 @@ model FreelanceProject {
   transactions  Transaction[]
   invoices      Invoice[]
   documents     Document[]
+  access        AccessDetail[]
 }
 
 model FreelanceTask {

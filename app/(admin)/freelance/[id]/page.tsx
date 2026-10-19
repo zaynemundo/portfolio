@@ -5,6 +5,7 @@ import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { invoiceTotals } from "@/app/lib/invoice-math";
 import { ProjectForm } from "../ProjectForm";
 import { TaskList } from "../TaskList";
+import { AccessList, type AccessItem } from "@/app/(admin)/_components/AccessList";
 import { InvoiceList } from "../InvoiceList";
 import { JobClientPanel, JobMoneyStrip, JobTransactions, type JobMoney } from "../JobPanels";
 import { JobDocuments } from "@/app/(admin)/_components/DocumentList";
@@ -31,10 +32,13 @@ const getProjectDetail = unstable_cache(
           tasks: { orderBy: { sortOrder: "asc" } },
           invoices: { orderBy: { issueDate: "asc" }, include: { payments: true } },
           documents: { orderBy: { createdAt: "desc" } },
+          access: { orderBy: { sortOrder: "asc" } },
           transactions: { orderBy: { date: "desc" } },
           clientRecord: {
             include: {
               contacts: { orderBy: { sortOrder: "asc" } },
+              // The client's logins for all of their jobs show on every job.
+              access: { where: { projectId: null }, orderBy: { sortOrder: "asc" } },
               // The client's full set, so documents can be picked onto this job.
               documents: { orderBy: { name: "asc" }, include: { project: { select: { name: true } } } },
             },
@@ -152,6 +156,19 @@ export default async function FreelanceProjectDetailPage({ params, searchParams 
                       }
                     : null
                 }
+              />
+              <AccessList
+                clientId={project.clientId}
+                projectId={project.id}
+                items={[...project.access, ...(project.clientRecord?.access ?? [])].map((a): AccessItem => ({
+                  id: a.id,
+                  label: a.label,
+                  url: a.url ?? "",
+                  username: a.username ?? "",
+                  hasPassword: a.passwordEncrypted !== null,
+                  notes: a.notes ?? "",
+                  projectId: a.projectId,
+                }))}
               />
               <JobDocuments
                 projectId={project.id}
