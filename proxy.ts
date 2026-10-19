@@ -60,6 +60,7 @@ export const config = {
     "/clients/:path*",
     "/contacts/:path*",
     "/documents/:path*",
+    "/access/:path*",
     "/finance/:path*",
     "/invoices/:path*",
   ],

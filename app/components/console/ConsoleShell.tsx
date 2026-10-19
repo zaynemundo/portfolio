@@ -13,6 +13,7 @@ import {
   Settings,
   FolderKanban,
   FileText,
+  KeyRound,
   Users,
   Wallet,
   Search,
@@ -81,6 +82,7 @@ function buildWorkspaces(unreadInquiries: number): Workspace[] {
         { href: routes.projects.list, label: "Jobs", icon: <FolderKanban {...ICON_PROPS} /> },
         { href: routes.clients.list, label: "Clients", icon: <Users {...ICON_PROPS} /> },
         { href: routes.documents.list, label: "Documents", icon: <FileText {...ICON_PROPS} /> },
+        { href: routes.access.list, label: "Access", icon: <KeyRound {...ICON_PROPS} /> },
         // Invoices, income and expenses share one page (tabs), so invoice
         // routes count as part of Finance.
         { href: routes.finance.list, label: "Finance", icon: <Wallet {...ICON_PROPS} />, also: [routes.invoices.list] },

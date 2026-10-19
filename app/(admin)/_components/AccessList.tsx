@@ -82,9 +82,11 @@ function CopyButton({ label, getText }: { label: string; getText: () => Promise<
  * page, `projectId` is fixed and the client's all-jobs logins show too.
  */
 export function AccessList({
-  clientId, projectId, jobs = [], items,
+  clientId, projectId, jobs = [], items, title = "Access",
 }: {
   clientId: string | null;
+  /** The card's title; the Access page uses the client's name. */
+  title?: React.ReactNode;
   /** Fixed job, on a job's page. */
   projectId?: string;
   /** Jobs to choose from, on a client's page. */
@@ -156,7 +158,7 @@ export function AccessList({
   return (
     <Card>
       <CardHeader
-        title="Access"
+        title={title}
         count={items.length}
         action={
           <button type="button" onClick={() => open("new")} className={`${cardActionClass} inline-flex items-center gap-1.5`}>

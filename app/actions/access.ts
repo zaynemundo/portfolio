@@ -27,6 +27,7 @@ export interface AccessResult {
 function invalidate() {
   revalidatePath("/clients/[id]", "page");
   revalidatePath("/freelance/[id]", "page");
+  revalidatePath("/access");
   updateTag(CACHE_TAGS.clients);
   updateTag(CACHE_TAGS.freelance);
 }

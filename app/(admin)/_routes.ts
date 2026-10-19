@@ -61,6 +61,9 @@ export const routes = {
   documents: {
     list: "/documents",
   },
+  access: {
+    list: "/access",
+  },
   finance: {
     list: "/finance",
     new: "/finance/new",
@@ -90,6 +93,7 @@ export const PROTECTED_TOP_LEVEL_PATHS = [
   routes.clients.list,
   routes.contacts.list,
   routes.documents.list,
+  routes.access.list,
   routes.finance.list,
   routes.invoices.list,
 ] as const;
