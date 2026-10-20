@@ -16,7 +16,8 @@ import { SITE_URL } from "@/app/lib/site-url";
 export async function generateMetadata(): Promise<Metadata> {
   const { name, jobTitle } = await getSiteSettings();
   return {
-    title: `${name} | ${jobTitle}`,
+    // Absolute: the layout's "%s | Zaira Mundo" template would add the name a second time.
+    title: { absolute: `${name} | ${jobTitle}` },
     alternates: { canonical: "/" },
     description:
       "Creative Designer and Front-End Developer building accessible, responsive, and high-performing websites — from interface design through to production code — across React, Next.js, WordPress, and modern web technologies.",

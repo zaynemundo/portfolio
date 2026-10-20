@@ -348,72 +348,76 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
         {/* ── Text scenes ────────────────────────────────────────────────── */}
         {/* The scenes are absolutely placed, which ignores padding, so each one carries the side padding itself. */}
         <div className="relative z-10 max-w-(--site-max) mx-auto w-full h-full">
-          {scenes.map((scene, i) => (
-            <div
-              key={i}
-              data-scene=""
-              // Only the first scene is showing before the page's script runs.
-              inert={i !== 0}
-              data-start={scene.start}
-              data-end={scene.end}
-              className="absolute inset-0 flex items-center px-6 md:px-10"
-              style={{
-                opacity: i === 0 ? 1 : 0,
-                willChange: reducedMotion ? "auto" : "opacity, transform",
-                pointerEvents: "none",
-                /* Base scene sits behind overlay scenes */
-                zIndex: i === 0 ? 0 : 1,
-              }}
-            >
-              <div className="max-w-2xl" style={{ pointerEvents: "auto" }}>
-                {scene.eyebrow && (
-                  <p
-                    className="hero-shadow-sm text-[12px] md:text-[13px] font-semibold tracking-[0.2em] uppercase text-white mb-5"
-                  >
-                    {scene.eyebrow}
-                  </p>
-                )}
-                <h2
-                  className="hero-shadow-lg font-extrabold text-white leading-[0.92] mb-6"
-                  style={{
-                    fontSize: "clamp(2.75rem, 9vw, 5rem)",
-                    letterSpacing: "-0.04em",
-                  }}
-                >
-                  {scene.heading}
-                </h2>
-                {scene.description && (
-                  <p
-                    className="hero-shadow-md text-white leading-relaxed max-w-lg mb-8"
-                    style={{ fontSize: "clamp(1rem, 0.9rem + 0.35vw, 1.1875rem)" }}
-                  >
-                    {scene.description}
-                  </p>
-                )}
-                {scene.ctaLabel && scene.ctaHref && (
-                  <div className="flex flex-wrap items-center gap-3">
-                    <a
-                      href={scene.ctaHref}
-                      onClick={(e) => {
-                        /* Same-page anchor — scroll without stamping #hash into the URL */
-                        if (scene.ctaHref?.startsWith("#")) {
-                          const el = document.getElementById(scene.ctaHref.slice(1));
-                          if (el) {
-                            e.preventDefault();
-                            el.scrollIntoView({ behavior: "smooth" });
-                          }
-                        }
-                      }}
-                      className="inline-flex items-center px-6 py-3 rounded-full bg-white text-zinc-900 text-[14.5px] font-semibold hover:bg-[#8B5CF6] hover:text-white transition-colors duration-200"
-                      style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.25)" }}
+          {scenes.map((scene, i) => {
+            const Heading = i === 0 ? "h1" : "h2";
+            return (
+              <div
+                key={i}
+                data-scene=""
+                // Only the first scene is showing before the page's script runs.
+                inert={i !== 0}
+                data-start={scene.start}
+                data-end={scene.end}
+                className="absolute inset-0 flex items-center px-6 md:px-10"
+                style={{
+                  opacity: i === 0 ? 1 : 0,
+                  willChange: reducedMotion ? "auto" : "opacity, transform",
+                  pointerEvents: "none",
+                  /* Base scene sits behind overlay scenes */
+                  zIndex: i === 0 ? 0 : 1,
+                }}
+              >
+                <div className="max-w-2xl" style={{ pointerEvents: "auto" }}>
+                  {scene.eyebrow && (
+                    <p
+                      className="hero-shadow-sm text-[12px] md:text-[13px] font-semibold tracking-[0.2em] uppercase text-white mb-5"
                     >
-                      {scene.ctaLabel}
-                    </a>
-                  </div>
-                )}
+                      {scene.eyebrow}
+                    </p>
+                  )}
+                  {/* The first scene's heading (the name) is the page's one H1; the rest stay H2. */}
+                  <Heading
+                    className="hero-shadow-lg font-extrabold text-white leading-[0.92] mb-6"
+                    style={{
+                      fontSize: "clamp(2.75rem, 9vw, 5rem)",
+                      letterSpacing: "-0.04em",
+                    }}
+                  >
+                    {scene.heading}
+                  </Heading>
+                  {scene.description && (
+                    <p
+                      className="hero-shadow-md text-white leading-relaxed max-w-lg mb-8"
+                      style={{ fontSize: "clamp(1rem, 0.9rem + 0.35vw, 1.1875rem)" }}
+                    >
+                      {scene.description}
+                    </p>
+                  )}
+                  {scene.ctaLabel && scene.ctaHref && (
+                    <div className="flex flex-wrap items-center gap-3">
+                      <a
+                        href={scene.ctaHref}
+                        onClick={(e) => {
+                          /* Same-page anchor — scroll without stamping #hash into the URL */
+                          if (scene.ctaHref?.startsWith("#")) {
+                            const el = document.getElementById(scene.ctaHref.slice(1));
+                            if (el) {
+                              e.preventDefault();
+                              el.scrollIntoView({ behavior: "smooth" });
+                            }
+                          }
+                        }}
+                        className="inline-flex items-center px-6 py-3 rounded-full bg-white text-zinc-900 text-[14.5px] font-semibold hover:bg-[#8B5CF6] hover:text-white transition-colors duration-200"
+                        style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.25)" }}
+                      >
+                        {scene.ctaLabel}
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* ── Scroll hint ────────────────────────────────────────────────── */}
