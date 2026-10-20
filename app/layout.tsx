@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "@/app/lib/site-url";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/app/lib/seo";
 import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({
@@ -14,13 +15,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Zaira Mundo | Creative Designer & Front-End Developer",
+    default: SITE_TITLE,
     template: "%s | Zaira Mundo",
   },
-  description:
-    "Creative Designer and Front-End Developer building accessible, responsive, and high-performing websites — from interface design through to production code — across React, TypeScript, WordPress, and modern web technologies.",
+  description: SITE_DESCRIPTION,
   keywords: [
-    "digital designer", "web designer", "front-end developer", "web developer", "UI/UX design", "digital experience",
+    "web designer", "web developer", "UI/UX designer", "front-end developer", "web design UAE", "web developer Dubai",
     "React", "TypeScript", "WordPress", "accessibility", "technical SEO", "Dubai", "UAE",
   ],
   authors: [{ name: "Zaira Mundo" }],
@@ -30,14 +30,13 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: SITE_URL,
     siteName: "Zaira Mundo",
-    title: "Zaira Mundo | Creative Designer & Front-End Developer",
-    description:
-      "Creative Designer and Front-End Developer building accessible, responsive, and high-performing websites — from interface design through to production code — across React, TypeScript, WordPress, and modern web technologies.",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zaira Mundo | Creative Designer & Front-End Developer",
-    description: "Creative Designer and Front-End Developer.",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
   robots: { index: true, follow: true },
 };

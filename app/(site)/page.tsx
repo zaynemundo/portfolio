@@ -12,15 +12,14 @@ import { FeaturedWork } from "@/app/components/work/FeaturedWork";
 import { AboutStorySection } from "@/app/components/about/AboutStorySection";
 import { InsightsSection } from "@/app/components/insights/InsightsSection";
 import { SITE_URL } from "@/app/lib/site-url";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/app/lib/seo";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { name, jobTitle } = await getSiteSettings();
+export function generateMetadata(): Metadata {
   return {
     // Absolute: the layout's "%s | Zaira Mundo" template would add the name a second time.
-    title: { absolute: `${name} | ${jobTitle}` },
+    title: { absolute: SITE_TITLE },
     alternates: { canonical: "/" },
-    description:
-      "Creative Designer and Front-End Developer building accessible, responsive, and high-performing websites — from interface design through to production code — across React, Next.js, WordPress, and modern web technologies.",
+    description: SITE_DESCRIPTION,
   };
 }
 
@@ -52,7 +51,7 @@ export default async function Home() {
 
   const settings = await getSiteSettings();
   const {
-    portraitUrl, email, phone, linkedinUrl, githubUrl, name, jobTitle, aboutChapters,
+    portraitUrl, email, phone, linkedinUrl, githubUrl, name, aboutChapters,
     heroVideoUrl, heroPosterUrl, selectedWorkHeading, selectedWorkIntro,
     insightsHeading, insightsIntro,
   } = settings;
@@ -69,10 +68,20 @@ export default async function Home() {
             "@context": "https://schema.org",
             "@type": "Person",
             name,
-            jobTitle,
+            // The roles people search for, rather than the display title in Settings.
+            jobTitle: ["Web Designer", "Web Developer", "UI/UX Designer"],
+            description: SITE_DESCRIPTION,
+            ...(portraitUrl && { image: new URL(portraitUrl, SITE_URL).href }),
             email,
             url: SITE_URL,
-            sameAs: [linkedinUrl, githubUrl],
+            sameAs: [linkedinUrl, githubUrl].filter(Boolean),
+            knowsAbout: [
+              "Web Design", "Web Development", "UI/UX Design", "Front-End Development", "E-commerce",
+              "React", "TypeScript", "WordPress", "Headless WordPress", "Figma",
+              "Web Accessibility (WCAG)", "Technical SEO", "Core Web Vitals",
+            ],
+            worksFor: { "@type": "Organization", name: "Creativo FZCO" },
+            alumniOf: { "@type": "CollegeOrUniversity", name: "Bath Spa University" },
             address: {
               "@type": "PostalAddress",
               addressLocality: "Dubai",

@@ -1,6 +1,6 @@
 import { OG_SIZE, renderOgImage } from "@/app/lib/og-image";
 
-export const alt = "Zaira Mundo — Creative Designer & Front-End Developer";
+export const alt = "Zaira Mundo — Web Designer, Developer & UI/UX Designer";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
@@ -8,7 +8,7 @@ export const contentType = "image/png";
 export default function Image() {
   return renderOgImage({
     eyebrow: "Portfolio",
-    title: "Creative Designer & Front-End Developer",
+    title: "Web Designer, Developer & UI/UX Designer",
     footer: "zairamundo.com",
   });
 }
