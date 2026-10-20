@@ -91,6 +91,15 @@ export async function getPublishedProjectIndex(): Promise<{ slug: string; name: 
   return rows;
 }
 
+/** Slug + last edit of every published project, for the sitemap. */
+export async function getPublishedProjectDates(): Promise<{ slug: string; updatedAt: Date }[]> {
+  return prisma.project.findMany({
+    where: { published: true },
+    orderBy: { sortOrder: "asc" },
+    select: { slug: true, updatedAt: true },
+  });
+}
+
 /** Slugs of published projects flagged "Featured" (the homepage's Selected Work). */
 export async function getFeaturedProjectSlugs(): Promise<string[]> {
   const rows = await prisma.project.findMany({

@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getPublishedProject, getPublishedProjectIndex } from "@/app/lib/projects-db";
+import { SITE_URL } from "@/app/lib/site-url";
 import type { Project } from "@/app/lib/projects";
 import { CaseStudyImageSlider } from "@/app/components/CaseStudyImageSlider";
 import type { SliderImage } from "@/app/components/CaseStudyImageSlider";
@@ -118,6 +119,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const project = await getPublishedProject(slug);
   if (!project) return { title: "Project not found" };
+  // The case study's own cover, so a shared link shows the project rather than the site-wide image.
+  const cover = project.images?.[0];
+  const images = cover ? [{ url: cover, alt: project.imageAlt }] : undefined;
   return {
     title: project.name,
     description: project.shortDescription,
@@ -126,6 +130,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${project.name} | Zaira Mundo`,
       description: project.shortDescription,
       url: `/work/${slug}`,
+      ...(images && { images }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${project.name} | Zaira Mundo`,
+      description: project.shortDescription,
+      ...(images && { images }),
     },
   };
 }
@@ -175,8 +186,43 @@ export default async function CaseStudyPage({ params }: Props) {
     ...(project.whyItWorked?.length ? [{ label: "Why it worked", id: "section-the-thinking" }] : []),
   ];
 
+  const url = `${SITE_URL}/work/${slug}`;
+  const author = { "@type": "Person", name: "Zaira Mundo", url: SITE_URL };
+  /* Tells search engines this is a piece of work, whose it is and what it was built with. */
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      name: project.name,
+      headline: project.tagline || project.name,
+      description: project.shortDescription,
+      ...(cover && { image: new URL(cover, SITE_URL).href }),
+      author,
+      creator: author,
+      ...(project.year && { dateCreated: project.year }),
+      ...(project.category && { genre: project.category }),
+      ...(project.technologies?.length && { keywords: project.technologies.join(", ") }),
+      ...(project.client && { sourceOrganization: { "@type": "Organization", name: project.client } }),
+      url,
+      mainEntityOfPage: url,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "Work", item: `${SITE_URL}/work` },
+        { "@type": "ListItem", position: 3, name: project.name, item: url },
+      ],
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
+      />
       <ReadingProgress />
       <BackToTop />
       {chapters.length >= 2 && <CaseStudyChapterNav chapters={chapters} />}
