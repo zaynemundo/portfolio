@@ -19,7 +19,7 @@ export function ForgotForm() {
 
   if (sent) {
     return (
-      <div className="w-full max-w-sm text-center">
+      <div className="w-full">
         <p className="text-[14px] text-foreground/80">
           If that email is registered, a reset link is on its way. Check your inbox.
         </p>
@@ -34,7 +34,7 @@ export function ForgotForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-sm">
+    <form onSubmit={handleSubmit} className="w-full">
       <div className="mb-6">
         <label htmlFor="email" className="block text-xs font-medium text-muted-foreground mb-2">
           Email

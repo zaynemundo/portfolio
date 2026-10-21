@@ -39,7 +39,7 @@ export function ResetForm() {
 
   if (!token) {
     return (
-      <div className="w-full max-w-sm text-center">
+      <div className="w-full">
         <p className="text-[14px] text-foreground/80">This reset link is missing its token.</p>
         <Link href="/login/forgot" className="mt-6 inline-block text-[13px] text-muted-foreground hover:text-foreground transition-colors">
           Request a new link
@@ -50,14 +50,14 @@ export function ResetForm() {
 
   if (done) {
     return (
-      <p className="w-full max-w-sm text-center text-[14px] text-foreground/80">
+      <p className="w-full text-[14px] text-foreground/80">
         Password updated. Redirecting to sign in…
       </p>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-sm">
+    <form onSubmit={handleSubmit} className="w-full">
       <div className="mb-5">
         <label htmlFor="password" className="block text-xs font-medium text-muted-foreground mb-2">
           New password

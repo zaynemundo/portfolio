@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function LoginPage() {
   return (
-    <LoginShell title="Admin sign in" subtitle="Restricted access.">
+    <LoginShell title="Welcome back" subtitle="Sign in to your workspace.">
       <Suspense fallback={null}>
         <LoginForm />
       </Suspense>
