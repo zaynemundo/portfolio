@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-// Must match ConsoleShell.tsx's THEME_STORAGE_KEY — same admin theme preference.
-const THEME_STORAGE_KEY = "zm-admin-theme";
+import { readStoredTheme, useSystemDark, type ThemePreference } from "@/app/components/console/ThemeContext";
 
 interface Props {
   title: string;
@@ -16,15 +14,13 @@ interface Props {
  *  sign-in flow matches the rest of the admin instead of being stuck on the
  *  old hardcoded dark theme. Respects the visitor's stored theme preference. */
 export function LoginShell({ title, subtitle, children }: Props) {
-  const [isDark, setIsDark] = useState(false);
+  const [theme, setTheme] = useState<ThemePreference>("light");
+  const systemDark = useSystemDark();
+  const isDark = theme === "dark" || (theme === "system" && systemDark);
 
   useEffect(() => {
-    try {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from localStorage on mount; can't be derived during render without a hydration mismatch.
-      setIsDark(localStorage.getItem(THEME_STORAGE_KEY) === "dark");
-    } catch {
-      // localStorage unavailable — stay on the light default.
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from localStorage on mount; can't be derived during render without a hydration mismatch.
+    setTheme(readStoredTheme());
   }, []);
 
   return (

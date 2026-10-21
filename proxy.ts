@@ -31,13 +31,20 @@ export async function proxy(request: NextRequest) {
 
   const sessionId = request.cookies.get("admin_session")?.value;
 
+  let response: NextResponse;
   if (!sessionId) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
-    return NextResponse.redirect(loginUrl);
+    response = NextResponse.redirect(loginUrl);
+  } else {
+    response = NextResponse.next();
   }
 
-  return NextResponse.next();
+  // Keep every admin address out of search results, including the redirect
+  // a crawler gets when it isn't signed in. A header rather than robots.txt
+  // entries, which would publish the list of admin addresses for anyone to read.
+  response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  return response;
 }
 
 // Next.js statically parses `matcher` at build time, so it must be a literal

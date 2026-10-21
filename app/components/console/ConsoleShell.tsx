@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -23,11 +23,13 @@ import {
   Check,
   Menu,
   Plus,
+  Power,
   X,
 } from "lucide-react";
+import { logout } from "@/app/actions/auth";
 import { routes } from "@/app/(admin)/_routes";
 import { CommandPalette } from "./CommandPalette";
-import { ThemeContext } from "./ThemeContext";
+import { ThemeContext, readStoredTheme, useSystemDark, THEME_STORAGE_KEY, type ThemePreference } from "./ThemeContext";
 
 interface NavItem {
   href: string;
@@ -61,9 +63,6 @@ interface Workspace {
 }
 
 const ICON_PROPS = { size: 16, strokeWidth: 1.75 };
-/** Shown beside the avatar at the top of the sidebar. */
-const BRAND = "Zaira Mundo";
-const THEME_STORAGE_KEY = "zm-admin-theme";
 const WORKSPACE_STORAGE_KEY = "zm-admin-workspace";
 
 const SETTINGS_ITEM: NavItem = { href: routes.account, label: "Settings", icon: <Settings {...ICON_PROPS} /> };
@@ -137,9 +136,8 @@ function workspaceForPath(workspaces: Workspace[], pathname: string): WorkspaceI
 }
 
 export function ConsoleShell({
-  email, children, unreadInquiries = 0,
+  children, unreadInquiries = 0,
 }: {
-  email: string;
   children: React.ReactNode;
   unreadInquiries?: number;
 }) {
@@ -148,7 +146,9 @@ export function ConsoleShell({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [theme, setThemeState] = useState<ThemePreference>("light");
+  const systemDark = useSystemDark();
+  const isDark = theme === "dark" || (theme === "system" && systemDark);
 
   // Closes the mobile nav on navigation — adjusted during render (React's
   // documented pattern for resetting state on a prop change) rather than a
@@ -172,7 +172,7 @@ export function ConsoleShell({
   useEffect(() => {
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from localStorage on mount; can't be derived during render without a server/client hydration mismatch.
-      setIsDark(localStorage.getItem(THEME_STORAGE_KEY) === "dark");
+      setThemeState(readStoredTheme());
       const stored = localStorage.getItem(WORKSPACE_STORAGE_KEY);
       if (!routeWorkspace && WORKSPACE_IDS.includes(stored as WorkspaceId)) setLastWorkspace(stored as WorkspaceId);
     } catch {
@@ -192,16 +192,13 @@ export function ConsoleShell({
 
   const allNavItems: NavItem[] = [...workspaces.flatMap((ws) => ws.items), SETTINGS_ITEM];
 
-  function toggleTheme() {
-    setIsDark((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(THEME_STORAGE_KEY, next ? "dark" : "light");
-      } catch {
-        // ignore
-      }
-      return next;
-    });
+  function setTheme(next: ThemePreference) {
+    setThemeState(next);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch {
+      // ignore
+    }
   }
 
   useEffect(() => {
@@ -216,7 +213,7 @@ export function ConsoleShell({
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, isDark, setTheme }}>
     {/* Three layers: the grey canvas (with the sidebar on it), the big rounded sheet the page sits on, and the white cards on the sheet. */}
     <div className={`admin-root ${isDark ? "dark" : ""} min-h-screen bg-canvas flex print:bg-white`}>
       {/* Mobile hamburger — fixed top-left, hidden once the slide-in nav is open */}
@@ -245,7 +242,6 @@ export function ConsoleShell({
         <SidebarHeader
           workspaces={workspaces}
           active={activeWorkspace}
-          email={email}
           onCollapse={() => setMobileOpen(false)}
           collapseIcon={<X size={15} />}
           collapseLabel="Close menu"
@@ -259,7 +255,6 @@ export function ConsoleShell({
           <SidebarHeader
             workspaces={workspaces}
             active={activeWorkspace}
-            email={email}
             onCollapse={() => setSidebarOpen(false)}
             collapseIcon={<ChevronLeft size={15} />}
             collapseLabel="Collapse sidebar to icons"
@@ -271,7 +266,6 @@ export function ConsoleShell({
           workspaces={workspaces}
           active={activeWorkspace}
           pathname={pathname}
-          email={email}
           onExpand={() => setSidebarOpen(true)}
         />
       )}
@@ -450,26 +444,44 @@ function WorkspaceSwitcher({ workspaces, active, compact }: { workspaces: Worksp
   );
 }
 
-/** The round black avatar; it opens Settings, where the account lives. */
-function Avatar({ email }: { email: string }) {
+/** "ZM" set like the favicon (bold, tight, no badge): opens the live site's homepage in a new tab. */
+function Avatar() {
   return (
-    <Link
-      href={routes.account}
-      title={email}
-      aria-label="Your account and settings"
-      className="h-10 w-10 rounded-full bg-foreground text-background flex items-center justify-center text-[13px] font-bold shrink-0 hover:opacity-85 transition-opacity"
+    <a
+      href="/"
+      target="_blank"
+      rel="noopener"
+      aria-label="Open the website in a new tab"
+      title="Open the website"
+      className="h-10 w-10 flex items-center justify-center text-[17px] font-extrabold tracking-[-0.04em] text-foreground shrink-0 hover:opacity-70 transition-opacity"
     >
-      {BRAND.charAt(0)}
-    </Link>
+      ZM
+    </a>
+  );
+}
+
+/** Round sign-out button, next to the sidebar's collapse button (and near the bottom of the collapsed rail). */
+function SignOutButton({ size = "h-7 w-7" }: { size?: string }) {
+  const [isPending, startTransition] = useTransition();
+  return (
+    <button
+      type="button"
+      onClick={() => startTransition(() => logout())}
+      disabled={isPending}
+      aria-label="Sign out"
+      title="Sign out"
+      className={`${size} rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors shrink-0 disabled:opacity-50`}
+    >
+      <Power size={14} />
+    </button>
   );
 }
 
 function SidebarHeader({
-  workspaces, active, email, onCollapse, collapseIcon, collapseLabel,
+  workspaces, active, onCollapse, collapseIcon, collapseLabel,
 }: {
   workspaces: Workspace[];
   active: Workspace;
-  email: string;
   onCollapse: () => void;
   collapseIcon: React.ReactNode;
   collapseLabel: string;
@@ -477,8 +489,9 @@ function SidebarHeader({
   return (
     <div className="shrink-0">
       <div className="flex items-center gap-2.5 mb-3">
-        <Avatar email={email} />
-        <span className="flex-1 min-w-0 truncate text-[13.5px] font-bold text-foreground">{BRAND}</span>
+        <Avatar />
+        <span className="flex-1" />
+        <SignOutButton />
         <button
           type="button"
           onClick={onCollapse}
@@ -520,17 +533,16 @@ function SidebarNav({ workspace, pathname }: { workspace: Workspace; pathname: s
  *  violet, names on hover. The workspace dropdown stays at the top as a round
  *  button, so you can always change workspace from here too. */
 function CollapsedRail({
-  workspaces, active, pathname, email, onExpand,
+  workspaces, active, pathname, onExpand,
 }: {
   workspaces: Workspace[];
   active: Workspace;
   pathname: string;
-  email: string;
   onExpand: () => void;
 }) {
   return (
     <aside className="hidden md:flex w-16 shrink-0 flex-col items-center h-screen sticky top-0 py-3 gap-2 print:hidden">
-      <Avatar email={email} />
+      <Avatar />
       <WorkspaceSwitcher workspaces={workspaces} active={active} compact />
 
       <nav aria-label={`${active.label} navigation`} className="flex-1 flex flex-col items-center gap-2 pt-2 overflow-y-auto">
@@ -540,6 +552,7 @@ function CollapsedRail({
       </nav>
 
       <RailLink item={SETTINGS_ITEM} pathname={pathname} />
+      <SignOutButton size="h-10 w-10" />
       <button
         type="button"
         onClick={onExpand}
