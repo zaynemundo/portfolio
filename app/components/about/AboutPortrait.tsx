@@ -39,7 +39,7 @@ export function AboutPortrait({ state, portraitUrl }: Props) {
         {portraitUrl ? (
           <Image
             src={portraitUrl}
-            alt="Portrait of Zaira Mundo"
+            alt="Portrait of Zayne Mundo"
             fill
             sizes="(max-width: 1023px) 80vw, (max-width: 1200px) 40vw, 480px"
             className="about-portrait__image"
@@ -54,7 +54,7 @@ export function AboutPortrait({ state, portraitUrl }: Props) {
           />
         ) : (
           /* Placeholder when no portrait has been uploaded yet */
-          <div className="about-portrait__placeholder" aria-label="Portrait of Zaira Mundo">
+          <div className="about-portrait__placeholder" aria-label="Portrait of Zayne Mundo">
             <span aria-hidden="true">ZM</span>
           </div>
         )}

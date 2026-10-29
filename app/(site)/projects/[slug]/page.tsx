@@ -127,14 +127,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: project.shortDescription,
     alternates: { canonical: `/work/${slug}` },
     openGraph: {
-      title: `${project.name} | Zaira Mundo`,
+      title: `${project.name} | Zayne Mundo`,
       description: project.shortDescription,
       url: `/work/${slug}`,
       ...(images && { images }),
     },
     twitter: {
       card: "summary_large_image",
-      title: `${project.name} | Zaira Mundo`,
+      title: `${project.name} | Zayne Mundo`,
       description: project.shortDescription,
       ...(images && { images }),
     },
@@ -187,7 +187,7 @@ export default async function CaseStudyPage({ params }: Props) {
   ];
 
   const url = `${SITE_URL}/work/${slug}`;
-  const author = { "@type": "Person", name: "Zaira Mundo", url: SITE_URL };
+  const author = { "@type": "Person", name: "Zayne Mundo", url: SITE_URL };
   /* Tells search engines this is a piece of work, whose it is and what it was built with. */
   const structuredData = [
     {

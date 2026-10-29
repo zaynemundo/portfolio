@@ -8,7 +8,7 @@ const prisma = new PrismaClient({ adapter });
 
 const heroScenes = [
   {
-    heading: "Zaira Mundo",
+    heading: "Zayne Mundo",
     description:
       "Creative Designer and Front-End Developer designing and shipping websites, e-commerce platforms, and digital campaigns for UAE brands — from Figma to production in React/TypeScript, headless WordPress, and Laravel/Vue.",
     start: 0,
@@ -41,14 +41,14 @@ async function main() {
   const settings = await prisma.siteSettings.upsert({
     where: { id: "singleton" },
     update: {
-      name: "Zaira Mundo",
+      name: "Zayne Mundo",
       jobTitle: "Creative Designer & Front-End Developer",
       heroScenes: heroScenes as Prisma.InputJsonValue,
       aboutChapters: aboutChapters as unknown as Prisma.InputJsonValue,
     },
     create: {
       id: "singleton",
-      name: "Zaira Mundo",
+      name: "Zayne Mundo",
       jobTitle: "Creative Designer & Front-End Developer",
       email: "mzaira.mundo@gmail.com",
       phone: "+971 50 562 8417",

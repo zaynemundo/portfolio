@@ -3,11 +3,11 @@
  * sender available is Resend's test address, which delivers to the account
  * owner and nobody else — fine for inquiry notifications and password
  * resets, useless for emailing clients. Setting EMAIL_FROM (for example
- * "Zaira Mundo <hello@yourdomain.com>") switches every email to the real
+ * "Zayne Mundo <hello@yourdomain.com>") switches every email to the real
  * address and turns on client-facing emails.
  */
 
-const TEST_SENDER = "Zaira Mundo <onboarding@resend.dev>";
+const TEST_SENDER = "Zayne Mundo <onboarding@resend.dev>";
 
 export function emailFrom(): string {
   return process.env.EMAIL_FROM?.trim() || TEST_SENDER;
