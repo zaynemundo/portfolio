@@ -39,7 +39,7 @@ export interface SiteSettingsData {
 
 const DEFAULT_HERO_SCENES: HeroSceneData[] = [
   {
-    heading: "Zayne Mundo",
+    heading: "Zaira Mundo",
     description:
       "Creative Designer and Front-End Developer designing and shipping websites, e-commerce platforms, and digital campaigns for UAE brands — from Figma to production in React/TypeScript, headless WordPress, and Laravel/Vue.",
     start: 0,
@@ -63,7 +63,7 @@ const DEFAULT_HERO_SCENES: HeroSceneData[] = [
 
 /** Falls back to the original hardcoded values if the DB row is missing/unset. */
 const DEFAULTS: SiteSettingsData = {
-  name: "Zayne Mundo",
+  name: "Zaira Mundo",
   jobTitle: "Creative Designer & Front-End Developer",
   email: "mzaira.mundo@gmail.com",
   phone: "+971 50 562 8417",

@@ -93,7 +93,7 @@ export function AboutStorySection({ portraitUrl, chapters }: Props) {
           {/* Portrait column — sticky on desktop */}
           <aside
             className="about-story__visual"
-            aria-label="About Zayne Mundo"
+            aria-label="About Zaira Mundo"
           >
             <Reveal className="about-story__portrait-wrap">
               <AboutPortrait

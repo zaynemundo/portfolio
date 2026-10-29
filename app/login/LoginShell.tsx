@@ -78,7 +78,7 @@ export function LoginShell({ title, subtitle, children }: Props) {
         <LoginArtwork isDark={isDark} />
         <div className={`absolute inset-x-0 bottom-0 p-12 lg:p-16 ${isDark ? "text-white" : "text-[#1e1035]"}`}>
           <p className="max-w-md text-[34px] lg:text-[40px] font-bold leading-[1.1] tracking-tight">
-            Good to see you again, Zayne.
+            Good to see you again, Zaira.
           </p>
           <p className={`mt-3 max-w-sm text-[15px] leading-relaxed ${isDark ? "text-white/70" : "text-[#1e1035]/70"}`}>
             Everything for zairamundo.com and your clients is inside.

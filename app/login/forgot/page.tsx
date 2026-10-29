@@ -2,7 +2,7 @@ import { LoginShell } from "../LoginShell";
 import { ForgotForm } from "./ForgotForm";
 
 export const metadata = {
-  title: "Reset password | Zayne Mundo",
+  title: "Reset password | Zaira Mundo",
   robots: { index: false, follow: false },
 };
 

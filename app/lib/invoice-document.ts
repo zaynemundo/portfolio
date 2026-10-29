@@ -129,7 +129,7 @@ async function load(where: { id: string } | { shareToken: string }): Promise<Inv
       : null,
     linked: linkedRow ? { id: linkedRow.id, number: linkedRow.invoiceNumber } : null,
     sender: {
-      name: settings?.name || "Zayne Mundo",
+      name: settings?.name || "Zaira Mundo",
       email: settings?.email || "",
       phone: settings?.phone || "",
       address: settings?.invoiceAddress || null,

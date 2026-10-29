@@ -104,7 +104,7 @@ export async function requestPasswordReset(email: string): Promise<RequestResetR
         from: emailFrom(),
         to: cleanEmail,
         subject: "Reset your admin password",
-        text: `Someone requested a password reset for your Zayne Mundo dashboard account.
+        text: `Someone requested a password reset for your Zaira Mundo dashboard account.
 
 Set a new password (link expires in 30 minutes):
 ${resetUrl}

@@ -1,6 +1,6 @@
 import { OG_SIZE, renderOgImage } from "@/app/lib/og-image";
 
-export const alt = "Zayne Mundo — Web Designer, Developer & UI/UX Designer";
+export const alt = "Zaira Mundo — Web Designer, Developer & UI/UX Designer";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 

@@ -3,7 +3,7 @@ import { LoginShell } from "./LoginShell";
 import { LoginForm } from "./LoginForm";
 
 export const metadata = {
-  title: "Sign in | Zayne Mundo",
+  title: "Sign in | Zaira Mundo",
   robots: { index: false, follow: false },
 };
 
