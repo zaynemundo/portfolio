@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.dev.vars
 
 # vercel
 .vercel
@@ -47,3 +48,7 @@ next-env.d.ts
 
 # written by prisma/scripts/import-case-studies.ts
 /case-studies-backup*.json
+/dist/
+.vinext/
+.cloudflare/
+.wrangler/
