@@ -37,7 +37,7 @@ export function renderOgImage({ eyebrow, title, footer }: { eyebrow: string; tit
           {title}
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 28, color: "#d4d4d8" }}>
-          <div style={{ display: "flex" }}>Zaira Mundo</div>
+          <div style={{ display: "flex" }}>Zayne Mundo</div>
           <div style={{ display: "flex", color: "#71717a" }}>{footer}</div>
         </div>
       </div>

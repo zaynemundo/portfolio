@@ -117,7 +117,7 @@ export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
             {/* Logo */}
             <Link
               href="/"
-              aria-label="ZM Zaira Mundo, home"
+              aria-label="ZM Zayne Mundo, home"
               className="flex items-center gap-2.5 shrink-0 group focus-visible:outline-none"
             >
               <span
@@ -140,7 +140,7 @@ export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
                     : "text-zinc-900 group-hover:text-zinc-700"
                 }`}
               >
-                Zaira Mundo
+                Zayne Mundo
               </span>
             </Link>
 

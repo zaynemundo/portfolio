@@ -16,7 +16,7 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "@/app/lib/seo";
 
 export function generateMetadata(): Metadata {
   return {
-    // Absolute: the layout's "%s | Zaira Mundo" template would add the name a second time.
+    // Absolute: the layout's "%s | Zayne Mundo" template would add the name a second time.
     title: { absolute: SITE_TITLE },
     alternates: { canonical: "/" },
     description: SITE_DESCRIPTION,

@@ -246,7 +246,7 @@ export function BlogForm({ postId: initialPostId, initial, categories }: Props) 
     if (e.key === "Enter" && e.target instanceof HTMLInputElement) e.preventDefault();
   }
 
-  const searchTitle = `${title.trim() || "Untitled"} | Zaira Mundo`;
+  const searchTitle = `${title.trim() || "Untitled"} | Zayne Mundo`;
 
   const liveHref = published && fields.slug && !saveState.dirty ? `/insights/${fields.slug}` : undefined;
 

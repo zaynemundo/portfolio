@@ -1,4 +1,4 @@
-# Zaira Mundo — Portfolio
+# Zayne Mundo — Portfolio
 
 The source for [zairamundo.com](https://www.zairamundo.com): my portfolio site, plus the private admin I use to run it and my freelance work.
 
@@ -66,4 +66,4 @@ Every push to `master` deploys to production on Vercel.
 
 ---
 
-© Zaira Mundo. The code is shared to show how the site is built. Its content, pictures and case studies are not licensed for reuse.
+© Zayne Mundo. The code is shared to show how the site is built. Its content, pictures and case studies are not licensed for reuse.

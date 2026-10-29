@@ -56,7 +56,7 @@ export function emailShell({ preheader, badge, title, body, footer, headerNote }
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td width="36" height="36" align="center" valign="middle" style="width:36px;height:36px;background:${BRAND};border-radius:10px;font-family:${FONT};font-size:11px;font-weight:800;color:#ffffff;letter-spacing:-0.03em;line-height:36px">ZM</td>
-              <td valign="middle" style="padding-left:12px;font-family:${FONT};font-size:14px;font-weight:700;color:#ffffff;letter-spacing:-0.01em">Zaira Mundo</td>
+              <td valign="middle" style="padding-left:12px;font-family:${FONT};font-size:14px;font-weight:700;color:#ffffff;letter-spacing:-0.01em">Zayne Mundo</td>
               <td align="right" valign="middle" style="font-family:${FONT};font-size:11px;color:#8b8a94">${headerNote ?? ""}</td>
             </tr>
           </table>
