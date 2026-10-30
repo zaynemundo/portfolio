@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
+import { asStringArray } from "@/app/lib/json-array";
 import { ProjectForm } from "../ProjectForm";
 import { BackLink } from "@/app/(admin)/_components/BackLink";
 import { routes } from "@/app/(admin)/_routes";
@@ -42,20 +43,20 @@ export default async function EditCaseStudyPage({ params }: Props) {
             category: project.category,
             year: project.year,
             workType: project.workType ?? "Freelance",
-            technologies: project.technologies.join(", "),
+            technologies: asStringArray(project.technologies).join(", "),
             challenge: project.challenge,
             approach: project.approach,
             outcome: project.outcome,
-            highlights: project.highlights.join("\n"),
+            highlights: asStringArray(project.highlights).join("\n"),
             accessibility: project.accessibility ?? "",
             performance: project.performance ?? "",
             seo: project.seo ?? "",
             client: project.client ?? "",
             liveUrl: project.liveUrl ?? "",
             imageAlt: project.imageAlt,
-            images: project.images,
-            imageLabels: project.imageLabels,
-            imageAlts: project.imageAlts,
+            images: asStringArray(project.images),
+            imageLabels: asStringArray(project.imageLabels),
+            imageAlts: asStringArray(project.imageAlts),
             themeBg: theme.bg ?? "#f4f4f5",
             themeDark: theme.dark ?? false,
             logoInitials: logo.initials ?? "",

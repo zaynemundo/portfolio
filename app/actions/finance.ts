@@ -7,7 +7,7 @@ import { put } from "@vercel/blob";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
-import { TransactionType } from "@/generated/prisma/client/client";
+import type { TransactionType } from "@/app/lib/enums";
 import type { UploadResult } from "@/app/actions/settings";
 
 export interface TransactionFormData {

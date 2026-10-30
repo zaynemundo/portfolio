@@ -19,7 +19,9 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
   const q = query.trim();
   if (q.length < 2) return [];
 
-  const insensitive = { contains: q, mode: "insensitive" as const };
+  // SQLite's LIKE (which Prisma's `contains` uses) is already case-insensitive
+  // for ASCII, and the SQLite connector has no `mode` option.
+  const insensitive = { contains: q };
 
   const [posts, projects, clients, freelanceProjects, invoices, inquiries] = await Promise.all([
     prisma.blogPost.findMany({ where: { title: insensitive }, take: RESULTS_PER_CATEGORY, select: { id: true, title: true } }),

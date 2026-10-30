@@ -6,7 +6,7 @@ import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 import { uniqueClientSlug } from "@/app/lib/client-slug";
-import { LeadStage } from "@/generated/prisma/client/client";
+import { LeadStage } from "@/app/lib/enums";
 
 export interface LeadActionResult {
   ok: boolean;
@@ -65,7 +65,7 @@ export async function createJobFromLead(id: string): Promise<LeadActionResult> {
 
   const email = lead.email.trim();
   const existing = email
-    ? await prisma.contact.findFirst({ where: { email: { equals: email, mode: "insensitive" } }, select: { clientId: true } })
+    ? await prisma.contact.findFirst({ where: { email: { equals: email } }, select: { clientId: true } })
     : null;
 
   let clientId = existing?.clientId;

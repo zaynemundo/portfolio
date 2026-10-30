@@ -5,7 +5,7 @@ import { updateTag } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
-import { ClientType } from "@/generated/prisma/client/client";
+import type { ClientType } from "@/app/lib/enums";
 import { uniqueClientSlug } from "@/app/lib/client-slug";
 
 export interface ClientFormData {

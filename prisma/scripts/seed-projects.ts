@@ -1,9 +1,4 @@
-import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../../generated/prisma/client/client";
-
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
+import { prisma } from "./seed-client";
 
 /* ── Card-only projects (no full case study written yet) ─────────────── */
 const cardProjects = [
@@ -107,6 +102,7 @@ async function main() {
         imageAlt: p.imageAlt,
         images: p.images,
         imageLabels: [],
+        imageAlts: [],
         theme: p.theme,
         logo: p.logo,
         videoMp4: p.videoMp4,
@@ -154,6 +150,7 @@ async function main() {
       imageAlt: "Monili Jewellers — luxury jewellery e-commerce platform",
       images: [],
       imageLabels: ["Homepage", "Product Listing", "Product Detail", "Cart & Checkout"],
+      imageAlts: [],
       theme: { bg: "#ede8e2" },
       logo: { initials: "MJ", bg: "#d9d4cd" },
       videoMp4: "/case-studies/monili-mockup.mp4",

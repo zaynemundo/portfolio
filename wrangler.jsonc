@@ -8,6 +8,13 @@
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://zaynemundo.com"
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "portfolio-db",
+      "database_id": "c256e8d7-1cfe-460d-89be-7468544e0b9d"
+    }
+  ],
   "main": "vinext/server/fetch-handler",
   "assets": {
     "directory": "dist/client",

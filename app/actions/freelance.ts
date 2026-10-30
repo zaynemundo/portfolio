@@ -5,7 +5,7 @@ import { updateTag } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { requireSession } from "@/app/lib/session";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
-import { FreelanceStatus, RateType } from "@/generated/prisma/client/client";
+import type { FreelanceStatus, RateType } from "@/app/lib/enums";
 
 export interface FreelanceProjectFormData {
   name: string;

@@ -1,10 +1,11 @@
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma/client"
+  runtime  = "cloudflare"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 model User {
@@ -116,21 +117,13 @@ model Inquiry {
   message   String
   read      Boolean  @default(false)
   /// Where the lead is in the pipeline (2026-10-13). A message from the site's contact form starts as NEW.
-  stage     LeadStage @default(NEW)
+  stage     String    @default("NEW")
   /// One line on where things stand, e.g. "Call booked Tue" — shown on the lead's card.
   note      String?
   /// The job this lead became, once "Create job" has been used.
   projectId String?
   project   FreelanceProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
-}
-
-enum LeadStage {
-  NEW
-  CONTACTED
-  QUOTED
-  WON
-  LOST
 }
 
 /// Portfolio case study. Core fields are plain columns; the long tail of
@@ -149,50 +142,32 @@ model Project {
   category         String
   year             String
   workType         String?
-  technologies     String[]
+  technologies     Json
   challenge        String
   approach         String
   outcome          String
-  highlights       String[]
+  highlights       Json
   accessibility    String?
   performance      String?
   seo              String?
   imageAlt         String
   liveUrl          String?
   client           String?
-  images           String[]
-  imageLabels      String[]
+  images           Json
+  imageLabels      Json
   /// Alt text per screenshot, paired with images by index (imageAlt is the fallback).
-  imageAlts        String[] @default([])
+  imageAlts        Json
   theme            Json?
   logo             Json?
   videoMp4         String?
   videoWebm        String?
   poster           String?
-  richContent      Json     @default("{}")
+  richContent      Json
   featured         Boolean  @default(false)
   published        Boolean  @default(false)
   sortOrder        Int      @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-}
-
-enum FreelanceStatus {
-  NOT_STARTED
-  ACTIVE
-  ON_HOLD
-  COMPLETED
-}
-
-enum RateType {
-  HOURLY
-  FIXED
-  RETAINER
-}
-
-enum ClientType {
-  COMPANY
-  INDIVIDUAL
 }
 
 /// A freelance client — shared across FreelanceProject and Transaction so
@@ -202,7 +177,7 @@ model Client {
   name         String
   /// Readable address for the client's page, e.g. /clients/davaolease. Made from the name.
   slug         String?            @unique
-  type         ClientType?
+  type         String?
   /// Deprecated 2026-09-28 — removed from the UI; per-Contact email under this Client is the source of truth now (fides-creativo-style separation). Column kept, unused.
   email        String?
   /// Deprecated 2026-09-28 — removed from the UI, same reasoning as `email`: per-Contact phone is the source of truth now.
@@ -294,13 +269,13 @@ model FreelanceProject {
   rate        String?
   clientId     String?
   clientRecord Client?         @relation(fields: [clientId], references: [id])
-  status       FreelanceStatus @default(NOT_STARTED)
+  status       String          @default("NOT_STARTED")
   description  String?
   /// One line on what happens next, e.g. "Waiting for client feedback" — shown on the Jobs list.
   nextAction   String?
   rateAmount    Float?
   rateCurrency  String?        @default("AED")
-  rateType      RateType?
+  rateType      String?
   /// Link to a contract/invoice/deliverable (Vercel Blob upload or external URL).
   attachmentUrl String?
   /// Deprecated single deadline — superseded by startDate/endDate. Kept
@@ -346,16 +321,11 @@ model FreelanceServiceItem {
   createdAt DateTime         @default(now())
 }
 
-enum TransactionType {
-  INCOME
-  EXPENSE
-}
-
 /// Simple income/expense tracker for freelance finances.
 model Transaction {
   id          String            @id @default(cuid())
   date        DateTime
-  type        TransactionType
+  type        String
   amount      Float
   currency    String            @default("AED")
   category    String?
@@ -370,16 +340,6 @@ model Transaction {
   invoiceId   String?
   invoice     Invoice?          @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   createdAt   DateTime          @default(now())
-}
-
-enum InvoiceStatus {
-  DRAFT
-  SENT
-  PAID
-  OVERDUE
-  /// Quotes only: the client said yes (an invoice was created from it) or no.
-  ACCEPTED
-  DECLINED
 }
 
 /// Client invoices — line items stored as JSON ({description, quantity, rate}[]),
@@ -411,7 +371,7 @@ model Invoice {
   client        Client?       @relation(fields: [clientId], references: [id])
   projectId     String?
   project       FreelanceProject? @relation(fields: [projectId], references: [id])
-  status        InvoiceStatus @default(DRAFT)
+  status        String        @default("DRAFT")
   issueDate     DateTime
   dueDate       DateTime?
   currency      String        @default("AED")
@@ -432,7 +392,7 @@ model Note {
   id          String   @id @default(cuid())
   title       String
   contentHtml String
-  tags        String[]
+  tags        Json
   pinned      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

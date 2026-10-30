@@ -1,10 +1,6 @@
-import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient, Prisma } from "../../generated/prisma/client/client";
+import { Prisma } from "../../generated/prisma/client/client";
+import { prisma } from "./seed-client";
 import { aboutChapters } from "../../app/data/aboutChapters";
-
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
 
 const heroScenes = [
   {

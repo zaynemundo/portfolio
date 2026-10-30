@@ -1,7 +1,5 @@
-import "dotenv/config";
 import { randomBytes, scryptSync } from "node:crypto";
-import { PrismaClient } from "../../generated/prisma/client/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { prisma } from "./seed-client";
 
 function hashPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");
@@ -17,9 +15,6 @@ async function main() {
   }
 
   const password = process.argv[3] ?? randomBytes(9).toString("base64url");
-
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-  const prisma = new PrismaClient({ adapter });
 
   const passwordHash = hashPassword(password);
 

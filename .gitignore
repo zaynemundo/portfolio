@@ -52,3 +52,5 @@ next-env.d.ts
 .vinext/
 .cloudflare/
 .wrangler/
+/prisma/seed.db
+/prisma/d1/seed.sql

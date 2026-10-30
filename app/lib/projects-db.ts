@@ -10,6 +10,7 @@
 import { prisma } from "@/app/lib/prisma";
 import type { Project } from "@/app/lib/projects";
 import type { ProjectCard } from "@/app/lib/projects";
+import { asStringArray } from "@/app/lib/json-array";
 
 type ProjectRow = Awaited<ReturnType<typeof prisma.project.findMany>>[number];
 
@@ -24,20 +25,20 @@ function rowToProject(row: ProjectRow): Project {
     category: row.category,
     year: row.year,
     workType: row.workType ?? undefined,
-    technologies: row.technologies,
+    technologies: asStringArray(row.technologies),
     challenge: row.challenge,
     approach: row.approach,
     outcome: row.outcome,
-    highlights: row.highlights,
+    highlights: asStringArray(row.highlights),
     accessibility: row.accessibility ?? undefined,
     performance: row.performance ?? undefined,
     seo: row.seo ?? undefined,
     imageAlt: row.imageAlt,
     liveUrl: row.liveUrl ?? undefined,
     client: row.client ?? undefined,
-    images: row.images,
-    imageLabels: row.imageLabels,
-    imageAlts: row.imageAlts,
+    images: asStringArray(row.images),
+    imageLabels: asStringArray(row.imageLabels),
+    imageAlts: asStringArray(row.imageAlts),
     theme: row.theme as Project["theme"],
     logo: row.logo as Project["logo"],
     ...rich,
@@ -51,10 +52,10 @@ function rowToCard(row: ProjectRow): ProjectCard {
     tagline: row.tagline,
     category: row.category,
     year: row.year,
-    technologies: row.technologies,
+    technologies: asStringArray(row.technologies),
     role: row.role,
     workType: row.workType ?? undefined,
-    images: row.images,
+    images: asStringArray(row.images),
     imageAlt: row.imageAlt,
     liveUrl: row.liveUrl,
     theme: row.theme as ProjectCard["theme"],
