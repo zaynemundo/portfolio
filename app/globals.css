@@ -4,6 +4,20 @@
 
 @theme inline {
   --font-sans: var(--font-inter);
+  --font-serif: var(--font-instrument-serif);
+  --font-mono: var(--font-ibm-plex-mono);
+
+  /* Public-site design tokens — Emotion-inspired lavender system.
+     Values live on :root / :root[data-theme="dark"] further down. */
+  --color-paper: var(--site-bg);
+  --color-paper-deep: var(--site-bg-2);
+  --color-ink: var(--site-ink);
+  --color-ink-soft: var(--site-ink-soft);
+  --color-brand: var(--site-primary);
+  --color-brand-deep: var(--site-primary-deep);
+  --color-surface: var(--site-card);
+  --color-line: var(--site-line);
+  --color-glow: var(--site-glow);
 
   /* Admin design-system tokens (shadcn-style) — public site does not use these. */
   --color-background: var(--admin-background);
@@ -166,11 +180,12 @@ html {
 }
 
 body {
-  background-color: #0a0a0b;
-  color: #18181b;
+  background-color: var(--site-bg);
+  color: var(--site-ink);
   font-family: var(--font-inter), -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
 /* Site layout — `clip` keeps sticky working, rounded corners reveal dark body. */
@@ -396,4 +411,216 @@ body {
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PUBLIC SITE — LAVENDER DESIGN SYSTEM (2026 redesign)
+   Light lavender canvas + deep-plum ink, electric violet accent, editorial
+   serif display + mono micro-labels. Dark theme is opt-in via data-theme.
+   The admin has its own --admin-* system and is not affected.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --site-bg: #f5efff;
+  --site-bg-2: #ece2ff;
+  --site-ink: #2a1647;
+  --site-ink-soft: #6e6a8a;
+  --site-primary: #9047ff;
+  --site-primary-deep: #7114ff;
+  --site-card: #ffffff;
+  --site-line: #e0d8f2;
+  --site-glow: #b79bff;
+  --site-blush: #e0aec7;
+  --site-display: var(--font-instrument-serif), "Times New Roman", serif;
+  --site-mono: var(--font-ibm-plex-mono), ui-monospace, "Courier New", monospace;
+  --site-radius: 1.5rem;
+}
+
+:root[data-theme="dark"] {
+  --site-bg: #121212;
+  --site-bg-2: #1b1526;
+  --site-ink: #f5f0ff;
+  --site-ink-soft: #a3a6c1;
+  --site-card: #181818;
+  --site-line: #30343f;
+  --site-glow: #c4b5fd;
+  --site-blush: #e0aec7;
+}
+
+::selection {
+  background: var(--site-primary);
+  color: #fff;
+}
+
+.site-container {
+  width: 100%;
+  max-width: 90rem;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 3vw, 3rem);
+}
+
+.site-display {
+  font-family: var(--site-display);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.site-display em {
+  font-style: italic;
+  color: var(--site-primary);
+}
+
+.site-mono {
+  font-family: var(--site-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.site-muted { color: var(--site-ink-soft); }
+.site-hairline { border-top: 1px solid var(--site-line); }
+.site-surface { background: var(--site-card); border: 1px solid var(--site-line); }
+
+.site-glass {
+  background: color-mix(in srgb, var(--site-card) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--site-line) 80%, transparent);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+}
+
+.site-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.7rem 1.15rem;
+  font-family: var(--site-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.site-pill--primary { background: var(--site-ink); color: var(--site-bg); }
+.site-pill--primary:hover { background: var(--site-primary); color: #fff; transform: translateY(-1px); }
+.site-pill--ghost { border: 1px solid var(--site-line); color: var(--site-ink); }
+.site-pill--ghost:hover { border-color: var(--site-primary); color: var(--site-primary); }
+
+@keyframes site-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+.site-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: site-marquee 34s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-marquee-track { animation: none; }
+}
+
+.site-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.site-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.site-link:hover::after { transform: scaleX(1); }
+
+.site-arrow {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+a:hover .site-arrow,
+button:hover .site-arrow { transform: translate(3px, -3px); }
+
+.site-work-row .site-work-media {
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+}
+
+.site-work-row:hover .site-work-media { transform: scale(1.02); filter: saturate(1.08); }
+.site-work-row:hover .site-work-title { color: var(--site-primary); }
+
+.site-mono-link {
+  font-family: var(--site-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  border-bottom: 1px solid var(--site-line);
+  padding-bottom: 0.15rem;
+  transition: border-color 0.25s ease, color 0.25s ease;
+}
+
+.site-mono-link:hover { border-color: var(--site-primary); color: var(--site-primary); }
+
+.site-hero-canvas {
+  background:
+    radial-gradient(60% 55% at 78% 18%, rgba(183, 155, 255, 0.55) 0%, rgba(183, 155, 255, 0) 60%),
+    radial-gradient(50% 60% at 22% 88%, rgba(224, 174, 199, 0.35) 0%, rgba(245, 239, 255, 0) 65%),
+    radial-gradient(70% 70% at 50% 110%, rgba(144, 71, 255, 0.30) 0%, rgba(245, 239, 255, 0) 60%),
+    linear-gradient(180deg, #f7f1ff 0%, #f0e6ff 55%, #ece2ff 100%);
+}
+
+:root[data-theme="dark"] .site-hero-canvas {
+  background:
+    radial-gradient(60% 55% at 78% 18%, rgba(139, 92, 246, 0.28) 0%, rgba(18, 18, 18, 0) 60%),
+    radial-gradient(50% 60% at 22% 88%, rgba(224, 174, 199, 0.12) 0%, rgba(18, 18, 18, 0) 65%),
+    radial-gradient(70% 70% at 50% 110%, rgba(113, 20, 255, 0.22) 0%, rgba(18, 18, 18, 0) 60%),
+    linear-gradient(180deg, #14101d 0%, #121212 60%, #0f0b16 100%);
+}
+
+.site-grid-overlay {
+  background-image: radial-gradient(circle at 1px 1px, rgba(42, 22, 71, 0.16) 1px, transparent 0);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(75% 75% at 50% 40%, #000 0%, transparent 100%);
+  -webkit-mask-image: radial-gradient(75% 75% at 50% 40%, #000 0%, transparent 100%);
+}
+
+:root[data-theme="dark"] .site-grid-overlay {
+  background-image: radial-gradient(circle at 1px 1px, rgba(245, 240, 255, 0.16) 1px, transparent 0);
+}
+
+.site-reveal { opacity: 1; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .js-site-reveal-ready .site-reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .js-site-reveal-ready .site-reveal.is-visible { opacity: 1; transform: none; }
+}
+
+/* Numbers card: the italic accent must stay readable on the inverted panel
+   in both themes (light panel in dark mode needs the darker violet). */
+.site-numbers .site-display em {
+  color: #e9d5ff;
+}
+
+:root[data-theme="dark"] .site-numbers .site-display em {
+  color: var(--site-primary);
 }

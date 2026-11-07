@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import type { Project } from "@/app/lib/projects";
-import { getPublishedPosts } from "@/app/lib/posts-db";
+import type { ProjectCard } from "@/app/lib/projects";
 import { getPublishedProjectCards, getFeaturedProjectSlugs } from "@/app/lib/projects-db";
 import { getSiteSettings } from "@/app/lib/settings-db";
-import { ContactSection } from "@/app/components/ContactSection";
 import { staticProjects } from "@/app/lib/projects-static";
-import { ScrollVideoHero } from "@/app/components/motion/ScrollVideoHero";
-import { SectionSnap } from "@/app/components/motion/SectionSnap";
-import type { HeroScene } from "@/app/components/motion/ScrollVideoHero";
-import { FeaturedWork } from "@/app/components/work/FeaturedWork";
-import { AboutStorySection } from "@/app/components/about/AboutStorySection";
-import { InsightsSection } from "@/app/components/insights/InsightsSection";
 import { SITE_URL } from "@/app/lib/site-url";
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/app/lib/seo";
+
+import { RevealMotion } from "@/app/components/home/RevealMotion";
+import { HomeHero } from "@/app/components/home/HomeHero";
+import { HomeTicker } from "@/app/components/home/HomeTicker";
+import { HomeApproach } from "@/app/components/home/HomeApproach";
+import { HomeWorkIndex } from "@/app/components/home/HomeWorkIndex";
+import { HomeNumbers } from "@/app/components/home/HomeNumbers";
+import { HomeAbout } from "@/app/components/home/HomeAbout";
+import { HomeServices } from "@/app/components/home/HomeServices";
+import { HomeContact } from "@/app/components/home/HomeContact";
 
 export function generateMetadata(): Metadata {
   return {
@@ -23,58 +25,38 @@ export function generateMetadata(): Metadata {
   };
 }
 
-
-type ProjectCard = Pick<
-  Project,
-  "slug" | "name" | "tagline" | "category" | "year" | "technologies" | "role" | "workType"
-> & {
-  images?: string[];
-  imageAlt?: string;
-  liveUrl?: string | null;
-  theme?: Project["theme"];
-  logo?: Project["logo"];
-  client?: string;
-};
-
 export default async function Home() {
-  const allPosts = await getPublishedPosts();
-  const insightPosts = allPosts.slice(0, 3);
-
-  const dbProjects = await getPublishedProjectCards();
-  const allProjects: ProjectCard[] = (dbProjects.length > 0 ? dbProjects : staticProjects) as ProjectCard[];
-  /* Which projects show here is the "Featured" checkbox on each case study
-     in the dashboard — falls back to the original 3 while DB is empty. */
-  const featuredSlugs = dbProjects.length > 0
-    ? new Set(await getFeaturedProjectSlugs())
-    : new Set(["monili-jewellers", "scandinavian-physiotherapy-center", "pno-marinas"]);
-  const featuredProjects: ProjectCard[] = allProjects.filter((p) => featuredSlugs.has(p.slug));
-
   const settings = await getSiteSettings();
-  const {
-    portraitUrl, email, phone, linkedinUrl, githubUrl, name, aboutChapters,
-    heroVideoUrl, heroPosterUrl, selectedWorkHeading, selectedWorkIntro,
-    insightsHeading, insightsIntro,
-  } = settings;
-  const cvPath = settings.resumeUrl;
-  const heroScenes: HeroScene[] = settings.heroScenes;
+  const dbProjects = await getPublishedProjectCards();
+
+  const allProjects: ProjectCard[] = (
+    dbProjects.length > 0 ? dbProjects : staticProjects
+  ) as ProjectCard[];
+
+  /* Featured picks the rows on the homepage; fill up to three with the rest
+     while fewer than three projects are flagged as featured. */
+  const featuredSlugs =
+    dbProjects.length > 0 ? new Set(await getFeaturedProjectSlugs()) : new Set<string>();
+  const featured = allProjects.filter((project) => featuredSlugs.has(project.slug));
+  const ordered = [...featured, ...allProjects.filter((project) => !featured.includes(project))];
+  const projects = ordered.slice(0, 3);
 
   return (
     <>
-      {/* JSON-LD */}
+      {/* Structured data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Person",
-            name,
-            // The roles people search for, rather than the display title in Settings.
+            name: settings.name,
             jobTitle: ["Graphic Designer", "Web Developer", "Visual Designer"],
             description: SITE_DESCRIPTION,
-            ...(portraitUrl && { image: new URL(portraitUrl, SITE_URL).href }),
-            email,
+            ...(settings.portraitUrl && { image: new URL(settings.portraitUrl, SITE_URL).href }),
+            email: settings.email,
             url: SITE_URL,
-            sameAs: [linkedinUrl, githubUrl].filter(Boolean),
+            sameAs: [settings.linkedinUrl, settings.githubUrl].filter(Boolean),
             knowsAbout: [
               "Graphic Design", "2D Illustration", "Mockup Design", "Brand Identity",
               "Social Media Management", "Web Design", "Web Development", "WordPress",
@@ -93,33 +75,22 @@ export default async function Home() {
         }}
       />
 
-      {/* One scroll glides to the next hero scene */}
-      <SectionSnap />
-
-      {/* ── 01 · HERO — Scroll-scrubbed video ──────────────────────────────── */}
-      <ScrollVideoHero
-        videoSrc={heroVideoUrl}
-        posterSrc={heroPosterUrl}
-        scenes={heroScenes}
+      <RevealMotion />
+      <HomeHero cvPath={settings.resumeUrl} />
+      <HomeTicker />
+      <HomeApproach />
+      <HomeWorkIndex projects={projects} />
+      <HomeNumbers />
+      <HomeAbout
+        portraitUrl={settings.portraitUrl}
+        chapters={settings.aboutChapters}
+        cvPath={settings.resumeUrl}
       />
-
-      {/* ── 02 · SELECTED WORK ─────────────────────────────────────────────── */}
-      <FeaturedWork projects={featuredProjects} heading={selectedWorkHeading} intro={selectedWorkIntro} />
-
-      {/* ── 03 · ABOUT ─────────────────────────────────────────────────────── */}
-      <AboutStorySection portraitUrl={portraitUrl} chapters={aboutChapters} />
-
-      {/* ── INSIGHTS ──────────────────────────────────────────────────── */}
-      <InsightsSection posts={insightPosts} heading={insightsHeading} intro={insightsIntro} />
-
-      {/* ── CONTACT ───────────────────────────────────────────────────── */}
-      <ContactSection
-        email={email}
-        phone={phone}
-        linkedinUrl={linkedinUrl}
-        githubUrl={githubUrl}
-        cvPath={cvPath}
-        portfolioPath={settings.portfolioPdfUrl}
+      <HomeServices />
+      <HomeContact
+        email={settings.email}
+        phone={settings.phone}
+        cvPath={settings.resumeUrl}
       />
     </>
   );
