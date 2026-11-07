@@ -23,7 +23,7 @@ interface Props {
   cvPath?: string;
 }
 
-export function Nav({ cvPath = "/docs/zaira-mundo-cv.pdf" }: Props) {
+export function Nav({ cvPath = "/docs/zayne-mundo-cv.pdf" }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);

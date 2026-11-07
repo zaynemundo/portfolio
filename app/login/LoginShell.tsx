@@ -81,7 +81,7 @@ export function LoginShell({ title, subtitle, children }: Props) {
             Good to see you again, Zayne.
           </p>
           <p className={`mt-3 max-w-sm text-[15px] leading-relaxed ${isDark ? "text-white/70" : "text-[#1e1035]/70"}`}>
-            Everything for zairamundo.com and your clients is inside.
+            Everything for zaynemundo.com and your clients is inside.
           </p>
         </div>
       </div>

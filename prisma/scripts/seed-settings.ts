@@ -1,62 +1,31 @@
 import { Prisma } from "../../generated/prisma/client/client";
 import { prisma } from "./seed-client";
 import { aboutChapters } from "../../app/data/aboutChapters";
+import { heroScenes } from "../../app/data/heroScenes";
 
-const heroScenes = [
-  {
-    heading: "Zayne Mundo",
-    description:
-      "Creative Designer and Front-End Developer designing and shipping websites, e-commerce platforms, and digital campaigns for UAE brands — from Figma to production in React/TypeScript, headless WordPress, and Laravel/Vue.",
-    start: 0,
-    end: 0.28,
-  },
-  {
-    heading: "Websites that work as hard as they look",
-    description:
-      "Institutional platforms, healthcare portals, and commercial digital services — designed and engineered to international accessibility standards, optimised for performance, and built for long-term organizational use.",
-    start: 0.26,
-    end: 0.52,
-  },
-  {
-    heading: "Every detail is a decision",
-    description:
-      "Thoughtful visual design paired with WCAG 2.1 AA compliance, sub-second load times, and semantic information architecture — the rigour behind every pixel and every line of code.",
-    start: 0.5,
-    end: 0.74,
-  },
-  {
-    heading: "Let’s build something that lasts.",
-    ctaLabel: "Get in touch",
-    ctaHref: "#contact",
-    start: 0.72,
-    end: 0.9,
-  },
-];
+const settings = {
+  name: "Zayne Mundo",
+  jobTitle: "Graphic Designer & Web Developer",
+  email: "zayne.mayo@gmail.com",
+  phone: "+971 50 805 9968",
+  linkedinUrl: "",
+  githubUrl: "",
+  resumeUrl: "/docs/zayne-mundo-cv.pdf",
+  portraitUrl: "/portrait.jpg",
+  heroScenes: heroScenes as unknown as Prisma.InputJsonValue,
+  aboutChapters: aboutChapters as unknown as Prisma.InputJsonValue,
+};
 
 async function main() {
-  const settings = await prisma.siteSettings.upsert({
+  const row = await prisma.siteSettings.upsert({
     where: { id: "singleton" },
-    update: {
-      name: "Zayne Mundo",
-      jobTitle: "Creative Designer & Front-End Developer",
-      heroScenes: heroScenes as Prisma.InputJsonValue,
-      aboutChapters: aboutChapters as unknown as Prisma.InputJsonValue,
-    },
+    update: settings,
     create: {
       id: "singleton",
-      name: "Zayne Mundo",
-      jobTitle: "Creative Designer & Front-End Developer",
-      email: "mzaira.mundo@gmail.com",
-      phone: "+971 50 562 8417",
-      linkedinUrl: "https://linkedin.com/in/zaira-mundo/",
-      githubUrl: "https://github.com/mzaira",
-      resumeUrl: "/docs/zaira-mundo-cv.pdf",
-      portraitUrl: "/portrait.jpg",
-      heroScenes: heroScenes as Prisma.InputJsonValue,
-      aboutChapters: aboutChapters as unknown as Prisma.InputJsonValue,
+      ...settings,
     },
   });
-  console.log("Seeded site settings:", settings.id);
+  console.log("Seeded site settings:", row.id);
   await prisma.$disconnect();
 }
 

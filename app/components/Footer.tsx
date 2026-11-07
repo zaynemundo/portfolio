@@ -30,7 +30,7 @@ export function Footer() {
             </Link>
             <span className="hidden sm:inline text-zinc-800">|</span>
             <p className="text-[13.5px] text-zinc-400 leading-relaxed max-w-md">
-              Building digital experiences where thoughtful design meets dependable engineering.
+              Brand visuals, websites, and campaigns — designed with intent, built to perform.
             </p>
           </div>
 

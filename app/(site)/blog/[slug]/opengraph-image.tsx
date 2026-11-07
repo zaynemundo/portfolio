@@ -12,6 +12,6 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   return renderOgImage({
     eyebrow: post?.category || "Article",
     title: post?.title ?? "Zayne Mundo",
-    footer: post?.readTime ?? "zairamundo.com",
+    footer: post?.readTime ?? "zaynemundo.com",
   });
 }

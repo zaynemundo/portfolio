@@ -1,16 +1,10 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/app/lib/prisma";
 import { aboutChapters as DEFAULT_ABOUT_CHAPTERS, type Chapter } from "@/app/data/aboutChapters";
+import { heroScenes as DEFAULT_HERO_SCENES, type HeroSceneData } from "@/app/data/heroScenes";
 import { CACHE_TAGS } from "@/app/lib/cache-tags";
 
-export interface HeroSceneData {
-  heading: string;
-  description?: string;
-  ctaLabel?: string;
-  ctaHref?: string;
-  start: number;
-  end: number;
-}
+export type { HeroSceneData };
 
 export interface SiteSettingsData {
   name: string;
@@ -37,39 +31,15 @@ export interface SiteSettingsData {
   blogPageIntro: string;
 }
 
-const DEFAULT_HERO_SCENES: HeroSceneData[] = [
-  {
-    heading: "Zayne Mundo",
-    description:
-      "Creative Designer and Front-End Developer designing and shipping websites, e-commerce platforms, and digital campaigns for UAE brands — from Figma to production in React/TypeScript, headless WordPress, and Laravel/Vue.",
-    start: 0,
-    end: 0.28,
-  },
-  {
-    heading: "Websites that work as hard as they look",
-    description:
-      "Institutional platforms, healthcare portals, and commercial digital services — designed and engineered to international accessibility standards, optimised for performance, and built for long-term organizational use.",
-    start: 0.26,
-    end: 0.52,
-  },
-  {
-    heading: "Let’s build something that lasts.",
-    ctaLabel: "Get in touch",
-    ctaHref: "#contact",
-    start: 0.72,
-    end: 0.9,
-  },
-];
-
 /** Falls back to the original hardcoded values if the DB row is missing/unset. */
 const DEFAULTS: SiteSettingsData = {
   name: "Zayne Mundo",
-  jobTitle: "Creative Designer & Front-End Developer",
-  email: "mzaira.mundo@gmail.com",
-  phone: "+971 50 562 8417",
-  linkedinUrl: "https://linkedin.com/in/zaira-mundo/",
-  githubUrl: "https://github.com/mzaira",
-  resumeUrl: "/docs/zaira-mundo-cv.pdf",
+  jobTitle: "Graphic Designer & Web Developer",
+  email: "zayne.mayo@gmail.com",
+  phone: "+971 50 805 9968",
+  linkedinUrl: "",
+  githubUrl: "",
+  resumeUrl: "/docs/zayne-mundo-cv.pdf",
   portfolioPdfUrl: "",
   portraitUrl: "/portrait.jpg",
   heroVideoUrl: "/hero-banner-scroll.mp4",
@@ -77,16 +47,17 @@ const DEFAULTS: SiteSettingsData = {
   heroScenes: DEFAULT_HERO_SCENES,
   selectedWorkHeading: "Selected Work",
   selectedWorkIntro:
-    "A selection of digital platforms delivered across institutional, healthcare, and commercial sectors — where accessibility standards, information clarity, and long-term technical sustainability were central to every engagement.",
+    "A selection of brand systems, campaign visuals, and digital platforms across luxury e-commerce, healthcare, marine, real estate, and sports — where visual craft meets measured growth.",
   aboutChapters: DEFAULT_ABOUT_CHAPTERS,
-  insightsHeading: "Perspectives on accessible, standards-compliant digital platforms.",
+  insightsHeading: "Notes on design, growth, and building for the web.",
   insightsIntro:
-    "Perspectives on web accessibility, technical performance, information architecture, front-end implementation, and the standards-based systems behind reliable, inclusive digital services.",
+    "Notes on visual design, illustration, social growth, SEO, and the craft of building websites that hold their own.",
   workPageHeading: "Selected Work",
   workPageIntro:
-    "A collection of front-end engineering, custom e-commerce storefronts, corporate web builds, and technical performance optimizations.",
+    "A collection of graphic design, 2D illustration, campaign visuals, and website builds — each one taken from brief to measurable result.",
   blogPageHeading: "Insights",
-  blogPageIntro: "Thoughts on front-end development, technical SEO, accessibility, and building for the web.",
+  blogPageIntro:
+    "Notes on design, social growth, illustration, and the web.",
 };
 
 export const getSiteSettings = unstable_cache(

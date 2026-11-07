@@ -30,7 +30,7 @@ const posts = [
     featured: true,
     contentHtml: `<p>PLACEHOLDER — Replace this with your own writing. This post shares your hands-on experience with technical SEO from a front-end developer's perspective.</p>
 <h2>The changes that consistently work</h2>
-<p>PLACEHOLDER — Based on your work at Creativo FZCO, describe the SEO improvements that made measurable differences.</p>
+<p>PLACEHOLDER — Based on your work at Office Inspirations, describe the SEO improvements that made measurable differences.</p>
 <h2>Common SEO advice that rarely matters</h2>
 <p>PLACEHOLDER — Share your perspective on overrated SEO tactics.</p>`,
   },

@@ -389,7 +389,7 @@ export function BlogForm({ postId: initialPostId, initial, categories }: Props) 
                 />
               </div>
               <div className="mt-3 rounded-lg bg-background border border-border px-3 py-2.5">
-                <p className="text-[11px] text-muted-foreground truncate">zairamundo.com › blog › {fields.slug || "…"}</p>
+                <p className="text-[11px] text-muted-foreground truncate">zaynemundo.com › blog › {fields.slug || "…"}</p>
                 <p className="text-[14px] font-medium text-primary leading-snug mt-0.5 line-clamp-2">{searchTitle}</p>
                 <p className="text-[12px] text-muted-foreground leading-snug mt-1 line-clamp-3">
                   {excerpt.trim() || "Your excerpt appears here."}

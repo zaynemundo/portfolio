@@ -1,10 +1,9 @@
 /**
  * How the site introduces itself in search results and shared links. Worded
- * around the three roles people search for (web designer, web developer,
- * UI/UX designer), neutral between being hired and being commissioned, and
- * aimed at the UAE. Approved by Zayne 2026-10-20.
+ * around the roles people search for (graphic designer, web developer,
+ * visual designer), and aimed at the UAE. Updated with Zayne's latest resume.
  */
-export const SITE_TITLE = "Zayne Mundo | Web Designer, Developer & UI/UX Designer in UAE";
+export const SITE_TITLE = "Zayne Mundo | Graphic Designer & Web Developer in UAE";
 
 export const SITE_DESCRIPTION =
-  "Web designer, developer and UI/UX designer in Dubai, UAE. 5 years building websites and e-commerce for brands like P&O Marinas and Monili Jewellers.";
+  "Graphic designer and web developer in the UAE. Brand visuals, 2D illustration, mockups, and WordPress websites — with design that has grown account visibility by 640% and website traffic by 146%.";

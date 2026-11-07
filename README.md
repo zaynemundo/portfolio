@@ -1,8 +1,8 @@
 # Zayne Mundo — Portfolio
 
-The source for [zairamundo.com](https://www.zairamundo.com): my portfolio site, plus the private admin I use to run it and my freelance work.
+The source for [zaynemundo.com](https://www.zaynemundo.com): my portfolio site, plus the private admin I use to run it and my freelance work.
 
-I'm a web designer and front-end developer. I designed and built everything here: the public site, the case study system, the admin, and the freelance tools.
+I'm a graphic designer and web developer in the UAE. I design brand visuals, 2D illustration, mockups, and campaigns, and I build the websites behind them. I designed and built everything here: the public site, the case study system, the admin, and the freelance tools.
 
 ## The public site
 

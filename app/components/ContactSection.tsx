@@ -278,55 +278,61 @@ export function ContactSection({
               )}
 
               {/* ── Group: Professional ───────────────────────────── */}
-              <p className="cs-row-group-label font-mono text-[11px] text-zinc-400 uppercase tracking-wider pt-3 mb-2" role="presentation">
-                Professional
-              </p>
+              {(linkedinUrl || githubUrl) && (
+                <p className="cs-row-group-label font-mono text-[11px] text-zinc-400 uppercase tracking-wider pt-3 mb-2" role="presentation">
+                  Professional
+                </p>
+              )}
 
-              {/* LinkedIn */}
-              <a
-                href={linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="cs-row cs-row--external group p-4 rounded-xl border border-zinc-800 hover:border-zinc-500 bg-zinc-900/60 hover:bg-zinc-900 transition-all duration-200 flex items-center justify-between"
-                aria-label="View LinkedIn profile (opens in new tab)"
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icons/linkedin.svg" alt="" className="w-5 h-5 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-mono font-medium tracking-wider uppercase text-zinc-400 mb-0.5">
-                      LinkedIn
-                    </p>
-                    <p className="text-[14.5px] font-semibold text-zinc-100 group-hover:text-white transition-colors duration-200 truncate">
-                      {displayLinkedIn}
-                    </p>
+              {/* LinkedIn (only rendered when a URL is set) */}
+              {linkedinUrl && (
+                <a
+                  href={linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cs-row cs-row--external group p-4 rounded-xl border border-zinc-800 hover:border-zinc-500 bg-zinc-900/60 hover:bg-zinc-900 transition-all duration-200 flex items-center justify-between"
+                  aria-label="View LinkedIn profile (opens in new tab)"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/linkedin.svg" alt="" className="w-5 h-5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-mono font-medium tracking-wider uppercase text-zinc-400 mb-0.5">
+                        LinkedIn
+                      </p>
+                      <p className="text-[14.5px] font-semibold text-zinc-100 group-hover:text-white transition-colors duration-200 truncate">
+                        {displayLinkedIn}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <ExternalArrow />
-              </a>
+                  <ExternalArrow />
+                </a>
+              )}
 
-              {/* GitHub */}
-              <a
-                href={githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="cs-row cs-row--external group p-4 rounded-xl border border-zinc-800 hover:border-zinc-500 bg-zinc-900/60 hover:bg-zinc-900 transition-all duration-200 flex items-center justify-between"
-                aria-label="View GitHub profile (opens in new tab)"
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icons/github.svg" alt="" className="w-5 h-5 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-mono font-medium tracking-wider uppercase text-zinc-400 mb-0.5">
-                      GitHub
-                    </p>
-                    <p className="text-[14.5px] font-semibold text-zinc-100 group-hover:text-white transition-colors duration-200 truncate">
-                      {displayGitHub}
-                    </p>
+              {/* GitHub (only rendered when a URL is set) */}
+              {githubUrl && (
+                <a
+                  href={githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cs-row cs-row--external group p-4 rounded-xl border border-zinc-800 hover:border-zinc-500 bg-zinc-900/60 hover:bg-zinc-900 transition-all duration-200 flex items-center justify-between"
+                  aria-label="View GitHub profile (opens in new tab)"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/github.svg" alt="" className="w-5 h-5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-mono font-medium tracking-wider uppercase text-zinc-400 mb-0.5">
+                        GitHub
+                      </p>
+                      <p className="text-[14.5px] font-semibold text-zinc-100 group-hover:text-white transition-colors duration-200 truncate">
+                        {displayGitHub}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <ExternalArrow />
-              </a>
+                  <ExternalArrow />
+                </a>
+              )}
 
               {/* Resume / CV */}
               <a

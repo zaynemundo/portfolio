@@ -342,6 +342,17 @@ export function ScrollVideoHero({ videoSrc, posterSrc, scenes }: Props) {
         {/* ── Phones and tablets: a soft dark wash instead of text shadows ─── */}
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/45 via-black/25 to-black/5 md:hidden" />
 
+        {/* ── Desktop scrim: keeps the white headlines legible over a bright
+             hero (e.g. a lit laptop screen), whatever video is uploaded ──── */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 hidden md:block"
+          style={{
+            background:
+              "linear-gradient(to right, rgba(10,10,11,0.82) 0%, rgba(10,10,11,0.55) 28%, rgba(10,10,11,0.18) 55%, rgba(10,10,11,0) 78%)",
+          }}
+        />
+
         {/* ── Floating petals ──────────────────────────────────────────── */}
         <FloatingPetals />
 

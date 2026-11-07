@@ -40,7 +40,7 @@ async function sendNotificationEmail(name: string, email: string, message: strin
   // Resend reports a failed send in `error` rather than throwing, so check it.
   const { error } = await resend.emails.send({
     from: emailFrom(),
-    to: "mzaira.mundo@gmail.com",
+    to: "zayne.mayo@gmail.com",
     replyTo: email,
     subject: `New inquiry from ${name}`,
     html: emailShell({
@@ -73,7 +73,7 @@ async function sendNotificationEmail(name: string, email: string, message: strin
           </div>
 
           ${emailButton(replyHref, `Reply to ${safeName} →`)}`,
-      footer: `This notification was sent to mzaira.mundo@gmail.com because someone submitted the contact form on <a href="https://zairamundo.com" style="color:#785EF7;text-decoration:none">zairamundo.com</a>.<br>
+      footer: `This notification was sent to zayne.mayo@gmail.com because someone submitted the contact form on <a href="https://zaynemundo.com" style="color:#785EF7;text-decoration:none">zaynemundo.com</a>.<br>
             Reply directly to this email to respond to ${safeName}.`,
     }),
   });
@@ -106,7 +106,7 @@ export async function submitContact(payload: ContactPayload): Promise<ContactRes
     console.error("[contact] DB error:", err);
     return {
       ok: false,
-      error: "Unable to send your message right now. Please email me directly at mzaira.mundo@gmail.com",
+      error: "Unable to send your message right now. Please email me directly at zayne.mayo@gmail.com",
     };
   }
 
